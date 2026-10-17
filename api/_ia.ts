@@ -3,12 +3,11 @@ import Anthropic from '@anthropic-ai/sdk'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import type { z } from 'zod'
 
-// Con OPENROUTER_API_KEY va por OpenRouter (mismo formato de Anthropic); si no, directo con ANTHROPIC_API_KEY.
-const openrouter = process.env.OPENROUTER_API_KEY
-const cliente = openrouter
-  ? new Anthropic({ baseURL: 'https://openrouter.ai/api', apiKey: null, authToken: openrouter })
-  : new Anthropic()
-const MODELO = openrouter ? 'anthropic/claude-opus-5.5' : 'claude-opus-5-5'
+// Todo va por OpenRouter con el formato de Anthropic. El modelo se cambia con AI_MODEL (cualquier id de
+// openrouter.ai/models que soporte structured outputs); por defecto, Claude Opus 5.5. Probados el 17-oct:
+// google/gemini-3.8-flash (10 s, bien), x-ai/grok-4.7 (42 s, bien); deepseek/deepseek-v4.1-flash devuelve basura.
+const cliente = new Anthropic({ baseURL: 'https://openrouter.ai/api', apiKey: null, authToken: process.env.OPENROUTER_API_KEY })
+const MODELO = process.env.AI_MODEL || 'anthropic/claude-opus-5.5'
 
 export const SISTEMA = `Eres Supermentes, un asistente que prepara material de clase para docentes del Perú (Inicial, Primaria y Secundaria).
 - Escribe en español peruano neutro, claro y cálido, con palabras del aula (nada de jerga técnica ni pedagógica rebuscada).
