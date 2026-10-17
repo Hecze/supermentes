@@ -14,12 +14,13 @@ flowchart LR
   L[Landing /<br/>lista de espera] -. enlace privado .-> A
   A[Docente en /app] --> T[Busca su tema en el<br/>Currículo Nacional, al instante]
   T --> FI[Ficha del tema<br/>competencias, desempeños,<br/>vocabulario]
+  FI --> S[Sesión de aprendizaje<br/>formato MINEDU, Word]
   FI --> C[Canción]
   EX[Examen del docente<br/>PDF o foto] --> E[Adaptar examen<br/>PDF adaptado]
   FI --> E
   FI --> J[Juego web]
   FI --> X[Crucigrama]
-  C & E & X --> H[Hoja: imprimir, PDF<br/>o WhatsApp]
+  S & C & E & X --> H[Hoja: imprimir, PDF<br/>o WhatsApp]
   J --> Q[Link + QR para<br/>los alumnos]
   H & Q --> B[Biblioteca]
 ```
@@ -31,6 +32,7 @@ flowchart LR
 | Landing `/` | Lista de espera con contador, referidos y fuente | **Real** en producción | Gratis | Promoción (reto de tracción) |
 | Currículo | CNEB de Inicial, Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
 | Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude: completa ideas clave y vocabulario en segundo plano (el tema y su currículo ya están) |
+| Sesión de aprendizaje | La sesión que el docente entrega al director, en el formato del MINEDU: datos, competencia y capacidades oficiales, criterios con su desempeño citado ("i"), enfoque transversal, materiales, momentos con tiempos (45 o 90 min), ficha de aplicación y escala de valoración para 30. Se corrige con un clic, se imprime o se descarga en Word | **Real** (`api/sesion.ts`, ~35 s; citas verificadas contra `packages/curriculo`) | 1 crédito | Probarla con docentes; Word es un .doc hecho con HTML (abre y se edita, no es .docx nativo) |
 | Canción | Primero, canciones de YouTube que ya existen para el tema (206 de primaria, con cita del desempeño por grado, `apps/web/src/canciones`); abajo, crear una nueva con ritmo peruano y luego el audio | Catálogo **real**; letra nueva con `/api/cancion` | Gratis las existentes; 1 + 3 créditos la nueva | Más canciones donde no hay (ver huecos en `apps/web/src/canciones/README.md`); `/api/audio` (ElevenLabs) |
 | Adaptar examen | El docente sube su examen (PDF o foto) y descarga un PDF ambientado en lo que le gusta a la clase y/o para TDAH, dislexia, TEA o lectura fácil (formato incluido: letra grande, casillas, apoyos) | Código real (`api/examen.ts`; PDF en el navegador). En producción sale el ejemplo hasta configurar la clave | 1 crédito | `OPENROUTER_API_KEY` y `VITE_API=real` en Vercel |
 | Juego web | 6 juegos para cualquier tema; 22 habilidades de cálculo | **Real** con cálculo y vocabulario | Gratis / 1 crédito | `/api/juego` para preguntas del tema |
