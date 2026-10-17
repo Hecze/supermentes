@@ -21,7 +21,13 @@ export function VisorCurriculo() {
 
   const grado = gradoPorId(gradoId)
   // Los cursos salen del documento cuando ya cargó; si no, del catálogo.
-  const cursos = cur.estado === 'listo' ? cur.grado.areas.map((a) => ({ id: a.id, nombre: a.nombre })) : areasDe(gradoId)
+  // Se ordenan como en el catálogo (Comunicación, Matemática…); lo que no está en él va al final.
+  const orden = areasDe(gradoId).map((a) => a.id)
+  const posicion = (id: string) => (orden.includes(id) ? orden.indexOf(id) : orden.length)
+  const cursos =
+    cur.estado === 'listo'
+      ? cur.grado.areas.map((a) => ({ id: a.id, nombre: a.nombre })).sort((a, b) => posicion(a.id) - posicion(b.id))
+      : areasDe(gradoId)
 
   function cambiarGrado(id: string) {
     setGradoId(id)
