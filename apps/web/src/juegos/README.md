@@ -65,13 +65,14 @@ Sin cuentas ni registro, como en Kahoot:
 
 - **El código va en el link.** `/j/CODIGO` ya trae el código; el alumno no escribe nada.
 - **El nombre, una sola vez.** La primera vez que abre un juego, un popup le pregunta "¿Cómo te llamas?". El celular guarda su nombre y un id al azar (`localStorage`), así reconoce al mismo alumno las siguientes veces. Abajo del juego dice "Juegas como Ana · No soy yo", por si el celular lo comparten hermanos.
-- **Se guarda el mejor puntaje.** Al terminar cada partida, el celular manda el puntaje a `POST /api/resultados`. El servidor guarda un archivo por alumno y por código (`resultados/CODIGO/ID.json`) con su mejor puntaje, sus estrellas y cuántas veces jugó; dos alumnos que terminan a la vez no se pisan.
-- **Solo el docente los ve.** Al publicar, el servidor devuelve una `clave` secreta que se queda en la laptop del docente (`localStorage`); el juego guardado nunca la devuelve. En la vista del tema aparece "Resultados de tus alumnos": cada juego enviado, con una tabla de alumno, puntaje más alto, estrellas, veces que jugó y última vez (`GET /api/resultados?codigo&clave`).
+- **Se guarda el mejor puntaje.** Al terminar una partida, si el alumno superó su mejor puntaje, el celular lo manda a `POST /api/resultados`. El servidor guarda un archivo por alumno y por código (`resultados/CODIGO/ID.json`) con su mejor puntaje y sus estrellas; dos alumnos que terminan a la vez no se pisan. Si no lo superó, el celular ni llama: así se cuidan las 2.000 escrituras al mes del plan Hobby de Vercel Blob, que comparte la lista de espera. Por eso no se cuentan las veces que jugó.
+- **Solo el docente los ve.** Al publicar, el servidor devuelve una `clave` secreta que se queda en la laptop del docente (`localStorage`); el juego guardado nunca la devuelve.
+- **Una vista simple y fácil de encontrar.** "Resultados de juegos" está en el menú y no depende del tema abierto: muestra todos los juegos enviados, agrupados por tema y grado, con el tema abierto primero. Cada juego abre una tabla con alumno, puntaje más alto, estrellas y cuándo (`GET /api/resultados?codigo&clave`, solo del juego que se abre). En Juego web queda una sola línea, "Mandaste un juego de este tema. Ver resultados", para no empujar la lista de juegos.
 - **Reintentar no es memorizar.** Cada partida trae ejercicios nuevos: el cálculo se genera en el celular con otra semilla y Memoria arma parejas nuevas en cada partida. Las preguntas del tema que crea la IA son un banco fijo: cambian el orden y las opciones, pero se repiten. Para que no se memoricen, el backend debería crear más preguntas de las que entran en una partida.
 
-Pendiente: la clave vive en el navegador del docente. Si borra los datos del navegador o cambia de laptop, deja de ver esos resultados. Cuando haya cuentas, la clave pasa a su cuenta.
+Los endpoints que escriben tienen un tope por conexión (`demasiadas` en `api/_juegos.ts`). Pendiente: la clave vive en el navegador del docente. Si borra los datos del navegador o cambia de laptop, deja de ver esos resultados. Cuando haya cuentas, la clave pasa a su cuenta.
 
-En desarrollo (`npm run dev`), Vite sirve `/api/juegos-compartidos` y `/api/resultados` con un Blob en memoria (`scripts/blob-en-memoria.mjs`): se puede probar todo el recorrido sin credenciales.
+En desarrollo (`npm run dev`), Vite corre las funciones de `api/`. Si el `.env.local` de la raíz no trae `BLOB_READ_WRITE_TOKEN`, usan un Blob en memoria (`scripts/blob-en-memoria.mjs`): se puede probar compartir y ver resultados sin credenciales y sin tocar los datos de producción.
 
 ## Juegos
 

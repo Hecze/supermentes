@@ -43,16 +43,40 @@ export function guardarAlumno(nombre: string): Alumno {
   return alumno
 }
 
-/** Manda el puntaje de una partida. Devuelve si es su mejor puntaje, o null si no se pudo guardar. */
+const CLAVE_MEJORES = 'supermentes-mejores'
+
+function mejoresGuardados(): Record<string, number> {
+  try {
+    return (JSON.parse(localStorage.getItem(CLAVE_MEJORES) ?? '{}') as Record<string, number>) ?? {}
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * Manda el puntaje de una partida si supera el mejor de este alumno en este juego: si no lo superó, el docente
+ * ya tiene su mejor puntaje y no se gasta una escritura. Devuelve si es su mejor puntaje, o null si no se pudo guardar.
+ */
 export async function enviarResultado(codigo: string, alumno: Alumno, juego: JuegoId, r: Resultado): Promise<boolean | null> {
+  const puntaje = Math.max(0, Math.round(r.puntaje ?? 0))
+  const clave = `${codigo}:${alumno.id}`
+  const antes = mejoresGuardados()[clave]
+  if (antes !== undefined && puntaje <= antes) return false
   try {
     const res = await fetch('/api/resultados', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigo, alumno, juego, puntaje: Math.max(0, Math.round(r.puntaje ?? 0)), estrellas: r.estrellas }),
+      body: JSON.stringify({ codigo, alumno, juego, puntaje, estrellas: r.estrellas }),
     })
     if (!res.ok) return null
-    return ((await res.json()) as { nuevoRecord?: boolean }).nuevoRecord ?? false
+    const { nuevoRecord, mejor } = (await res.json()) as { nuevoRecord?: boolean; mejor?: number }
+    try {
+      const mejores = Object.entries({ ...mejoresGuardados(), [clave]: Math.max(puntaje, mejor ?? 0) }).slice(-100)
+      localStorage.setItem(CLAVE_MEJORES, JSON.stringify(Object.fromEntries(mejores)))
+    } catch {
+      // Sin almacenamiento, la próxima partida vuelve a preguntar al servidor.
+    }
+    return nuevoRecord ?? false
   } catch {
     return null
   }
@@ -60,7 +84,17 @@ export async function enviarResultado(codigo: string, alumno: Alumno, juego: Jue
 
 // ---------- Docente (en su laptop) ----------
 
-export type Enviado = { codigo: string; clave: string; juego: JuegoId; tema: string; fecha: string }
+export type Enviado = {
+  codigo: string
+  clave: string
+  juego: JuegoId
+  tema: string
+  /** "4.º primaria": para reconocer el tema sin abrirlo. */
+  grado?: string
+  /** Qué practican: "Fracciones: reconocer · Hasta octavos" o las palabras del tema. */
+  practica?: string
+  fecha: string
+}
 
 const CLAVE_ENVIADOS = 'supermentes-juegos-enviados'
 
@@ -85,9 +119,7 @@ export function guardarEnviado(e: Enviado) {
 export type FilaResultado = {
   id: string
   nombre: string
-  intentos: number
   mejor: { puntaje: number; estrellas: number; juego: JuegoId; fecha: string }
-  ultimo: string
 }
 
 export async function cargarResultados(e: Enviado): Promise<FilaResultado[]> {

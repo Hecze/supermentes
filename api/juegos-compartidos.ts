@@ -9,7 +9,7 @@
 // lo que llega, porque cualquiera puede llamar a este endpoint.
 import { randomBytes, randomInt } from 'node:crypto'
 import { get, put } from '@vercel/blob'
-import { CODIGO, JUEGOS, entero, json, leerJuego, objeto, rutaJuego, texto } from './_juegos.js'
+import { CODIGO, JUEGOS, demasiadas, entero, json, leerJuego, objeto, rutaJuego, texto } from './_juegos.js'
 
 const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const MAXIMO_BYTES = 200_000
@@ -104,6 +104,7 @@ async function existe(ruta: string) {
 }
 
 export async function POST(request: Request) {
+  if (demasiadas(request, 'juego', 30)) return json({ error: 'Compartiste muchos juegos seguidos. Espera unos minutos.' }, 429)
   const cuerpo = await request.text()
   if (cuerpo.length > MAXIMO_BYTES) return json({ error: 'El juego es demasiado grande.' }, 413)
   let datos: unknown

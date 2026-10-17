@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Adaptacion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES, examenEjemplo } from '../api/ejemplos'
 
-export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
+export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'

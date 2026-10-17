@@ -15,7 +15,7 @@ import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../jue
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
-import { ResultadosJuegos } from './ResultadosJuegos'
+import { AtajoResultados } from './ResultadosJuegos'
 import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
@@ -256,7 +256,7 @@ function ElegirPractica({
 // Un juego se publica una sola vez por sesión aunque se abra y cierre el panel.
 const publicados = new Map<string, Promise<{ url: string; codigo: string | null }>>()
 
-function enlaceDe(p: Publicado) {
+function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
   const clave = JSON.stringify(p)
   if (!publicados.has(clave)) {
     publicados.set(
@@ -264,7 +264,7 @@ function enlaceDe(p: Publicado) {
       publicar(p).then(
         ({ codigo, clave }) => {
           // La laptop del docente guarda la clave: con ella verá quién jugó y su mejor puntaje.
-          guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, fecha: new Date().toISOString() })
+          guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, ...datos, fecha: new Date().toISOString() })
           return { url: enlaceConCodigo(codigo), codigo }
         },
         // Sin servidor (por ejemplo, en desarrollo) el juego viaja dentro del link y funciona igual.
@@ -278,7 +278,7 @@ function enlaceDe(p: Publicado) {
   return publicados.get(clave)!
 }
 
-function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJuego: string }) {
+function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Publicado; nombreJuego: string; grado: string; practica: string }) {
   const { avisar } = useStore()
   const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
   const [grande, setGrande] = useState(false)
@@ -293,7 +293,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
   useEffect(() => {
     let vivo = true
     setEnlace(null)
-    enlaceDe(publicado).then((e) => vivo && setEnlace(e))
+    enlaceDe(publicado, { grado, practica }).then((e) => vivo && setEnlace(e))
     return () => {
       vivo = false
     }
@@ -338,7 +338,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
           <p className="font-semibold">Mándalo al grupo de WhatsApp de las familias</p>
           <p className="text-ink-soft">
             Los niños juegan desde el celular de casa, sin cuenta: la primera vez escriben su nombre.{' '}
-            {enlace.codigo && 'Verás quién jugó y su mejor puntaje en «Resultados de tus alumnos», arriba de la lista de juegos.'}
+            {enlace.codigo && 'Verás quién jugó y su puntaje más alto en «Resultados de juegos», en el menú.'}
           </p>
           {enlace.codigo ? (
             <p className="text-sm text-ink-soft">
@@ -474,6 +474,8 @@ export function Juego() {
         {compartir && deCelular && (
           <Compartir
             nombreJuego={enJuego.def.nombre}
+            grado={ficha.grado}
+            practica={nombreFuente(fuente, ficha)}
             publicado={{
               v: 1,
               juego: enJuego.def.id,
@@ -495,7 +497,7 @@ export function Juego() {
     <>
       <EncabezadoHerramienta id="juego" />
 
-      <ResultadosJuegos tema={ficha.titulo} />
+      <AtajoResultados tema={ficha.titulo} />
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl font-bold sm:text-3xl">¿A qué jugamos?</h2>

@@ -7,6 +7,7 @@ import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
 import { Juego } from './views/Juego'
+import { ResultadosJuegos } from './views/ResultadosJuegos'
 
 const VISTAS = {
   ficha: Ficha,
@@ -16,6 +17,7 @@ const VISTAS = {
   crucigrama: Crucigrama,
   adaptar: Adaptar,
   biblioteca: Biblioteca,
+  resultados: ResultadosJuegos,
 }
 
 function Pantalla() {

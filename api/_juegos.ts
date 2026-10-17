@@ -37,3 +37,19 @@ export function claveCorrecta(guardada: string | undefined, dada: string | null)
   const b = Buffer.from(dada)
   return a.length === b.length && timingSafeEqual(a, b)
 }
+
+// Tope de escrituras por conexión, en la memoria de cada instancia: frena a un bot antes de gastar operaciones
+// de Blob (como en api/lista-espera.ts). Es holgado porque en un colegio muchos comparten la misma red.
+const escrituras = new Map<string, number[]>()
+const VENTANA = 10 * 60_000
+
+export function demasiadas(request: Request, tipo: string, maximo: number) {
+  const ip = (request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'sin-ip'
+  const clave = `${tipo}:${ip}`
+  const ahora = Date.now()
+  const recientes = (escrituras.get(clave) ?? []).filter((t) => ahora - t < VENTANA)
+  recientes.push(ahora)
+  if (escrituras.size > 10_000) escrituras.clear()
+  escrituras.set(clave, recientes)
+  return recientes.length > maximo
+}
