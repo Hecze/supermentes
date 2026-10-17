@@ -75,6 +75,19 @@ Supermentes: eliges tu tema del CNEB y te arma crucigramas, juegos para proyecta
 Unirse a la lista es gratis 👉 https://www.supermentes.app/?utm_source=whatsapp
 ```
 
+### 2b. Para un profe amigo que lo difunde (lo reenvía tal cual, en su voz)
+Cambia `luis` por el nombre de quien lo difunde: así en el CSV (`campana`) se ve cuántos llegaron por él o ella.
+```
+Colegas, les pido un favorcito 🙏
+
+Un amigo está en una competencia de 30 horas en Lima y está creando una herramienta para nosotros los profes: Supermentes. Eliges tu tema del currículo y te ayuda a preparar crucigramas, juegos para proyectar y canciones para la clase.
+
+Le di una mirada y se ve interesante. Le ayudaría muchísimo que se anoten profes de verdad antes de mañana a las 9 a. m. Es solo dejar tu correo (un minuto) y te avisan cuando puedas probarlo gratis:
+https://www.supermentes.app/?utm_source=whatsapp&utm_campaign=luis
+
+Si les parece útil, pásenlo a otros profes. ¡Gracias! 😊
+```
+
 ### 3. Publicación en grupos de Facebook de docentes
 Busca en Facebook "docentes Perú", "maestros primaria Perú", "educación inicial Perú", "sesiones de aprendizaje" y "materiales educativos". Elige grupos con más de 50 mil miembros y publicaciones de hoy. Publica desde tu perfil personal, con una captura o el video del crucigrama. Si el grupo no permite enlaces, ponlo en el primer comentario o pide que comenten "QUIERO" y responde a cada uno.
 
