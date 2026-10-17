@@ -2,7 +2,9 @@
 import type { Api } from './types'
 import {
   BIBLIOTECA_EJEMPLO,
+  FICHA_AGUA,
   FICHA_EJEMPLO,
+  FICHA_SUSTANTIVOS,
   JUEGO_EJEMPLO,
   adaptacionEjemplo,
   cancionEjemplo,
@@ -20,7 +22,17 @@ export const mockApi: Api = {
         : entrada.tipo === 'archivo'
           ? `Archivo: ${entrada.archivo?.name ?? 'Sesión 12 - Fracciones.pdf'}`
           : 'Escrito por la docente'
-    return { ...FICHA_EJEMPLO, grado: entrada.grado, duracion: entrada.duracion ?? FICHA_EJEMPLO.duracion, fuente }
+    // Elige el ejemplo que más se parece a lo que escribió la docente.
+    const t = (entrada.texto ?? '').toLowerCase()
+    const base = /agua|lluvia|nube/.test(t) ? FICHA_AGUA : /sustantiv|nombre/.test(t) ? FICHA_SUSTANTIVOS : FICHA_EJEMPLO
+    return {
+      ...base,
+      id: `ficha-${Date.now()}`,
+      fecha: new Date().toISOString(),
+      grado: entrada.grado,
+      duracion: entrada.duracion ?? base.duracion,
+      fuente: entrada.tipo === 'texto' ? base.fuente : fuente,
+    }
   },
   async generarCancion(_ficha, opciones) {
     await esperar(1200)

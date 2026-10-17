@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente cuenta qué va a enseñar (escribiéndolo, dictándolo, con una foto de la página del libro o subiendo un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un examen gamificado, un juego web, un crucigrama o una versión adaptada para estudiantes con TDAH, dislexia o TEA.
+Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un examen gamificado, un juego web, un crucigrama o una versión adaptada para estudiantes con TDAH, dislexia o TEA.
 
 Proyecto para Hack the Andes 2026.
 
@@ -8,7 +8,8 @@ Proyecto para Hack the Andes 2026.
 
 Pensado para docentes con poca experiencia digital: simple a primera vista y potente cuando lo necesitas, como una hoja de cálculo.
 
-- **Una pregunta y un botón principal por pantalla.** "¿Qué vas a enseñar hoy?", "¿Con qué ritmo?", "¿Qué le gusta a tu clase?".
+- **Una pregunta y un botón principal por pantalla.** "¿Qué necesitas para tu clase?", "¿Con qué ritmo?", "¿Qué le gusta a tu clase?".
+- **No es un chat.** Los temas se eligen y se crean desde un solo selector, y "Nuevo tema" es un formulario corto en una ventana.
 - **El resultado se ve como una hoja.** Lo que ves es lo que se imprime, y cualquier texto se corrige con un clic.
 - **Lo avanzado queda plegado** en "Más opciones" o "Cambiar…", nunca en la primera vista.
 - **Palabras del aula, no técnicas.** "Le cuesta concentrarse" antes que "TDAH"; los créditos solo aparecen bajo el botón que los gasta.

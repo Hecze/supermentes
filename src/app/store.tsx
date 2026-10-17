@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Adaptacion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
-import { FICHA_EJEMPLO, JUEGO_EJEMPLO, examenEjemplo } from '../api/ejemplos'
+import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES, examenEjemplo } from '../api/ejemplos'
 
-export const VISTAS = ['inicio', 'ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
+export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
@@ -20,8 +20,14 @@ export type Resultados = {
 type Store = {
   vista: Vista
   ir: (v: Vista) => void
+  /** Temas de la docente, del más reciente al más antiguo. */
+  temas: Ficha[]
   ficha: Ficha | null
   setFicha: (f: Ficha) => void
+  elegirTema: (id: string) => void
+  nuevoTemaAbierto: boolean
+  abrirNuevoTema: () => void
+  cerrarNuevoTema: () => void
   resultados: Resultados
   guardar: <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => void
   creditos: number
@@ -38,9 +44,9 @@ const Ctx = createContext<Store | null>(null)
 function vistaDelHash(): Vista {
   try {
     const h = window.location.hash.replace('#', '')
-    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'inicio'
+    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'ficha'
   } catch {
-    return 'inicio'
+    return 'ficha'
   }
 }
 
@@ -63,18 +69,17 @@ function temaActual(): Tema {
   }
 }
 
-// En modo ejemplo la app arranca con un tema a medio trabajar: examen y juego listos, canción y adaptación por crear.
-const RESULTADOS_INICIALES: Resultados = MODO_EJEMPLO
-  ? {
-      examen: examenEjemplo({ interes: 'Fútbol', formato: 'mision' }),
-      juego: JUEGO_EJEMPLO,
-    }
+// En modo ejemplo la docente ya tiene tres temas; en el de fracciones, el examen y el juego están listos.
+const RESULTADOS_INICIALES: Record<string, Resultados> = MODO_EJEMPLO
+  ? { [FICHA_EJEMPLO.id]: { examen: examenEjemplo({ interes: 'Fútbol', formato: 'mision' }), juego: JUEGO_EJEMPLO } }
   : {}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [vista, setVista] = useState<Vista>(vistaDelHash)
-  const [ficha, setFichaState] = useState<Ficha | null>(MODO_EJEMPLO ? FICHA_EJEMPLO : null)
-  const [resultados, setResultados] = useState<Resultados>(RESULTADOS_INICIALES)
+  const [temas, setTemas] = useState<Ficha[]>(MODO_EJEMPLO ? TEMAS_INICIALES : [])
+  const [fichaId, setFichaId] = useState<string | null>(MODO_EJEMPLO ? FICHA_EJEMPLO.id : null)
+  const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
+  const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
   const [creditos, setCreditos] = useState(MODO_EJEMPLO ? 18 : CREDITOS_MENSUALES)
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [tema, setTema] = useState<Tema>(() => {
@@ -104,13 +109,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const setFicha = useCallback((f: Ficha) => {
-    setFichaState(f)
-    setResultados({})
+    setTemas((lista) => [f, ...lista.filter((t) => t.id !== f.id)])
+    setFichaId(f.id)
   }, [])
 
-  const guardar = useCallback(<K extends keyof Resultados>(clave: K, valor: Resultados[K]) => {
-    setResultados((r) => ({ ...r, [clave]: valor }))
-  }, [])
+  const elegirTema = useCallback(
+    (id: string) => {
+      setFichaId(id)
+      ir('ficha')
+    },
+    [ir],
+  )
+
+  const guardar = useCallback(
+    <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => {
+      if (!fichaId) return
+      setPorTema((r) => ({ ...r, [fichaId]: { ...r[fichaId], [clave]: valor } }))
+    },
+    [fichaId],
+  )
 
   const avisar = useCallback((texto: string, tono: Tono = 'info') => {
     const id = Date.now() + Math.random()
@@ -144,9 +161,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setTema(siguiente)
   }, [])
 
+  const ficha = temas.find((t) => t.id === fichaId) ?? null
+
   return (
     <Ctx.Provider
-      value={{ vista, ir, ficha, setFicha, resultados, guardar, creditos, gastar, devolver, avisos, avisar, tema, cambiarTema }}
+      value={{
+        vista,
+        ir,
+        temas,
+        ficha,
+        setFicha,
+        elegirTema,
+        nuevoTemaAbierto,
+        abrirNuevoTema: () => setNuevoTemaAbierto(true),
+        cerrarNuevoTema: () => setNuevoTemaAbierto(false),
+        resultados: (fichaId && porTema[fichaId]) || {},
+        guardar,
+        creditos,
+        gastar,
+        devolver,
+        avisos,
+        avisar,
+        tema,
+        cambiarTema,
+      }}
     >
       {children}
     </Ctx.Provider>
@@ -157,4 +195,17 @@ export function useStore() {
   const s = useContext(Ctx)
   if (!s) throw new Error('useStore debe usarse dentro de StoreProvider')
   return s
+}
+
+/** "Hoy", "Ayer", el día de la semana o la fecha corta. */
+export function cuando(fecha: string) {
+  const d = new Date(fecha)
+  const dias = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86_400_000)
+  if (dias <= 0) return 'Hoy'
+  if (dias === 1) return 'Ayer'
+  if (dias < 7) {
+    const dia = d.toLocaleDateString('es-PE', { weekday: 'long' })
+    return dia[0].toUpperCase() + dia.slice(1)
+  }
+  return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
 }

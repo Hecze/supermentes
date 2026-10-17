@@ -1,9 +1,11 @@
-import { BookOpen, CircleAlert, CircleCheck, Coins, House, Info, Library, Moon, Plus, Sun } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Sun, X } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
+import { NuevoTema } from './NuevoTema'
+import { SelectorTema } from './SelectorTema'
 import { Boton, IconoHerramienta, cx } from './ui'
 
 /** Cinco plumones en su estuche: uno por herramienta. */
@@ -24,7 +26,7 @@ function Creditos() {
   const { creditos } = useStore()
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-sm font-medium text-warn tabular-nums"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-sm font-medium text-warn tabular-nums"
       title={`Te quedan ${creditos} de ${CREDITOS_MENSUALES} créditos este mes`}
     >
       <Coins className="size-4" aria-hidden />
@@ -68,121 +70,107 @@ function ItemNav({ vista, icono, children }: { vista: Vista; icono: ReactNode; c
   )
 }
 
+/** Lo que va en la barra lateral: en escritorio siempre visible, en el celular dentro del menú. */
+function ContenidoLateral() {
+  const { ir } = useStore()
+  return (
+    <>
+      <button type="button" onClick={() => ir('ficha')} className="self-start rounded-lg">
+        <Logo />
+      </button>
+
+      <SelectorTema />
+
+      <nav className="flex flex-col gap-1" aria-label="Herramientas">
+        <p className="px-3 pb-1 text-sm text-ink-soft">Herramientas</p>
+        {ORDEN_HERRAMIENTAS.map((id: HerramientaId) => (
+          <ItemNav key={id} vista={id} icono={<IconoHerramienta id={id} tam="sm" />}>
+            {HERRAMIENTAS[id].nombre}
+          </ItemNav>
+        ))}
+      </nav>
+
+      <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
+        <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
+          Biblioteca
+        </ItemNav>
+      </nav>
+
+      <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
+        <div className="flex items-center justify-between">
+          <Creditos />
+          <BotonTema />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
+          <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
+        </div>
+        {MODO_EJEMPLO && (
+          <p className="flex items-start gap-1.5 text-xs text-ink-soft">
+            <Info className="mt-px size-3.5 shrink-0" aria-hidden />
+            Prototipo con datos de ejemplo.
+          </p>
+        )}
+      </div>
+    </>
+  )
+}
+
 export function Shell({ children }: { children: ReactNode }) {
-  const { vista, ir, ficha } = useStore()
-  const enHerramienta = (ORDEN_HERRAMIENTAS as string[]).includes(vista)
+  const { vista, ficha } = useStore()
+  const [menu, setMenu] = useState(false)
+
+  // Al navegar o cambiar de tema, el menú del celular se cierra.
+  useEffect(() => setMenu(false), [vista, ficha?.id])
 
   return (
     <div className="min-h-dvh lg:pl-72 print:pl-0">
-      {/* Barra lateral (escritorio) */}
       <aside
         className="fixed inset-y-0 left-0 z-30 hidden w-72 flex-col gap-5 overflow-y-auto border-r border-line bg-surface px-4 py-5 lg:flex print:hidden"
         style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)' }}
       >
-        <button type="button" onClick={() => ir('inicio')} className="self-start rounded-lg">
-          <Logo />
-        </button>
-
-        <Boton variante="contorno" onClick={() => ir('inicio')} className="justify-start">
-          <Plus className="size-5" aria-hidden /> Nuevo tema
-        </Boton>
-
-        {ficha && (
-          <button
-            type="button"
-            onClick={() => ir('ficha')}
-            aria-current={vista === 'ficha' ? 'page' : undefined}
-            className={cx(
-              'flex flex-col gap-0.5 rounded-xl border-2 px-3 py-2.5 text-left transition',
-              vista === 'ficha' ? 'border-ink' : 'border-line hover:border-ink-soft',
-            )}
-          >
-            <span className="text-xs text-ink-soft">Tu tema</span>
-            <span className="line-clamp-2 font-semibold leading-snug">{ficha.titulo}</span>
-            <span className="text-sm text-ink-soft">{ficha.grado}</span>
-          </button>
-        )}
-
-        <nav className="flex flex-col gap-1" aria-label="Herramientas">
-          <p className="px-3 pb-1 text-sm text-ink-soft">Herramientas</p>
-          {ORDEN_HERRAMIENTAS.map((id: HerramientaId) => (
-            <ItemNav key={id} vista={id} icono={<IconoHerramienta id={id} tam="sm" />}>
-              {HERRAMIENTAS[id].nombre}
-            </ItemNav>
-          ))}
-        </nav>
-
-        <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
-          <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
-            Biblioteca
-          </ItemNav>
-        </nav>
-
-        <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
-          <div className="flex items-center justify-between">
-            <Creditos />
-            <BotonTema />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
-            <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
-          </div>
-          {MODO_EJEMPLO && (
-            <p className="flex items-start gap-1.5 text-xs text-ink-soft">
-              <Info className="mt-px size-3.5 shrink-0" aria-hidden />
-              Prototipo con datos de ejemplo.
-            </p>
-          )}
-        </div>
+        <ContenidoLateral />
       </aside>
 
-      {/* Barra superior (celular) */}
+      {/* Barra superior (celular): menú, tema actual y créditos */}
       <header
-        className="gutter sticky z-30 flex h-14 items-center justify-between border-b border-line bg-surface lg:hidden print:hidden"
+        className="gutter sticky z-30 flex h-14 items-center gap-1 border-b border-line bg-surface lg:hidden print:hidden"
         style={{ top: 'env(safe-area-inset-top, 0px)' }}
       >
-        <button type="button" onClick={() => ir('inicio')} className="rounded-lg">
-          <Logo />
+        <button
+          type="button"
+          onClick={() => setMenu(true)}
+          className="-ml-2 grid size-10 shrink-0 place-items-center rounded-xl hover:bg-surface-2"
+          aria-label="Abrir menú"
+        >
+          <Menu className="size-6" />
         </button>
-        <div className="flex items-center gap-1">
-          <Creditos />
-          <BotonTema />
+        <div className="min-w-0 flex-1">
+          <SelectorTema compacto />
         </div>
+        <Creditos />
       </header>
 
-      <main className="gutter pb-28 pt-6 lg:pb-16 lg:pt-10 print:p-0">
+      {menu && (
+        <div className="fixed inset-0 z-40 lg:hidden print:hidden">
+          <button type="button" className="absolute inset-0 bg-black/45" onClick={() => setMenu(false)} aria-label="Cerrar menú" />
+          <aside
+            className="absolute inset-y-0 left-0 flex w-[min(20rem,85vw)] flex-col gap-5 overflow-y-auto bg-surface px-4 py-5 shadow-2xl"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 20px)', paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 20px)', paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))' }}
+          >
+            <button type="button" onClick={() => setMenu(false)} className="absolute right-3 top-4 rounded-lg p-1.5 text-ink-soft hover:bg-surface-2" aria-label="Cerrar menú">
+              <X className="size-5" />
+            </button>
+            <ContenidoLateral />
+          </aside>
+        </div>
+      )}
+
+      <main className="gutter pb-16 pt-6 lg:pt-10 print:p-0">
         <div className="mx-auto flex max-w-4xl flex-col gap-7">{children}</div>
       </main>
 
-      {/* Barra inferior (celular) */}
-      <nav
-        className="gutter fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-line bg-surface lg:hidden print:hidden"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        aria-label="Principal"
-      >
-        {(
-          [
-            ['inicio', 'Nuevo tema', House],
-            ['ficha', 'Mi tema', BookOpen],
-            ['biblioteca', 'Biblioteca', Library],
-          ] as const
-        ).map(([v, texto, Icono]) => {
-          const activo = vista === v || (v === 'ficha' && enHerramienta)
-          return (
-            <button
-              key={v}
-              type="button"
-              onClick={() => ir(v)}
-              aria-current={activo ? 'page' : undefined}
-              className={cx('flex h-16 flex-col items-center justify-center gap-1 text-xs', activo ? 'font-semibold text-ink' : 'text-ink-soft')}
-            >
-              <Icono className="size-5" aria-hidden />
-              {texto}
-            </button>
-          )
-        })}
-      </nav>
-
+      <NuevoTema />
       <Avisos />
     </div>
   )
@@ -192,8 +180,8 @@ function Avisos() {
   const { avisos } = useStore()
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 z-40 flex flex-col items-center gap-2 px-4 lg:left-auto lg:right-6 lg:items-end print:hidden"
-      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 84px)' }}
+      className="pointer-events-none fixed inset-x-0 z-[60] flex flex-col items-center gap-2 px-4 lg:left-auto lg:right-6 lg:items-end print:hidden"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)' }}
       aria-live="polite"
     >
       {avisos.map((a) => (
@@ -215,34 +203,27 @@ function Avisos() {
   )
 }
 
-/** Encabezado común de cada herramienta: de qué tema es y qué herramienta estás usando. */
+/** Encabezado común de cada herramienta. */
 export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
-  const { ficha, ir } = useStore()
   const h = HERRAMIENTAS[id]
   return (
     <header className="flex items-center gap-4 print:hidden">
       <IconoHerramienta id={id} tam="lg" />
-      <div className="min-w-0">
-        {ficha && (
-          <button type="button" onClick={() => ir('ficha')} className="max-w-full truncate rounded text-left text-sm text-ink-soft hover:text-ink lg:hidden">
-            {ficha.titulo} · {ficha.grado}
-          </button>
-        )}
-        <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
-      </div>
+      <h1 className="min-w-0 font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
     </header>
   )
 }
 
-/** Lo que ve una herramienta si todavía no hay tema preparado. */
+/** Lo que se ve si todavía no hay ningún tema. */
 export function SinTema() {
-  const { ir } = useStore()
+  const { abrirNuevoTema } = useStore()
   return (
-    <div className="flex flex-col items-start gap-4 rounded-2xl border border-dashed border-line bg-surface p-6">
-      <h2 className="font-display text-2xl font-bold">Primero, cuéntanos qué vas a enseñar</h2>
-      <p className="max-w-xl text-ink-soft">Escribe el tema o sácale una foto a la página del libro. Con eso preparamos todo lo demás.</p>
-      <Boton tam="lg" onClick={() => ir('inicio')}>
-        Empezar
+    <div className="flex flex-col items-start gap-4 rounded-3xl border-2 border-dashed border-line bg-surface p-8">
+      <p className="text-lg text-ink-soft">Hola, {DOCENTE.saludo}</p>
+      <h1 className="font-display text-3xl font-bold sm:text-4xl">Empieza con el tema de tu próxima clase</h1>
+      <p className="max-w-xl text-lg text-ink-soft">Con el tema preparamos canciones, exámenes, juegos y más. Solo toma un minuto.</p>
+      <Boton tam="lg" onClick={abrirNuevoTema}>
+        Crear tema
       </Boton>
     </div>
   )

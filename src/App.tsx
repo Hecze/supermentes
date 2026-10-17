@@ -6,11 +6,9 @@ import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
-import { Inicio } from './views/Inicio'
 import { Juego } from './views/Juego'
 
 const VISTAS = {
-  inicio: Inicio,
   ficha: Ficha,
   cancion: Cancion,
   examen: Examen,
@@ -21,11 +19,11 @@ const VISTAS = {
 }
 
 function Pantalla() {
-  const { vista } = useStore()
+  const { vista, ficha } = useStore()
   const Vista = VISTAS[vista]
   return (
     <Shell>
-      <Vista key={vista} />
+      <Vista key={`${vista}-${ficha?.id}`} />
     </Shell>
   )
 }

@@ -10,7 +10,6 @@ import type {
   OpcionesCancion,
   OpcionesExamen,
   PreguntaExamen,
-  TemaReciente,
 } from './types'
 
 export const DOCENTE = {
@@ -19,8 +18,11 @@ export const DOCENTE = {
   colegio: 'I.E. N.º 2048 · San Juan de Lurigancho',
 }
 
+const haceDias = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString()
+
 export const FICHA_EJEMPLO: Ficha = {
   id: 'ficha-fracciones-4',
+  fecha: haceDias(0),
   titulo: 'Fracciones: partes de un todo',
   grado: '4.º primaria',
   area: 'Matemática',
@@ -53,11 +55,73 @@ export const FICHA_EJEMPLO: Ficha = {
   coincidenciasBiblioteca: 3,
 }
 
-export const TEMAS_RECIENTES: TemaReciente[] = [
-  { titulo: 'Fracciones: partes de un todo', cuando: 'Hoy', grado: '4.º primaria', herramientas: ['examen', 'juego'] },
-  { titulo: 'El ciclo del agua', cuando: 'Ayer', grado: '4.º primaria', herramientas: ['crucigrama', 'adaptar'] },
-  { titulo: 'Sustantivos propios y comunes', cuando: 'Lunes', grado: '4.º primaria', herramientas: ['juego'] },
-]
+export const FICHA_AGUA: Ficha = {
+  id: 'ficha-agua-4',
+  fecha: haceDias(1),
+  titulo: 'El ciclo del agua',
+  grado: '4.º primaria',
+  area: 'Ciencia y Tecnología',
+  duracion: '90 min',
+  fuente: 'Escrito por la docente',
+  proposito: 'Que los estudiantes expliquen cómo el agua cambia de estado y circula entre el mar, el cielo y la tierra.',
+  curriculo: {
+    competencia: 'Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
+    capacidad: 'Comprende y usa conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
+  },
+  conceptos: [
+    'El sol calienta el agua de mares, ríos y lagos, y se evapora.',
+    'El vapor sube, se enfría y forma las nubes.',
+    'El agua de las nubes cae como lluvia, nieve o granizo.',
+    'El agua vuelve a los ríos y al mar, o entra en la tierra.',
+  ],
+  vocabulario: [
+    { palabra: 'evaporación', definicion: 'El agua se calienta y sube como vapor.' },
+    { palabra: 'condensación', definicion: 'El vapor se enfría y forma nubes.' },
+    { palabra: 'precipitación', definicion: 'El agua cae como lluvia, nieve o granizo.' },
+    { palabra: 'infiltración', definicion: 'El agua entra en la tierra.' },
+    { palabra: 'vapor', definicion: 'Agua en estado gaseoso.' },
+    { palabra: 'nube', definicion: 'Muchas gotitas de agua juntas en el cielo.' },
+    { palabra: 'glaciar', definicion: 'Gran masa de hielo en lo alto de las montañas.' },
+  ],
+  ejemplo: 'Cuando hierves agua para el té, el vapor que sale de la olla es agua evaporándose.',
+  errorFrecuente: 'Creen que las nubes son humo o algodón, y no agua.',
+  coincidenciasBiblioteca: 2,
+}
+
+export const FICHA_SUSTANTIVOS: Ficha = {
+  id: 'ficha-sustantivos-4',
+  fecha: haceDias(4),
+  titulo: 'Sustantivos propios y comunes',
+  grado: '4.º primaria',
+  area: 'Comunicación',
+  duracion: '45 min',
+  fuente: 'Foto del libro de Comunicación, pág. 22',
+  proposito: 'Que los estudiantes distingan los sustantivos propios de los comunes y usen la mayúscula correctamente.',
+  curriculo: {
+    competencia: 'Escribe diversos tipos de textos en su lengua materna',
+    capacidad: 'Utiliza convenciones del lenguaje escrito de forma pertinente',
+  },
+  conceptos: [
+    'Los sustantivos nombran personas, animales, cosas y lugares.',
+    'Los sustantivos comunes nombran a cualquiera de un grupo: perro, ciudad.',
+    'Los sustantivos propios nombran a uno en particular: Firulais, Arequipa.',
+    'Los sustantivos propios se escriben con mayúscula.',
+  ],
+  vocabulario: [
+    { palabra: 'sustantivo', definicion: 'Palabra que nombra personas, animales, cosas o lugares.' },
+    { palabra: 'propio', definicion: 'Nombra a uno en particular.' },
+    { palabra: 'común', definicion: 'Nombra a cualquiera de un grupo.' },
+    { palabra: 'mayúscula', definicion: 'Letra grande al inicio de un nombre propio.' },
+    { palabra: 'lugar', definicion: 'Puede ser una ciudad, un río o una montaña.' },
+    { palabra: 'nombre', definicion: 'Palabra con la que llamamos a alguien.' },
+  ],
+  ejemplo: '"Mi perra Luna vive en Huancayo": perra es común; Luna y Huancayo son propios.',
+  errorFrecuente: 'Escriben con minúscula los nombres de ciudades y ríos.',
+  coincidenciasBiblioteca: 4,
+}
+
+/** Temas que la docente ya preparó, del más reciente al más antiguo. */
+export const TEMAS_INICIALES: Ficha[] = [FICHA_EJEMPLO, FICHA_AGUA, FICHA_SUSTANTIVOS]
 
 // ---------- Canción ----------
 

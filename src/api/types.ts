@@ -18,6 +18,8 @@ export type Fraccion = [number, number]
 
 export type Ficha = {
   id: string
+  /** Fecha de creación o último uso (ISO). */
+  fecha: string
   titulo: string
   grado: string
   area: string
@@ -113,13 +115,6 @@ export type Material = {
   lugar: string
   usos: number
   esMio?: boolean
-}
-
-export type TemaReciente = {
-  titulo: string
-  cuando: string
-  grado: string
-  herramientas: HerramientaId[]
 }
 
 export interface Api {
