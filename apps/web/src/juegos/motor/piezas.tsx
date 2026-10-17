@@ -81,7 +81,8 @@ export function Contar({ figura, cantidad, tam = '1.6em' }: { figura: string; ca
 
 export function VisualDe({ visual, tam = '5em' }: { visual: Visual; tam?: string }) {
   if (visual.tipo === 'fraccion') return <Pastel partes={visual.partes} tam={tam} />
-  const t = visual.cantidad <= 5 ? 0.42 : visual.cantidad <= 10 ? 0.32 : 0.24
+  // Cada fila tiene hasta cinco figuras: el tamaño se calcula para que la fila entre en `tam`.
+  const t = Math.min(0.42, 1 / (Math.min(visual.cantidad, 5) * 1.18))
   return <Contar figura={visual.figura} cantidad={visual.cantidad} tam={`calc(${tam} * ${t})`} />
 }
 
@@ -96,7 +97,8 @@ export function Enunciado({ reto, tam = 'clamp(22px, 7cqmin, 64px)', className }
           {reto.consigna}
         </p>
       )}
-      {reto.visual && <VisualDe visual={reto.visual} tam={`calc(${tam} * 2.6)`} />}
+      {/* Las cosas para contar van en filas de cinco: necesitan más ancho que una fracción. */}
+      {reto.visual && <VisualDe visual={reto.visual} tam={`calc(${tam} * ${reto.visual.tipo === 'contar' ? 4.4 : 2.6})`} />}
       {reto.pregunta && (
         <p className="font-semibold leading-tight text-balance" style={{ fontSize: `max(17px, calc(${tam} * ${escala}))` }}>
           <TextoMat texto={reto.pregunta} />
