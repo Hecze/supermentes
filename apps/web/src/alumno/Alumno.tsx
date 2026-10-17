@@ -1,17 +1,18 @@
 // Página del alumno (/j/CODIGO): abre el juego que compartió su profe. Sin cuenta y sin el panel del docente.
-import { ArrowRight, X } from 'lucide-react'
-import { useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
+import { ArrowRight, Check, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
 import { juegoPorId, juegosCompatibles } from '../juegos/catalogo'
 import { cargar, codigoValido, contenidoDe, leerAutonomo, type Publicado } from '../juegos/compartir/publicado'
+import { alumnoGuardado, enviarResultado, guardarAlumno, type Alumno as DatosAlumno } from '../juegos/compartir/resultados'
 import { Llama, LLAMAS } from '../juegos/motor/Llama'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
-import type { Contenido, JuegoId } from '../juegos/tipos'
+import type { Contenido, JuegoId, Resultado } from '../juegos/tipos'
 import '../juegos/juegos.css'
 
 type Estado =
   | { fase: 'codigo'; error?: string }
   | { fase: 'cargando' }
-  | { fase: 'listo'; publicado: Publicado; contenido: Contenido }
+  | { fase: 'listo'; publicado: Publicado; contenido: Contenido; codigo?: string }
 
 /** Los alumnos juegan en el celular de la familia: solo se ofrecen juegos pensados para celular. */
 function deCelular(contenido: Contenido, grado?: string) {
@@ -93,6 +94,50 @@ function PedirCodigo({ error, entrar }: { error?: string; entrar: (c: string) =>
   )
 }
 
+/** La primera vez en este celular: el nombre con el que el docente verá el puntaje. Sin cuenta ni contraseña. */
+function PedirNombre({ anterior, listo }: { anterior: DatosAlumno | null; listo: (a: DatosAlumno) => void }) {
+  const [nombre, setNombre] = useState('')
+  const limpio = nombre.trim()
+
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    if (limpio.length >= 2) listo(guardarAlumno(limpio))
+  }
+
+  return (
+    <div className="fixed inset-0 z-[95] flex items-center justify-center overflow-y-auto bg-[rgb(30_20_80/0.6)] p-4 backdrop-blur-sm" role="dialog" aria-modal aria-labelledby="titulo-nombre">
+      <form onSubmit={enviar} className="tarjeta-juego entrar flex w-full max-w-sm flex-col items-center gap-4 px-6 pb-6 pt-4 text-center text-[#2b2d5c]">
+        <Llama colores={LLAMAS.crema} tam={110} className="flotar" />
+        <h2 id="titulo-nombre" className="text-3xl font-bold leading-tight">
+          ¿Cómo te llamas?
+        </h2>
+        <p className="text-lg text-[#5d6290]">Así tu profe verá tu puntaje.</p>
+        <label htmlFor="nombre" className="sr-only">
+          Tu nombre
+        </label>
+        <input
+          id="nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value.slice(0, 30))}
+          autoComplete="given-name"
+          autoCapitalize="words"
+          autoFocus
+          placeholder={anterior ? 'Escribe tu nombre' : 'Nombre y apellido'}
+          className="w-full rounded-2xl border-2 border-[#d9dcf2] px-4 py-3 text-center text-2xl font-semibold outline-none focus:border-[#4f6dff]"
+        />
+        <button
+          type="submit"
+          disabled={limpio.length < 2}
+          className="b3d inline-flex w-full items-center justify-center gap-2 px-6 py-3 text-2xl disabled:opacity-50"
+          style={{ '--c': '#2fc46f' } as CSSProperties}
+        >
+          <Check className="size-6" aria-hidden /> ¡Listo!
+        </button>
+      </form>
+    </div>
+  )
+}
+
 function OtroJuego({ contenido, grado, actual, elegir, cerrar }: { contenido: Contenido; grado?: string; actual: JuegoId; elegir: (id: JuegoId) => void; cerrar: () => void }) {
   const otros = deCelular(contenido, grado).filter((j) => j.def.id !== actual)
   return (
@@ -127,16 +172,19 @@ export function Alumno() {
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' })
   const [juego, setJuego] = useState<JuegoId | null>(null)
   const [eligiendo, setEligiendo] = useState(false)
+  const [alumno, setAlumno] = useState<DatosAlumno | null>(alumnoGuardado)
+  const [cambiandoNombre, setCambiandoNombre] = useState(false)
+  const [aviso, setAviso] = useState<{ texto: string; n: number } | null>(null)
   const pantalla = usePantallaCompleta()
 
-  async function abrir(fuente: () => Promise<Publicado>) {
+  async function abrir(fuente: () => Promise<Publicado>, codigo?: string) {
     setEstado({ fase: 'cargando' })
     try {
       const publicado = await fuente()
       const contenido = contenidoDe(publicado)
       if (!contenido || !juegoPorId(publicado.juego)) throw new Error('vacio')
       setJuego(publicado.juego)
-      setEstado({ fase: 'listo', publicado, contenido })
+      setEstado({ fase: 'listo', publicado, contenido, codigo })
     } catch (e) {
       const noExiste = (e as Error).message === 'no-existe'
       setEstado({ fase: 'codigo', error: noExiste ? 'No encontramos ese juego. Revisa el código.' : 'No pudimos abrir el juego. Revisa tu conexión e intenta otra vez.' })
@@ -150,7 +198,7 @@ export function Alumno() {
     } catch {
       // Si no se puede cambiar la dirección, el juego abre igual.
     }
-    void abrir(() => cargar(codigo))
+    void abrir(() => cargar(codigo), codigo)
   }
 
   useEffect(() => {
@@ -168,6 +216,25 @@ export function Alumno() {
     const compatibles = juegosCompatibles(listo.contenido)
     return compatibles.find((j) => j.def.id === juego) ?? deCelular(listo.contenido, listo.publicado.grado)[0] ?? null
   }, [listo, juego])
+
+  // Cada partida manda su puntaje: el servidor se queda con el mejor de cada alumno.
+  const codigo = listo?.codigo
+  const juegoActual = elegido?.def.id
+  const alTerminar = useCallback(
+    async (r: Resultado) => {
+      if (!codigo || !alumno || !juegoActual) return
+      const nuevo = await enviarResultado(codigo, alumno, juegoActual, r)
+      const texto = nuevo === null ? 'No pudimos guardar tu puntaje. Revisa tu conexión.' : nuevo ? '¡Es tu mejor puntaje! Tu profe lo verá.' : 'Listo: tu profe verá tu mejor puntaje.'
+      setAviso({ texto, n: Math.random() })
+    },
+    [codigo, alumno, juegoActual],
+  )
+
+  useEffect(() => {
+    if (!aviso) return
+    const id = window.setTimeout(() => setAviso(null), 4500)
+    return () => window.clearTimeout(id)
+  }, [aviso])
 
   if (!navegadorAlDia()) {
     return (
@@ -202,9 +269,33 @@ export function Alumno() {
         contenido={elegido.contenido}
         ritmo={listo.publicado.ritmo}
         pantalla={pantalla}
-        alSalir={deCelular(listo.contenido, listo.publicado.grado).length > 1 ? () => setEligiendo(true) : undefined}
+        // Con código, el juego es una tarea del docente: no se cambia por otro.
+        alSalir={!codigo && deCelular(listo.contenido, listo.publicado.grado).length > 1 ? () => setEligiendo(true) : undefined}
+        alTerminar={alTerminar}
+        pie={
+          codigo &&
+          alumno && (
+            <button type="button" onClick={() => setCambiandoNombre(true)} className="rounded-full bg-white/20 px-4 py-1.5 text-white" style={{ fontSize: 'clamp(14px, 3cqmin, 22px)' }}>
+              Juegas como <strong>{alumno.nombre}</strong> · <span className="underline">No soy yo</span>
+            </button>
+          )
+        }
         className="h-full w-full"
       />
+      {codigo && (!alumno || cambiandoNombre) && (
+        <PedirNombre
+          anterior={alumno}
+          listo={(a) => {
+            setAlumno(a)
+            setCambiandoNombre(false)
+          }}
+        />
+      )}
+      {aviso && (
+        <div key={aviso.n} className="entrar pointer-events-none fixed inset-x-0 bottom-[max(16px,env(safe-area-inset-bottom))] z-[96] flex justify-center px-4" role="status">
+          <span className="rounded-full bg-[#2b2d5c] px-5 py-3 text-center text-lg font-semibold text-white shadow-xl">{aviso.texto}</span>
+        </div>
+      )}
       {eligiendo && (
         <OtroJuego
           contenido={listo.contenido}

@@ -1,6 +1,7 @@
 // Memoria: voltear cartas de a dos hasta encontrar todas las parejas (3/4 y su dibujo, 7 × 8 y 56).
 import { Check } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
+import { paresDePartida } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useTamano, useTemporizadores } from '../motor/bucle'
 import { PALETA, TextoMat, VisualDe } from '../motor/piezas'
@@ -29,9 +30,10 @@ function tamTexto(t: string) {
 
 export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
-  const cuantas = Math.min(contenido.pares.length, [0, 6, 8, 10][ritmo])
+  const disponibles = useMemo(() => paresDePartida(contenido, azar), [contenido, azar])
+  const cuantas = Math.min(disponibles.length, [0, 6, 8, 10][ritmo])
   const cartas = useMemo<Carta[]>(() => {
-    const pares = barajar(azar, contenido.pares).slice(0, cuantas)
+    const pares = barajar(azar, disponibles).slice(0, cuantas)
     return barajar(
       azar,
       pares.flatMap((p, i) => [
@@ -39,7 +41,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
         { id: i * 2 + 1, par: i, lado: p.b },
       ]),
     )
-  }, [azar, contenido, cuantas])
+  }, [azar, disponibles, cuantas])
 
   const tablero = useRef<HTMLDivElement>(null)
   const { ancho, alto } = useTamano(tablero)
@@ -76,6 +78,8 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
               estrellas,
               titulo: '¡Encontraron todas!',
               detalle: `${cuantas} parejas en ${total} intentos.${estrellas < 3 ? ` Con ${cuantas + 2} o menos son tres estrellas.` : ''}`,
+              // 1000 sin errores; cada intento de más resta 50.
+              puntaje: Math.max(0, 1000 - (total - cuantas) * 50),
             }),
           900,
         )

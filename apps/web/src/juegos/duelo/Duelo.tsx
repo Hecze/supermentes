@@ -177,6 +177,7 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
             estrellas: gane ? (v >= 70 ? 3 : v >= 40 ? 2 : 1) : 0,
             titulo: gane ? '¡Le ganaste a la máquina!' : '¡Ganó la máquina!',
             detalle: gane ? `${r} ganó con ${v} de vida y ${aciertos.current.volt} golpes.` : `Acertaste ${aciertos.current.volt}. ¡Pide la revancha!`,
+            puntaje: aciertos.current.volt * 100 + (gane ? v * 5 : 0),
           })
         } else {
           terminar({ estrellas: 3, titulo: `¡${r} gana!`, detalle: `VOLT acertó ${aciertos.current.volt} y NOVA acertó ${aciertos.current.nova}. ¿Revancha?` })

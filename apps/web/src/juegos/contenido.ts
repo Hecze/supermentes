@@ -36,7 +36,11 @@ export function contenidoMatematica(p: Practica, semilla = 1): Contenido | null 
     retos.push(r)
   }
 
-  // Parejas pregunta ↔ respuesta sin respuestas repetidas, para que cada carta tenga una sola pareja.
+  return { titulo: nombrePractica(p), retos, pares: paresDeRetos(retos), palabras: [], generar: nivel.generar }
+}
+
+/** Parejas pregunta ↔ respuesta sin respuestas repetidas, para que cada carta tenga una sola pareja. */
+export function paresDeRetos(retos: Reto[]): Par[] {
   const pares: Par[] = []
   const respuestas = new Set<string>()
   for (const r of retos) {
@@ -44,8 +48,15 @@ export function contenidoMatematica(p: Practica, semilla = 1): Contenido | null 
     respuestas.add(r.respuesta)
     pares.push({ a: { texto: sinIgual(r.pregunta), visual: r.visual }, b: { texto: r.respuesta } })
   }
+  return pares
+}
 
-  return { titulo: nombrePractica(p), retos, pares, palabras: [], generar: nivel.generar }
+/** Parejas nuevas en cada partida cuando el contenido se genera: al repetir el juego no salen las mismas. */
+export function paresDePartida(c: Contenido, azar: () => number): Par[] {
+  if (!c.generar) return c.pares
+  // Como en el catálogo: cada lado tiene que caber en una carta.
+  const cabe = (l: Par['a']) => !!l.visual || (largo(l.texto) > 0 && largo(l.texto) <= 16)
+  return paresDeRetos(Array.from({ length: 40 }, () => c.generar!(azar))).filter((p) => cabe(p.a) && cabe(p.b))
 }
 
 /** Palabras del tema: las del juego creado y las de la ficha, sin repetir. */

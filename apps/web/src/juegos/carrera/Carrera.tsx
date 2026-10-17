@@ -82,6 +82,7 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
         terminar({
           estrellas: gane ? (ella <= 1 ? 3 : ella <= 3 ? 2 : 1) : 0,
           titulo: gane ? '¡Tu llama ganó la carrera!' : '¡Ganó la rival!',
+          puntaje: Math.max(0, yo * 100 - ella * 50),
           detalle: gane ? (ella === 0 ? 'Llegaste a la meta sin ningún error.' : `Llegaste a la meta con ${ella} ${ella === 1 ? 'error' : 'errores'}.`) : `Acertaste ${yo} de ${yo + ella}. ¡Pide la revancha!`,
         })
       }, 1300)

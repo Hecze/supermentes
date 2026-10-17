@@ -97,7 +97,7 @@ function Controles({ pantalla }: { pantalla: PantallaCompleta }) {
   )
 }
 
-function Portada({ def, contenido, jugar }: { def: DefinicionJuego; contenido: Contenido; jugar: () => void }) {
+function Portada({ def, contenido, jugar, pie }: { def: DefinicionJuego; contenido: Contenido; jugar: () => void; pie?: ReactNode }) {
   const { Miniatura } = def
   const oscuro = def.estilo === 'juvenil'
   return (
@@ -137,6 +137,7 @@ function Portada({ def, contenido, jugar }: { def: DefinicionJuego; contenido: C
       >
         <Play className="size-[0.9em] fill-current" aria-hidden /> ¡Jugar!
       </button>
+      {pie && <div className="relative">{pie}</div>}
     </div>
   )
 }
@@ -199,6 +200,8 @@ export function Partida({
   ritmo,
   pantalla,
   alSalir,
+  alTerminar,
+  pie,
   className,
 }: {
   def: DefinicionJuego
@@ -207,6 +210,10 @@ export function Partida({
   pantalla: PantallaCompleta
   /** Si se indica, la pantalla final ofrece "Otro juego". */
   alSalir?: () => void
+  /** Cada vez que termina una partida (por ejemplo, para mandar el puntaje al docente). */
+  alTerminar?: (r: Resultado) => void
+  /** Algo más bajo el botón "¡Jugar!" de la portada (por ejemplo, con qué nombre juega el alumno). */
+  pie?: ReactNode
   className?: string
 }) {
   const [fase, setFase] = useState<'portada' | 'jugando' | 'final'>('portada')
@@ -226,6 +233,7 @@ export function Partida({
     (r: Resultado) => {
       setResultado(r)
       setFase('final')
+      alTerminar?.(r)
       if (r.estrellas >= 1) sonar.victoria()
       else sonar.fin()
       if (r.puntaje !== undefined) {
@@ -242,7 +250,7 @@ export function Partida({
         setRecord({ valor: Math.max(antes, r.puntaje), nuevo: nuevo && antes > 0 })
       }
     },
-    [def, contenido],
+    [def, contenido, alTerminar],
   )
 
   return (
@@ -251,7 +259,7 @@ export function Partida({
       className={`escena relative overflow-hidden bg-[#bfe8ff] ${def.estilo === 'juvenil' ? 'escena-oscura' : ''} ${pantalla.fija ? 'escena-fija' : ''} ${className ?? ''}`}
     >
       {fase === 'portada' ? (
-        <Portada def={def} contenido={contenido} jugar={jugar} />
+        <Portada def={def} contenido={contenido} jugar={jugar} pie={pie} />
       ) : (
         <Suspense fallback={<Cargando />}>
           <Juego key={semilla} contenido={contenido} ritmo={ritmo} semilla={semilla} terminar={terminar} />

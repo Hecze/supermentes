@@ -1,34 +1,24 @@
 // Juegos compartidos con los alumnos: cada uno es un archivo privado en Vercel Blob con un código corto.
 //
-//   POST /api/juegos-compartidos  { v, juego, ritmo, tema, fuente }  → { codigo }
-//   GET  /api/juegos-compartidos?codigo=ABC234                          → el juego (no cambia: se cachea en la CDN)
+//   POST /api/juegos-compartidos  { v, juego, ritmo, tema, grado, fuente }  → { codigo, clave }
+//   GET  /api/juegos-compartidos?codigo=ABC234                                 → el juego, sin la clave (se cachea en la CDN)
+//
+// La clave queda en la laptop del docente: con ella ve los resultados de sus alumnos (api/resultados.ts).
 //
 // La forma de los datos está en apps/web/src/juegos/compartir/publicado.ts. Aquí se valida y se recorta todo
 // lo que llega, porque cualquiera puede llamar a este endpoint.
-import { randomInt } from 'node:crypto'
+import { randomBytes, randomInt } from 'node:crypto'
 import { get, put } from '@vercel/blob'
+import { CODIGO, JUEGOS, entero, json, leerJuego, objeto, rutaJuego, texto } from './_juegos.js'
 
-const PREFIJO = 'juegos/'
 const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
-const CODIGO = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
-const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta', 'duelo', 'invasion', 'concurso'])
 const MAXIMO_BYTES = 200_000
 
 type Visual = { tipo: 'fraccion'; partes: [number, number] } | { tipo: 'contar'; figura: string; cantidad: number }
 type Reto = { consigna?: string; pregunta: string; visual?: Visual; respuesta: string; distractores: string[] }
 type Lado = { texto: string; visual?: Visual }
 
-function json(datos: unknown, estado = 200, cabeceras: Record<string, string> = {}) {
-  return new Response(JSON.stringify(datos), {
-    status: estado,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...cabeceras },
-  })
-}
-
-const texto = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '')
-const entero = (v: unknown, min: number, max: number) => (Number.isInteger(v) && (v as number) >= min && (v as number) <= max ? (v as number) : null)
 const lista = (v: unknown, max: number): unknown[] => (Array.isArray(v) ? v.slice(0, max) : [])
-const objeto = (v: unknown): Record<string, unknown> => (v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {})
 
 function visual(v: unknown): Visual | undefined {
   const o = objeto(v)
@@ -106,7 +96,7 @@ function validar(datos: unknown) {
 }
 
 const nuevoCodigo = () => Array.from({ length: 6 }, () => ALFABETO[randomInt(ALFABETO.length)]).join('')
-const rutaDe = (codigo: string) => `${PREFIJO}${codigo}.json`
+const rutaDe = rutaJuego
 
 async function existe(ruta: string) {
   const r = await get(ruta, { access: 'private', useCache: false })
@@ -128,13 +118,14 @@ export async function POST(request: Request) {
   try {
     let codigo = nuevoCodigo()
     for (let i = 0; i < 4 && (await existe(rutaDe(codigo))); i++) codigo = nuevoCodigo()
-    await put(rutaDe(codigo), JSON.stringify({ ...limpio, creado: new Date().toISOString() }), {
+    const clave = randomBytes(15).toString('base64url')
+    await put(rutaDe(codigo), JSON.stringify({ ...limpio, clave, creado: new Date().toISOString() }), {
       access: 'private',
       contentType: 'application/json',
       addRandomSuffix: false,
       allowOverwrite: false,
     })
-    return json({ codigo })
+    return json({ codigo, clave })
   } catch (e) {
     console.error('No se pudo guardar el juego compartido', e)
     return json({ error: 'No pudimos guardar el juego. Intenta de nuevo.' }, 500)
@@ -145,12 +136,11 @@ export async function GET(request: Request) {
   const codigo = (new URL(request.url).searchParams.get('codigo') ?? '').trim().toUpperCase()
   if (!CODIGO.test(codigo)) return json({ error: 'Ese código no es válido.' }, 400)
   try {
-    const r = await get(rutaDe(codigo), { access: 'private' })
-    if (!r || r.statusCode !== 200 || !r.stream) return json({ error: 'No encontramos ese juego.' }, 404)
-    // Un juego compartido no cambia: la CDN lo guarda y no se vuelve a leer de la tienda.
-    return new Response(r.stream, {
-      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300, s-maxage=31536000, immutable' },
-    })
+    const guardado = await leerJuego(codigo)
+    if (!guardado) return json({ error: 'No encontramos ese juego.' }, 404)
+    // La clave es solo del docente. Sin ella, un juego compartido no cambia: la CDN lo guarda.
+    const { clave: _clave, ...publico } = guardado
+    return json(publico, 200, { 'Cache-Control': 'public, max-age=300, s-maxage=31536000, immutable' })
   } catch (e) {
     console.error('No se pudo leer el juego compartido', e)
     return json({ error: 'No pudimos abrir el juego. Intenta de nuevo.' }, 500)

@@ -13,6 +13,7 @@ Proyecto para Hack the Andes 2026.
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 | `/j/CODIGO` | Juego compartido para los alumnos: solo el juego, sin cuenta (`j/index.html`, `src/alumno/`). En `/j` se escribe el código |
 | `/api/juegos-compartidos` | Guarda cada juego compartido en Vercel Blob con un código de 6 letras (`api/juegos-compartidos.ts`) |
+| `/api/resultados` | Guarda el mejor puntaje de cada alumno en un juego compartido y se los muestra al docente que lo envió (`api/resultados.ts`) |
 
 ## Currículo nacional (base de conocimiento)
 
@@ -50,6 +51,7 @@ Ya funciona sin backend:
 - **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
 - **Juegos:** doce juegos que sirven para cualquier tema (Concurso estilo Kahoot, Globos, Botones rápidos, Memoria, Carrera de llamas, Atrapa al cuy, Adivina la palabra, Pupiletras, Duelo de robots, Invasión, Tira y afloja y Ruleta de preguntas): el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. El pupiletras también se imprime. Ver `src/juegos/README.md`.
 - **Mandar un juego a las familias:** el docente toca "Enviar a las familias" y sale el mensaje de WhatsApp para el grupo de papás con el link (`supermentes.app/j/CODIGO`); los niños juegan en el celular de casa, sin cuenta. También hay código para escribir en `/j` y QR en grande para la clase. Si el servidor no responde, el juego viaja dentro del link y abre igual.
+- **Resultados de los alumnos:** la primera vez, el niño escribe su nombre en un popup (sin cuenta; el código ya viene en el link). Al terminar cada partida se guarda su puntaje, y el docente ve en el tema una tabla simple: quién jugó, su puntaje más alto, estrellas y cuántas veces jugó. Los ejercicios de cálculo cambian en cada intento, así que reintentar no es memorizar.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
 

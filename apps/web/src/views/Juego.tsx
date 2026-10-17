@@ -9,11 +9,13 @@ import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
 import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
 import { Qr } from '../juegos/compartir/Qr'
+import { guardarEnviado } from '../juegos/compartir/resultados'
 import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/matematica/deducir'
 import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../juegos/matematica/habilidades'
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
+import { ResultadosJuegos } from './ResultadosJuegos'
 import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
@@ -260,7 +262,11 @@ function enlaceDe(p: Publicado) {
     publicados.set(
       clave,
       publicar(p).then(
-        (codigo) => ({ url: enlaceConCodigo(codigo), codigo }),
+        ({ codigo, clave }) => {
+          // La laptop del docente guarda la clave: con ella verá quién jugó y su mejor puntaje.
+          guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, fecha: new Date().toISOString() })
+          return { url: enlaceConCodigo(codigo), codigo }
+        },
         // Sin servidor (por ejemplo, en desarrollo) el juego viaja dentro del link y funciona igual.
         async () => {
           publicados.delete(clave)
@@ -330,7 +336,10 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <div className="flex flex-col gap-1">
           <p className="font-semibold">Mándalo al grupo de WhatsApp de las familias</p>
-          <p className="text-ink-soft">Los niños juegan desde el celular de casa, sin cuenta ni descargas.</p>
+          <p className="text-ink-soft">
+            Los niños juegan desde el celular de casa, sin cuenta: la primera vez escriben su nombre.{' '}
+            {enlace.codigo && 'Verás quién jugó y su mejor puntaje en «Resultados de tus alumnos», arriba de la lista de juegos.'}
+          </p>
           {enlace.codigo ? (
             <p className="text-sm text-ink-soft">
               En clase también pueden escanear el código o entrar a <strong className="text-ink">{sitio}</strong> y escribir{' '}
@@ -485,6 +494,8 @@ export function Juego() {
   return (
     <>
       <EncabezadoHerramienta id="juego" />
+
+      <ResultadosJuegos tema={ficha.titulo} />
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl font-bold sm:text-3xl">¿A qué jugamos?</h2>

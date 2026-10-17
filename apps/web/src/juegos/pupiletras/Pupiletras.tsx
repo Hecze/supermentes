@@ -92,6 +92,8 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
             estrellas,
             titulo: '¡Encontraron todas!',
             detalle: `${total} palabras en ${min ? `${min} min ` : ''}${seg} s.`,
+            // Cada palabra vale 100 y terminar rápido suma hasta 300 más.
+            puntaje: total * 100 + Math.max(0, 300 - Math.round(s)),
           }),
         1100,
       )
