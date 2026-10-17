@@ -56,9 +56,9 @@ cuello de botella.
 ## Decisiones abiertas
 
 - **Quién paga.** El docente de colegio público no va a pagar con tarjeta. Opciones: colegios
-  privados, UGEL/MINEDU, o freemium con donante. Sin decidir.
+  privados, UGEL/MINEDU, o freemium con donante. Sin decidir; propuesta con evidencia en [[NEGOCIO]].
 - **Costo por docente.** Cuánto cuesta en Claude + ElevenLabs un docente activo al mes con 30
-  créditos. Sin medir.
+  créditos. Estimado en [[NEGOCIO]] (~US$ 1.3 con uso típico); sin medir en producción.
 - **Qué mostrar en la entrega** (domingo 18, 9:00 a. m.). Cuáles herramientas tienen que funcionar
   con IA real y cuáles pueden quedar como ejemplo.
 - **Canal.** Grupos de WhatsApp de docentes y referidos de la lista de espera parecen el canal

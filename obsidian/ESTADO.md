@@ -14,6 +14,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **App en `/app`:** abierta, pero la landing no la enlaza y no aparece en buscadores. Interfaz completa con datos de ejemplo; todo pasa por `apps/web/src/api`.
 - **Base de conocimiento:** el Currículo Nacional (MINEDU) por grado y curso en `packages/curriculo/data/{inicial,primaria,secundaria}.json` (competencias, capacidades, estándar del ciclo, desempeños y temas sugeridos). Los temas no son libres: se buscan en el currículo ("Busca tu tema") y cada uno guarda `gradoId` + `areaId` + su competencia y desempeños; la app lo muestra en Biblioteca → Currículo nacional y en cada herramienta ("A partir de… y del Currículo Nacional de…"). Completo: Inicial, Primaria (1.º–6.º) y Secundaria (1.º–5.º, extraída con OCR del PDF escaneado).
 - **Juegos web** (`apps/web/src/juegos`, ver su README): doce juegos que consumen formas de contenido (retos, parejas, palabras), no temas fijos; entre ellos un Concurso estilo Kahoot. El docente elige qué practican (el tema o una de 22 habilidades de cálculo generadas sin IA) y ve solo los compatibles, separados en "para la casa (celular)" y "para la clase (proyector)". **Uso real:** el docente (laptop) los manda al WhatsApp de las familias y los niños juegan en el celular de sus papás: `/j/CODIGO`, sin cuenta; cada juego compartido queda en Vercel Blob (`api/juegos-compartidos.ts`, prefijo `juegos/`). Foco en primaria.
+- **Pitch** (`obsidian/PITCH.md`): presentación en https://claude.ai/artifact/DKrH3Xuqr7huT7JMdgyd2L (10 láminas + 5 de anexo, guion en las notas), privada hasta compartirla. Falta poner los `[N]` de tracción antes de las 9:00. La investigación de mercado, competencia y modelo de negocio, con fuentes, está en `obsidian/NEGOCIO.md` (propuesta: gratis + Pase Profe S/ 14.90 por Yape, licencia a colegios privados, pilotos FONDEP/UGEL).
 
 ## Siguiente paso
 - Backend `/api` con Claude (ficha, letra, examen, juego, adaptación): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada generación debe partir de los desempeños de `packages/curriculo` para el `gradoId`/`areaId` del tema.
@@ -26,6 +27,8 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - La rama de producción de Vercel aún no es `main`: los push crean previews y producción se publica a mano (o cambiar *Settings → Environments → Production → Branch Tracking*).
 
 ## Dónde mirar
+- `obsidian/PITCH.md`: guion del pitch, lista para antes de las 9:00 y preguntas probables.
+- `obsidian/NEGOCIO.md`: cifras con fuente (mercado, docentes, IA, quién paga, competencia, costos).
 - `obsidian/MVP.md`: qué tiene que funcionar para la entrega y qué no hacer.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/VISION.md`: visión y principios del producto.
