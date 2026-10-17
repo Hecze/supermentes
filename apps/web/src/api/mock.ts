@@ -29,7 +29,10 @@ export const mockApi: Api = {
       ...base,
       id: `ficha-${Date.now()}`,
       fecha: new Date().toISOString(),
+      gradoId: entrada.gradoId,
+      areaId: entrada.areaId,
       grado: entrada.grado,
+      area: entrada.area,
       duracion: entrada.duracion ?? base.duracion,
       fuente: entrada.tipo === 'texto' ? base.fuente : fuente,
     }

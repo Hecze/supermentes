@@ -1,0 +1,10 @@
+{
+  "name": "@supermentes/curriculo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Currículo Nacional del Perú (MINEDU) por nivel, grado y área, en JSON",
+  "exports": {
+    "./data/*": "./data/*"
+  }
+}

@@ -15,8 +15,10 @@ export const realApi: Api = {
   async prepararFicha(entrada) {
     const datos = new FormData()
     datos.set('tipo', entrada.tipo)
+    datos.set('gradoId', entrada.gradoId)
+    datos.set('areaId', entrada.areaId)
     datos.set('grado', entrada.grado)
-    if (entrada.area) datos.set('area', entrada.area)
+    datos.set('area', entrada.area)
     if (entrada.duracion) datos.set('duracion', entrada.duracion)
     if (entrada.texto) datos.set('texto', entrada.texto)
     if (entrada.archivo) datos.set('archivo', entrada.archivo)

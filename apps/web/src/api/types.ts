@@ -7,9 +7,12 @@ export type EntradaTema = {
   tipo: 'texto' | 'foto' | 'archivo'
   texto?: string
   archivo?: File
+  /** Grado y área (curso) del Currículo Nacional: ids de packages/curriculo. */
+  gradoId: string
+  areaId: string
+  /** Nombres para mostrar. */
   grado: string
-  /** Si no se indica, la IA la deduce del tema. */
-  area?: string
+  area: string
   duracion?: string
 }
 
@@ -21,6 +24,9 @@ export type Ficha = {
   /** Fecha de creación o último uso (ISO). */
   fecha: string
   titulo: string
+  /** Grado y área (curso) del Currículo Nacional: ids de packages/curriculo. */
+  gradoId: string
+  areaId: string
   grado: string
   area: string
   duracion: string

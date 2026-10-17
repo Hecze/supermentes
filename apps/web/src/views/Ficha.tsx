@@ -1,11 +1,11 @@
-import { Check, ChevronRight, Library } from 'lucide-react'
+import { BookMarked, Check, ChevronRight, Library } from 'lucide-react'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { SinTema } from '../components/Shell'
 import { Desplegable, Editable, tinte } from '../components/ui'
 
 export function Ficha() {
-  const { ficha, ir, resultados } = useStore()
+  const { ficha, ir, resultados, verCurriculo } = useStore()
 
   if (!ficha) return <SinTema />
 
@@ -26,6 +26,27 @@ export function Ficha() {
           {ficha.grado} · {ficha.area}
         </p>
       </header>
+
+      <button
+        type="button"
+        onClick={() => verCurriculo(ficha.gradoId, ficha.areaId)}
+        className="group flex items-center gap-4 rounded-2xl border-2 border-line bg-surface p-4 text-left transition hover:border-ink sm:p-5"
+      >
+        <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-surface-2">
+          <BookMarked className="size-6" aria-hidden />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="font-semibold">
+            Basado en el Currículo Nacional: {ficha.area}, {ficha.grado}
+          </span>
+          <span className="text-ink-soft">
+            Competencia: {ficha.curriculo.competencia}. Todo lo que crees parte de este tema y de este currículo.
+          </span>
+        </span>
+        <span className="hidden items-center gap-1 font-medium sm:inline-flex">
+          Ver currículo <ChevronRight className="size-4 transition group-hover:translate-x-0.5" aria-hidden />
+        </span>
+      </button>
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl font-bold sm:text-3xl">¿Qué necesitas para tu clase?</h2>

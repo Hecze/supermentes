@@ -1,11 +1,12 @@
-import { Library, Search } from 'lucide-react'
+import { BookMarked, Library, Search, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, type HerramientaId, type Material } from '../api'
 import { GRADOS, HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
-import { Boton, Chip, IconoHerramienta, Tarjeta } from '../components/ui'
+import { Boton, Chip, IconoHerramienta, Tarjeta, cx } from '../components/ui'
+import { VisorCurriculo } from './Curriculo'
 
-export function Biblioteca() {
+function MaterialesComunidad() {
   const { avisar } = useStore()
   const [materiales, setMateriales] = useState<Material[] | null>(null)
   const [busqueda, setBusqueda] = useState('')
@@ -33,10 +34,7 @@ export function Biblioteca() {
 
   return (
     <>
-      <header className="flex flex-col gap-2">
-        <h1 className="font-display text-4xl font-bold">Biblioteca</h1>
-        <p className="max-w-2xl text-lg text-ink-soft">Materiales que hicieron profes de todo el Perú. Usarlos es gratis.</p>
-      </header>
+      <p className="-mt-2 max-w-2xl text-lg text-ink-soft">Canciones, juegos, crucigramas y exámenes que hicieron profes de todo el Perú. Usarlos es gratis.</p>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -117,6 +115,42 @@ export function Biblioteca() {
           ))}
         </div>
       )}
+    </>
+  )
+}
+
+const PESTANAS = [
+  { id: 'curriculo', nombre: 'Currículo nacional', icono: BookMarked },
+  { id: 'materiales', nombre: 'Materiales de la comunidad', icono: Users },
+] as const
+
+/** Biblioteca: la base de conocimiento (currículo oficial) y lo que crearon otros profes. */
+export function Biblioteca() {
+  const { pestanaBiblioteca, setPestanaBiblioteca } = useStore()
+  return (
+    <>
+      <header className="flex flex-col gap-4 print:hidden">
+        <h1 className="font-display text-4xl font-bold">Biblioteca</h1>
+        <div className="flex gap-1 self-start rounded-2xl bg-surface-2 p-1" role="tablist" aria-label="Biblioteca">
+          {PESTANAS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              role="tab"
+              aria-selected={pestanaBiblioteca === p.id}
+              onClick={() => setPestanaBiblioteca(p.id)}
+              className={cx(
+                'inline-flex h-11 items-center gap-2 rounded-xl px-4 transition',
+                pestanaBiblioteca === p.id ? 'bg-surface font-semibold shadow-sm' : 'text-ink-soft hover:text-ink',
+              )}
+            >
+              <p.icono className="size-5" aria-hidden />
+              {p.nombre}
+            </button>
+          ))}
+        </div>
+      </header>
+      {pestanaBiblioteca === 'curriculo' ? <VisorCurriculo /> : <MaterialesComunidad />}
     </>
   )
 }

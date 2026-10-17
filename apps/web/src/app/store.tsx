@@ -21,6 +21,9 @@ export type Resultados = {
   adaptacion?: Adaptacion
 }
 
+/** Lo que la ventana de "Nuevo tema" trae ya escrito (por ejemplo, desde un tema del currículo). */
+export type PrevioTema = { texto?: string; gradoId?: string; areaId?: string }
+
 type Store = {
   vista: Vista
   ir: (v: Vista) => void
@@ -30,8 +33,14 @@ type Store = {
   setFicha: (f: Ficha) => void
   elegirTema: (id: string) => void
   nuevoTemaAbierto: boolean
-  abrirNuevoTema: () => void
+  previoTema: PrevioTema | null
+  abrirNuevoTema: (previo?: PrevioTema) => void
   cerrarNuevoTema: () => void
+  /** Pestaña de la Biblioteca y documento del currículo que está abierto. */
+  pestanaBiblioteca: 'curriculo' | 'materiales'
+  setPestanaBiblioteca: (p: 'curriculo' | 'materiales') => void
+  curriculoAbierto: { gradoId: string; areaId: string } | null
+  verCurriculo: (gradoId: string, areaId: string) => void
   resultados: Resultados
   guardar: <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => void
   creditos: number
@@ -84,6 +93,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [fichaId, setFichaId] = useState<string | null>(MODO_EJEMPLO ? FICHA_EJEMPLO.id : null)
   const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
   const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
+  const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)
+  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<'curriculo' | 'materiales'>('curriculo')
+  const [curriculoAbierto, setCurriculoAbierto] = useState<{ gradoId: string; areaId: string } | null>(null)
   const [creditos, setCreditos] = useState(MODO_EJEMPLO ? 18 : CREDITOS_MENSUALES)
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [tema, setTema] = useState<Tema>(() => {
@@ -167,6 +179,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const ficha = temas.find((t) => t.id === fichaId) ?? null
 
+  const verCurriculo = useCallback(
+    (gradoId: string, areaId: string) => {
+      setCurriculoAbierto({ gradoId, areaId })
+      setPestanaBiblioteca('curriculo')
+      ir('biblioteca')
+    },
+    [ir],
+  )
+
   return (
     <Ctx.Provider
       value={{
@@ -177,8 +198,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setFicha,
         elegirTema,
         nuevoTemaAbierto,
-        abrirNuevoTema: () => setNuevoTemaAbierto(true),
+        previoTema,
+        abrirNuevoTema: (previo?: PrevioTema) => {
+          setPrevioTema(previo ?? null)
+          setNuevoTemaAbierto(true)
+        },
         cerrarNuevoTema: () => setNuevoTemaAbierto(false),
+        pestanaBiblioteca,
+        setPestanaBiblioteca,
+        curriculoAbierto,
+        verCurriculo,
         resultados: (fichaId && porTema[fichaId]) || {},
         guardar,
         creditos,

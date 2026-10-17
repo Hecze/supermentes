@@ -190,13 +190,24 @@ function Avisos() {
   )
 }
 
-/** Encabezado común de cada herramienta. */
+/** Encabezado común de cada herramienta: qué herramienta es y de qué tema y currículo parte. */
 export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
+  const { ficha, verCurriculo } = useStore()
   const h = HERRAMIENTAS[id]
   return (
     <header className="flex items-center gap-4 print:hidden">
       <IconoHerramienta id={id} tam="lg" />
-      <h1 className="min-w-0 font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
+      <div className="min-w-0">
+        <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
+        {ficha && (
+          <p className="text-ink-soft">
+            A partir de «{ficha.titulo}» y del Currículo Nacional de {ficha.area}, {ficha.grado}.{' '}
+            <button type="button" onClick={() => verCurriculo(ficha.gradoId, ficha.areaId)} className="underline underline-offset-4 hover:text-ink">
+              Ver currículo
+            </button>
+          </p>
+        )}
+      </div>
     </header>
   )
 }
@@ -209,7 +220,7 @@ export function SinTema() {
       <p className="text-lg text-ink-soft">Hola, {DOCENTE.saludo}</p>
       <h1 className="font-display text-3xl font-bold sm:text-4xl">Empieza con el tema de tu próxima clase</h1>
       <p className="max-w-xl text-lg text-ink-soft">Con el tema preparamos canciones, exámenes, juegos y más. Solo toma un minuto.</p>
-      <Boton tam="lg" onClick={abrirNuevoTema}>
+      <Boton tam="lg" onClick={() => abrirNuevoTema()}>
         Crear tema
       </Boton>
     </div>

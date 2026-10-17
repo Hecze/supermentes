@@ -27,7 +27,7 @@ export function SelectorTema({ compacto }: { compacto?: boolean }) {
     return (
       <button
         type="button"
-        onClick={abrirNuevoTema}
+        onClick={() => abrirNuevoTema()}
         className={cx(
           'flex items-center gap-2 rounded-xl border-2 border-dashed border-line text-left font-medium hover:border-ink-soft',
           compacto ? 'h-10 px-3' : 'px-3 py-3',

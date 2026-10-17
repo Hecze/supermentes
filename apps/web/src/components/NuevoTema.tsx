@@ -1,20 +1,45 @@
-import { Camera, Check, FileText, LoaderCircle, X } from 'lucide-react'
+import { BookOpen, Camera, Check, FileText, LoaderCircle, Plus, X } from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../api'
-import { GRADOS } from '../app/herramientas'
 import { useStore } from '../app/store'
+import { GRADOS_CURRICULO, NIVELES, areaPorId, areasDe, gradoPorId, nivelDe } from '../curriculo/catalogo'
+import { useCurriculo } from '../curriculo/cargar'
 import { Boton, cx } from './ui'
 
 type Material = { nombre: string; url: string | null; archivo?: File; tipo: 'foto' | 'archivo' }
 
 const PASOS = ['Leyendo lo que enviaste', 'Buscando las ideas y palabras clave', 'Preparando tu tema']
 
-/** Ventana para crear un tema: qué vas a enseñar, para qué grado y, si quieres, el material. */
+/** Temas del currículo para el grado y curso elegidos: un clic y quedan escritos. */
+function TemasSugeridos({ gradoId, areaId, elegir }: { gradoId: string; areaId: string; elegir: (t: string) => void }) {
+  const cur = useCurriculo(nivelDe(gradoId), gradoId, areaId)
+  if (cur.estado !== 'listo' || !cur.area?.temas.length) return null
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-sm text-ink-soft">Temas de este grado según el currículo:</p>
+      <div className="flex flex-wrap gap-1.5">
+        {cur.area.temas.slice(0, 8).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => elegir(t)}
+            className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-sm hover:bg-surface-2"
+          >
+            <Plus className="size-3.5" aria-hidden /> {t}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Ventana para crear un tema: qué vas a enseñar, para qué grado y curso y, si quieres, el material. */
 export function NuevoTema() {
-  const { nuevoTemaAbierto, cerrarNuevoTema, setFicha, ir, avisar, ficha } = useStore()
+  const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, setFicha, ir, avisar, ficha, verCurriculo } = useStore()
   const dialogo = useRef<HTMLDialogElement>(null)
   const [texto, setTexto] = useState('')
-  const [grado, setGrado] = useState(ficha?.grado ?? '4.º primaria')
+  const [gradoId, setGradoId] = useState(ficha?.gradoId ?? 'primaria-4')
+  const [areaId, setAreaId] = useState(ficha?.areaId ?? 'matematica')
   const [material, setMaterial] = useState<Material | null>(null)
   const [paso, setPaso] = useState<number | null>(null)
   const temporizadores = useRef<number[]>([])
@@ -23,14 +48,21 @@ export function NuevoTema() {
     const d = dialogo.current
     if (!d) return
     if (nuevoTemaAbierto && !d.open) {
-      setTexto('')
+      setTexto(previoTema?.texto ?? '')
       setMaterial(null)
       setPaso(null)
-      if (ficha) setGrado(ficha.grado)
+      setGradoId(previoTema?.gradoId ?? ficha?.gradoId ?? 'primaria-4')
+      setAreaId(previoTema?.areaId ?? ficha?.areaId ?? 'matematica')
       d.showModal()
     }
     if (!nuevoTemaAbierto && d.open) d.close()
-  }, [nuevoTemaAbierto, ficha])
+  }, [nuevoTemaAbierto, previoTema, ficha])
+
+  function cambiarGrado(id: string) {
+    setGradoId(id)
+    // Si el curso no existe en el nuevo nivel, se elige el primero.
+    if (!areaPorId(id, areaId)) setAreaId(areasDe(id)[0].id)
+  }
 
   useEffect(() => () => temporizadores.current.forEach((t) => window.clearTimeout(t)), [])
 
@@ -50,7 +82,10 @@ export function NuevoTema() {
         tipo: material ? material.tipo : 'texto',
         texto: texto.trim() || undefined,
         archivo: material?.archivo,
-        grado,
+        gradoId,
+        areaId,
+        grado: gradoPorId(gradoId)?.corto ?? gradoId,
+        area: areaPorId(gradoId, areaId)?.nombre ?? areaId,
       })
       setFicha(nueva)
       cerrarNuevoTema()
@@ -108,11 +143,57 @@ export function NuevoTema() {
           </div>
         ) : (
           <div className="flex flex-col gap-5 px-6 py-6">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label htmlFor="nuevo-tema-grado" className="flex flex-col gap-1.5">
+                <span className="font-medium">Grado</span>
+                <select
+                  id="nuevo-tema-grado"
+                  value={gradoId}
+                  onChange={(e) => cambiarGrado(e.target.value)}
+                  className="h-12 rounded-xl border-2 border-line bg-surface px-3 text-lg focus:border-ink focus:outline-none"
+                >
+                  {NIVELES.map((n) => (
+                    <optgroup key={n.id} label={n.nombre}>
+                      {GRADOS_CURRICULO.filter((g) => g.nivel === n.id).map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.corto}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+              <label htmlFor="nuevo-tema-curso" className="flex flex-col gap-1.5">
+                <span className="font-medium">Curso</span>
+                <select
+                  id="nuevo-tema-curso"
+                  value={areaId}
+                  onChange={(e) => setAreaId(e.target.value)}
+                  className="h-12 rounded-xl border-2 border-line bg-surface px-3 text-lg focus:border-ink focus:outline-none"
+                >
+                  {areasDe(gradoId).map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nombre}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                cerrarNuevoTema()
+                verCurriculo(gradoId, areaId)
+              }}
+              className="-mt-2 inline-flex items-center gap-1.5 self-start text-sm text-ink-soft underline underline-offset-4 hover:text-ink"
+            >
+              <BookOpen className="size-4" aria-hidden />
+              Ver el currículo de {areaPorId(gradoId, areaId)?.nombre} · {gradoPorId(gradoId)?.corto}
+            </button>
             <label htmlFor="nuevo-tema-texto" className="flex flex-col gap-1.5">
               <span className="font-medium">¿Qué tema vas a enseñar?</span>
               <input
                 id="nuevo-tema-texto"
-                autoFocus
                 value={texto}
                 onChange={(e) => setTexto(e.target.value)}
                 placeholder="Ej.: Las fracciones"
@@ -120,19 +201,7 @@ export function NuevoTema() {
               />
             </label>
 
-            <label htmlFor="nuevo-tema-grado" className="flex flex-col gap-1.5">
-              <span className="font-medium">Grado</span>
-              <select
-                id="nuevo-tema-grado"
-                value={grado}
-                onChange={(e) => setGrado(e.target.value)}
-                className="h-12 rounded-xl border-2 border-line bg-surface px-3 text-lg focus:border-ink focus:outline-none"
-              >
-                {GRADOS.map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
-              </select>
-            </label>
+            <TemasSugeridos gradoId={gradoId} areaId={areaId} elegir={setTexto} />
 
             <div className="flex flex-col gap-2">
               <p className="font-medium">

@@ -12,6 +12,14 @@ Proyecto para Hack the Andes 2026.
 | `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). La landing no la enlaza y no aparece en buscadores (`noindex`) |
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 
+## Currículo nacional (base de conocimiento)
+
+`packages/curriculo/data/*.json` tiene el currículo oficial del MINEDU por nivel, grado y área (competencias, capacidades, estándares y desempeños). En la app:
+
+- **Biblioteca → Currículo nacional:** el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
+- **Nuevo tema:** se elige grado y curso del currículo, con temas sugeridos y enlace al documento.
+- **Ficha del tema y herramientas:** muestran en qué currículo se basa todo lo que se genera. El backend debe usar `gradoId` y `areaId` de la ficha para incluir esas competencias y desempeños en cada generación.
+
 ## Lista de espera
 
 - Cada registro es un archivo **privado** en Vercel Blob (`lista-espera/<huella del correo>.json`): un archivo por correo, así que no hay duplicados y volver a enviar el formulario solo completa los datos.
