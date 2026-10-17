@@ -185,7 +185,7 @@ export function Landing() {
             <h1 className="font-display text-[2.5rem] font-bold leading-[1.04] tracking-tight sm:text-[3.4rem] lg:text-[3.55rem]">
               Crea canciones, juegos y exámenes para tu clase <span className="marker">en minutos</span>.
             </h1>
-            <p className="max-w-xl text-lg text-ink-soft sm:text-xl">Herramientas para hacer tu clase más enganchante en minutos.</p>
+            <p className="max-w-xl text-lg text-ink-soft sm:text-xl">Herramientas para hacer tu clase más enganchante y entendible.</p>
             <div className="flex max-w-xl flex-col gap-3">
               {bienvenida ?? <FormularioCorreo origen={origen} alUnirse={alUnirse} />}
               {!registro && <Contador total={total} />}
