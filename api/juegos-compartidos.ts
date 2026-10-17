@@ -11,7 +11,7 @@ import { get, put } from '@vercel/blob'
 const PREFIJO = 'juegos/'
 const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODIGO = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
-const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra'])
+const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta'])
 const MAXIMO_BYTES = 200_000
 
 type Visual = { tipo: 'fraccion'; partes: [number, number] } | { tipo: 'contar'; figura: string; cantidad: number }

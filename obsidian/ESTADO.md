@@ -13,12 +13,12 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **Landing en `/`** con lista de espera real: `api/lista-espera.ts` guarda cada registro como archivo privado en Vercel Blob. Contador público, enlace para invitar (`?ref=`) y fuente (`utm_source`). CSV de inscritos: `/api/lista-espera?formato=csv&clave=…` (clave en la variable `LISTA_CLAVE` de Vercel).
 - **App en `/app`:** abierta, pero la landing no la enlaza y no aparece en buscadores. Interfaz completa con datos de ejemplo; todo pasa por `apps/web/src/api`.
 - **Base de conocimiento:** el Currículo Nacional (MINEDU) por grado y curso en `packages/curriculo/data/{inicial,primaria,secundaria}.json` (competencias, capacidades, estándar del ciclo, desempeños y temas sugeridos). Cada tema guarda `gradoId` + `areaId`; la app lo muestra en Biblioteca → Currículo nacional y en cada herramienta ("A partir de… y del Currículo Nacional de…"). Completo: Inicial, Primaria (1.º–6.º) y Secundaria (1.º–5.º, extraída con OCR del PDF escaneado).
-- **Juegos web** (`apps/web/src/juegos`, ver su README): seis juegos que consumen formas de contenido (retos, parejas, palabras), no temas fijos. El docente elige qué practican (el tema o una de 22 habilidades de cálculo generadas sin IA) y ve solo los juegos compatibles. Se comparten de verdad: `/j/CODIGO` para los alumnos (sin cuenta), QR real, código en `/j`; cada juego compartido queda en Vercel Blob (`api/juegos-compartidos.ts`, prefijo `juegos/`).
+- **Juegos web** (`apps/web/src/juegos`, ver su README): nueve juegos que consumen formas de contenido (retos, parejas, palabras), no temas fijos. El docente elige qué practican (el tema o una de 22 habilidades de cálculo generadas sin IA) y ve solo los juegos compatibles. Se comparten de verdad: `/j/CODIGO` para los alumnos (sin cuenta), QR real, código en `/j`; cada juego compartido queda en Vercel Blob (`api/juegos-compartidos.ts`, prefijo `juegos/`).
 
 ## Siguiente paso
 - Backend `/api` con Claude (ficha, letra, examen, juego, adaptación): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada generación debe partir de los desempeños de `packages/curriculo` para el `gradoId`/`areaId` del tema.
 - Audio con ElevenLabs, persistencia (biblioteca, créditos, links/QR), pictogramas ARASAAC.
-- Juegos: más juegos (pupiletras, topo, clasificar) y, cuando haya cuentas, ver los resultados de los alumnos.
+- Juegos: clasificar en grupos (necesita que `/api/juego` devuelva grupos) y, cuando haya cuentas, ver los resultados de los alumnos.
 
 ## Riesgos
 - El `package-lock.json` debe incluir los binarios de Linux (`@rolldown/binding-linux-x64-gnu`, etc.) o el build de Vercel falla. Si npm los omite, regenerarlo con `rm -rf node_modules package-lock.json && npm install`.

@@ -12,9 +12,9 @@ Habilidad + nivel ─┘
 
 | Forma | Qué es | La usan |
 | --- | --- | --- |
-| `Reto` | Pregunta con una respuesta correcta y distractores (siempre incorrectos) | Globos, Botones rápidos, Tira y afloja, Carrera |
+| `Reto` | Pregunta con una respuesta correcta y distractores (siempre incorrectos) | Globos, Botones rápidos, Tira y afloja, Carrera, Atrapa al cuy, Ruleta |
 | `Par` | Dos cosas que van juntas (3/4 y su dibujo, Rímac y río) | Memoria |
-| `Palabra` | Palabra y pista | Adivina la palabra |
+| `Palabra` | Palabra y pista | Adivina la palabra, Pupiletras |
 
 Un `Contenido` puede traer además `generar()`: retos sin fin, para la matemática.
 
@@ -51,3 +51,6 @@ Los alumnos entran a `/j/CODIGO` (QR, WhatsApp) o escriben el código en `/j`. L
 | Memoria | Matching pairs (Wordwall) | Celular y proyector |
 | Carrera de llamas | Math Racing, sin reloj | Celular y proyector |
 | Adivina la palabra | Ahorcado, sin horca | Celular y proyector |
+| Pupiletras | Sopa de letras (también se imprime) | Celular y proyector |
+| Atrapa al cuy | Whack-a-mole (Wordwall) | Celular y proyector |
+| Ruleta de preguntas | Ruleta aleatoria (Wordwall), la guía el docente | Proyector |

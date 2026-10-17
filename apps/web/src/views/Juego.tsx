@@ -1,10 +1,10 @@
-import { ArrowLeft, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, NotaCreditos, cx, tinte } from '../components/ui'
+import { Acciones, Boton, Chip, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
 import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
 import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
@@ -13,6 +13,7 @@ import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/m
 import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../juegos/matematica/habilidades'
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
+import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
 import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
@@ -302,7 +303,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
 
   if (!enlace) {
     return (
-      <section ref={panel} className="flex items-center gap-3 rounded-2xl border-2 bg-surface p-5 text-ink-soft" style={{ borderColor: COLOR }} role="status">
+      <section ref={panel} className="flex items-center gap-3 rounded-2xl print:hidden border-2 bg-surface p-5 text-ink-soft" style={{ borderColor: COLOR }} role="status">
         <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para tus alumnos…
       </section>
     )
@@ -321,7 +322,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
   }
 
   return (
-    <section ref={panel} className="flex flex-col gap-5 rounded-2xl border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
+    <section ref={panel} className="flex flex-col gap-5 rounded-2xl print:hidden border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
       <button type="button" onClick={() => setGrande(true)} className="shrink-0 self-center rounded-xl border border-line bg-white p-1.5" aria-label="Mostrar el código QR en grande">
         <Qr texto={enlace.url} tam={152} />
       </button>
@@ -378,7 +379,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
 }
 
 export function Juego() {
-  const { ficha, resultados, guardar, creditos } = useStore()
+  const { ficha, resultados, guardar, creditos, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
   const [elegido, setElegido] = useState<JuegoId | null>(null)
   const [eligiendo, setEligiendo] = useState(false)
@@ -416,7 +417,7 @@ export function Juego() {
     return (
       <>
         <EncabezadoHerramienta id="juego" />
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
           <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3">
             <ArrowLeft className="size-5" aria-hidden /> Todos los juegos
           </Boton>
@@ -431,7 +432,7 @@ export function Juego() {
           ritmo={ritmoDe(ficha.gradoId)}
           pantalla={pantalla}
           alSalir={() => setElegido(null)}
-          className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)]"
+          className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
         <Acciones>
           <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
@@ -440,7 +441,13 @@ export function Juego() {
           <Boton variante="contorno" onClick={() => setCompartir(!compartir)}>
             <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
           </Boton>
+          {enJuego.def.id === 'pupiletras' && (
+            <Boton variante="contorno" onClick={() => imprimir(avisar)}>
+              <Printer className="size-5" aria-hidden /> Imprimir pupiletras
+            </Boton>
+          )}
         </Acciones>
+        {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
         {compartir && (
           <Compartir
             nombreJuego={enJuego.def.nombre}

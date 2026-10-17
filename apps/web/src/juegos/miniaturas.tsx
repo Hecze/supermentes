@@ -1,5 +1,6 @@
 // Ilustraciones de cada juego para el catálogo y la portada. Todas en SVG: pesan poco y se ven nítidas al proyectar.
 import { useId } from 'react'
+import { Cuy } from './motor/Cuy'
 import { Llama, LLAMAS } from './motor/Llama'
 
 const marco = { viewBox: '0 0 160 100', className: 'block h-auto w-full', 'aria-hidden': true } as const
@@ -233,6 +234,78 @@ export function MiniPalabra() {
           </text>
         </g>
       ))}
+    </svg>
+  )
+}
+
+export function MiniPupiletras() {
+  const letras = ['NUBEQA', 'ROVAPE', 'LLUVIA', 'MARSOL', 'GTIERA']
+  return (
+    <svg {...marco}>
+      <Fondo de="#6fe3cf" a="#17998f" />
+      <rect x={34} y={8} width={92} height={84} rx={8} fill="#fff" />
+      <line x1={44} y1={22} x2={86} y2={22} stroke="#ff9636" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
+      <line x1={44} y1={54} x2={114} y2={54} stroke="#2fb2ff" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
+      <line x1={58} y1={38} x2={100} y2={70} stroke="#ff6fbf" strokeOpacity={0.5} strokeWidth={11} strokeLinecap="round" />
+      {letras.map((fila, f) =>
+        [...fila].map((l, c) => (
+          <text key={`${f}-${c}`} x={44 + c * 14} y={26 + f * 16} textAnchor="middle" fontSize={11} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
+            {l}
+          </text>
+        )),
+      )}
+    </svg>
+  )
+}
+
+export function MiniTopo() {
+  return (
+    <svg {...marco}>
+      <Fondo de="#a6e98f" a="#45b03a" />
+      <rect x={48} y={6} width={64} height={16} rx={5} fill="#fff" />
+      <text x={80} y={18} textAnchor="middle" fontSize={10} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
+        9 × 6 = ?
+      </text>
+      {[
+        { x: 30, y: 62, texto: '54', arriba: true },
+        { x: 80, y: 74, texto: '', arriba: false },
+        { x: 130, y: 62, texto: '56', arriba: true },
+      ].map((h, i) => (
+        <g key={i}>
+          <ellipse cx={h.x} cy={h.y + 14} rx={20} ry={6} fill="#4a2f22" />
+          {h.arriba && (
+            <>
+              <rect x={h.x - 15} y={h.y - 30} width={30} height={14} rx={3} fill="#f6d6a3" stroke="#b7804a" strokeWidth={1.5} />
+              <text x={h.x} y={h.y - 19.5} textAnchor="middle" fontSize={10} fontWeight={700} fill="#4a2c00" fontFamily="Fredoka, sans-serif">
+                {h.texto}
+              </text>
+              <svg x={h.x - 15} y={h.y - 16} width={30} height={26} viewBox="0 0 100 80">
+                <Cuy />
+              </svg>
+            </>
+          )}
+          <path d={`M${h.x - 22} ${h.y + 14} a22 7 0 0 0 44 0 Z`} fill="#8a5d3b" />
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+export function MiniRuleta() {
+  const colores = ['#ff5d73', '#ff9636', '#ffc93c', '#2fc46f', '#2fb2ff', '#4f6dff', '#9f63ff', '#ff6fbf']
+  return (
+    <svg {...marco}>
+      <Fondo de="#ff8a9a" a="#c2185b" />
+      <g transform="translate(80 54)">
+        <circle r={40} fill="#fff" />
+        {colores.map((c, i) => {
+          const a0 = (i / 8) * 2 * Math.PI - Math.PI / 2
+          const a1 = ((i + 1) / 8) * 2 * Math.PI - Math.PI / 2
+          return <path key={c} d={`M0 0 L${38 * Math.cos(a0)} ${38 * Math.sin(a0)} A38 38 0 0 1 ${38 * Math.cos(a1)} ${38 * Math.sin(a1)} Z`} fill={c} stroke="#fff" strokeWidth={1} />
+        })}
+        <circle r={7} fill="#fff" stroke="#ffc93c" strokeWidth={2} />
+      </g>
+      <path d="M72 6 H88 L80 22 Z" fill="#ffc93c" stroke="#fff" strokeWidth={2} strokeLinejoin="round" />
     </svg>
   )
 }

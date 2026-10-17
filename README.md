@@ -48,7 +48,7 @@ Interfaz completa con **datos de ejemplo**. Todas las pantallas pasan por `src/a
 Ya funciona sin backend:
 
 - **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
-- **Juegos:** seis juegos (Globos, Botones rápidos, Tira y afloja, Memoria, Carrera de llamas y Adivina la palabra) que sirven para cualquier tema: el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. Ver `src/juegos/README.md`.
+- **Juegos:** nueve juegos (Globos, Botones rápidos, Tira y afloja, Memoria, Carrera de llamas, Adivina la palabra, Pupiletras, Atrapa al cuy y Ruleta de preguntas) que sirven para cualquier tema: el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. El pupiletras también se imprime. Ver `src/juegos/README.md`.
 - **Compartir un juego:** link y QR reales (`supermentes.app/j/CODIGO`), código para escribir en `/j`, botón de WhatsApp y QR en grande para escanear desde el proyector. Si el servidor no responde, el juego viaja dentro del link y abre igual.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
