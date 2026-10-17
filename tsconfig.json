@@ -1,5 +1,5 @@
 {
-  // Solo para lo que corre en Vercel desde la raíz: las funciones de api/ y middleware.ts.
+  // Solo para lo que corre en Vercel desde la raíz: las funciones de api/.
   // La app tiene su propio tsconfig en apps/web.
   "compilerOptions": {
     "target": "ES2022",
@@ -13,5 +13,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["api", "middleware.ts"]
+  "include": ["api"]
 }

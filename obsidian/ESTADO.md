@@ -7,11 +7,11 @@ actualizado: 2026-10-17
 > Única fuente de verdad de "dónde quedamos". Se reemplaza, no se acumula (≤ 60 líneas).
 
 ## En qué estamos
-Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/supermentes`, rama `main`). Monorepo Turborepo: el sitio en `apps/web`, funciones de Vercel en `api/` y `middleware.ts` en la raíz, notas en `obsidian/`.
+Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/supermentes`, rama `main`). Monorepo Turborepo: el sitio en `apps/web`, funciones de Vercel en `api/` en la raíz, notas en `obsidian/`.
 
-- **En producción:** https://supermentes.vercel.app (proyecto de Vercel `supermentes`, cuenta de Hecze).
+- **En producción:** https://www.supermentes.app (proyecto de Vercel `supermentes`, cuenta de Hecze).
 - **Landing en `/`** con lista de espera real: `api/lista-espera.ts` guarda cada registro como archivo privado en Vercel Blob. Contador público, enlace para invitar (`?ref=`) y fuente (`utm_source`). CSV de inscritos: `/api/lista-espera?formato=csv&clave=…` (clave en la variable `LISTA_CLAVE` de Vercel).
-- **App en `/app`, privada:** solo entra quien tiene el enlace `/app?acceso=…` (clave en la variable `APP_ACCESO` de Vercel). Interfaz completa con datos de ejemplo; todo pasa por `apps/web/src/api`.
+- **App en `/app`:** abierta, pero la landing no la enlaza y no aparece en buscadores. Interfaz completa con datos de ejemplo; todo pasa por `apps/web/src/api`.
 
 ## Siguiente paso
 - Backend `/api` con Claude (ficha, letra, examen, juego, adaptación): contratos en `apps/web/src/api/types.ts`, endpoints en el README.

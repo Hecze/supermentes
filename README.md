@@ -9,7 +9,7 @@ Proyecto para Hack the Andes 2026.
 | Ruta | Qué es |
 | --- | --- |
 | `/` | Landing con la lista de espera (`index.html`, `src/landing/`) |
-| `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). Privada por ahora: solo entra quien tiene el enlace `/app?acceso=APP_ACCESO` (ver `middleware.ts`) |
+| `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). La landing no la enlaza y no aparece en buscadores (`noindex`) |
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 
 ## Lista de espera
