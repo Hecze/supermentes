@@ -49,7 +49,7 @@ npm install
 npm run dev            # landing en http://localhost:5173 y app en /app/ (la lista de espera solo funciona desplegada)
 npm run typecheck
 npm run build
-npm run build:preview  # un solo HTML en dist-preview/supermentes.html para compartir
+npm run build:preview -w @supermentes/web  # un solo HTML en apps/web/dist-preview/supermentes.html para compartir
 ```
 
 Para usar el backend real: `VITE_API=real npm run dev`.
@@ -57,6 +57,8 @@ Para usar el backend real: `VITE_API=real npm run dev`.
 Se despliega en Vercel desde la rama `main` (proyecto `supermentes`).
 
 ## Estructura
+
+Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relativas a esa carpeta), las funciones de Vercel siguen en `api/` de la raíz, el código compartido iría en `packages/` y las notas del proyecto en `obsidian/`.
 
 | Ruta | Qué hay |
 | --- | --- |

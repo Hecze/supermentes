@@ -1,18 +1,17 @@
 {
+  // Solo para lo que corre en Vercel desde la raíz: las funciones de api/ y middleware.ts.
+  // La app tiene su propio tsconfig en apps/web.
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "noEmit": true,
-    "types": ["vite/client", "node"]
+    "types": ["node"]
   },
-  "include": ["src", "api", "middleware.ts", "vite.config.ts"]
+  "include": ["api", "middleware.ts"]
 }

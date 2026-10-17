@@ -1,5 +1,8 @@
 node_modules
 dist
 dist-preview
+.turbo
 *.local
 .DS_Store
+obsidian/.obsidian/workspace*.json
+.vercel
