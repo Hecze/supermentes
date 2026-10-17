@@ -2,6 +2,7 @@
 // Lo que sale de la ficha sin llamar a la IA (crucigrama, biblioteca) es gratis.
 export const COSTOS = {
   ficha: 0,
+  sesion: 1,
   letra: 1,
   audio: 3,
   examen: 1,

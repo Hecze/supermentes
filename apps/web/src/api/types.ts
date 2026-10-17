@@ -113,6 +113,49 @@ export type Juego = {
   palabras: { palabra: string; pista: string }[]
 }
 
+export type OpcionesSesion = {
+  /** Minutos de la clase. */
+  duracion: 45 | 90
+  /** Lo que le gusta al salón, para la motivación. */
+  interes?: string
+}
+
+/** Un criterio de evaluación con el desempeño oficial que trabaja y la parte exacta que cita. */
+export type CriterioSesion = {
+  texto: string
+  /** Desempeño oficial del grado, copiado tal cual de packages/curriculo. */
+  desempeno?: string
+  /** Fragmento del desempeño, letra por letra (el backend descarta las citas que no aparecen). */
+  cita?: string
+}
+
+/** Un subtítulo de un momento de la sesión y lo que se hace en él. */
+export type PasoSesion = { titulo: string; pasos: string[] }
+
+/** Sesión de aprendizaje en el formato que el docente entrega al director (CNEB, MINEDU). */
+export type Sesion = {
+  opciones: OpcionesSesion
+  titulo: string
+  grado: string
+  area: string
+  /** Competencia y capacidades oficiales (texto del currículo). */
+  competencia: string
+  capacidades: string[]
+  criterios: CriterioSesion[]
+  evidencia: string
+  instrumento: string
+  enfoque: { nombre: string; valor: string; actitudes: string }
+  materiales: { antes: string[]; recursos: string[] }
+  proposito: string
+  /** Minutos de cada momento; suman la duración de la clase. */
+  minutos: { inicio: number; desarrollo: number; cierre: number }
+  inicio: { motivacion: string[]; saberesPrevios: string[]; conflicto: string[]; normas: string[] }
+  desarrollo: PasoSesion[]
+  cierre: { sistematizacion: string[]; metacognicion: string[]; tarea: string[] }
+  /** Ficha de aplicación para el alumno. */
+  ficha: { titulo: string; actividades: { consigna: string; lineas: number }[] }
+}
+
 export type Material = {
   id: string
   titulo: string
@@ -132,5 +175,6 @@ export interface Api {
   /** Adapta el examen que sube el docente. */
   adaptarExamen(ficha: Ficha, opciones: OpcionesExamen & { examen: File }): Promise<Examen>
   generarJuego(ficha: Ficha): Promise<Juego>
+  generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   biblioteca(): Promise<Material[]>
 }

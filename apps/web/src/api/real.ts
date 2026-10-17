@@ -24,9 +24,9 @@ async function achicar(archivo: File): Promise<File> {
 // La IA no puede dejar al docente esperando para siempre: pasado este tiempo se avisa y se puede reintentar.
 const LIMITE_MS = 90_000
 
-async function pedir<T>(ruta: string, init: RequestInit): Promise<T> {
+async function pedir<T>(ruta: string, init: RequestInit, limite = LIMITE_MS): Promise<T> {
   try {
-    return leer<T>(await fetch(`/api/${ruta}`, { ...init, signal: AbortSignal.timeout(LIMITE_MS) }))
+    return leer<T>(await fetch(`/api/${ruta}`, { ...init, signal: AbortSignal.timeout(limite) }))
   } catch (e) {
     if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
       throw new Error('La IA está tardando demasiado. Vuelve a intentarlo en un momento.')
@@ -35,8 +35,8 @@ async function pedir<T>(ruta: string, init: RequestInit): Promise<T> {
   }
 }
 
-const post = <T,>(ruta: string, cuerpo: unknown) =>
-  pedir<T>(ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) })
+const post = <T,>(ruta: string, cuerpo: unknown, limite?: number) =>
+  pedir<T>(ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) }, limite)
 
 export const realApi: Api = {
   prepararFicha: (entrada) => post('ficha', entrada),
@@ -50,6 +50,8 @@ export const realApi: Api = {
     return pedir('examen', { method: 'POST', body: datos })
   },
   generarJuego: (ficha) => post('juego', { ficha }),
+  // La sesión es el texto más largo que se genera: tiene un poco más de tiempo.
+  generarSesion: (ficha, opciones) => post('sesion', { ficha, opciones }, 150_000),
   async biblioteca() {
     return pedir('biblioteca', {})
   },

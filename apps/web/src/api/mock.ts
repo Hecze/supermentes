@@ -11,6 +11,7 @@ import {
   cancionEjemplo,
   examenEjemplo,
   juegoDesdeVocabulario,
+  sesionEjemplo,
 } from './ejemplos'
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -58,6 +59,10 @@ export const mockApi: Api = {
     await esperar(1200)
     const t = ficha.titulo.toLowerCase()
     return /fracci/.test(t) ? JUEGO_EJEMPLO : /agua|lluvia|nube/.test(t) ? JUEGO_AGUA : /sustantiv/.test(t) ? JUEGO_SUSTANTIVOS : juegoDesdeVocabulario(ficha)
+  },
+  async generarSesion(_ficha, opciones) {
+    await esperar(2500)
+    return sesionEjemplo(opciones)
   },
   async biblioteca() {
     await esperar(300)
