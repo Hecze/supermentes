@@ -269,7 +269,7 @@ export function Bienvenida({
 
       <div className="flex flex-col gap-2 rounded-xl bg-surface-2 p-4">
         <p className="font-semibold">Invita a otros profes</p>
-        <p className="text-sm text-ink-soft">Mientras más docentes se unan, antes abrimos. Este es tu enlace:</p>
+        <p className="text-sm text-ink-soft">¿Conoces a otros profes a quienes les serviría? Compárteles tu enlace:</p>
         <div className="flex min-w-0 items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2">
           <span className="min-w-0 flex-1 truncate text-sm">{enlace}</span>
           <button type="button" onClick={copiar} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold hover:underline">
