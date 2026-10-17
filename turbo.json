@@ -1,0 +1,9 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalEnv": ["VITE_*"],
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "dist-preview/**"] },
+    "typecheck": { "dependsOn": ["^typecheck"] },
+    "dev": { "cache": false, "persistent": true }
+  }
+}

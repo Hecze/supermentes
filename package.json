@@ -1,29 +1,20 @@
 {
   "name": "supermentes",
   "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "packageManager": "npm@11.11.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
-    "build:preview": "vite build --mode artifact && node scripts/make-artifact.mjs"
-  },
-  "dependencies": {
-    "@vercel/analytics": "^2.0.1",
-    "@vercel/blob": "^2.8.2",
-    "lucide-react": "^1.59.0",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26.6.5",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "tailwindcss": "^4.3.3",
-    "typescript": "~5.9.3",
-    "vite": "^8.3.4"
+    "turbo": "^2.11.9"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2"
   }
 }

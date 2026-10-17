@@ -1,4 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/app", "destination": "/app/index.html" }]
+  "framework": "vite",
+  "installCommand": "npm install",
+  "buildCommand": "turbo run build",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/app",
+      "destination": "/app/index.html"
+    }
+  ]
 }
