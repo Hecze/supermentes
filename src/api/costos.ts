@@ -1,0 +1,20 @@
+// Créditos que cuesta cada acción. Lo caro (audio, imágenes) se cobra aparte y solo a pedido.
+// Lo que sale de la ficha sin llamar a la IA (crucigrama, biblioteca) es gratis.
+export const COSTOS = {
+  ficha: 0,
+  letra: 1,
+  audio: 3,
+  examen: 1,
+  ilustracion: 1,
+  juego: 1,
+  crucigrama: 0,
+  adaptacion: 1,
+  biblioteca: 0,
+} as const
+
+export const CREDITOS_MENSUALES = 30
+
+export function textoCosto(n: number) {
+  if (n === 0) return 'Gratis'
+  return `${n} ${n === 1 ? 'crédito' : 'créditos'}`
+}

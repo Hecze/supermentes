@@ -1,0 +1,38 @@
+// Implementación real: llama al backend en /api/*. Cada endpoint devuelve los tipos de types.ts.
+import type { Api } from './types'
+
+async function post<T>(ruta: string, cuerpo: unknown): Promise<T> {
+  const res = await fetch(`/api/${ruta}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+  })
+  if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/${ruta}`)
+  return res.json() as Promise<T>
+}
+
+export const realApi: Api = {
+  async prepararFicha(entrada) {
+    const datos = new FormData()
+    datos.set('tipo', entrada.tipo)
+    datos.set('grado', entrada.grado)
+    datos.set('area', entrada.area)
+    datos.set('duracion', entrada.duracion)
+    if (entrada.texto) datos.set('texto', entrada.texto)
+    if (entrada.archivo) datos.set('archivo', entrada.archivo)
+    const res = await fetch('/api/ficha', { method: 'POST', body: datos })
+    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/ficha`)
+    return res.json()
+  },
+  generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
+  generarAudio: (cancion) => post('audio', { cancion }),
+  generarExamen: (ficha, opciones) => post('examen', { ficha, opciones }),
+  generarIlustraciones: (examen) => post('ilustraciones', { examen }),
+  generarJuego: (ficha) => post('juego', { ficha }),
+  adaptar: (ficha, necesidades) => post('adaptar', { ficha, necesidades }),
+  async biblioteca() {
+    const res = await fetch('/api/biblioteca')
+    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/biblioteca`)
+    return res.json()
+  },
+}

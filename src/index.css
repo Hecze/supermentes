@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+/* Diseño: el tema claro es un cuaderno cuadriculado con plumones; el oscuro, una pizarra con tizas.
+   Cada herramienta tiene su color de plumón. Layout: barra lateral + lienzo; en el celular, barra inferior. */
+:root {
+  --bg: #f4f7fb;
+  --grid: #e1e8f2;
+  --surface: #ffffff;
+  --surface-2: #edf1f7;
+  --ink: #172031;
+  --ink-soft: #536075;
+  --line: #d4dce8;
+  --primary: #172031;
+  --primary-ink: #ffffff;
+  --on-tool: #ffffff;
+  --marker: #ffe45c;
+  --cancion: #cf3150;
+  --examen: #2453cc;
+  --juego: #0f7f55;
+  --crucigrama: #b05a06;
+  --adaptar: #7547cc;
+  --ok: #0f7f55;
+  --warn: #9a6210;
+  --danger: #c2362f;
+  --ff-display: "Shantell Sans", "Comic Neue", "Chalkboard SE", ui-rounded, system-ui, sans-serif;
+  --ff-body: "Lexend", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12201a;
+    --grid: #182a22;
+    --surface: #172720;
+    --surface-2: #1e3128;
+    --ink: #eaefe7;
+    --ink-soft: #a3b3a8;
+    --line: #2b3f35;
+    --primary: #eaefe7;
+    --primary-ink: #12201a;
+    --on-tool: #12201a;
+    --marker: rgba(255, 226, 92, 0.32);
+    --cancion: #ff7d90;
+    --examen: #8aabff;
+    --juego: #5bd69b;
+    --crucigrama: #ffb45e;
+    --adaptar: #bfa2ff;
+    --ok: #5bd69b;
+    --warn: #f2c24e;
+    --danger: #ff8a80;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12201a;
+  --grid: #182a22;
+  --surface: #172720;
+  --surface-2: #1e3128;
+  --ink: #eaefe7;
+  --ink-soft: #a3b3a8;
+  --line: #2b3f35;
+  --primary: #eaefe7;
+  --primary-ink: #12201a;
+  --on-tool: #12201a;
+  --marker: rgba(255, 226, 92, 0.32);
+  --cancion: #ff7d90;
+  --examen: #8aabff;
+  --juego: #5bd69b;
+  --crucigrama: #ffb45e;
+  --adaptar: #bfa2ff;
+  --ok: #5bd69b;
+  --warn: #f2c24e;
+  --danger: #ff8a80;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-grid: var(--grid);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-on-tool: var(--on-tool);
+  --color-marker: var(--marker);
+  --color-cancion: var(--cancion);
+  --color-examen: var(--examen);
+  --color-juego: var(--juego);
+  --color-crucigrama: var(--crucigrama);
+  --color-adaptar: var(--adaptar);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --font-display: var(--ff-display);
+  --font-sans: var(--ff-body);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--ff-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+/* Franja de la zona segura superior en celulares, del color de la barra. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 50;
+  background: var(--surface);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+.gutter {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Resaltador amarillo detrás del texto. */
+.marker {
+  background: linear-gradient(transparent 58%, var(--marker) 58%, var(--marker) 92%, transparent 92%);
+  padding: 0 0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Líneas para escribir la respuesta en el examen impreso. */
+.renglones {
+  background-image: linear-gradient(transparent calc(100% - 1px), var(--line) 0);
+  background-size: 100% 2rem;
+  height: 4rem;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--examen);
+  outline-offset: 2px;
+}
+
+.voltear {
+  perspective: 800px;
+}
+.voltear-interior {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.35s ease;
+  transform-style: preserve-3d;
+}
+.voltear.volteada .voltear-interior {
+  transform: rotateY(180deg);
+}
+.cara {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.cara-frente {
+  transform: rotateY(180deg);
+}
+
+@keyframes onda {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.barra-onda {
+  transform-origin: center;
+  animation: onda 1s ease-in-out infinite;
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(8px);
+  }
+}
+.aviso-entra {
+  animation: subir 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
