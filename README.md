@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama o su propio examen adaptado (sube el PDF y recibe un PDF ambientado en lo que le gusta a la clase o adaptado para estudiantes con TDAH, dislexia, TEA o que necesitan lectura fácil).
+Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama o su propio examen adaptado (sube el PDF y recibe un PDF ambientado en lo que le gusta a la clase o adaptado para estudiantes con TDAH, dislexia, TEA o que necesitan lectura fácil).
 
 Proyecto para Hack the Andes 2026.
 
@@ -20,7 +20,7 @@ Proyecto para Hack the Andes 2026.
 `packages/curriculo/data/*.json` tiene el currículo oficial del MINEDU por nivel, grado y área (competencias, capacidades, estándares y desempeños). En la app:
 
 - **Biblioteca → Currículo nacional:** el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
-- **Busca tu tema:** no hay temas libres. El docente elige grado (y si quiere, curso) y busca: aparecen los temas del currículo y, si la palabra no es un tema, los desempeños que la mencionan. Antes de preparar el tema ve la competencia y los desempeños en que se basa (`apps/web/src/curriculo/buscar.ts`).
+- **Busca tu tema:** no hay temas libres, ni fotos ni archivos: el Currículo Nacional alcanza. Es un solo buscador, como el de YouTube: mientras el docente escribe aparecen temas del currículo de su grado (y de otros grados si no está), con lo escrito en negrita. Con un clic el tema queda creado al instante, con su competencia y desempeños (`apps/web/src/components/NuevoTema.tsx`, `apps/web/src/curriculo/buscar.ts`). La IA completa después ideas clave, vocabulario y ejemplo, sin hacer esperar al docente (`apps/web/src/app/temaInstantaneo.ts`); si no responde, la ficha muestra "Reintentar".
 - **Ficha del tema y herramientas:** muestran en qué currículo se basa todo lo que se genera. El backend debe usar `gradoId` y `areaId` de la ficha para incluir esas competencias y desempeños en cada generación.
 
 ## Lista de espera
@@ -92,7 +92,7 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 | Endpoint | Entrada | Devuelve |
 | --- | --- | --- |
-| `POST /api/ficha` | `multipart/form-data`: `tipo`, `texto`, `archivo`, `grado`, `area`, `duracion` | `Ficha` |
+| `POST /api/ficha` | JSON `EntradaTema`: `texto` (tema del currículo), `gradoId`, `areaId`, `grado`, `area`, `competencia`, `capacidad`, `desempenos`, `duracion` | `Ficha` (la app la usa para completar la ficha en segundo plano) |
 | `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
 | `POST /api/audio` | `{ cancion }` | `AudioCancion` |
 | `POST /api/examen` | multipart: `ficha`, `opciones` (`{ interes, necesidades }`), `examen` (PDF o foto) | `Examen` adaptado |
@@ -105,7 +105,7 @@ La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no ga
 
 ## Pendiente para que funcione de verdad
 
-1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen adaptado y juego.
+1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo), letra, examen adaptado y juego.
 2. Audio de canciones con ElevenLabs.
 3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
 4. Pictogramas de ARASAAC en el examen adaptado para TEA.

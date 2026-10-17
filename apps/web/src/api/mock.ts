@@ -18,14 +18,8 @@ const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
 export const mockApi: Api = {
   async prepararFicha(entrada) {
     await esperar(1800)
-    const fuente =
-      entrada.tipo === 'foto'
-        ? 'Foto del libro de Matemática, pág. 48'
-        : entrada.tipo === 'archivo'
-          ? `Archivo: ${entrada.archivo?.name ?? 'Sesión 12 - Fracciones.pdf'}`
-          : `Currículo Nacional: ${entrada.area}, ${entrada.grado}`
     // Elige el ejemplo que más se parece al tema elegido.
-    const t = (entrada.texto ?? '').toLowerCase()
+    const t = entrada.texto.toLowerCase()
     const base =
       /agua|lluvia|nube/.test(t) || entrada.areaId === 'ciencia-y-tecnologia'
         ? FICHA_AGUA
@@ -35,15 +29,17 @@ export const mockApi: Api = {
     return {
       ...base,
       id: `ficha-${Date.now()}`,
-      titulo: entrada.texto ?? base.titulo,
-      curriculo: entrada.competencia ? { competencia: entrada.competencia, capacidad: entrada.capacidad ?? '' } : base.curriculo,
+      titulo: entrada.texto,
+      curriculo: entrada.competencia
+        ? { competencia: entrada.competencia, capacidad: entrada.capacidad ?? '', desempenos: entrada.desempenos }
+        : base.curriculo,
       fecha: new Date().toISOString(),
       gradoId: entrada.gradoId,
       areaId: entrada.areaId,
       grado: entrada.grado,
       area: entrada.area,
       duracion: entrada.duracion ?? base.duracion,
-      fuente,
+      fuente: `Currículo Nacional: ${entrada.area}, ${entrada.grado}`,
     }
   },
   async generarCancion(_ficha, opciones) {

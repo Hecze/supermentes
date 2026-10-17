@@ -3,10 +3,10 @@
 
 export type HerramientaId = 'cancion' | 'examen' | 'juego' | 'crucigrama'
 
+/** El tema elegido en el Currículo Nacional: con esto la IA completa la ficha (ideas clave, vocabulario…). */
 export type EntradaTema = {
-  tipo: 'texto' | 'foto' | 'archivo'
-  texto?: string
-  archivo?: File
+  /** El tema tal como figura en el currículo ("Fracciones: partes de un todo"). */
+  texto: string
   /** Grado y área (curso) del Currículo Nacional: ids de packages/curriculo. */
   gradoId: string
   areaId: string

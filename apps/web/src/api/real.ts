@@ -21,31 +21,25 @@ async function achicar(archivo: File): Promise<File> {
   return blob ? new File([blob], archivo.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }) : archivo
 }
 
-async function post<T>(ruta: string, cuerpo: unknown): Promise<T> {
-  const res = await fetch(`/api/${ruta}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cuerpo),
-  })
-  return leer<T>(res)
+// La IA no puede dejar al docente esperando para siempre: pasado este tiempo se avisa y se puede reintentar.
+const LIMITE_MS = 90_000
+
+async function pedir<T>(ruta: string, init: RequestInit): Promise<T> {
+  try {
+    return leer<T>(await fetch(`/api/${ruta}`, { ...init, signal: AbortSignal.timeout(LIMITE_MS) }))
+  } catch (e) {
+    if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
+      throw new Error('La IA está tardando demasiado. Vuelve a intentarlo en un momento.')
+    }
+    throw e
+  }
 }
 
+const post = <T,>(ruta: string, cuerpo: unknown) =>
+  pedir<T>(ruta, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) })
+
 export const realApi: Api = {
-  async prepararFicha(entrada) {
-    const datos = new FormData()
-    datos.set('tipo', entrada.tipo)
-    datos.set('gradoId', entrada.gradoId)
-    datos.set('areaId', entrada.areaId)
-    datos.set('grado', entrada.grado)
-    datos.set('area', entrada.area)
-    if (entrada.competencia) datos.set('competencia', entrada.competencia)
-    if (entrada.capacidad) datos.set('capacidad', entrada.capacidad)
-    if (entrada.desempenos?.length) datos.set('desempenos', JSON.stringify(entrada.desempenos))
-    if (entrada.duracion) datos.set('duracion', entrada.duracion)
-    if (entrada.texto) datos.set('texto', entrada.texto)
-    if (entrada.archivo) datos.set('archivo', await achicar(entrada.archivo))
-    return leer(await fetch('/api/ficha', { method: 'POST', body: datos }))
-  },
+  prepararFicha: (entrada) => post('ficha', entrada),
   generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
   generarAudio: (cancion) => post('audio', { cancion }),
   async adaptarExamen(ficha, { examen, ...opciones }) {
@@ -53,10 +47,10 @@ export const realApi: Api = {
     datos.set('ficha', JSON.stringify(ficha))
     datos.set('opciones', JSON.stringify(opciones))
     datos.set('examen', await achicar(examen))
-    return leer(await fetch('/api/examen', { method: 'POST', body: datos }))
+    return pedir('examen', { method: 'POST', body: datos })
   },
   generarJuego: (ficha) => post('juego', { ficha }),
   async biblioteca() {
-    return leer(await fetch('/api/biblioteca'))
+    return pedir('biblioteca', {})
   },
 }

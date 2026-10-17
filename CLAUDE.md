@@ -30,5 +30,7 @@ Lee:
 - Producción: https://www.supermentes.app (Vercel, proyecto `supermentes`). La landing está en `/` y la app en `/app`.
 - Todo en español peruano, con palabras del aula y no técnicas: el docente promedio tiene poca experiencia digital y usa laptop.
 - Nos centramos en **primaria**. Los alumnos juegan en **el celular de sus papás**: el docente (en laptop) manda el link del juego al grupo de WhatsApp de las familias y los papás le prestan el celular a su hijo o hija. Todo lo que juega el alumno se diseña primero para celular en vertical (ver `apps/web/src/juegos/README.md`).
-- Los temas salen del Currículo Nacional (`packages/curriculo`): no se crean temas libres sin respaldo del currículo (ver "El currículo es el eje").
+- Los temas salen del Currículo Nacional (`packages/curriculo`): no se crean temas libres ni desde fotos o archivos (ver "El currículo es el eje"). El tema se crea al instante con lo que trae el currículo y la IA completa la ficha en segundo plano: el docente nunca espera a la IA para empezar.
+- Toda llamada a la IA tiene tiempo límite y un "Reintentar" visible: nada de pantallas de carga infinitas.
+- En `api/`, los imports relativos llevan `.js` (`from './_ia.js'`): Vercel corre Node con ESM y sin la extensión la función no carga (`FUNCTION_INVOCATION_FAILED`). `npm run typecheck` lo marca como error.
 - Al terminar algo importante, actualiza `obsidian/ESTADO.md` (se reemplaza, no se acumula).

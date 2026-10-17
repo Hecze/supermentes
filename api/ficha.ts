@@ -1,16 +1,17 @@
-// Ficha del tema: resume lo que se va a enseñar, alineado al Currículo Nacional. Todo lo demás parte de aquí.
+// Ficha del tema: completa con IA las ideas clave, el vocabulario, el ejemplo y el error frecuente de un tema
+// del Currículo Nacional. El tema, su competencia y sus desempeños ya vienen del currículo (no se suben fotos
+// ni archivos): la app crea la ficha al instante y esto la completa en segundo plano.
 //
-//   POST /api/ficha  multipart/form-data: tipo, texto, archivo, gradoId, areaId, grado, area,
-//                    competencia, capacidad, desempenos (JSON), duracion  → Ficha (apps/web/src/api/types.ts)
-import type Anthropic from '@anthropic-ai/sdk'
+//   POST /api/ficha  JSON: EntradaTema (texto, gradoId, areaId, grado, area, competencia, capacidad,
+//                    desempenos, duracion)  → Ficha (apps/web/src/api/types.ts)
 import { z } from 'zod'
-import { bloqueArchivo, fallo, generar, json } from './_ia'
+import { fallo, generar, json } from './_ia.js'
 
 const Esquema = z.object({
   titulo: z.string().describe('Nombre corto del tema, como lo diría el docente'),
   proposito: z.string().describe('Una oración: "Que los estudiantes…"'),
-  competencia: z.string().describe('Competencia del CNEB tal como la nombra el MINEDU (p. ej. "Se comunica oralmente en su lengua materna"); usa la indicada o la del archivo'),
-  capacidad: z.string().describe('Capacidad del CNEB que se trabaja; usa la indicada o la del archivo'),
+  competencia: z.string().describe('Competencia del CNEB tal como la nombra el MINEDU (p. ej. "Se comunica oralmente en su lengua materna"); usa la indicada'),
+  capacidad: z.string().describe('Capacidad del CNEB que se trabaja; usa la indicada'),
   conceptos: z.array(z.string()).describe('3 a 5 ideas clave, una oración cada una'),
   vocabulario: z
     .array(z.object({ palabra: z.string().describe('Una sola palabra, sin espacios'), definicion: z.string() }))
@@ -19,56 +20,48 @@ const Esquema = z.object({
   errorFrecuente: z.string().describe('El error más común de los estudiantes en este tema y cómo corregirlo'),
 })
 
-const texto = (v: FormDataEntryValue | null, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
+const texto = (v: unknown, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max) : '')
 
 export async function POST(request: Request) {
   try {
-    const datos = await request.formData()
-    const tipo = texto(datos.get('tipo'), 10)
-    const grado = texto(datos.get('grado'), 60)
-    const area = texto(datos.get('area'), 60)
-    const tema = texto(datos.get('texto'))
-    const competencia = texto(datos.get('competencia'), 300)
-    const capacidad = texto(datos.get('capacidad'), 300)
-    const duracion = texto(datos.get('duracion'), 30) || '45 min'
-    const archivo = datos.get('archivo')
-    let desempenos: string[] = []
-    try {
-      desempenos = (JSON.parse(texto(datos.get('desempenos'), 8000) || '[]') as unknown[]).filter((d): d is string => typeof d === 'string').slice(0, 12)
-    } catch {}
-    if (!grado || !area) return json({ error: 'Falta el grado o el curso.' }, 400)
-    if (!tema && !(archivo instanceof File)) return json({ error: 'Escribe el tema o sube una foto del libro.' }, 400)
+    const datos = ((await request.json().catch(() => null)) ?? {}) as Record<string, unknown>
+    const grado = texto(datos.grado, 60)
+    const area = texto(datos.area, 60)
+    const tema = texto(datos.texto, 300)
+    const competencia = texto(datos.competencia, 300)
+    const capacidad = texto(datos.capacidad, 300)
+    const duracion = texto(datos.duracion, 30) || '45 min'
+    const desempenos = (Array.isArray(datos.desempenos) ? datos.desempenos : []).filter((d): d is string => typeof d === 'string').map((d) => d.slice(0, 2000)).slice(0, 12)
+    if (!grado || !area || !tema) return json({ error: 'Falta el tema, el grado o el curso.' }, 400)
 
-    const contenido: Anthropic.ContentBlockParam[] = []
-    if (archivo instanceof File) contenido.push(await bloqueArchivo(archivo))
-    contenido.push({
-      type: 'text',
-      text: [
-        `Prepara la ficha del tema para una clase de ${duracion} de ${area}, ${grado}.`,
-        tema && `Tema que escribió el docente: ${tema}`,
-        archivo instanceof File && 'Arriba está la página del libro o la sesión que subió el docente: el tema sale de ahí.',
-        competencia && `Competencia del CNEB: ${competencia}`,
-        capacidad && `Capacidad: ${capacidad}`,
-        desempenos.length && `Desempeños del grado:\n- ${desempenos.join('\n- ')}`,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    })
+    const contenido = [
+      {
+        type: 'text' as const,
+        text: [
+          `Prepara la ficha del tema para una clase de ${duracion} de ${area}, ${grado}.`,
+          `Tema del Currículo Nacional: ${tema}`,
+          competencia && `Competencia del CNEB: ${competencia}`,
+          capacidad && `Capacidad: ${capacidad}`,
+          desempenos.length && `Desempeños del grado:\n- ${desempenos.join('\n- ')}`,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+    ]
 
     const f = await generar(Esquema, contenido)
     return json({
       id: `ficha-${Date.now()}`,
       fecha: new Date().toISOString(),
-      titulo: f.titulo,
-      gradoId: texto(datos.get('gradoId'), 60),
-      areaId: texto(datos.get('areaId'), 60),
+      titulo: tema || f.titulo,
+      gradoId: texto(datos.gradoId, 60),
+      areaId: texto(datos.areaId, 60),
       grado,
       area,
       duracion,
-      fuente:
-        tipo === 'foto' ? 'Foto del libro' : archivo instanceof File ? `Archivo: ${archivo.name}` : `Currículo Nacional: ${area}, ${grado}`,
+      fuente: `Currículo Nacional: ${area}, ${grado}`,
       proposito: f.proposito,
-      curriculo: { competencia: competencia || f.competencia, capacidad: capacidad || f.capacidad },
+      curriculo: { competencia: competencia || f.competencia, capacidad: capacidad || f.capacidad, desempenos },
       conceptos: f.conceptos,
       vocabulario: f.vocabulario,
       ejemplo: f.ejemplo,

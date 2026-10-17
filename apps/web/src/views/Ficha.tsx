@@ -1,11 +1,11 @@
-import { BookMarked, Check, ChevronRight, Library } from 'lucide-react'
+import { BookMarked, Check, ChevronRight, Library, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { SinTema } from '../components/Shell'
 import { Desplegable, Editable, tinte } from '../components/ui'
 
 export function Ficha() {
-  const { ficha, ir, resultados, verCurriculo } = useStore()
+  const { ficha, ir, resultados, verCurriculo, completando, completarFicha } = useStore()
 
   if (!ficha) return <SinTema />
 
@@ -86,6 +86,23 @@ export function Ficha() {
           Otros profes ya hicieron {ficha.coincidenciasBiblioteca} materiales de este tema. Usarlos es gratis.
           <ChevronRight className="size-4" aria-hidden />
         </button>
+      )}
+
+      {/* El tema se crea al instante; la IA completa esto en segundo plano (app/temaInstantaneo.ts). */}
+      {completando[ficha.id] === 'cargando' && (
+        <p className="-mb-4 flex items-center gap-2 text-ink-soft" role="status">
+          <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden />
+          Completando las ideas clave y las palabras del tema. Mientras tanto, ya puedes usar las herramientas.
+        </p>
+      )}
+      {completando[ficha.id] === 'error' && (
+        <p className="-mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-soft" role="status">
+          <TriangleAlert className="size-4 shrink-0 text-warn" aria-hidden />
+          No pudimos completar las ideas clave y las palabras del tema.
+          <button type="button" onClick={() => completarFicha(ficha)} className="font-medium text-ink underline underline-offset-4">
+            Reintentar
+          </button>
+        </p>
       )}
 
       <Desplegable titulo="Revisa lo que entendimos de tu tema">

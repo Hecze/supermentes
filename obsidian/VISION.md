@@ -21,7 +21,7 @@ actualizado: 2026-10-17
 - Las herramientas que existen (SchoolHub, MagicSchool) están pensadas para otros países o en inglés. Ninguna parte del Currículo Nacional (CNEB).
 
 ## Cómo funciona
-1. **Busca tu tema** en el Currículo Nacional: grado, curso y tema. Si quiere, el docente suma una foto del libro o su sesión de clase.
+1. **Busca tu tema** en el Currículo Nacional, como en un buscador: escribe y elige. El tema se crea al instante; no hace falta subir fotos ni archivos.
 2. Se arma la **ficha del tema**: competencia y desempeños del currículo, ideas clave, vocabulario y un ejemplo.
 3. El docente elige **solo lo que va a usar**:
    - **Canción** pegajosa con ritmo peruano (cumbia, huayno, festejo…) o con una melodía que ya conocen.

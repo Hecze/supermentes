@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
+import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
 export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
@@ -32,6 +33,11 @@ type Store = {
   temas: Ficha[]
   ficha: Ficha | null
   setFicha: (f: Ficha) => void
+  /** Cambia una ficha sin elegirla (por ejemplo, cuando la IA termina de completarla). */
+  actualizarFicha: (id: string, cambios: Partial<Ficha>) => void
+  /** Fichas que la IA está completando o que no pudo completar (ver app/temaInstantaneo.ts). */
+  completando: Record<string, EstadoCompletar>
+  completarFicha: (f: Ficha) => void
   elegirTema: (id: string) => void
   nuevoTemaAbierto: boolean
   previoTema: PrevioTema | null
@@ -130,6 +136,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setFichaId(f.id)
   }, [])
 
+  const actualizarFicha = useCallback((id: string, cambios: Partial<Ficha>) => {
+    setTemas((lista) => lista.map((t) => (t.id === id ? { ...t, ...cambios } : t)))
+  }, [])
+
+  const [completando, setCompletando] = useState<Record<string, EstadoCompletar>>({})
+  const completarFicha = useCallback(
+    (f: Ficha) =>
+      void completarConIA(f, actualizarFicha, (id, e) =>
+        setCompletando((c) => {
+          const { [id]: _, ...resto } = c
+          return e ? { ...resto, [id]: e } : resto
+        }),
+      ),
+    [actualizarFicha],
+  )
+
   const elegirTema = useCallback(
     (id: string) => {
       setFichaId(id)
@@ -197,6 +219,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         temas,
         ficha,
         setFicha,
+        actualizarFicha,
+        completando,
+        completarFicha,
         elegirTema,
         nuevoTemaAbierto,
         previoTema,
