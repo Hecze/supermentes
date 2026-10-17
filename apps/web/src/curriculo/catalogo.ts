@@ -35,6 +35,7 @@ export const AREAS_POR_NIVEL: Record<Nivel, AreaCatalogo[]> = {
     A('personal-social', 'Personal Social'),
     A('arte-y-cultura', 'Arte y Cultura'),
     A('educacion-fisica', 'Educación Física'),
+    A('ingles', 'Inglés'),
     A('educacion-religiosa', 'Educación Religiosa'),
     A('castellano-segunda-lengua', 'Castellano como segunda lengua'),
   ],
