@@ -1,10 +1,11 @@
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 const raiz = fileURLToPath(new URL('.', import.meta.url))
+const repo = resolve(raiz, '../..')
 
 // En desarrollo, /j/ABC234 abre la página del alumno, como hace vercel.json en producción.
 const rutasDelAlumno: Plugin = {
@@ -13,6 +14,34 @@ const rutasDelAlumno: Plugin = {
     server.middlewares.use((req, _res, next) => {
       if (req.url && /^\/j\/[A-Za-z0-9]{6}\/?(\?.*)?$/.test(req.url)) req.url = '/j/index.html'
       next()
+    })
+  },
+}
+
+// En desarrollo, /api/<nombre> corre la función de Vercel de api/<nombre>.ts, como en producción.
+// Las claves (ANTHROPIC_API_KEY…) salen del .env.local de la raíz del repo.
+const funcionesDeVercel: Plugin = {
+  name: 'funciones-de-vercel',
+  configureServer(server) {
+    Object.assign(process.env, loadEnv('development', repo, ''))
+    server.middlewares.use(async (req, res, next) => {
+      const nombre = req.url?.match(/^\/api\/([a-z-]+)(?:\?|$)/)?.[1]
+      if (!nombre) return next()
+      try {
+        const modulo = await server.ssrLoadModule(resolve(repo, `api/${nombre}.ts`))
+        const manejar = modulo[req.method ?? 'GET']
+        if (!manejar) return void res.writeHead(405).end()
+        const partes: Buffer[] = []
+        for await (const parte of req) partes.push(parte as Buffer)
+        const cuerpo = req.method === 'GET' || req.method === 'HEAD' ? undefined : Buffer.concat(partes)
+        const respuesta: Response = await manejar(
+          new Request(`http://localhost${req.url}`, { method: req.method, headers: req.headers as HeadersInit, body: cuerpo }),
+        )
+        res.writeHead(respuesta.status, Object.fromEntries(respuesta.headers))
+        res.end(Buffer.from(await respuesta.arrayBuffer()))
+      } catch (e) {
+        next(e)
+      }
     })
   },
 }
@@ -26,7 +55,8 @@ export default defineConfig(({ mode }) => {
     : { inicio: resolve(raiz, 'index.html'), app: resolve(raiz, 'app/index.html'), jugar: resolve(raiz, 'j/index.html') }
 
   return {
-    plugins: [react(), tailwindcss(), rutasDelAlumno],
+    plugins: [react(), tailwindcss(), rutasDelAlumno, funcionesDeVercel],
+    envDir: repo,
     base: vistaPrevia ? './' : '/',
     build: {
       rollupOptions: { input: paginas },
