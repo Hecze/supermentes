@@ -21,6 +21,7 @@ Lee:
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/ESTADO.md`: dónde quedamos, qué sigue y los riesgos conocidos.
 - `obsidian/HACKATHON.md`: condiciones del evento, reto de tracción y créditos gratis.
+- `obsidian/DATOS.md`: cifras con fuente (docentes, horas extra, aprendizajes, cuánto pagan, costos de IA). Úsalas en vez de inventar números.
 - `README.md`: páginas, principios de diseño, endpoints y costos.
 
 ## Cómo trabajamos

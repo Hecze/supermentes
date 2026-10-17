@@ -534,3 +534,60 @@
 .parpadeo {
   animation: parpadeo 4s linear infinite;
 }
+
+/* Une con flechas: la línea se dibuja de un lado al otro. */
+@keyframes trazar {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.trazo {
+  stroke-dasharray: 1;
+  animation: trazar 0.35s ease-out both;
+}
+
+/* Vuela, cóndor: un aleteo por toque. */
+@keyframes aletear {
+  0% {
+    transform: rotate(0deg);
+  }
+  40% {
+    transform: rotate(-32deg) scaleY(0.8);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.ala {
+  animation: aletear 0.28s ease-out;
+}
+
+/* Corre, cuy: las líneas del camino corren hacia abajo y el cuy trota. */
+@keyframes avanzar-camino {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: 12cqmin;
+  }
+}
+.carril-linea {
+  background-image: repeating-linear-gradient(#fff6e0 0 6cqmin, transparent 6cqmin 12cqmin);
+  opacity: 0.85;
+  animation: avanzar-camino 0.6s linear infinite;
+}
+@keyframes trotar {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-8%) rotate(2deg);
+  }
+}
+.trotar {
+  animation: trotar 0.32s ease-in-out infinite;
+}

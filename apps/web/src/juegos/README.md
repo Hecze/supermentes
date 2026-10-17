@@ -104,3 +104,8 @@ En desarrollo (`npm run dev`), Vite corre las funciones de `api/`. Si el `.env.l
 | Concurso | Kahoot: reloj, cuatro colores con figuras y puntos por rapidez | Celular y proyector |
 | Duelo de robots | Juegos de pelea, sin sangre (contra la máquina o de a dos) | Celular y proyector (5.º–6.º) |
 | Invasión | Arcades de naves (Space Invaders), sin violencia | Celular y proyector (5.º–6.º) |
+| ¿Verdad o mentira? | Verdadero o falso (Wordwall) y las cartas que se deslizan; las mentiras son los errores típicos | Celular y proyector |
+| Une con flechas | Relaciona columnas (cuadernos) y Match up (Wordwall), sin reloj | Celular y proyector |
+| Vuela, cóndor | Flappy Bird, amable: el piso y el techo no matan, solo cuenta por qué hueco pasa | Celular (desde 2.º) |
+| Corre, cuy | Subway Surfers: tres carriles, se toca el carril o se desliza | Celular |
+| Michi | Tres en raya contra la compu: para marcar una casilla hay que responder bien | Celular y proyector |

@@ -529,3 +529,176 @@ export function MiniConcurso({ muestra }: { muestra?: Muestra }) {
     </svg>
   )
 }
+
+/** "7 × 8 = 56", "45 < 54" o la pregunta: la afirmación que muestra la carta de Verdad o mentira. */
+function afirmacion(muestra: Muestra | undefined) {
+  const r = muestra?.reto
+  if (!r) return '7 × 8 = 54'
+  const propuesta = r.opciones[0] ?? r.opciones[1]
+  if (/=\s*\?$/.test(r.pregunta)) return r.pregunta.replace(/\?$/, propuesta)
+  if (r.pregunta.includes('▢')) return r.pregunta.replace('▢', propuesta)
+  return propuesta
+}
+
+export function MiniVerdad({ muestra }: { muestra?: Muestra }) {
+  const r = muestra?.reto
+  return (
+    <svg {...marco}>
+      <Fondo de="#3dd6c4" a="#2f7bff" />
+      <rect x={48} y={14} width={64} height={58} rx={7} fill="#fff" opacity={0.45} transform="rotate(-6 80 43)" />
+      <g transform="rotate(5 80 40)">
+        <rect x={42} y={8} width={76} height={62} rx={7} fill="#fff" />
+        <text x={80} y={20} textAnchor="middle" fontSize={5.5} fontWeight={700} fill="#8a8fb8" fontFamily="Fredoka, sans-serif">
+          ¿ES CORRECTO?
+        </text>
+        {r?.visual ? (
+          <>
+            <VisualMini x={70} y={42} tam={20} visual={r.visual} />
+            <Texto x={96} y={42} w={30} t={`= ${r.opciones[0]}`} tam={10} />
+          </>
+        ) : (
+          <Texto x={80} y={42} w={68} t={afirmacion(muestra)} tam={12} />
+        )}
+        <rect x={50} y={52} width={30} height={10} rx={2} fill="none" stroke="#1f9d55" strokeWidth={1.2} transform="rotate(-10 65 57)" />
+        <text x={65} y={59.5} textAnchor="middle" fontSize={6} fontWeight={700} fill="#1f9d55" fontFamily="Fredoka, sans-serif" transform="rotate(-10 65 57)">
+          VERDAD
+        </text>
+      </g>
+      <rect x={16} y={78} width={58} height={16} rx={5} fill="#ff5d73" />
+      <text x={45} y={89.5} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
+        ✕ Mentira
+      </text>
+      <rect x={86} y={78} width={58} height={16} rx={5} fill="#2fc46f" />
+      <text x={115} y={89.5} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
+        ✓ Verdad
+      </text>
+    </svg>
+  )
+}
+
+export function MiniUne({ muestra }: { muestra?: Muestra }) {
+  const par = muestra?.par
+  const filas = [14, 42, 70]
+  return (
+    <svg {...marco}>
+      <Fondo de="#ffd166" a="#ff7aa2" />
+      <line x1={58} y1={filas[0] + 9} x2={102} y2={filas[2] + 9} stroke="#fff" strokeWidth={5} strokeLinecap="round" />
+      <line x1={58} y1={filas[0] + 9} x2={102} y2={filas[2] + 9} stroke="#4f6dff" strokeWidth={3} strokeLinecap="round" />
+      <line x1={58} y1={filas[1] + 9} x2={102} y2={filas[0] + 9} stroke="#fff" strokeWidth={5} strokeLinecap="round" />
+      <line x1={58} y1={filas[1] + 9} x2={102} y2={filas[0] + 9} stroke="#2fc46f" strokeWidth={3} strokeLinecap="round" />
+      {filas.map((y, i) => (
+        <g key={i}>
+          <rect x={14} y={y} width={44} height={18} rx={4} fill={i === 0 ? '#4f6dff' : i === 1 ? '#2fc46f' : '#fff'} />
+          <rect x={102} y={y} width={44} height={18} rx={4} fill={i === 2 ? '#4f6dff' : i === 0 ? '#2fc46f' : '#fff'} />
+        </g>
+      ))}
+      {par ? (
+        <>
+          <LadoMiniEn x={36} y={filas[0] + 9} lado={par.a} claro />
+          <LadoMiniEn x={124} y={filas[2] + 9} lado={par.b} claro />
+        </>
+      ) : (
+        <>
+          <Texto x={36} y={filas[0] + 9} w={40} t="7 × 8" tam={9} fill="#fff" />
+          <Texto x={124} y={filas[2] + 9} w={40} t="56" tam={9} fill="#fff" />
+        </>
+      )}
+      <rect x={22} y={filas[2] + 7} width={28} height={4} rx={2} fill="#e3d7ff" />
+      <rect x={110} y={filas[1] + 7} width={28} height={4} rx={2} fill="#e3d7ff" />
+      <circle cx={58} cy={filas[0] + 9} r={2.6} fill="#4f6dff" stroke="#fff" />
+      <circle cx={102} cy={filas[2] + 9} r={2.6} fill="#4f6dff" stroke="#fff" />
+    </svg>
+  )
+}
+
+/** Un lado de una pareja dentro de una tarjeta de color (texto blanco). */
+function LadoMiniEn({ x, y, lado, claro }: { x: number; y: number; lado: Lado; claro?: boolean }) {
+  if (lado.visual) return <VisualMini x={x} y={y} tam={14} visual={lado.visual} />
+  return <Texto x={x} y={y} w={40} t={lado.texto} tam={9} min={6} fill={claro ? '#fff' : '#2b2d5c'} />
+}
+
+export function MiniCondor({ muestra }: { muestra?: Muestra }) {
+  const [mal, bien] = opciones(muestra, ['63', '56'])
+  const t = tamComun([mal, bien], 30, 10, 6.5)
+  return (
+    <svg {...marco}>
+      <Fondo de="#5ab8ff" a="#e6f6ff" />
+      <path d="M0 92 L0 66 L28 46 L50 62 L82 36 L112 60 L136 44 L160 58 V92 Z" fill="#9db3d9" />
+      <path d="M76 41 L82 36 L88 42 L84 41 Z M130 48 L136 44 L142 49 Z" fill="#fff" />
+      <rect y={90} width={160} height={10} fill="#8fd16a" />
+      {/* Muro de nubes con dos huecos */}
+      <rect x={104} y={-4} width={26} height={30} rx={8} fill="#fff" />
+      <rect x={104} y={46} width={26} height={12} rx={6} fill="#fff" />
+      <rect x={104} y={78} width={26} height={14} rx={7} fill="#fff" />
+      <rect x={100} y={29} width={34} height={14} rx={3} fill="#f6d6a3" stroke="#b7804a" strokeWidth={1.2} />
+      <Texto x={117} y={36} w={30} t={bien} tam={t} min={t} fill="#4a2c00" />
+      <rect x={100} y={61} width={34} height={14} rx={3} fill="#f6d6a3" stroke="#b7804a" strokeWidth={1.2} />
+      <Texto x={117} y={68} w={30} t={mal} tam={t} min={t} fill="#4a2c00" />
+      {/* Cóndor */}
+      <g transform="translate(36 30) scale(0.42)">
+        <path d="M58 38 C40 10 14 8 2 18 C18 22 30 30 44 44 Z" fill="#1f1f2e" />
+        <ellipse cx={58} cy={44} rx={32} ry={17} fill="#2a2a3d" />
+        <path d="M60 40 C46 8 20 2 6 10 C22 18 36 30 48 48 Z" fill="#33334a" />
+        <path d="M44 22 C34 14 22 10 12 12 C22 16 30 22 38 30 Z" fill="#f2f2f2" />
+        <ellipse cx={86} cy={36} rx={9} ry={8} fill="#fff" />
+        <circle cx={95} cy={30} r={9} fill="#c96b5a" />
+        <path d="M103 28 Q114 30 108 37 Q106 34 101 33 Z" fill="#e8c27a" />
+      </g>
+      <rect x={10} y={6} width={74} height={16} rx={5} fill="#fff" />
+      <Pregunta x={47} y={14} w={68} tam={9} muestra={muestra} defecto="8 × 7 = ?" />
+    </svg>
+  )
+}
+
+export function MiniCarriles({ muestra }: { muestra?: Muestra }) {
+  const [a, b, c] = opciones(muestra, ['54', '56', '48'])
+  const textos = [a, b, c ?? '63']
+  const t = tamComun(textos, 34, 10, 6.5)
+  return (
+    <svg {...marco}>
+      <Fondo de="#8fd3ff" a="#c9ecff" />
+      <path d="M0 40 L0 26 L30 12 L52 26 L84 6 L112 24 L140 10 L160 22 V40 Z" fill="#9e8bd8" />
+      <rect y={34} width={160} height={66} fill="#8fd16a" />
+      <path d="M40 34 H120 L150 100 H10 Z" fill="#d9a86c" />
+      <path d="M66 34 L56 100 M94 34 L104 100" stroke="#fff6e0" strokeWidth={1.4} strokeDasharray="5 4" />
+      {textos.map((x, i) => (
+        <g key={i}>
+          <rect x={[34, 62, 90][i]} y={44} width={36} height={16} rx={3} fill={i === 1 ? '#2fc46f' : '#f6d6a3'} stroke={i === 1 ? '#1f9d55' : '#b7804a'} strokeWidth={1.2} />
+          <Texto x={[52, 80, 108][i]} y={52} w={32} t={x} tam={t} min={t} fill={i === 1 ? '#fff' : '#4a2c00'} />
+        </g>
+      ))}
+      <svg x={64} y={68} width={32} height={26} viewBox="0 0 100 80">
+        <Cuy />
+      </svg>
+      <rect x={30} y={4} width={100} height={14} rx={4} fill="#fff" />
+      <Pregunta x={80} y={11} w={94} tam={8.5} muestra={muestra} defecto="7 × 8 = ?" />
+    </svg>
+  )
+}
+
+export function MiniMichi({ muestra }: { muestra?: Muestra }) {
+  const marcas = ['X', 'O', '', '', 'X', '', 'O', '', 'X']
+  return (
+    <svg {...marco}>
+      <Fondo de="#4f6dff" a="#b05cff" />
+      <rect x={46} y={22} width={68} height={72} rx={6} fill="#fff" opacity={0.2} />
+      {marcas.map((m, i) => {
+        const x = 50 + (i % 3) * 21.3
+        const y = 26 + Math.floor(i / 3) * 21.6
+        const linea = i === 0 || i === 4 || i === 8
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={18.5} height={18.5} rx={3} fill={linea ? '#ffd23f' : '#fff'} />
+            {m && (
+              <text x={x + 9.25} y={y + 14} textAnchor="middle" fontSize={14} fontWeight={700} fill={m === 'X' ? '#2f7bff' : '#ff4d6d'} fontFamily="Fredoka, sans-serif">
+                {m}
+              </text>
+            )}
+          </g>
+        )
+      })}
+      <rect x={20} y={3} width={120} height={16} rx={5} fill="#fff" />
+      <Pregunta x={80} y={11} w={112} tam={9} muestra={muestra} defecto="¿Cuánto es 6 × 7?" />
+    </svg>
+  )
+}
