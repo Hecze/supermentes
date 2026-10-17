@@ -19,8 +19,7 @@ punta, con IA real, desde el link y en una ventana privada.
    - **Adaptar examen**: sube su examen de siempre (PDF o foto) y descarga el PDF adaptado: ambientado en lo que le gusta a su clase y/o para quien aprende distinto. **Listo** (`api/examen.ts`, PDF con jsPDF).
    - **Canción**: letra con ritmo peruano **lista** (`api/cancion.ts`); audio con ElevenLabs **pendiente**
      (falta la key).
-   - **Juego** con preguntas del tema, compartido por QR a los celulares. Los juegos y el QR funcionan;
-     **falta** `api/juego.ts` para que las preguntas del tema salgan de la IA.
+   - **Juego** con preguntas del tema, compartido por QR a los celulares. **Listo** (`api/juego.ts`): preguntas, parejas y palabras del tema con IA; los juegos y el QR ya funcionaban.
 4. La landing con lista de espera mide la tracción. **Listo.**
 
 ## Lo que falta, en orden
