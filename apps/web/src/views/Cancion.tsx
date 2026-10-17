@@ -1,5 +1,5 @@
 import { Pause, Play, Printer, Share2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
 import { useStore } from '../app/store'
@@ -47,20 +47,36 @@ function ElegirRitmo({ opciones, cambiar }: { opciones: OpcionesCancion; cambiar
 function Reproductor({ duracion, url }: { duracion: number; url: string | null }) {
   const [sonando, setSonando] = useState(false)
   const [t, setT] = useState(0)
+  const audio = useRef<HTMLAudioElement | null>(null)
   const barras = useMemo(() => Array.from({ length: 48 }, (_, i) => 0.3 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)) * 0.7), [])
 
+  // Con audio real suena el mp3; sin url (datos de ejemplo) solo avanza la barra.
   useEffect(() => {
+    if (!url) return
+    const a = new Audio(url)
+    a.ontimeupdate = () => setT(Math.floor(a.currentTime))
+    a.onended = () => { setSonando(false); setT(0) }
+    audio.current = a
+    return () => { a.pause(); audio.current = null }
+  }, [url])
+
+  useEffect(() => {
+    if (url) {
+      if (sonando) audio.current?.play().catch(() => setSonando(false))
+      else audio.current?.pause()
+      return
+    }
     if (!sonando) return
     const id = window.setInterval(() => setT((x) => Math.min(x + 1, duracion)), 1000)
     return () => window.clearInterval(id)
-  }, [sonando, duracion])
+  }, [sonando, duracion, url])
 
   useEffect(() => {
-    if (t >= duracion) {
+    if (!url && t >= duracion) {
       setSonando(false)
       setT(0)
     }
-  }, [t, duracion])
+  }, [t, duracion, url])
 
   return (
     <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-3 print:hidden">
