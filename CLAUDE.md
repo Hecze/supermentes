@@ -3,6 +3,7 @@
 Herramientas de IA para docentes del Perú, hechas para Hack the Andes 2026 (entrega: 18 de octubre de 2026, 9:00 a. m., hora de Lima).
 
 Antes de trabajar, lee:
+- `obsidian/VISION.md`: qué construimos, para quién y los principios de diseño.
 - `obsidian/ESTADO.md`: dónde quedamos, qué sigue y los riesgos conocidos.
 - `obsidian/HACKATHON.md`: condiciones del evento, reto de tracción y créditos gratis.
 - `README.md`: páginas, principios de diseño, endpoints y costos.
