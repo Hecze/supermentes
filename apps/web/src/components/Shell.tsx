@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Sun, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
@@ -154,7 +154,7 @@ export function Shell({ children }: { children: ReactNode }) {
       )}
 
       <main className="gutter pb-16 pt-6 lg:pt-10 print:p-0">
-        <div className="mx-auto flex max-w-4xl flex-col gap-7">{children}</div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-7">{children}</div>
       </main>
 
       <NuevoTema />
@@ -219,9 +219,9 @@ export function SinTema() {
     <div className="flex flex-col items-start gap-4 rounded-3xl border-2 border-dashed border-line bg-surface p-8">
       <p className="text-lg text-ink-soft">Hola, {DOCENTE.saludo}</p>
       <h1 className="font-display text-3xl font-bold sm:text-4xl">Empieza con el tema de tu próxima clase</h1>
-      <p className="max-w-xl text-lg text-ink-soft">Con el tema preparamos canciones, exámenes, juegos y más. Solo toma un minuto.</p>
+      <p className="max-w-xl text-lg text-ink-soft">Búscalo en el Currículo Nacional y preparamos canciones, exámenes, juegos y más. Solo toma un minuto.</p>
       <Boton tam="lg" onClick={() => abrirNuevoTema()}>
-        Crear tema
+        <Search className="size-5" aria-hidden /> Buscar mi tema
       </Boton>
     </div>
   )

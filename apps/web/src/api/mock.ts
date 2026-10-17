@@ -24,20 +24,27 @@ export const mockApi: Api = {
         ? 'Foto del libro de Matemática, pág. 48'
         : entrada.tipo === 'archivo'
           ? `Archivo: ${entrada.archivo?.name ?? 'Sesión 12 - Fracciones.pdf'}`
-          : 'Escrito por la docente'
-    // Elige el ejemplo que más se parece a lo que escribió la docente.
+          : `Currículo Nacional: ${entrada.area}, ${entrada.grado}`
+    // Elige el ejemplo que más se parece al tema elegido.
     const t = (entrada.texto ?? '').toLowerCase()
-    const base = /agua|lluvia|nube/.test(t) ? FICHA_AGUA : /sustantiv|nombre/.test(t) ? FICHA_SUSTANTIVOS : FICHA_EJEMPLO
+    const base =
+      /agua|lluvia|nube/.test(t) || entrada.areaId === 'ciencia-y-tecnologia'
+        ? FICHA_AGUA
+        : /sustantiv|nombre/.test(t) || entrada.areaId === 'comunicacion'
+          ? FICHA_SUSTANTIVOS
+          : FICHA_EJEMPLO
     return {
       ...base,
       id: `ficha-${Date.now()}`,
+      titulo: entrada.texto ?? base.titulo,
+      curriculo: entrada.competencia ? { competencia: entrada.competencia, capacidad: entrada.capacidad ?? '' } : base.curriculo,
       fecha: new Date().toISOString(),
       gradoId: entrada.gradoId,
       areaId: entrada.areaId,
       grado: entrada.grado,
       area: entrada.area,
       duracion: entrada.duracion ?? base.duracion,
-      fuente: entrada.tipo === 'texto' ? base.fuente : fuente,
+      fuente,
     }
   },
   async generarCancion(_ficha, opciones) {

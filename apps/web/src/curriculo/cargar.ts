@@ -10,6 +10,8 @@ export type Competencia = {
   estandar: string
   /** Desempeños del grado, texto oficial. */
   desempenos: string[]
+  /** Temas como los nombran los libros y las sesiones, que esta competencia trabaja en el grado: no es texto oficial. */
+  temas?: string[]
 }
 
 export type AreaCurriculo = {

@@ -1,9 +1,9 @@
-import { Check, ChevronsUpDown, Plus } from 'lucide-react'
+import { Check, ChevronsUpDown, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { cuando, useStore } from '../app/store'
 import { cx } from './ui'
 
-/** Muestra el tema actual. Al abrirlo lista los demás temas y, al final, "Nuevo tema". */
+/** Muestra el tema actual. Al abrirlo lista los demás temas y, al final, "Buscar otro tema". */
 export function SelectorTema({ compacto }: { compacto?: boolean }) {
   const { temas, ficha, elegirTema, abrirNuevoTema } = useStore()
   const [abierto, setAbierto] = useState(false)
@@ -33,7 +33,7 @@ export function SelectorTema({ compacto }: { compacto?: boolean }) {
           compacto ? 'h-10 px-3' : 'px-3 py-3',
         )}
       >
-        <Plus className="size-5" aria-hidden /> Crear mi primer tema
+        <Search className="size-5" aria-hidden /> Buscar mi primer tema
       </button>
     )
   }
@@ -100,7 +100,7 @@ export function SelectorTema({ compacto }: { compacto?: boolean }) {
             }}
             className="flex items-center gap-2 border-t border-line px-4 py-3 text-left font-semibold hover:bg-surface-2"
           >
-            <Plus className="size-5" aria-hidden /> Nuevo tema
+            <Search className="size-5" aria-hidden /> Buscar otro tema
           </button>
         </div>
       )}

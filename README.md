@@ -17,7 +17,7 @@ Proyecto para Hack the Andes 2026.
 `packages/curriculo/data/*.json` tiene el currículo oficial del MINEDU por nivel, grado y área (competencias, capacidades, estándares y desempeños). En la app:
 
 - **Biblioteca → Currículo nacional:** el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
-- **Nuevo tema:** se elige grado y curso del currículo, con temas sugeridos y enlace al documento.
+- **Busca tu tema:** no hay temas libres. El docente elige grado (y si quiere, curso) y busca: aparecen los temas del currículo y, si la palabra no es un tema, los desempeños que la mencionan. Antes de preparar el tema ve la competencia y los desempeños en que se basa (`apps/web/src/curriculo/buscar.ts`).
 - **Ficha del tema y herramientas:** muestran en qué currículo se basa todo lo que se genera. El backend debe usar `gradoId` y `areaId` de la ficha para incluir esas competencias y desempeños en cada generación.
 
 ## Lista de espera
@@ -34,7 +34,7 @@ Proyecto para Hack the Andes 2026.
 Pensado para docentes con poca experiencia digital: simple a primera vista y potente cuando lo necesitas, como una hoja de cálculo.
 
 - **Una pregunta y un botón principal por pantalla.** "¿Qué necesitas para tu clase?", "¿Con qué ritmo?", "¿Qué le gusta a tu clase?".
-- **No es un chat.** Los temas se eligen y se crean desde un solo selector, y "Nuevo tema" es un formulario corto en una ventana.
+- **No es un chat.** Los temas se eligen desde un solo selector, y "Buscar otro tema" abre un buscador del currículo en una ventana.
 - **El resultado se ve como una hoja.** Lo que ves es lo que se imprime, y cualquier texto se corrige con un clic.
 - **Lo avanzado queda plegado** en "Más opciones" o "Cambiar…", nunca en la primera vista.
 - **Palabras del aula, no técnicas.** "Le cuesta concentrarse" antes que "TDAH"; los créditos solo aparecen bajo el botón que los gasta.
