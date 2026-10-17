@@ -8,11 +8,8 @@ import { Acciones, Boton, Chip, Desplegable, Hoja, descargar, imprimir } from '.
 
 const COLOR = 'var(--crucigrama)'
 
-const TAMANOS = [
-  { lado: 10, nombre: 'Pequeño', detalle: '10 × 10' },
-  { lado: 15, nombre: 'Mediano', detalle: '15 × 15' },
-  { lado: 20, nombre: 'Grande', detalle: '20 × 20' },
-]
+// La grilla se ajusta sola a las palabras, sin pasar de 20 casillas por lado para que quepa en una hoja.
+const LADO_MAXIMO = 20
 
 let siguienteId = 1
 const filaVacia = (palabra = '', pista = ''): FilaCrucigrama => ({ id: siguienteId++, palabra, pista })
@@ -40,18 +37,17 @@ export function Crucigrama() {
 
   const datos = resultados.crucigrama
   const filas = datos?.filas ?? []
-  const lado = datos?.lado ?? 15
 
   // El crucigrama empieza vacío: las palabras las elige el docente.
   useEffect(() => {
-    if (!datos) guardar('crucigrama', { filas: [filaVacia()], lado: 15 })
+    if (!datos) guardar('crucigrama', { filas: [filaVacia()] })
   }, [datos, guardar])
 
   const validas = filas.filter((f) => normalizar(f.palabra).length > 1)
   const cruci = useMemo(
-    () => mejorCrucigrama(validas.map((f) => ({ palabra: f.palabra, pista: f.pista.trim() })), semilla, lado),
+    () => mejorCrucigrama(validas.map((f) => ({ palabra: f.palabra, pista: f.pista.trim() })), semilla, LADO_MAXIMO),
     // validas cambia de identidad en cada render; se recalcula solo si cambia el contenido.
-    [JSON.stringify(validas.map((f) => [f.palabra, f.pista])), semilla, lado],
+    [JSON.stringify(validas.map((f) => [f.palabra, f.pista])), semilla],
   )
 
   if (!ficha) return <SinTema />
@@ -61,7 +57,7 @@ export function Crucigrama() {
   const sinPista = cruci.ubicadas.filter((u) => !u.pista).length
 
   function cambiarFilas(nuevas: FilaCrucigrama[]) {
-    guardar('crucigrama', { filas: nuevas, lado })
+    guardar('crucigrama', { filas: nuevas })
   }
 
   function editar(id: number, campo: 'palabra' | 'pista', valor: string) {
@@ -188,16 +184,6 @@ export function Crucigrama() {
           </div>
         )}
 
-        <div className="flex flex-col gap-2">
-          <p className="font-medium">Tamaño</p>
-          <div className="flex flex-wrap gap-2">
-            {TAMANOS.map((t) => (
-              <Chip key={t.lado} activo={lado === t.lado} color={COLOR} onClick={() => guardar('crucigrama', { filas, lado: t.lado })}>
-                {t.nombre} <span className="font-normal opacity-70">{t.detalle}</span>
-              </Chip>
-            ))}
-          </div>
-        </div>
       </section>
 
       {validas.length < 2 ? (
@@ -208,7 +194,7 @@ export function Crucigrama() {
         <>
           {cruci.sinUbicar.length > 0 && (
             <p className="rounded-xl bg-warn/10 px-4 py-3 text-warn print:hidden">
-              No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba un tamaño más grande u "Otra forma".
+              No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba "Otra forma" o quita alguna palabra: la grilla tiene que caber en una hoja.
             </p>
           )}
 

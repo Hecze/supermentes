@@ -12,8 +12,8 @@ type Tema = 'light' | 'dark'
 export type FilaCrucigrama = { id: number; palabra: string; pista: string }
 
 export type Resultados = {
-  /** Palabras que eligió el docente y lado máximo de la grilla. */
-  crucigrama?: { filas: FilaCrucigrama[]; lado: number }
+  /** Palabras y pistas que eligió el docente. */
+  crucigrama?: { filas: FilaCrucigrama[] }
   cancion?: Cancion
   audio?: AudioCancion
   examen?: Examen

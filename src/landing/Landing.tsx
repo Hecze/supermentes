@@ -106,7 +106,7 @@ const PREGUNTAS = [
   },
   {
     p: '¿Cuándo estará listo?',
-    r: 'Lo estamos construyendo ahora mismo. Puedes probar la demo hoy, y a quienes estén en la lista les escribiremos primero cuando abramos.',
+    r: 'Lo estamos construyendo ahora mismo. A quienes estén en la lista de espera les escribiremos primero cuando abramos.',
   },
   {
     p: '¿Qué hacen con mis datos?',
@@ -167,9 +167,6 @@ export function Landing() {
             <a href="#herramientas" className="hidden rounded-lg px-3 py-2 text-ink-soft hover:text-ink md:inline">
               Herramientas
             </a>
-            <a href="/app" className="hidden rounded-lg px-3 py-2 font-medium hover:bg-surface-2 sm:inline">
-              Ver la demo
-            </a>
             <a href="#unirme" className="inline-flex h-10 items-center rounded-xl bg-primary px-4 font-semibold text-primary-ink hover:opacity-90">
               Unirme
             </a>
@@ -196,10 +193,6 @@ export function Landing() {
               {bienvenida ?? <FormularioCorreo origen={origen} alUnirse={alUnirse} />}
               {!registro && <Contador total={total} />}
             </div>
-            <a href="/app" className="group inline-flex items-center gap-2 self-start font-semibold">
-              O prueba la demo ahora
-              <ArrowRight className="size-5 transition group-hover:translate-x-0.5" aria-hidden />
-            </a>
           </div>
           <Collage />
         </Contenedor>
@@ -290,12 +283,12 @@ export function Landing() {
               </article>
             ))}
             <a
-              href="/app"
+              href="#unirme"
               className="group flex flex-col justify-between gap-4 rounded-3xl border-2 border-dashed border-line p-6 transition hover:border-ink sm:p-7"
             >
-              <p className="font-display text-2xl font-bold">Pruébalas en la demo</p>
+              <p className="font-display text-2xl font-bold">¿Te servirían en tu clase?</p>
               <span className="inline-flex items-center gap-2 font-semibold">
-                Abrir Supermentes <ArrowRight className="size-5 transition group-hover:translate-x-0.5" aria-hidden />
+                Únete a la lista de espera <ArrowRight className="size-5 transition group-hover:translate-x-0.5" aria-hidden />
               </span>
             </a>
           </div>
@@ -367,9 +360,6 @@ export function Landing() {
             <p className="text-sm text-ink-soft">Hecho en Lima para Hack the Andes 2026.</p>
           </div>
           <nav className="flex gap-5 text-ink-soft" aria-label="Pie de página">
-            <a href="/app" className="hover:text-ink">
-              Demo
-            </a>
             <a href="#herramientas" className="hover:text-ink">
               Herramientas
             </a>

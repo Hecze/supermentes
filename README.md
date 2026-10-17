@@ -9,7 +9,7 @@ Proyecto para Hack the Andes 2026.
 | Ruta | Qué es |
 | --- | --- |
 | `/` | Landing con la lista de espera (`index.html`, `src/landing/`) |
-| `/app` | La app para docentes (`app/index.html`, `src/main.tsx`) |
+| `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). Privada por ahora: solo entra quien tiene el enlace `/app?acceso=APP_ACCESO` (ver `middleware.ts`) |
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 
 ## Lista de espera
@@ -37,7 +37,7 @@ Interfaz completa con **datos de ejemplo**. Todas las pantallas pasan por `src/a
 
 Ya funciona sin backend:
 
-- **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema) y elige el tamaño; la grilla la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
+- **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
 - **Juegos:** Memoria, Carrera de preguntas y Adivina la palabra se pueden jugar con el contenido del juego.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
