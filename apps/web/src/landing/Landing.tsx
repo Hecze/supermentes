@@ -182,12 +182,12 @@ export function Landing() {
               <span className="size-2 rounded-full bg-cancion" aria-hidden />
               Para docentes de inicial, primaria y secundaria del Perú
             </p>
-            <h1 className="font-display text-[2.7rem] font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-[4.4rem]">
-              Menos horas preparando. Más alumnos <span className="marker">atentos</span>.
+            <h1 className="font-display text-[2.5rem] font-bold leading-[1.04] tracking-tight sm:text-[3.4rem] lg:text-[3.55rem]">
+              Crea canciones, juegos y exámenes para tu clase <span className="marker">en minutos</span>.
             </h1>
             <p className="max-w-xl text-lg text-ink-soft sm:text-xl">
-              Escribe tu tema o sácale una foto a la página del libro. Supermentes te prepara la canción, el juego, el crucigrama o el examen
-              divertido que necesitas, listo para imprimir o proyectar.
+              Escribe tu tema o sácale una foto a la página del libro. Supermentes arma el material y tú lo imprimes, lo proyectas o lo compartes
+              por WhatsApp.
             </p>
             <div className="flex max-w-xl flex-col gap-3">
               {bienvenida ?? <FormularioCorreo origen={origen} alUnirse={alUnirse} />}

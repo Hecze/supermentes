@@ -14,12 +14,10 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **App en `/app`, privada:** solo entra quien tiene el enlace `/app?acceso=…` (clave en la variable `APP_ACCESO` de Vercel). Interfaz completa con datos de ejemplo; todo pasa por `apps/web/src/api`.
 
 ## Siguiente paso
-- Elegir el título principal de la landing (hay opciones propuestas).
 - Backend `/api` con Claude (ficha, letra, examen, juego, adaptación): contratos en `apps/web/src/api/types.ts`, endpoints en el README.
 - Audio con ElevenLabs, persistencia (biblioteca, créditos, links/QR), pictogramas ARASAAC.
 
 ## Riesgos
-- La rama de producción de Vercel quedó como `claude/fervent-feynman-xbn417` (la rama por defecto de GitHub). Hasta cambiarla a `main` (GitHub → Settings → Default branch, y Vercel → Settings → Environments → Production), los pushes a `main` crean solo vistas previas y producción se despliega a mano.
 - El `package-lock.json` debe incluir los binarios de Linux (`@rolldown/binding-linux-x64-gnu`, etc.) o el build de Vercel falla. Si npm los omite, regenerarlo con `rm -rf node_modules package-lock.json && npm install`.
 - El repo es de Hecze: coordinar con él antes de pushear cambios de estructura a `main`.
 
