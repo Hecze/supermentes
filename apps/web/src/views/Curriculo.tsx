@@ -138,6 +138,11 @@ export function VisorCurriculo() {
                   <section key={c.nombre} className="flex flex-col gap-3 border-t border-line pt-6">
                     <p className="text-sm font-semibold text-ink-soft">Competencia {i + 1}</p>
                     <h3 className="-mt-2 text-2xl font-semibold leading-snug">{c.nombre}</h3>
+                    {/amada por Dios/i.test(c.nombre) && (
+                      <p className="-mt-1 text-sm text-ink-soft">
+                        Competencia de educación religiosa. El programa oficial respeta el derecho de las familias a exonerarse de ella.
+                      </p>
+                    )}
 
                     {c.capacidades.length > 0 && (
                       <div className="flex flex-col gap-1">
@@ -162,6 +167,7 @@ export function VisorCurriculo() {
 
                     <div className="flex flex-col gap-1">
                       <h4 className="font-semibold">Desempeños de {grado?.corto}</h4>
+                      {c.desempenos.length === 0 && <p className="text-ink-soft">El programa oficial indica que en esta edad no se evidencian desempeños.</p>}
                       <ul className="flex flex-col gap-2">
                         {c.desempenos.map((d) => (
                           <li key={d} className="flex gap-2.5">
