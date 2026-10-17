@@ -4,6 +4,23 @@ Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qu�
 
 Proyecto para Hack the Andes 2026.
 
+## Páginas
+
+| Ruta | Qué es |
+| --- | --- |
+| `/` | Landing con la lista de espera (`index.html`, `src/landing/`) |
+| `/app` | La app para docentes (`app/index.html`, `src/main.tsx`) |
+| `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
+
+## Lista de espera
+
+- Cada registro es un archivo **privado** en Vercel Blob (`lista-espera/<huella del correo>.json`): un archivo por correo, así que no hay duplicados y volver a enviar el formulario solo completa los datos.
+- `GET /api/lista-espera` devuelve `{ total }` para el contador de la landing (cacheado 2 minutos en la CDN).
+- `GET /api/lista-espera?formato=csv&clave=LISTA_CLAVE` descarga todos los registros en CSV, con la columna `invitados` (cuántas personas se unieron con el enlace de cada uno). La clave está en las variables de entorno del proyecto en Vercel.
+- `DELETE /api/lista-espera?correo=…&clave=LISTA_CLAVE` borra un registro (pruebas o spam).
+- Para medir cada red social, comparte la landing con `?utm_source=instagram` (o `facebook`, `tiktok`, `whatsapp`…); queda guardado en la columna `fuente`.
+- Cada inscrito recibe un enlace `/?ref=CODIGO` para invitar a otros.
+
 ## Principios de diseño
 
 Pensado para docentes con poca experiencia digital: simple a primera vista y potente cuando lo necesitas, como una hoja de cálculo.
@@ -29,13 +46,15 @@ Ya funciona sin backend:
 
 ```bash
 npm install
-npm run dev            # http://localhost:5173 con datos de ejemplo
+npm run dev            # landing en http://localhost:5173 y app en /app/ (la lista de espera solo funciona desplegada)
 npm run typecheck
 npm run build
 npm run build:preview  # un solo HTML en dist-preview/supermentes.html para compartir
 ```
 
 Para usar el backend real: `VITE_API=real npm run dev`.
+
+Se despliega en Vercel desde la rama `main` (proyecto `supermentes`).
 
 ## Estructura
 

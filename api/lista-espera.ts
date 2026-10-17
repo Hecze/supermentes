@@ -3,8 +3,9 @@
 //   GET  /api/lista-espera                         → { total }  (contador público, cacheado)
 //   POST /api/lista-espera  { correo, nombre, … }  → { ok, nuevo, codigo, total }
 //   GET  /api/lista-espera?formato=csv&clave=…     → CSV con todos los registros (requiere LISTA_CLAVE)
+//   DELETE /api/lista-espera?correo=…&clave=…      → borra un registro (pruebas o spam; requiere LISTA_CLAVE)
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { get, list, put } from '@vercel/blob'
+import { del, get, list, put } from '@vercel/blob'
 
 const PREFIJO = 'lista-espera/'
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -120,6 +121,20 @@ export async function POST(request: Request) {
   }
 }
 
+export async function DELETE(request: Request) {
+  const url = new URL(request.url)
+  if (!claveValida(claveDe(request, url))) return json({ error: 'Clave incorrecta.' }, 401)
+  const correo = texto(url.searchParams.get('correo'), 254).toLowerCase()
+  if (!CORREO.test(correo)) return json({ error: 'Indica el correo que quieres borrar.' }, 400)
+  const ruta = rutaDe(huella(correo))
+  if (!(await leer(ruta))) return json({ error: 'Ese correo no está en la lista.' }, 404)
+  await del(ruta)
+  return json({ ok: true })
+}
+
+const claveDe = (request: Request, url: URL) =>
+  url.searchParams.get('clave') ?? request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? null
+
 function claveValida(dada: string | null) {
   const clave = process.env.LISTA_CLAVE
   if (!clave || !dada) return false
@@ -136,8 +151,7 @@ function celda(v: string | number | null) {
 }
 
 async function exportar(request: Request, url: URL) {
-  const dada = url.searchParams.get('clave') ?? request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? null
-  if (!claveValida(dada)) return json({ error: 'Clave incorrecta.' }, 401)
+  if (!claveValida(claveDe(request, url))) return json({ error: 'Clave incorrecta.' }, 401)
 
   const rutas: string[] = []
   let cursor: string | undefined
