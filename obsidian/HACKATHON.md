@@ -13,6 +13,37 @@ actualizado: 2026-10-17
 - **Objetivo:** algo que funcione de verdad, no una demo. Lo que se muestre tiene que poder usarlo un docente real.
 - **Reto de tracción:** conseguir gente interesada. Por eso la landing (`/`) tiene lista de espera con contador, enlace para invitar (`?ref=`) y fuente (`utm_source`); se promociona por redes. El CSV de inscritos se baja con `/api/lista-espera?formato=csv&clave=…` (clave: variable `LISTA_CLAVE` en Vercel).
 
+## Equipo
+- **Dropout Hack**, track `education` (Educación Escolar): Hector Zerrillo y Harold Medrano.
+- Todos los integrantes pueden publicar avances y actualizar la entrega. El proyecto lleva el
+  nombre del equipo (`andes team rename --name "…"` para cambiarlo).
+
+## Cómo nos evalúan
+- **Nota de cada jurado sobre 100:** tracción × 6 + esfuerzo técnico × 8 + pitch × 6 (cada
+  criterio de 1 a 5). Pesa más lo técnico; tracción y pitch empatan. El resultado es el promedio
+  de los jurados.
+- **Pitch:** 3 minutos + 2 de preguntas, en la computadora de la organización y desde los
+  enlaces entregados (no se conecta la laptop). Problema → quién lo tiene → solución
+  funcionando → evidencia. Separar lo que ya funciona de lo que es idea.
+- **Se congela al abrir la evaluación:** la organización guarda una copia de la entrega, los
+  enlaces y la bitácora; los cambios posteriores no llegan al jurado.
+
+## Entrega (`andes project submit`)
+Se puede entregar temprano y corregir después; cualquier integrante la actualiza.
+1. **URL del despliegue** funcionando: https://www.supermentes.app
+2. **URL de la presentación** (Canva, Google Slides o hecha con código).
+3. **URL del repo:** https://github.com/Hecze/supermentes
+4. **Descripción en Markdown:** problema, para quién, cómo funciona y **limitaciones**
+   (`--file ./proyecto.md`).
+
+Probar app y presentación en una **ventana privada**, sin sesión iniciada ni archivos locales.
+La descripción y los avances se hacen públicos: nada de claves, tokens ni datos de usuarios.
+
+## Bitácora (`andes project update`)
+Avances para mentores y jurado, visibles en la galería. Publicar tras una decisión importante,
+una prueba con usuarios, una demo funcional o un bloqueo: qué cambió, por qué y el siguiente
+paso. Al 2026-10-17 la bitácora está vacía y no hay entrega.
+
 ## Créditos y perks
 Los **códigos** no van en el repo: pídelos a Hector (están en su Notion, página "Hack the Andes 2026: créditos y perks") o en el canal del evento.
 
