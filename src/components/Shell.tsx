@@ -4,23 +4,10 @@ import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
+import { Logo } from './Logo'
 import { NuevoTema } from './NuevoTema'
 import { SelectorTema } from './SelectorTema'
 import { Boton, IconoHerramienta, cx } from './ui'
-
-/** Cinco plumones en su estuche: uno por herramienta. */
-export function Logo() {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex h-8 items-end gap-[3px] rounded-lg border border-line bg-surface-2 px-1.5 pb-1" aria-hidden>
-        {ORDEN_HERRAMIENTAS.map((id, i) => (
-          <span key={id} className="w-[4px] rounded-full" style={{ background: HERRAMIENTAS[id].color, height: [18, 14, 20, 12, 16][i] }} />
-        ))}
-      </span>
-      <span className="font-display text-xl font-bold tracking-tight">Supermentes</span>
-    </span>
-  )
-}
 
 function Creditos() {
   const { creditos } = useStore()
