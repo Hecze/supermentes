@@ -27,6 +27,11 @@ Lee:
 ## Cómo trabajamos
 
 - Varias personas y sesiones de Claude trabajan en paralelo: cada una en su rama y luego merge a `main`. No reescribas historia de `main` (nada de rebase ni force-push).
+- **Sube seguido y por alcance chico, para no pisarnos:**
+  - Antes de empezar, trae lo último: `git pull origin main`.
+  - Una pieza por vez (un endpoint, una vista, una nota): al terminarla, `git pull origin main`, `npm run typecheck` y `npm run build`, merge a `main` y push. No se acumulan horas de trabajo sin subir: como máximo **cada 30 minutos**, aunque la pieza siga a medias detrás de un interruptor o sin conectar.
+  - Antes de tocar un archivo, mira quién lo cambió hace poco (`git log -3 --since="2 hours ago" -- <archivo>`). Si otra sesión lo está trabajando, toca lo mínimo o coordina antes.
+  - Commits chicos que digan qué cambió y por qué; nunca `--force` ni borrar trabajo ajeno para que tu merge pase.
 - Producción: https://www.supermentes.app (Vercel, proyecto `supermentes`). La landing está en `/` y la app en `/app`.
 - Todo en español peruano, con palabras del aula y no técnicas: el docente promedio tiene poca experiencia digital y usa laptop.
 - Nos centramos en **primaria**. Los alumnos juegan en **el celular de sus papás**: el docente (en laptop) manda el link del juego al grupo de WhatsApp de las familias y los papás le prestan el celular a su hijo o hija. Todo lo que juega el alumno se diseña primero para celular en vertical (ver `apps/web/src/juegos/README.md`).

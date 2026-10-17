@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: { Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(60_000), // nada de esperas infinitas: a los 60 s se corta y la app ofrece reintentar
       body: JSON.stringify({
         model: MODELO_MUSICA,
         stream: true, // el audio solo sale en streaming
