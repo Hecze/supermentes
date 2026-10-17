@@ -94,7 +94,7 @@ export function Crucigrama() {
     try {
       const png = await imagenCrucigrama(cruci, { conRespuestas: respuestas })
       const tema = normalizar(ficha!.titulo.split(':')[0]).toLowerCase()
-      descargar(png, `crucigrama-${tema}${respuestas ? '-respuestas' : ''}.png`, avisar)
+      await descargar(png, `crucigrama-${tema}${respuestas ? '-respuestas' : ''}.png`, avisar)
     } catch {
       avisar('No se pudo crear la imagen. Intenta de nuevo.', 'error')
     }

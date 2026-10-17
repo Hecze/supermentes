@@ -24,10 +24,33 @@ export function imprimir(avisar: (texto: string) => void) {
   else window.print()
 }
 
+type Guardador = { save: (pedido: { filename: string; data: Blob }) => Promise<unknown> }
+
+/** El visor de vista previa de claude.ai ofrece su propio permiso de descarga; fuera de él no existe. */
+async function descargasDelVisor(): Promise<Guardador | null> {
+  const visor = (window as unknown as { claude?: { use?: (nombre: string) => Promise<unknown> } }).claude
+  if (!visor?.use) return null
+  try {
+    return (await visor.use('downloads')) as Guardador | null
+  } catch {
+    return null
+  }
+}
+
 /** Descarga un archivo generado en el navegador. */
-export function descargar(archivo: Blob, nombre: string, avisar: (texto: string, tono?: 'info' | 'ok' | 'error') => void) {
+export async function descargar(archivo: Blob, nombre: string, avisar: (texto: string, tono?: 'info' | 'ok' | 'error') => void) {
   if (embebido()) {
-    avisar(`En la app se descarga "${nombre}". Esta vista previa no permite descargas.`)
+    const visor = await descargasDelVisor()
+    if (!visor) {
+      avisar(`En la app se descarga "${nombre}". Esta vista previa no permite descargas.`)
+      return
+    }
+    try {
+      await visor.save({ filename: nombre, data: archivo })
+      avisar(`Descargaste "${nombre}".`, 'ok')
+    } catch (e) {
+      if ((e as { code?: string }).code !== 'declined') avisar('No se pudo descargar el archivo. Intenta de nuevo.', 'error')
+    }
     return
   }
   const url = URL.createObjectURL(archivo)
