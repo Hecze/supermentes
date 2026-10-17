@@ -41,7 +41,11 @@ function SustentoCancion({ c, s, ficha }: { c: CancionExistente; s: Sustento | n
         {u && (
           <span className="mt-1.5 flex items-start gap-1.5 font-medium text-ok">
             <BadgeCheck className="mt-px size-4 shrink-0" aria-hidden />
-            {mismoDesempeno ? 'Es justo lo resaltado del desempeño del tema.' : `Es justo lo resaltado, de la competencia «${u.competencia}» del mismo grado.`}
+            {mismoDesempeno
+              ? 'Es justo lo resaltado del desempeño del tema.'
+              : c.area === ficha.areaId
+                ? `Es justo lo resaltado, de la competencia «${u.competencia}» del mismo grado.`
+                : `Es justo lo resaltado, de ${cur.estado === 'listo' && cur.area ? cur.area.nombre : 'otro curso'} (competencia «${u.competencia}») del mismo grado.`}
           </span>
         )}
       </Bloque>

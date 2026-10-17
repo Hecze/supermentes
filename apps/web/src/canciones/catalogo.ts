@@ -42,19 +42,31 @@ const raices = (t: string) =>
 export type CancionesDelTema = { delTema: CancionExistente[]; otras: CancionExistente[] }
 
 /**
- * Las canciones del grado y área del tema: primero las de ese tema (por su nombre o por palabras de la ficha),
- * después las demás del mismo grado y área.
+ * Las canciones del grado: primero las del tema (por su nombre: pesa más si está en el título de la canción),
+ * después las demás del mismo curso. De otro curso del grado solo entran las que coinciden con todo el nombre
+ * del tema; su «i» muestra el desempeño de su propio curso.
  */
 export function cancionesDelTema(todas: CancionExistente[], ficha: Ficha): CancionesDelTema {
-  const delGrado = todas.filter((c) => c.area === ficha.areaId && c.grados[ficha.gradoId])
+  const delGrado = todas.filter((c) => c.grados[ficha.gradoId])
   const titulo = normalizar(ficha.titulo)
-  const claves = raices([ficha.titulo, ...ficha.conceptos.slice(0, 3)].join(' '))
+  const claves = [...raices(ficha.titulo)]
   const puntos = (c: CancionExistente) => {
-    if (c.temas.some((t) => normalizar(t) === titulo)) return 100
-    return [...raices([...c.temas, c.titulo].join(' '))].filter((r) => claves.has(r)).length
+    const enTitulo = raices(c.titulo)
+    const enTemas = raices(c.temas.join(' '))
+    const exacto = c.temas.some((t) => normalizar(t) === titulo)
+    const todas = claves.length > 0 && claves.every((k) => enTitulo.has(k) || enTemas.has(k))
+    const p = (exacto ? 100 : 0) + claves.reduce((n, k) => n + (enTitulo.has(k) ? 3 : 0) + (enTemas.has(k) ? 2 : 0), 0)
+    if (c.area !== ficha.areaId) return exacto || todas ? p : -1
+    return p
   }
-  const conPuntos = delGrado.map((c) => ({ c, p: puntos(c) })).sort((a, b) => b.p - a.p)
-  return { delTema: conPuntos.filter((x) => x.p > 0).map((x) => x.c), otras: conPuntos.filter((x) => x.p === 0).map((x) => x.c) }
+  const conPuntos = delGrado
+    .map((c) => ({ c, p: puntos(c) }))
+    .filter((x) => x.p >= 0)
+    .sort((a, b) => b.p - a.p)
+  return {
+    delTema: conPuntos.filter((x) => x.p > 0).map((x) => x.c),
+    otras: conPuntos.filter((x) => x.p === 0 && x.c.area === ficha.areaId).map((x) => x.c),
+  }
 }
 
 /** Catálogo cargado (null mientras se descarga). */
