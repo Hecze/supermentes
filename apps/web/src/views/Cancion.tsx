@@ -6,6 +6,7 @@ import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { Acciones, Boton, Chip, Desplegable, Editable, Generando, Hoja, NotaCreditos, Pregunta, cx, imprimir, tinte } from '../components/ui'
+import { CancionesExistentes } from './CancionesExistentes'
 
 const POR_DEFECTO: OpcionesCancion = { modo: 'ritmo', ritmo: 'Cumbia', melodia: 'Los pollitos dicen' }
 const COLOR = 'var(--cancion)'
@@ -116,6 +117,11 @@ export function Cancion() {
     return (
       <>
         <EncabezadoHerramienta id="cancion" />
+        <CancionesExistentes ficha={ficha} />
+        <div className="flex flex-col gap-1 border-t border-line pt-6">
+          <h2 className="font-display text-2xl font-bold">O crea una canción nueva</h2>
+          <p className="text-ink-soft">Con las palabras de tu tema y el ritmo que le guste a tu clase.</p>
+        </div>
         <Pregunta titulo="¿Con qué ritmo?">
           <ElegirRitmo opciones={opciones} cambiar={setOpciones} />
         </Pregunta>
@@ -194,6 +200,8 @@ export function Cancion() {
           <NotaCreditos n={COSTOS.letra} quedan={creditos} />
         </div>
       </Desplegable>
+
+      <CancionesExistentes ficha={ficha} plegado />
     </>
   )
 }

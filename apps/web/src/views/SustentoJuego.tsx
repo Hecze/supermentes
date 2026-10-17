@@ -243,7 +243,7 @@ function Ejemplo({ r }: { r: Reto }) {
   )
 }
 
-function Bloque({ titulo, children }: { titulo: string; children: ReactNode }) {
+export function Bloque({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{titulo}</p>
@@ -253,7 +253,7 @@ function Bloque({ titulo, children }: { titulo: string; children: ReactNode }) {
 }
 
 /** Desempeño oficial con su número; en cálculo, con la parte que se practica resaltada. */
-function Cita({ u, cita }: { u: Ubicacion; cita?: string }) {
+export function Cita({ u, cita }: { u: Ubicacion; cita?: string }) {
   return (
     <blockquote className="mt-1 border-l-4 border-[#ffd23f] pl-3 italic text-ink">
       <Desempeno texto={u.desempeno} desde={cita ? u.desde : 0} cita={cita} />

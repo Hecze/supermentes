@@ -1,0 +1,15 @@
+[
+  {
+    "id": "JdV8Ea5Y-8Y",
+    "titulo": "Canción de fracciones con una rica pizza",
+    "canal": "ChuChuTV Español",
+    "duracion": "2:01",
+    "idioma": "es",
+    "area": "matematica",
+    "grados": {
+      "primaria-4": "acciones de partir una unidad o una colección de objetos en partes iguales y las transforma en expresiones numéricas (modelo) de fracciones usuales"
+    },
+    "temas": ["Fracciones usuales"],
+    "resumen": "Reparte una pizza en partes iguales para explicar las fracciones."
+  }
+]
