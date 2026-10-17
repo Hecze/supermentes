@@ -47,7 +47,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     id: 'crucigrama',
     pedido: 'Un crucigrama',
     nombre: 'Crucigrama',
-    descripcion: 'Con las palabras del tema, listo para imprimir.',
+    descripcion: 'Con las palabras que tú elijas, listo para imprimir.',
     icono: Grid3x3,
     color: 'var(--crucigrama)',
     costo: textoCosto(COSTOS.crucigrama),

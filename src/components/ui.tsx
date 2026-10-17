@@ -9,17 +9,36 @@ export function cx(...c: (string | false | null | undefined)[]) {
 
 export const tinte = (color: string, pct: number) => `color-mix(in oklab, ${color} ${pct}%, transparent)`
 
-/** Imprime solo la hoja visible. Dentro de un visor embebido no se puede abrir el diálogo, así que se avisa. */
+/** Dentro de un visor embebido (como la vista previa) el navegador no deja imprimir ni descargar. */
+function embebido() {
+  try {
+    return window.self !== window.top
+  } catch {
+    return true
+  }
+}
+
+/** Imprime solo la hoja visible. */
 export function imprimir(avisar: (texto: string) => void) {
-  const embebido = (() => {
-    try {
-      return window.self !== window.top
-    } catch {
-      return true
-    }
-  })()
-  if (embebido) avisar('En la app se abre la ventana para imprimir solo esta hoja (o guardarla como PDF).')
+  if (embebido()) avisar('En la app se abre la ventana para imprimir solo esta hoja (o guardarla como PDF).')
   else window.print()
+}
+
+/** Descarga un archivo generado en el navegador. */
+export function descargar(archivo: Blob, nombre: string, avisar: (texto: string, tono?: 'info' | 'ok' | 'error') => void) {
+  if (embebido()) {
+    avisar(`En la app se descarga "${nombre}". Esta vista previa no permite descargas.`)
+    return
+  }
+  const url = URL.createObjectURL(archivo)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = nombre
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  avisar(`Descargaste "${nombre}".`, 'ok')
 }
 
 type BotonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

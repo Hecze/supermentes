@@ -1,5 +1,5 @@
 // Arma la grilla de un crucigrama con un algoritmo simple (sin IA).
-// Las palabras y pistas salen del vocabulario de la ficha.
+// Las palabras y pistas las elige el docente.
 
 export type Direccion = 'horizontal' | 'vertical'
 
@@ -43,11 +43,15 @@ function aleatorio(semilla: number) {
   }
 }
 
-export function armarCrucigrama(entradas: Entrada[], semilla = 1): Crucigrama {
+/** Arma la grilla sin pasarse de `maxLado` casillas de alto ni de ancho. */
+export function armarCrucigrama(entradas: Entrada[], semilla = 1, maxLado = Infinity): Crucigrama {
   const azar = aleatorio(semilla)
-  const palabras = entradas
+  const vistas = new Set<string>()
+  const normalizadas = entradas
     .map((e) => ({ ...e, palabra: normalizar(e.palabra) }))
-    .filter((e) => e.palabra.length > 1)
+    .filter((e) => e.palabra.length > 1 && !vistas.has(e.palabra) && vistas.add(e.palabra))
+  const palabras = normalizadas.filter((e) => e.palabra.length <= maxLado)
+  const sinUbicar: Entrada[] = normalizadas.filter((e) => e.palabra.length > maxLado)
 
   // La más larga va primero; el resto se ordena por largo con un poco de azar para variar la grilla.
   const ordenadas = [...palabras].sort((a, b) => b.palabra.length - a.palabra.length)
@@ -61,7 +65,6 @@ export function armarCrucigrama(entradas: Entrada[], semilla = 1): Crucigrama {
   const usos = new Map<string, Set<Direccion>>()
   const clave = (f: number, c: number) => `${f},${c}`
   const colocadas: Omit<Ubicada, 'numero'>[] = []
-  const sinUbicar: Entrada[] = []
   let lim = { f0: 0, f1: 0, c0: 0, c1: 0 }
 
   const paso = (dir: Direccion) => (dir === 'vertical' ? [1, 0] : [0, 1])
@@ -105,7 +108,7 @@ export function armarCrucigrama(entradas: Entrada[], semilla = 1): Crucigrama {
     return n === palabra.length ? -1 : n
   }
 
-  if (!primera) return { filas: 0, cols: 0, letras: [], numeros: [], ubicadas: [], sinUbicar: [] }
+  if (!primera) return { filas: 0, cols: 0, letras: [], numeros: [], ubicadas: [], sinUbicar }
   colocar(primera, 0, 0, 'horizontal')
 
   for (const e of orden) {
@@ -124,6 +127,7 @@ export function armarCrucigrama(entradas: Entrada[], semilla = 1): Crucigrama {
           const [df, dc] = paso(dir)
           const alto = Math.max(lim.f1, fila + df * (e.palabra.length - 1)) - Math.min(lim.f0, fila) + 1
           const ancho = Math.max(lim.c1, col + dc * (e.palabra.length - 1)) - Math.min(lim.c0, col) + 1
+          if (alto > maxLado || ancho > maxLado) continue
           const puntaje = n * 100 - alto * ancho - Math.abs(alto - ancho) * 3 + azar() * 6
           if (!mejor || puntaje > mejor.puntaje) mejor = { fila, col, dir, puntaje }
         }
@@ -157,10 +161,10 @@ export function armarCrucigrama(entradas: Entrada[], semilla = 1): Crucigrama {
 }
 
 /** Prueba varias semillas y se queda con la grilla que ubica más palabras y ocupa menos espacio. */
-export function mejorCrucigrama(entradas: Entrada[], semilla = 1, intentos = 12): Crucigrama {
+export function mejorCrucigrama(entradas: Entrada[], semilla = 1, maxLado = Infinity, intentos = 12): Crucigrama {
   let mejor: Crucigrama | null = null
   for (let i = 0; i < intentos; i++) {
-    const c = armarCrucigrama(entradas, semilla * 97 + i)
+    const c = armarCrucigrama(entradas, semilla * 97 + i, maxLado)
     if (
       !mejor ||
       c.sinUbicar.length < mejor.sinUbicar.length ||

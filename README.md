@@ -20,7 +20,7 @@ Interfaz completa con **datos de ejemplo**. Todas las pantallas pasan por `src/a
 
 Ya funciona sin backend:
 
-- **Crucigrama:** la grilla la arma un algoritmo (`src/lib/crucigrama.ts`) con el vocabulario de la ficha.
+- **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema) y elige el tamaño; la grilla la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
 - **Juegos:** Memoria, Carrera de preguntas y Adivina la palabra se pueden jugar con el contenido del juego.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
@@ -67,7 +67,7 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 ## Costos
 
-La ficha, el crucigrama y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Un juego se genera una vez y cambiar de plantilla es gratis.
+La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Un juego se genera una vez y cambiar de plantilla es gratis.
 
 ## Pendiente para que funcione de verdad
 

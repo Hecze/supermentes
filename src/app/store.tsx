@@ -9,7 +9,11 @@ type Tono = 'info' | 'ok' | 'error'
 export type Aviso = { id: number; texto: string; tono: Tono }
 type Tema = 'light' | 'dark'
 
+export type FilaCrucigrama = { id: number; palabra: string; pista: string }
+
 export type Resultados = {
+  /** Palabras que eligió el docente y lado máximo de la grilla. */
+  crucigrama?: { filas: FilaCrucigrama[]; lado: number }
   cancion?: Cancion
   audio?: AudioCancion
   examen?: Examen

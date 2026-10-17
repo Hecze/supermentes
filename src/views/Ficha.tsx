@@ -13,7 +13,7 @@ export function Ficha() {
     cancion: !!resultados.cancion,
     examen: !!resultados.examen,
     juego: !!resultados.juego,
-    crucigrama: false,
+    crucigrama: !!resultados.crucigrama?.filas.some((f) => f.palabra.trim().length > 1),
     adaptar: !!resultados.adaptacion,
   }
 
