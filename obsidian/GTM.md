@@ -13,6 +13,13 @@ Al 2026-10-17 la lista de espera tiene **1 inscrito**. La meta de la noche son d
 3. **Gancho:** "Inscríbete y te mando el juego de tu tema gratis" (los juegos ya funcionan).
 4. **Medir la fuente** con `utm_source`: "50 docentes en 12 h, 70 % por WhatsApp" es evidencia para el pitch.
 
+## Video demo para la lista de espera
+Un solo video de la app funcionando sirve para todo: se manda a la lista de espera, se publica en TikTok y se muestra en el pitch.
+- **Qué muestra:** un tema real del currículo → el juego → el QR escaneado en un celular. 30–60 s, sin cortes de carga.
+- **Cómo llega:** la lista guarda `correo` y `nombre`, así que va por correo: "Hola {nombre}, así queda tu clase con Supermentes" + el link al video (YouTube o TikTok, no adjunto) + un botón a la app.
+- **Para qué:** que el inscrito vuelva y lo use, y que lo reenvíe con su `?ref=`. Lo que se mide es cuántos abren la app desde el correo.
+- Hay grabaciones en curso en `demos/tiktok/` (otra sesión): reutilizar esas tomas, no grabar de cero.
+
 ## Quién paga (hipótesis, sin verificar)
 **El docente sí paga, por Yape, no con tarjeta.** Hoy se venden por Facebook y WhatsApp paquetes de sesiones de aprendizaje y fichas a S/ 10–50. Si se confirma, competimos con esos vendedores, no con MagicSchool.
 
