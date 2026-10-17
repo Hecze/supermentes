@@ -46,7 +46,7 @@ desde *Share* (o la exporte a PDF / PowerPoint / Google Slides desde ahí).
 - **¿Cuánto les cuesta un docente?** ~US$ 1.3 al mes con uso típico. Lámina "Lo que cuesta cada material".
 - **¿Qué validaron con docentes?** Una entrevista a fondo y la lista de espera. Lo honesto es decir eso y
   mostrar qué medimos: docentes que vuelven por un segundo tema, juegos jugados, invitados.
-- **¿Qué es real y qué es idea?** Real: currículo, buscador, 12 juegos con QR y resultados de los alumnos,
+- **¿Qué es real y qué es idea?** Real: currículo, buscador, 17 juegos con QR y resultados de los alumnos,
   crucigrama, lista de espera y, con IA, ficha, juego del tema, examen adaptado en PDF y letra. Falta: audio,
   cuentas y pagos.
 - **¿De dónde salen las 7 horas?** La ENDO 2021 da rangos, no promedios; sumamos lo mínimo de cada rango

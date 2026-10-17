@@ -34,7 +34,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - `obsidian/DATOS.md`: cifras con fuente (horas extra del docente, aprendizajes, cuánto pagan, costos de IA).
 - `obsidian/GTM.md`: tracción para el jurado, quién paga y guiones de TikTok.
 - `obsidian/PITCH.md`: guion del pitch, lista para antes de las 9:00 y preguntas probables.
-- `obsidian/NEGOCIO.md`: cifras con fuente (mercado, docentes, IA, quién paga, competencia, costos).
+- `obsidian/NEGOCIO.md`: investigación del modelo de negocio y la competencia (las cifras sueltas, en `DATOS.md`).
 - `obsidian/MVP.md`: qué tiene que funcionar para la entrega y qué no hacer.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/VISION.md`: visión y principios del producto.
