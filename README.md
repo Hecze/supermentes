@@ -52,6 +52,7 @@ Ya funciona sin backend:
 - **Juegos:** doce juegos que sirven para cualquier tema (Concurso estilo Kahoot, Globos, Botones rápidos, Memoria, Carrera de llamas, Atrapa al cuy, Adivina la palabra, Pupiletras, Duelo de robots, Invasión, Tira y afloja y Ruleta de preguntas): el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. El pupiletras también se imprime. Ver `src/juegos/README.md`.
 - **Mandar un juego a las familias:** el docente toca "Enviar a las familias" y sale el mensaje de WhatsApp para el grupo de papás con el link (`supermentes.app/j/CODIGO`); los niños juegan en el celular de casa, sin cuenta. También hay código para escribir en `/j` y QR en grande para la clase. Si el servidor no responde, el juego viaja dentro del link y abre igual.
 - **Resultados de los alumnos:** la primera vez, el niño escribe su nombre en un popup (sin cuenta; el código ya viene en el link). Cuando supera su puntaje, se guarda, y el docente ve en **Resultados de juegos** (en el menú, sin importar el tema abierto) una tabla simple: quién jugó, su puntaje más alto y sus estrellas. Los ejercicios de cálculo cambian en cada intento, así que reintentar no es memorizar.
+- **Sustento curricular en cada juego:** el icono "i" muestra, con texto oficial del MINEDU, qué competencia y desempeño abarca el tema y qué parte exacta del desempeño practica el juego. Cada nivel de cálculo cita su desempeño grado por grado y `npm run verificar:curriculo` comprueba que la cita exista tal cual. Las miniaturas de los juegos muestran el contenido del tema.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama o letra), siempre en blanco. El examen adaptado además se descarga como PDF (`apps/web/src/lib/pdfExamen.ts`, con jsPDF en el navegador), y aparte el PDF de respuestas.
 
@@ -60,7 +61,7 @@ Ya funciona sin backend:
 ```bash
 npm install
 npm run dev            # landing en http://localhost:5173 y app en /app/ (la lista de espera solo funciona desplegada)
-npm run typecheck
+npm run typecheck      # tipos y verificador del currículo (npm run verificar:curriculo)
 npm run build
 npm run build:preview -w @supermentes/web  # un solo HTML en apps/web/dist-preview/supermentes.html para compartir
 ```

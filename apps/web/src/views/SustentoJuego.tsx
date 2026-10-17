@@ -131,15 +131,20 @@ const ANCHO = 400
 /** Se abre al pasar el mouse o al enfocarlo con el teclado; un clic (o un toque en el celular) la deja fija. */
 export function BotonInfo({ etiqueta, children, chip, className }: { etiqueta: string; children: ReactNode; chip?: boolean; className?: string }) {
   const [abierto, setAbierto] = useState<'paso' | 'fijo' | null>(null)
-  const [haciaDerecha, setHaciaDerecha] = useState(false)
+  const [lugar, setLugar] = useState({ izquierda: 0, ancho: ANCHO })
   const caja = useRef<HTMLDivElement>(null)
   const id = useId()
 
   function abrir(como: 'paso' | 'fijo') {
     const r = caja.current?.getBoundingClientRect()
-    // Se abre hacia la izquierda del icono, salvo que no quepa sin tapar el menú lateral.
-    const borde = caja.current?.closest('main')?.getBoundingClientRect().left ?? 0
-    if (r) setHaciaDerecha(r.right - ANCHO < borde + 8)
+    if (r) {
+      // Hacia la izquierda del icono si cabe; si no, corrida lo justo para no tapar el menú ni salirse de la pantalla.
+      const ancho = Math.min(ANCHO, window.innerWidth - 32)
+      const minimo = (caja.current?.closest('main')?.getBoundingClientRect().left ?? 0) + 8
+      const maximo = window.innerWidth - 16 - ancho
+      const x = Math.max(Math.min(r.right - ancho, maximo), Math.min(minimo, maximo))
+      setLugar({ izquierda: x - r.left, ancho })
+    }
     setAbierto((a) => (a === 'fijo' ? 'fijo' : como))
   }
   const cerrarPaso = () => setAbierto((a) => (a === 'paso' ? null : a))
@@ -188,7 +193,7 @@ export function BotonInfo({ etiqueta, children, chip, className }: { etiqueta: s
         {chip && etiqueta}
       </button>
       {abierto && (
-        <div id={id} role="dialog" aria-label={etiqueta} className={cx('absolute top-full z-40 pt-2', haciaDerecha ? 'left-0' : 'right-0')} style={{ width: `min(${ANCHO}px, calc(100vw - 2rem))` }}>
+        <div id={id} role="dialog" aria-label={etiqueta} className="absolute top-full z-40 pt-2" style={{ left: lugar.izquierda, width: lugar.ancho }}>
           <div className="entrar rounded-2xl border border-line bg-surface p-4 text-left text-ink shadow-2xl">{children}</div>
         </div>
       )}

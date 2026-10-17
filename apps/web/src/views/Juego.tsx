@@ -17,7 +17,8 @@ import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
 import { AtajoResultados } from './ResultadosJuegos'
 import { InfoCurricular, textoGrados, useSustento, type Sustento } from './SustentoJuego'
-import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
+import { muestraDe } from '../juegos/miniaturas'
+import type { DefinicionJuego, JuegoId, Muestra } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
 
@@ -57,7 +58,7 @@ function Insignias({ def }: { def: DefinicionJuego }) {
   )
 }
 
-function TarjetaJuego({ def, onClick, sustento }: { def: DefinicionJuego; onClick: () => void; sustento: Sustento | null }) {
+function TarjetaJuego({ def, onClick, sustento, muestra }: { def: DefinicionJuego; onClick: () => void; sustento: Sustento | null; muestra: Muestra }) {
   const { Miniatura } = def
   return (
     <div className="relative flex">
@@ -68,7 +69,7 @@ function TarjetaJuego({ def, onClick, sustento }: { def: DefinicionJuego; onClic
       >
         <span className="block overflow-hidden border-b-2 border-line">
           <span className="block transition duration-300 group-hover:scale-[1.04]">
-            <Miniatura />
+            <Miniatura muestra={muestra} />
           </span>
         </span>
         <span className="flex flex-1 flex-col gap-1.5 p-4">
@@ -530,7 +531,7 @@ export function Juego() {
           <span className="grid size-11 shrink-0 place-items-center rounded-xl" style={{ background: tinte(COLOR, 14), color: COLOR }}>
             {fuente.fuente === 'calculo' ? <Calculator className="size-5" aria-hidden /> : <Sparkles className="size-5" aria-hidden />}
           </span>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-56">
             <p className="text-sm text-ink-soft">Practican</p>
             <p className="font-semibold">
               <TextoMat texto={nombreFuente(fuente, ficha)} />
@@ -564,8 +565,8 @@ export function Juego() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {compatibles
                 .filter(({ def }) => def.donde.includes('celular'))
-                .map(({ def }) => (
-                  <TarjetaJuego key={def.id} def={def} sustento={sustento} onClick={() => setElegido(def.id)} />
+                .map(({ def, contenido: c }) => (
+                  <TarjetaJuego key={def.id} def={def} sustento={sustento} muestra={muestraDe(c)} onClick={() => setElegido(def.id)} />
                 ))}
             </div>
             {compatibles.some(({ def }) => !def.donde.includes('celular')) && (
@@ -579,8 +580,8 @@ export function Juego() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {compatibles
                     .filter(({ def }) => !def.donde.includes('celular'))
-                    .map(({ def }) => (
-                      <TarjetaJuego key={def.id} def={def} sustento={sustento} onClick={() => setElegido(def.id)} />
+                    .map(({ def, contenido: c }) => (
+                      <TarjetaJuego key={def.id} def={def} sustento={sustento} muestra={muestraDe(c)} onClick={() => setElegido(def.id)} />
                     ))}
                 </div>
               </>

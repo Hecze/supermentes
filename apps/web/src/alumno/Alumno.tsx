@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type CSSProperties, type For
 import { juegoPorId, juegosCompatibles } from '../juegos/catalogo'
 import { cargar, codigoValido, contenidoDe, leerAutonomo, type Publicado } from '../juegos/compartir/publicado'
 import { alumnoGuardado, enviarResultado, guardarAlumno, type Alumno as DatosAlumno } from '../juegos/compartir/resultados'
+import { muestraDe } from '../juegos/miniaturas'
 import { Llama, LLAMAS } from '../juegos/motor/Llama'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import type { Contenido, JuegoId, Resultado } from '../juegos/tipos'
@@ -150,7 +151,7 @@ function OtroJuego({ contenido, grado, actual, elegir, cerrar }: { contenido: Co
           </button>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {otros.map(({ def }) => (
+          {otros.map(({ def, contenido: c }) => (
             <button
               key={def.id}
               type="button"
@@ -158,7 +159,7 @@ function OtroJuego({ contenido, grado, actual, elegir, cerrar }: { contenido: Co
               className="overflow-hidden rounded-2xl border-4 text-left transition hover:-translate-y-0.5"
               style={{ borderColor: def.color }}
             >
-              <def.Miniatura />
+              <def.Miniatura muestra={muestraDe(c)} />
               <span className="block px-3 py-2 text-xl font-bold">{def.nombre}</span>
             </button>
           ))}

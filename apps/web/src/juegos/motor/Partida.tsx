@@ -5,6 +5,7 @@ import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties,
 import type { Contenido, DefinicionJuego, Resultado, Ritmo } from '../tipos'
 import { nuevaSemilla } from './azar'
 import { Confeti } from './Confeti'
+import { muestraDe } from '../miniaturas'
 import { Llama } from './Llama'
 import { num } from '../matematica/formato'
 import { Estrellas, TextoMat } from './piezas'
@@ -115,7 +116,7 @@ function Portada({ def, contenido, jugar, pie }: { def: DefinicionJuego; conteni
         aria-hidden
       />
       <div className="entrar relative w-[min(46cqw,44cqh)] -rotate-2 overflow-hidden rounded-[3cqmin] border-[1cqmin] border-white shadow-xl">
-        <Miniatura />
+        <Miniatura muestra={muestraDe(contenido)} />
       </div>
       <h2
         className={`entrar relative font-bold leading-none ${oscuro ? 'texto-neon uppercase' : 'sombra-texto'}`}

@@ -38,6 +38,15 @@ export type Contenido = {
   generar?: (azar: () => number) => Reto
 }
 
+/** Lo que una miniatura muestra del contenido elegido, para que el dibujo se parezca al tema (ver muestraDe). */
+export type Muestra = {
+  /** Una pregunta corta y sus opciones; la correcta va en `opciones[1]`. */
+  reto?: { pregunta: string; visual?: Visual; opciones: string[] }
+  par?: Par
+  /** Palabras del tema en mayúsculas, de la más corta a la más larga. */
+  palabras: string[]
+}
+
 /** Velocidad del juego según la edad: 1 lento (inicial y 1.º–2.º), 3 rápido (5.º primaria en adelante). */
 export type Ritmo = 1 | 2 | 3
 
@@ -86,6 +95,7 @@ export type DefinicionJuego = {
   desde?: string
   /** Prepara el contenido que usa el juego, o null si con este contenido no se puede jugar. */
   preparar: (c: Contenido) => Contenido | null
-  Miniatura: ComponentType
+  /** Dibujo del juego; con `muestra`, usa el contenido elegido (ver miniaturas.tsx). */
+  Miniatura: ComponentType<{ muestra?: Muestra }>
   Componente: ComponentType<PropsJuego>
 }
