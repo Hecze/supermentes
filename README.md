@@ -11,6 +11,8 @@ Proyecto para Hack the Andes 2026.
 | `/` | Landing con la lista de espera (`index.html`, `src/landing/`) |
 | `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). La landing no la enlaza y no aparece en buscadores (`noindex`) |
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
+| `/j/CODIGO` | Juego compartido para los alumnos: solo el juego, sin cuenta (`j/index.html`, `src/alumno/`). En `/j` se escribe el código |
+| `/api/juegos-compartidos` | Guarda cada juego compartido en Vercel Blob con un código de 6 letras (`api/juegos-compartidos.ts`) |
 
 ## Currículo nacional (base de conocimiento)
 
@@ -47,6 +49,7 @@ Ya funciona sin backend:
 
 - **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
 - **Juegos:** seis juegos (Globos, Botones rápidos, Tira y afloja, Memoria, Carrera de llamas y Adivina la palabra) que sirven para cualquier tema: el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. Ver `src/juegos/README.md`.
+- **Compartir un juego:** link y QR reales (`supermentes.app/j/CODIGO`), código para escribir en `/j`, botón de WhatsApp y QR en grande para escanear desde el proyector. Si el servidor no responde, el juego viaja dentro del link y abre igual.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
 
@@ -103,5 +106,5 @@ La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no ga
 
 1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen, juego y adaptación.
 2. Audio de canciones con ElevenLabs.
-3. Persistencia: biblioteca, juegos publicados con link y QR reales, créditos en el servidor y guardar lo que el docente corrige en la hoja.
+3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
 4. Pictogramas de ARASAAC en la adaptación para TEA.

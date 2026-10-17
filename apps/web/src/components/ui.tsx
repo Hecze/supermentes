@@ -224,44 +224,6 @@ export function Pastel({ fraccion, tam = 56, color = 'var(--examen)' }: { fracci
   )
 }
 
-/** Código QR de muestra: el patrón no es un QR real hasta que exista el link del juego. */
-export function QrEjemplo({ semilla, tam = 148 }: { semilla: string; tam?: number }) {
-  const N = 25
-  let h = 2166136261
-  for (const ch of semilla) {
-    h ^= ch.charCodeAt(0)
-    h = Math.imul(h, 16777619)
-  }
-  const azar = () => {
-    h ^= h << 13
-    h ^= h >>> 17
-    h ^= h << 5
-    return ((h >>> 0) % 1000) / 1000
-  }
-  const enEsquina = (f: number, c: number) => (f < 8 && c < 8) || (f < 8 && c >= N - 8) || (f >= N - 8 && c < 8)
-  const modulos: ReactNode[] = []
-  for (let f = 0; f < N; f++)
-    for (let c = 0; c < N; c++) if (!enEsquina(f, c) && azar() < 0.48) modulos.push(<rect key={`${f}-${c}`} x={c + 2} y={f + 2} width={1} height={1} />)
-  const esquina = (f: number, c: number) => (
-    <g key={`e${f}-${c}`}>
-      <rect x={c + 2} y={f + 2} width={7} height={7} />
-      <rect x={c + 3} y={f + 3} width={5} height={5} fill="#ffffff" />
-      <rect x={c + 4} y={f + 4} width={3} height={3} />
-    </g>
-  )
-  return (
-    <svg width={tam} height={tam} viewBox={`0 0 ${N + 4} ${N + 4}`} role="img" aria-label="Código QR de ejemplo" shapeRendering="crispEdges">
-      <rect width={N + 4} height={N + 4} fill="#ffffff" rx={1.5} />
-      <g fill="#111111">
-        {modulos}
-        {esquina(0, 0)}
-        {esquina(0, N - 7)}
-        {esquina(N - 7, 0)}
-      </g>
-    </svg>
-  )
-}
-
 export function Generando({ texto }: { texto: string }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line bg-surface px-5 py-6 text-ink-soft print:hidden" role="status">
