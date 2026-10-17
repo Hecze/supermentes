@@ -2,7 +2,7 @@
 //
 //   POST /api/cancion  { ficha, opciones }  → Cancion (apps/web/src/api/types.ts)
 import { z } from 'zod'
-import { fallo, generar, json } from './_ia'
+import { fallo, generar, json } from './_ia.js'
 
 const Esquema = z.object({
   titulo: z.string().describe('Título corto y pegajoso'),

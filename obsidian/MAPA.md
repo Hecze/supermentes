@@ -12,8 +12,7 @@ actualizado: 2026-10-17
 ```mermaid
 flowchart LR
   L[Landing /<br/>lista de espera] -. enlace privado .-> A
-  A[Docente en /app] --> T[Elige grado, curso y tema<br/>del Currículo Nacional]
-  F[Foto del libro o<br/>su sesión, opcional] --> FI
+  A[Docente en /app] --> T[Busca su tema en el<br/>Currículo Nacional, al instante]
   T --> FI[Ficha del tema<br/>competencias, desempeños,<br/>vocabulario]
   FI --> C[Canción]
   EX[Examen del docente<br/>PDF o foto] --> E[Adaptar examen<br/>PDF adaptado]
@@ -31,7 +30,7 @@ flowchart LR
 | --- | --- | --- | --- | --- |
 | Landing `/` | Lista de espera con contador, referidos y fuente | **Real** en producción | Gratis | Promoción (reto de tracción) |
 | Currículo | CNEB de Inicial, Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
-| Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude (lee foto/PDF) |
+| Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude: completa ideas clave y vocabulario en segundo plano (el tema y su currículo ya están) |
 | Canción | Letra con ritmo peruano y luego el audio | Ejemplo | 1 + 3 créditos | `/api/cancion` (Claude) y `/api/audio` (ElevenLabs) |
 | Adaptar examen | El docente sube su examen (PDF o foto) y descarga un PDF ambientado en lo que le gusta a la clase y/o para TDAH, dislexia, TEA o lectura fácil (formato incluido: letra grande, casillas, apoyos) | Código real (`api/examen.ts`; PDF en el navegador). En producción sale el ejemplo hasta configurar la clave | 1 crédito | `OPENROUTER_API_KEY` y `VITE_API=real` en Vercel |
 | Juego web | 6 juegos para cualquier tema; 22 habilidades de cálculo | **Real** con cálculo y vocabulario | Gratis / 1 crédito | `/api/juego` para preguntas del tema |
@@ -50,7 +49,7 @@ cuello de botella.
   funciones de Vercel en `api/`, currículo en `packages/curriculo`, notas en `obsidian/`.
 - **Producción:** https://www.supermentes.app (Vercel, cuenta de Hecze). Datos en Vercel Blob.
 - **Contratos UI ↔ backend:** `apps/web/src/api/types.ts`. Cambiar de ejemplo a real: `VITE_API=real`.
-- **IA prevista:** Claude (texto y lectura de fotos), ElevenLabs (audio), ARASAAC (pictogramas).
+- **IA prevista:** Claude (texto; lee el examen que sube el docente para adaptarlo), ElevenLabs (audio), ARASAAC (pictogramas).
 
 ## Decisiones abiertas
 

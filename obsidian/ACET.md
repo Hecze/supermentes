@@ -23,7 +23,7 @@ reflexiones; ficha teórica; ficha de aplicación; escala de valoración para 30
 - **El profe ya paga** por material alineado al CNEB, y lo compra por WhatsApp. La demanda existe.
 - **Lo de ACET es genérico y estático**: la misma sesión para todos. No es para su clase ni trae canción,
   juego ni examen ambientado.
-- **No competimos, complementamos:** el profe sube la sesión que ya compró y Supermentes le arma la
-  canción, el juego y el examen a partir de ella. Probado el 2026-10-17: `api/ficha.ts` lee el PDF de
-  ACET y saca tema, propósito, competencia y vocabulario correctos (~17 s).
+- **No competimos, complementamos:** ACET vende la sesión; Supermentes le da al profe la canción, el juego y
+  el examen ambientado del mismo tema. Decisión del 17-oct: los temas salen solo del Currículo Nacional, así que
+  ya no se sube la sesión ni fotos del libro (el currículo alcanza y el tema se crea al instante).
 - **Canal posible:** una editorial así podría revender Supermentes a su base de suscriptores.

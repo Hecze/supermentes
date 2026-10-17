@@ -4,7 +4,7 @@
 //   POST /api/examen  multipart: ficha (JSON), opciones (JSON { interes, necesidades }), examen (archivo)  → Examen
 import type Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
-import { bloqueArchivo, fallo, generar, json } from './_ia'
+import { bloqueArchivo, fallo, generar, json } from './_ia.js'
 
 const Esquema = z.object({
   titulo: z.string().describe('Título corto del examen. Si se ambienta, que suene a la historia; si no, "Evaluación de <tema>"'),

@@ -3,7 +3,7 @@
 //
 //   POST /api/juego  { ficha }  → Juego (apps/web/src/api/types.ts)
 import { z } from 'zod'
-import { fallo, generar, json } from './_ia'
+import { fallo, generar, json } from './_ia.js'
 
 const Esquema = z.object({
   preguntas: z
