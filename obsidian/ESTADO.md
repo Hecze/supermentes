@@ -18,7 +18,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **Resultados de los alumnos:** el niño pone su nombre en un popup la primera vez (sin cuenta; el código viene en el link) y cuando supera su puntaje lo manda a `api/resultados.ts` (Blob, `resultados/CODIGO/ID.json`; solo escribe si mejora, para cuidar las 2.000 escrituras/mes del plan Hobby). El docente lo ve en "Resultados de juegos" del menú, de todos sus temas: alumno, puntaje más alto, estrellas. Para verlos usa una clave que recibió al publicar y que se guarda en su navegador. En `npm run dev`, sin token de Blob, las funciones usan un Blob en memoria.
 
 ## Siguiente paso
-- **Entrega (domingo 18, 9:00):** `proyecto.md` listo en la raíz; falta la presentación y la tracción (lista de espera en 1). Aún no se entrega: `andes project submit --file ./proyecto.md`.
+- **Entrega (domingo 18, 9:00):** `proyecto.md` listo en la raíz; presentación lista en `presentacion/` (falta compartirla por link y llenar las cifras de tracción; lista de espera en 1). Aún no se entrega: `andes project submit --file ./proyecto.md`.
 - Backend `/api` con Claude (ficha, letra, examen adaptado, juego): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada endpoint debe recibir `ficha.curriculo.desempenos` y devolver, por ítem, la cita textual del desempeño que trabaja (validada contra `packages/curriculo`), para que canción, examen y preguntas del tema tengan el mismo icono "i" que los juegos de cálculo.
 - Audio con ElevenLabs, persistencia (biblioteca, créditos, links/QR), pictogramas ARASAAC.
 - Juegos: que `/api/juego` cree más preguntas de las que entran en una partida (hoy las del tema se repiten al reintentar; el cálculo ya es procedural), clasificar en grupos y, cuando haya cuentas, pasar la clave de resultados a la cuenta del docente.
@@ -31,6 +31,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 
 ## Dónde mirar
 - `obsidian/DATOS.md`: cifras con fuente (horas extra del docente, aprendizajes, cuánto pagan, costos de IA).
+- `presentacion/`: el deck del pitch (link en su README).
 - `obsidian/GTM.md`: tracción para el jurado, quién paga y guiones de TikTok.
 - `obsidian/MVP.md`: qué tiene que funcionar para la entrega y qué no hacer.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).

@@ -31,7 +31,7 @@ actualizado: 2026-10-17
 ## Entrega (`andes project submit`)
 Se puede entregar temprano y corregir después; cualquier integrante la actualiza.
 1. **URL del despliegue** funcionando: https://www.supermentes.app
-2. **URL de la presentación** (Canva, Google Slides o hecha con código).
+2. **URL de la presentación:** https://claude.ai/artifact/Vbx4ZRLX8eDRKFCyLz6UiV (copia en `presentacion/`; compartirla por link antes de entregar).
 3. **URL del repo:** https://github.com/Hecze/supermentes
 4. **Descripción en Markdown:** problema, para quién, cómo funciona y **limitaciones**
    (`--file ./proyecto.md`).
