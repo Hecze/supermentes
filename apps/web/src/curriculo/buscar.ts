@@ -14,6 +14,8 @@ export type Resultado = {
   cita?: string
   /** Índice de la competencia a la que pertenece el tema, si se sabe. */
   indiceCompetencia?: number
+  /** Solo coincide una parte de las palabras buscadas. */
+  parcial?: boolean
 }
 
 /** Lo que pide el currículo para un tema: la competencia y los desempeños más cercanos. */
@@ -73,7 +75,8 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
   const areas = grado.areas.filter((a) => !areaId || a.id === areaId)
   const base = (a: AreaCurriculo) => ({ gradoId: grado.id, grado: nombreGrado, areaId: a.id, area: a.nombre })
 
-  // Orden: temas con todas las palabras, temas parecidos, desempeños con todas las palabras, desempeños parecidos.
+  // Orden: tema exacto, temas que empiezan igual, temas con todas las palabras, temas parecidos y luego desempeños.
+  const nq = normalizar(q.trim())
   const res: (Resultado & { orden: number })[] = []
   for (const a of areas) {
     let completos = 0
@@ -81,8 +84,9 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
       const n = puntaje(b, t)
       if (n === b.length) {
         completos++
-        res.push({ ...base(a), tema: t, indiceCompetencia, orden: normalizar(t).startsWith(normalizar(q.trim())) ? 0 : 1 })
-      } else if (parecido(n, b)) res.push({ ...base(a), tema: t, indiceCompetencia, orden: 2 })
+        const nt = normalizar(t)
+        res.push({ ...base(a), tema: t, indiceCompetencia, orden: nt === nq ? 0 : nt.startsWith(nq) ? 1 : 2 })
+      } else if (parecido(n, b)) res.push({ ...base(a), tema: t, indiceCompetencia, parcial: true, orden: 3 })
     }
     if (completos) continue
     // Un desempeño por curso: el que tenga más palabras de la búsqueda.
@@ -91,8 +95,8 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
       const n = puntaje(b, t)
       if (n > mejor.n) mejor = { n, cita: t }
     }
-    if (mejor.n === b.length) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, orden: 3 })
-    else if (parecido(mejor.n, b)) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, orden: 4 })
+    if (mejor.n === b.length) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, orden: 4 })
+    else if (parecido(mejor.n, b)) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, parcial: true, orden: 5 })
   }
   return res.sort((x, y) => x.orden - y.orden).map(({ orden: _, ...r }) => r)
 }
