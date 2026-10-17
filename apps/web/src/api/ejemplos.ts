@@ -311,6 +311,63 @@ export const JUEGO_EJEMPLO: Juego = {
   palabras: FICHA_EJEMPLO.vocabulario.map((v) => ({ palabra: v.palabra, pista: v.definicion })),
 }
 
+export const JUEGO_AGUA: Juego = {
+  codigo: 'AGUA-4B',
+  pares: [
+    { a: { texto: 'Evaporación' }, b: { texto: 'Sube como vapor' } },
+    { a: { texto: 'Condensación' }, b: { texto: 'Forma las nubes' } },
+    { a: { texto: 'Precipitación' }, b: { texto: 'Cae como lluvia' } },
+    { a: { texto: 'Infiltración' }, b: { texto: 'Entra al suelo' } },
+    { a: { texto: 'Vapor' }, b: { texto: 'Agua como gas' } },
+    { a: { texto: 'Glaciar' }, b: { texto: 'Hielo en la cima' } },
+  ],
+  preguntas: [
+    { pregunta: '¿Qué calienta el agua del mar para que se evapore?', opciones: ['El sol', 'La luna', 'El viento', 'Las nubes'], correcta: 0 },
+    { pregunta: '¿De qué están hechas las nubes?', opciones: ['De gotitas de agua', 'De algodón', 'De humo', 'De polvo'], correcta: 0 },
+    { pregunta: 'Cuando el vapor se enfría y forma nubes, se llama…', opciones: ['Condensación', 'Evaporación', 'Infiltración', 'Precipitación'], correcta: 0 },
+    { pregunta: '¿Cómo puede caer el agua de las nubes?', opciones: ['Como lluvia, nieve o granizo', 'Solo como lluvia', 'Como vapor', 'Como humo'], correcta: 0 },
+    { pregunta: '¿A dónde va el agua que entra en la tierra?', opciones: ['Se guarda bajo el suelo', 'Desaparece', 'Sube al sol', 'Se vuelve piedra'], correcta: 0 },
+  ],
+  palabras: FICHA_AGUA.vocabulario.map((v) => ({ palabra: v.palabra, pista: v.definicion })),
+}
+
+export const JUEGO_SUSTANTIVOS: Juego = {
+  codigo: 'SUST-4B',
+  pares: [
+    { a: { texto: 'Rímac' }, b: { texto: 'río' } },
+    { a: { texto: 'Huascarán' }, b: { texto: 'montaña' } },
+    { a: { texto: 'Firulais' }, b: { texto: 'perro' } },
+    { a: { texto: 'Perú' }, b: { texto: 'país' } },
+    { a: { texto: 'Titicaca' }, b: { texto: 'lago' } },
+    { a: { texto: 'Arequipa' }, b: { texto: 'ciudad' } },
+  ],
+  preguntas: [
+    { pregunta: '¿Cuál es un sustantivo propio?', opciones: ['Cusco', 'ciudad', 'montaña', 'río'], correcta: 0 },
+    { pregunta: '¿Cuál es un sustantivo común?', opciones: ['perro', 'Firulais', 'Lima', 'Ana'], correcta: 0 },
+    { pregunta: '¿Cómo se escribe un sustantivo propio?', opciones: ['Con mayúscula al inicio', 'Todo en minúscula', 'Con un número', 'Entre comillas'], correcta: 0 },
+    { pregunta: 'En «Mi gata Michi duerme», ¿cuál es el sustantivo propio?', opciones: ['Michi', 'gata', 'duerme', 'Mi'], correcta: 0 },
+    { pregunta: '¿A quién nombra un sustantivo común?', opciones: ['A cualquiera de un grupo', 'A uno en particular', 'A una acción', 'A un color'], correcta: 0 },
+  ],
+  palabras: FICHA_SUSTANTIVOS.vocabulario.map((v) => ({ palabra: v.palabra, pista: v.definicion })),
+}
+
+/** Para un tema sin juego de ejemplo: preguntas armadas con su vocabulario, como haría el backend sin más datos. */
+export function juegoDesdeVocabulario(ficha: Ficha): Juego {
+  const v = ficha.vocabulario
+  return {
+    codigo: `${ficha.titulo.slice(0, 4).toUpperCase()}-1`,
+    pares: [],
+    preguntas: v.slice(0, 5).map((x, i) => {
+      const otras = v.filter((_, j) => j !== i).slice(0, 3).map((o) => o.palabra)
+      const correcta = i % 4
+      const opciones = [...otras]
+      opciones.splice(correcta, 0, x.palabra)
+      return { pregunta: `¿Qué palabra es? «${x.definicion}»`, opciones, correcta }
+    }),
+    palabras: v.map((x) => ({ palabra: x.palabra, pista: x.definicion })),
+  }
+}
+
 // ---------- Adaptación ----------
 
 const CONSEJOS: Record<Necesidad, string[]> = {

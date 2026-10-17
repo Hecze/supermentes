@@ -18,6 +18,8 @@ export type Resultados = {
   audio?: AudioCancion
   examen?: Examen
   juego?: Juego
+  /** Con qué se juega este tema: sus palabras y preguntas, o una habilidad de cálculo (src/juegos). */
+  juegos?: { fuente: 'tema' } | { fuente: 'calculo'; habilidad: string; nivel: number }
   adaptacion?: Adaptacion
 }
 

@@ -46,7 +46,7 @@ Interfaz completa con **datos de ejemplo**. Todas las pantallas pasan por `src/a
 Ya funciona sin backend:
 
 - **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
-- **Juegos:** Memoria, Carrera de preguntas y Adivina la palabra se pueden jugar con el contenido del juego.
+- **Juegos:** seis juegos (Globos, Botones rápidos, Tira y afloja, Memoria, Carrera de llamas y Adivina la palabra) que sirven para cualquier tema: el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. Ver `src/juegos/README.md`.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
 - **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
 
@@ -75,6 +75,7 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/real.ts` | Llamadas a `/api/*` |
 | `src/api/costos.ts` | Créditos que cuesta cada acción |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
+| `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
 | `src/app/` | Estado global, catálogo de herramientas, cobro de créditos |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |
@@ -96,7 +97,7 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 ## Costos
 
-La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Un juego se genera una vez y cambiar de plantilla es gratis.
+La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos.
 
 ## Pendiente para que funcione de verdad
 

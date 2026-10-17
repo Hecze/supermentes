@@ -5,10 +5,13 @@ import {
   FICHA_AGUA,
   FICHA_EJEMPLO,
   FICHA_SUSTANTIVOS,
+  JUEGO_AGUA,
   JUEGO_EJEMPLO,
+  JUEGO_SUSTANTIVOS,
   adaptacionEjemplo,
   cancionEjemplo,
   examenEjemplo,
+  juegoDesdeVocabulario,
 } from './ejemplos'
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -53,9 +56,10 @@ export const mockApi: Api = {
     await esperar(1800)
     return { ...examen, preguntas: examen.preguntas.map((p) => ({ ...p, ilustracion: 'ejemplo' })) }
   },
-  async generarJuego() {
+  async generarJuego(ficha) {
     await esperar(1200)
-    return JUEGO_EJEMPLO
+    const t = ficha.titulo.toLowerCase()
+    return /fracci/.test(t) ? JUEGO_EJEMPLO : /agua|lluvia|nube/.test(t) ? JUEGO_AGUA : /sustantiv/.test(t) ? JUEGO_SUSTANTIVOS : juegoDesdeVocabulario(ficha)
   },
   async adaptar(_ficha, necesidades) {
     await esperar(1200)

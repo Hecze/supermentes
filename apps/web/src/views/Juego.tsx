@@ -1,263 +1,257 @@
-import { Copy, Flag, Footprints, Maximize2, MessageCircle, RotateCcw, Share2, Trophy } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
-import { api, COSTOS, type Carta, type Juego as DatosJuego } from '../api'
-import { normalizar } from '../lib/crucigrama'
-import { useStore } from '../app/store'
+import { ArrowLeft, Calculator, Check, Copy, MessageCircle, Presentation, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { api, COSTOS, type Ficha } from '../api'
+import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Generando, NotaCreditos, Pastel, Pregunta, QrEjemplo, cx, tinte } from '../components/ui'
+import { Acciones, Boton, Chip, NotaCreditos, QrEjemplo, cx, tinte } from '../components/ui'
+import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
+import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
+import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/matematica/deducir'
+import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../juegos/matematica/habilidades'
+import { TextoMat } from '../juegos/motor/piezas'
+import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
+import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
 
-type Plantilla = 'memoria' | 'carrera' | 'palabra'
+type Fuente = NonNullable<Resultados['juegos']>
 
-const PLANTILLAS: { id: Plantilla; nombre: string }[] = [
-  { id: 'memoria', nombre: 'Memoria' },
-  { id: 'carrera', nombre: 'Carrera de preguntas' },
-  { id: 'palabra', nombre: 'Adivina la palabra' },
-]
+/** Si el tema es de cálculo, se juega con su habilidad; si no, con sus palabras y preguntas. */
+function fuentePorDefecto(ficha: Ficha): Fuente {
+  const sugerida = habilidadesDelTema(ficha)[0]
+  return sugerida ? { fuente: 'calculo', ...sugerida } : { fuente: 'tema' }
+}
 
-function barajar<T>(lista: T[], semilla: number) {
-  const a = [...lista]
-  let s = semilla
-  for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 9301 + 49297) % 233280
-    const j = Math.floor((s / 233280) * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
+function nombreFuente(f: Fuente, ficha: Ficha) {
+  return f.fuente === 'calculo' ? nombrePractica(f) : `Palabras y preguntas de «${ficha.titulo}»`
+}
+
+/** "3.º y 4.º de primaria", "Inicial 5 años y 1.º de primaria". */
+function textoGrados(grados: string[]) {
+  const partes: string[] = []
+  for (const nivel of ['inicial', 'primaria', 'secundaria']) {
+    const ns = grados.filter((g) => g.startsWith(nivel)).map((g) => g.split('-')[1])
+    if (!ns.length) continue
+    if (nivel === 'inicial') partes.push(`Inicial ${ns.join(' y ')} años`)
+    else partes.push(`${ns.map((n) => `${n}.º`).join(' y ')} de ${nivel}`)
   }
-  return a
+  return partes.join(' y ')
 }
 
-function Ganaste({ texto, otraVez }: { texto: string; otraVez: () => void }) {
+function Insignias({ def }: { def: DefinicionJuego }) {
+  const insignia = 'inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-soft'
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl p-3" style={{ background: tinte(COLOR, 12) }}>
-      <Trophy className="size-6" style={{ color: COLOR }} aria-hidden />
-      <p className="flex-1 font-semibold">{texto}</p>
-      <Boton variante="contorno" tam="sm" onClick={otraVez}>
-        <RotateCcw className="size-4" aria-hidden /> Otra vez
-      </Boton>
-    </div>
-  )
-}
-
-function CaraCarta({ carta }: { carta: Carta }) {
-  return carta.fraccion ? (
-    <span className="flex flex-col items-center gap-1">
-      <Pastel fraccion={carta.fraccion} tam={44} color={COLOR} />
-      <span className="text-[11px] leading-tight">{carta.texto}</span>
-    </span>
-  ) : (
-    <span className="font-display text-2xl font-bold">{carta.texto}</span>
-  )
-}
-
-function Memoria({ juego }: { juego: DatosJuego }) {
-  const [ronda, setRonda] = useState(1)
-  const cartas = useMemo(
-    () => barajar(juego.pares.flatMap((p, i) => [{ par: i, carta: p.a }, { par: i, carta: p.b }]), ronda * 7 + 3),
-    [juego, ronda],
-  )
-  const [abiertas, setAbiertas] = useState<number[]>([])
-  const [encontradas, setEncontradas] = useState<Set<number>>(new Set())
-  const [intentos, setIntentos] = useState(0)
-
-  function tocar(i: number) {
-    if (abiertas.length === 2 || abiertas.includes(i) || encontradas.has(cartas[i].par)) return
-    const nuevas = [...abiertas, i]
-    setAbiertas(nuevas)
-    if (nuevas.length < 2) return
-    setIntentos((n) => n + 1)
-    const [a, b] = nuevas
-    if (cartas[a].par === cartas[b].par) {
-      setEncontradas((e) => new Set(e).add(cartas[a].par))
-      setAbiertas([])
-    } else {
-      window.setTimeout(() => setAbiertas([]), 900)
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <p className="text-ink-soft tabular-nums">
-        Encuentra las parejas · {encontradas.size} de {juego.pares.length}
-      </p>
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6">
-        {cartas.map((c, i) => {
-          const visible = abiertas.includes(i) || encontradas.has(c.par)
-          return (
-            <button
-              key={`${ronda}-${i}`}
-              type="button"
-              onClick={() => tocar(i)}
-              className={cx('voltear aspect-[4/5] w-full', visible && 'volteada')}
-              aria-label={visible ? c.carta.texto : 'Carta tapada'}
-            >
-              <span className="voltear-interior block">
-                <span className="cara grid place-items-center rounded-xl font-display text-3xl font-bold text-on-tool" style={{ background: COLOR }}>
-                  ?
-                </span>
-                <span
-                  className="cara cara-frente grid place-items-center rounded-xl border-2 bg-surface p-1"
-                  style={{ borderColor: encontradas.has(c.par) ? COLOR : 'var(--line)' }}
-                >
-                  <CaraCarta carta={c.carta} />
-                </span>
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      {encontradas.size === juego.pares.length && (
-        <Ganaste
-          texto={`¡Lo lograron en ${intentos} intentos!`}
-          otraVez={() => {
-            setRonda((r) => r + 1)
-            setAbiertas([])
-            setEncontradas(new Set())
-            setIntentos(0)
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-function Carrera({ juego }: { juego: DatosJuego }) {
-  const [i, setI] = useState(0)
-  const [elegida, setElegida] = useState<number | null>(null)
-  const [puntos, setPuntos] = useState(0)
-  const total = juego.preguntas.length
-  const p = juego.preguntas[Math.min(i, total - 1)]
-  const avance = puntos / total
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="relative h-10 rounded-full bg-surface-2" aria-label={`Avance: ${puntos} de ${total}`}>
-        <div className="absolute inset-y-0 left-0 rounded-full transition-all" style={{ width: `${avance * 100}%`, background: tinte(COLOR, 30) }} />
-        <span
-          className="absolute top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-on-tool transition-all"
-          style={{ left: `calc(${avance * 100}% - ${avance * 32}px)`, background: COLOR }}
-          aria-hidden
-        >
-          <Footprints className="size-4" />
+    <span className="flex flex-wrap gap-1.5">
+      {def.donde.includes('clase') && (
+        <span className={insignia}>
+          <Presentation className="size-3.5" aria-hidden /> Proyectado
         </span>
-        <Flag className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-ink-soft" aria-hidden />
-      </div>
-      {i >= total ? (
-        <Ganaste
-          texto={`Llegaron a la meta con ${puntos} de ${total} respuestas correctas.`}
-          otraVez={() => {
-            setI(0)
-            setPuntos(0)
-            setElegida(null)
-          }}
-        />
-      ) : (
-        <>
-          <p className="font-display text-xl font-semibold sm:text-2xl">{p.pregunta}</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {p.opciones.map((o, k) => {
-              const correcta = elegida !== null && k === p.correcta
-              const mal = elegida === k && k !== p.correcta
-              return (
-                <button
-                  key={o}
-                  type="button"
-                  onClick={() => {
-                    if (elegida !== null) return
-                    setElegida(k)
-                    if (k === p.correcta) setPuntos((x) => x + 1)
-                  }}
-                  className={cx(
-                    'min-h-14 rounded-xl border-2 px-4 py-2 text-left text-lg font-medium transition',
-                    correcta ? 'border-ok bg-ok/12' : mal ? 'border-danger bg-danger/10' : 'border-line bg-surface hover:bg-surface-2',
-                  )}
-                >
-                  {o}
-                </button>
-              )
-            })}
-          </div>
-          {elegida !== null && (
-            <Boton
-              className="self-end"
-              onClick={() => {
-                setI(i + 1)
-                setElegida(null)
-              }}
-            >
-              {i + 1 < total ? 'Siguiente' : 'Ver resultado'}
-            </Boton>
-          )}
-        </>
       )}
-    </div>
+      {def.donde.includes('celular') && (
+        <span className={insignia}>
+          <Smartphone className="size-3.5" aria-hidden /> Celular
+        </span>
+      )}
+      {def.id === 'soga' && (
+        <span className={insignia}>
+          <Users className="size-3.5" aria-hidden /> 2 equipos
+        </span>
+      )}
+    </span>
   )
 }
 
-const ABECEDARIO = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('')
-const GLOBOS = 6
+function TarjetaJuego({ def, onClick }: { def: DefinicionJuego; onClick: () => void }) {
+  const { Miniatura } = def
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex flex-col overflow-hidden rounded-2xl border-2 border-line bg-surface text-left transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:-translate-y-0.5"
+    >
+      <span className="block overflow-hidden border-b-2 border-line">
+        <span className="block transition duration-300 group-hover:scale-[1.04]">
+          <Miniatura />
+        </span>
+      </span>
+      <span className="flex flex-1 flex-col gap-1.5 p-4">
+        <span className="font-display text-xl font-bold leading-tight">{def.nombre}</span>
+        <span className="text-sm text-ink-soft">{def.lema}</span>
+        <span className="mt-auto pt-2">
+          <Insignias def={def} />
+        </span>
+      </span>
+    </button>
+  )
+}
 
-function AdivinaPalabra({ juego }: { juego: DatosJuego }) {
-  const [n, setN] = useState(0)
-  const [usadas, setUsadas] = useState<Set<string>>(new Set())
-  const actual = juego.palabras[n % juego.palabras.length]
-  const palabra = normalizar(actual.palabra)
-  const errores = [...usadas].filter((l) => !palabra.includes(l)).length
-  const gano = palabra.split('').every((l) => usadas.has(l))
-  const perdio = errores >= GLOBOS
+/** Ventana para elegir con qué se juega: el tema o una habilidad de cálculo con su nivel. */
+function ElegirPractica({
+  abierta,
+  cerrar,
+  ficha,
+  actual,
+  tieneJuego,
+  elegir,
+}: {
+  abierta: boolean
+  cerrar: () => void
+  ficha: Ficha
+  actual: Fuente
+  tieneJuego: boolean
+  elegir: (f: Fuente) => void
+}) {
+  const dialogo = useRef<HTMLDialogElement>(null)
+  const [borrador, setBorrador] = useState<Fuente>(actual)
+  const deducidas = useMemo(() => habilidadesDelTema(ficha), [ficha])
+  // Si el tema no dice qué calcular, se sugiere lo típico del grado.
+  const sugeridas = deducidas.length ? deducidas : [practicaDelGrado(ficha.gradoId)]
+
+  useEffect(() => {
+    const d = dialogo.current
+    if (!d) return
+    if (abierta && !d.open) {
+      setBorrador(actual)
+      d.showModal()
+    }
+    if (!abierta && d.open) d.close()
+  }, [abierta, actual])
+
+  const hab = borrador.fuente === 'calculo' ? habilidadPorId(borrador.habilidad) : undefined
+  const recomendado = hab ? nivelPara(hab, ficha.gradoId) : -1
+  const muestra = useMemo(() => (borrador.fuente === 'calculo' ? (contenidoMatematica(borrador, 7)?.retos.slice(0, 4) ?? []) : []), [borrador])
+
+  function elegirHabilidad(p: Practica) {
+    setBorrador({ fuente: 'calculo', ...p })
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-center gap-2 text-2xl" aria-label={`Quedan ${GLOBOS - errores} globos`}>
-        {Array.from({ length: GLOBOS }, (_, i) => (
-          <span key={i} className={cx('transition', i < errores && 'scale-75 opacity-20 grayscale')} aria-hidden>
-            🎈
+    <dialog
+      ref={dialogo}
+      onClose={cerrar}
+      onClick={(e) => e.target === dialogo.current && cerrar()}
+      aria-labelledby="titulo-practica"
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(40rem,calc(100vw-2rem))] overflow-y-auto rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45"
+    >
+      <div className="flex flex-col gap-5 p-5 sm:p-7">
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <h2 id="titulo-practica" className="font-display text-2xl font-bold">
+              ¿Qué practican?
+            </h2>
+            <p className="text-ink-soft">Los mismos juegos sirven para el tema o para cálculo.</p>
+          </div>
+          <button type="button" onClick={cerrar} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface-2" aria-label="Cerrar">
+            <X className="size-5" />
+          </button>
+        </header>
+
+        <button
+          type="button"
+          onClick={() => setBorrador({ fuente: 'tema' })}
+          aria-pressed={borrador.fuente === 'tema'}
+          className={cx(
+            'flex items-start gap-3 rounded-2xl border-2 p-4 text-left transition',
+            borrador.fuente === 'tema' ? 'border-[var(--juego)]' : 'border-line hover:bg-surface-2',
+          )}
+          style={borrador.fuente === 'tema' ? { background: tinte(COLOR, 8) } : undefined}
+        >
+          <Sparkles className="mt-0.5 size-5 shrink-0" style={{ color: COLOR }} aria-hidden />
+          <span className="flex flex-col">
+            <span className="font-semibold">El tema: {ficha.titulo}</span>
+            <span className="text-sm text-ink-soft">
+              Sus palabras clave{tieneJuego ? ', preguntas y parejas' : ''}. {tieneJuego ? '' : 'Puedes crear preguntas y parejas después.'}
+            </span>
           </span>
-        ))}
-      </div>
-      <p className="text-center text-ink-soft">Pista: {actual.pista}</p>
-      <p className="flex flex-wrap justify-center gap-1.5 font-display text-3xl font-bold" aria-live="polite">
-        {palabra.split('').map((l, i) => (
-          <span key={i} className="grid h-11 w-8 place-items-end justify-center border-b-[3px] border-ink pb-0.5">
-            {usadas.has(l) || perdio ? l : ''}
-          </span>
-        ))}
-      </p>
-      {gano || perdio ? (
-        <Ganaste
-          texto={gano ? '¡Adivinaron!' : `La palabra era ${palabra}.`}
-          otraVez={() => {
-            setN(n + 1)
-            setUsadas(new Set())
-          }}
-        />
-      ) : (
-        <div className="flex flex-wrap justify-center gap-1.5">
-          {ABECEDARIO.map((l) => (
-            <button
-              key={l}
-              type="button"
-              disabled={usadas.has(l)}
-              onClick={() => setUsadas(new Set(usadas).add(l))}
-              className={cx(
-                'size-10 rounded-lg border border-line font-semibold transition disabled:opacity-35',
-                usadas.has(l) && palabra.includes(l) ? 'bg-ok/15' : 'bg-surface hover:bg-surface-2',
-              )}
-            >
-              {l}
-            </button>
+        </button>
+
+        <section className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <Calculator className="size-5" style={{ color: COLOR }} aria-hidden />
+            <h3 className="font-semibold">Cálculo</h3>
+            <span className="text-sm text-ink-soft">Gratis y sin fin: los ejercicios se crean al momento.</span>
+          </div>
+          {sugeridas.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-sm text-ink-soft">{deducidas.length ? 'Para este tema' : `Para ${ficha.grado}`}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {sugeridas.map((s) => (
+                  <Chip
+                    key={s.habilidad}
+                    activo={borrador.fuente === 'calculo' && borrador.habilidad === s.habilidad}
+                    color={COLOR}
+                    onClick={() => elegirHabilidad(s)}
+                  >
+                    {habilidadPorId(s.habilidad)?.nombre}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
+          {GRUPOS_HABILIDAD.map((g) => (
+            <div key={g} className="flex flex-col gap-1.5">
+              <p className="text-sm text-ink-soft">{g}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {HABILIDADES.filter((h) => h.grupo === g).map((h) => (
+                  <Chip
+                    key={h.id}
+                    activo={borrador.fuente === 'calculo' && borrador.habilidad === h.id}
+                    color={COLOR}
+                    onClick={() => elegirHabilidad({ habilidad: h.id, nivel: nivelPara(h, ficha.gradoId) })}
+                  >
+                    {h.nombre}
+                  </Chip>
+                ))}
+              </div>
+            </div>
           ))}
+        </section>
+
+        {hab && borrador.fuente === 'calculo' && (
+          <section className="flex flex-col gap-3 rounded-2xl bg-surface-2 p-4">
+            <h3 className="font-semibold">Nivel de {hab.nombre.toLowerCase()}</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {hab.niveles.map((n, i) => (
+                <Chip key={n.nombre} activo={borrador.nivel === i} color={COLOR} onClick={() => setBorrador({ ...borrador, nivel: i })}>
+                  {n.nombre}
+                  {i === recomendado && <span className="size-1.5 rounded-full" style={{ background: COLOR }} aria-label={`recomendado para ${ficha.grado}`} />}
+                </Chip>
+              ))}
+            </div>
+            <p className="text-sm text-ink-soft">Se trabaja en {textoGrados(hab.niveles[borrador.nivel]?.grados ?? [])}.</p>
+            <div className="flex flex-wrap gap-2" aria-label="Ejemplos">
+              {muestra.map((r, i) => (
+                <span key={i} className="rounded-xl border border-line bg-surface px-3 py-1.5 text-sm">
+                  {r.consigna && !r.pregunta ? r.consigna : <TextoMat texto={r.pregunta} />} →{' '}
+                  <strong>
+                    <TextoMat texto={r.respuesta} />
+                  </strong>
+                </span>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <div className="flex justify-end">
+          <Boton
+            onClick={() => {
+              elegir(borrador)
+              cerrar()
+            }}
+          >
+            <Check className="size-5" aria-hidden /> Listo
+          </Boton>
         </div>
-      )}
-    </div>
+      </div>
+    </dialog>
   )
 }
 
-function Compartir({ juego, titulo }: { juego: DatosJuego; titulo: string }) {
+function Compartir({ codigo, titulo }: { codigo: string; titulo: string }) {
   const { avisar } = useStore()
-  const enlace = `supermentes.pe/j/${juego.codigo}`
-  const mensaje = `¡Hola! Hoy jugamos sobre "${titulo}". Entra aquí: https://${enlace} (código ${juego.codigo})`
+  const enlace = `supermentes.pe/j/${codigo}`
+  const mensaje = `¡Hola! Hoy jugamos sobre "${titulo}". Entra aquí: https://${enlace} (código ${codigo})`
 
   async function copiar() {
     try {
@@ -270,12 +264,12 @@ function Compartir({ juego, titulo }: { juego: DatosJuego; titulo: string }) {
 
   return (
     <section className="flex flex-col gap-4 rounded-2xl border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
-      <QrEjemplo semilla={juego.codigo} tam={136} />
+      <QrEjemplo semilla={codigo} tam={136} />
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <div>
           <p className="font-semibold">Tus alumnos escanean el código con el celular</p>
           <p className="text-ink-soft">
-            O entran a {enlace} con el código <strong className="text-ink">{juego.codigo}</strong>. No necesitan cuenta.
+            O entran a {enlace} con el código <strong className="text-ink">{codigo}</strong>. No necesitan cuenta.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -299,36 +293,70 @@ function Compartir({ juego, titulo }: { juego: DatosJuego; titulo: string }) {
 }
 
 export function Juego() {
-  const { ficha, resultados, guardar, avisar, creditos } = useStore()
+  const { ficha, resultados, guardar, creditos } = useStore()
   const { ocupado, generar } = useGeneracion()
-  const [plantilla, setPlantilla] = useState<Plantilla>('memoria')
+  const [elegido, setElegido] = useState<JuegoId | null>(null)
+  const [eligiendo, setEligiendo] = useState(false)
   const [compartir, setCompartir] = useState(false)
-  const escenario = useRef<HTMLDivElement>(null)
-  const juego = resultados.juego
+  const pantalla = usePantallaCompleta()
+
+  // Al abrir un juego, la escena queda entera a la vista (en el celular el encabezado la empuja hacia abajo).
+  useEffect(() => {
+    if (elegido) pantalla.ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [elegido, pantalla.ref])
+
+  const fuente: Fuente = resultados.juegos ?? (ficha ? fuentePorDefecto(ficha) : { fuente: 'tema' })
+  const claveFuente = JSON.stringify(fuente)
+  const contenido = useMemo(
+    () => (!ficha ? null : fuente.fuente === 'calculo' ? contenidoMatematica(fuente) : contenidoDelTema(ficha, resultados.juego)),
+    // fuente se recrea en cada render; claveFuente cambia solo si cambia lo elegido.
+    [ficha, claveFuente, resultados.juego],
+  )
+  const compatibles = useMemo(() => (contenido ? juegosCompatibles(contenido) : []), [contenido])
 
   if (!ficha) return <SinTema />
 
-  async function crear() {
-    const nuevo = await generar(COSTOS.juego, 'Juego', () => api.generarJuego(ficha!))
-    if (nuevo) guardar('juego', nuevo)
+  const enJuego = compatibles.find((j) => j.def.id === elegido)
+  const faltan = JUEGOS.filter((j) => !compatibles.some((c) => c.def.id === j.id))
+
+  async function crearPreguntas() {
+    const nuevo = await generar(COSTOS.juego, 'Preguntas y parejas', () => api.generarJuego(ficha!))
+    if (nuevo) {
+      guardar('juego', nuevo)
+      guardar('juegos', { fuente: 'tema' })
+    }
   }
 
-  if (!juego) {
+  if (enJuego && contenido) {
     return (
       <>
         <EncabezadoHerramienta id="juego" />
-        <Pregunta titulo="Creamos juegos con tu tema">
-          <p className="max-w-2xl text-lg text-ink-soft">
-            Memoria, carrera de preguntas y adivina la palabra. Se juegan proyectados en clase o desde el celular de cada alumno.
-          </p>
-        </Pregunta>
-        <div className="flex flex-col items-start gap-2">
-          <Boton tam="lg" variante="herramienta" herramienta="juego" onClick={crear} cargando={ocupado}>
-            Crear los juegos
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3">
+            <ArrowLeft className="size-5" aria-hidden /> Todos los juegos
           </Boton>
-          <NotaCreditos n={COSTOS.juego} quedan={creditos} />
+          <p className="text-sm text-ink-soft">
+            Practican: <TextoMat texto={nombreFuente(fuente, ficha)} className="font-medium text-ink" />
+          </p>
         </div>
-        {ocupado && <Generando texto="Preparando preguntas, parejas y palabras…" />}
+        <Partida
+          key={`${elegido}-${claveFuente}`}
+          def={enJuego.def}
+          contenido={enJuego.contenido}
+          ritmo={ritmoDe(ficha.gradoId)}
+          pantalla={pantalla}
+          alSalir={() => setElegido(null)}
+          className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)]"
+        />
+        <Acciones>
+          <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
+            <Presentation className="size-5" aria-hidden /> Proyectar en clase
+          </Boton>
+          <Boton variante="contorno" onClick={() => setCompartir(!compartir)}>
+            <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
+          </Boton>
+        </Acciones>
+        {compartir && <Compartir codigo={resultados.juego?.codigo ?? 'JUEGO-1'} titulo={ficha.titulo} />}
       </>
     )
   }
@@ -337,43 +365,58 @@ export function Juego() {
     <>
       <EncabezadoHerramienta id="juego" />
 
-      <div className="flex gap-1 overflow-x-auto rounded-2xl bg-surface-2 p-1" role="tablist" aria-label="Juego">
-        {PLANTILLAS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            role="tab"
-            aria-selected={plantilla === p.id}
-            onClick={() => setPlantilla(p.id)}
-            className={cx(
-              'h-11 flex-1 whitespace-nowrap rounded-xl px-4 transition',
-              plantilla === p.id ? 'bg-surface font-semibold shadow-sm' : 'text-ink-soft hover:text-ink',
-            )}
-          >
-            {p.nombre}
-          </button>
-        ))}
-      </div>
+      <section className="flex flex-col gap-4">
+        <h2 className="font-display text-2xl font-bold sm:text-3xl">¿A qué jugamos?</h2>
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3 sm:p-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl" style={{ background: tinte(COLOR, 14), color: COLOR }}>
+            {fuente.fuente === 'calculo' ? <Calculator className="size-5" aria-hidden /> : <Sparkles className="size-5" aria-hidden />}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-ink-soft">Practican</p>
+            <p className="font-semibold">
+              <TextoMat texto={nombreFuente(fuente, ficha)} />
+            </p>
+          </div>
+          <Boton variante="contorno" tam="sm" onClick={() => setEligiendo(true)}>
+            Cambiar
+          </Boton>
+        </div>
 
-      <div ref={escenario} className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:p-8">
-        {plantilla === 'memoria' && <Memoria juego={juego} />}
-        {plantilla === 'carrera' && <Carrera juego={juego} />}
-        {plantilla === 'palabra' && <AdivinaPalabra juego={juego} />}
-      </div>
+        {compatibles.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {compatibles.map(({ def }) => (
+              <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-2xl border-2 border-dashed border-line bg-surface p-6 text-ink-soft">
+            Con esto todavía no hay juegos. Crea preguntas del tema o elige algo de cálculo en «Cambiar».
+          </p>
+        )}
+      </section>
 
-      <Acciones>
-        <Boton variante="herramienta" herramienta="juego" onClick={() => setCompartir(!compartir)}>
-          <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
-        </Boton>
-        <Boton
-          variante="contorno"
-          onClick={() => escenario.current?.requestFullscreen?.().catch(() => avisar('Tu navegador no permite pantalla completa aquí.', 'error'))}
-        >
-          <Maximize2 className="size-5" aria-hidden /> Proyectar en clase
-        </Boton>
-      </Acciones>
+      {fuente.fuente === 'tema' && !resultados.juego && (
+        <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-dashed border-line bg-surface p-5">
+          <p className="font-semibold">Más juegos con tu tema</p>
+          <p className="text-ink-soft">
+            Creamos preguntas y parejas sobre «{ficha.titulo}»
+            {faltan.length > 0 && <> para jugar también {faltan.map((j) => j.nombre).join(', ')}</>}. Se crean una vez y sirven para todos los juegos.
+          </p>
+          <Boton variante="herramienta" herramienta="juego" onClick={crearPreguntas} cargando={ocupado}>
+            Crear preguntas y parejas
+          </Boton>
+          <NotaCreditos n={COSTOS.juego} quedan={creditos} />
+        </section>
+      )}
 
-      {compartir && <Compartir juego={juego} titulo={ficha.titulo} />}
+      <ElegirPractica
+        abierta={eligiendo}
+        cerrar={() => setEligiendo(false)}
+        ficha={ficha}
+        actual={fuente}
+        tieneJuego={!!resultados.juego}
+        elegir={(f) => guardar('juegos', f)}
+      />
     </>
   )
 }

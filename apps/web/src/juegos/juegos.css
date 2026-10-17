@@ -1,0 +1,328 @@
+/* Juegos: escenas de colores vivos, botones gorditos y animaciones cortas.
+   Las escenas tienen sus propios colores (cielo, pasto, cancha) y se ven igual en el tema claro y el oscuro. */
+
+.escena {
+  --j-tinta: #2b2d5c;
+  --j-tinta-suave: #5d6290;
+  --j-rojo: #ff5d73;
+  --j-naranja: #ff9636;
+  --j-amarillo: #ffc93c;
+  --j-verde: #2fc46f;
+  --j-celeste: #2fb2ff;
+  --j-azul: #4f6dff;
+  --j-morado: #9f63ff;
+  --j-rosa: #ff6fbf;
+  --j-dorado: #ffc23d;
+  container-type: size;
+  font-family: "Fredoka", "Shantell Sans", ui-rounded, system-ui, sans-serif;
+  color: var(--j-tinta);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  isolation: isolate;
+}
+
+.escena:fullscreen {
+  border-radius: 0 !important;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Pantalla completa sin la API (iPhone): la escena tapa toda la ventana. */
+.escena.escena-fija {
+  position: fixed !important;
+  inset: 0;
+  z-index: 80;
+  width: 100vw !important;
+  height: 100dvh !important;
+  border-radius: 0 !important;
+}
+
+.escena button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Botón gordito con borde inferior, como una tecla. --c es el color y --t el del texto. */
+.b3d {
+  --c: var(--j-azul);
+  --t: #ffffff;
+  --borde: color-mix(in oklab, var(--c) 70%, #1a1240);
+  background: var(--c);
+  color: var(--t);
+  border-radius: 0.55em;
+  box-shadow:
+    0 0.22em 0 var(--borde),
+    0 0.45em 0.8em -0.35em rgb(20 10 60 / 0.45);
+  font-weight: 650;
+  line-height: 1.1;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    filter 0.15s ease,
+    opacity 0.2s ease;
+}
+.b3d:hover {
+  filter: brightness(1.06);
+}
+.b3d:active,
+.b3d.presionado {
+  transform: translateY(0.18em);
+  box-shadow:
+    0 0.04em 0 var(--borde),
+    0 0.2em 0.4em -0.25em rgb(20 10 60 / 0.4);
+}
+.b3d:disabled {
+  cursor: default;
+}
+.b3d-blanco {
+  --c: #ffffff;
+  --t: var(--j-tinta);
+  --borde: #cfd3ee;
+}
+.b3d.bien {
+  --c: var(--j-verde);
+  --t: #ffffff;
+}
+.b3d.mal {
+  --c: #ff6b6b;
+  --t: #ffffff;
+  animation: temblar 0.4s ease;
+}
+.b3d.apagado {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+
+.sombra-texto {
+  text-shadow: 0 0.06em 0 rgb(30 20 80 / 0.28);
+}
+
+/* Fracción apilada: numerador sobre denominador. */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  line-height: 1;
+  margin: 0 0.08em;
+  font-size: 0.86em;
+}
+.frac > span:first-child {
+  border-bottom: 0.08em solid currentColor;
+  padding: 0 0.12em 0.06em;
+}
+.frac > span:last-child {
+  padding-top: 0.06em;
+}
+
+.tarjeta-juego {
+  background: #ffffff;
+  border-radius: 1.1rem;
+  box-shadow:
+    0 0.3rem 0 #d9dcf2,
+    0 0.9rem 1.6rem -0.9rem rgb(30 20 90 / 0.45);
+}
+
+@keyframes entrar {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.entrar {
+  animation: entrar 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes temblar {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  40% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+.temblar {
+  animation: temblar 0.4s ease;
+}
+
+@keyframes flotar {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.flotar {
+  animation: flotar 2.6s ease-in-out infinite;
+}
+
+@keyframes nube {
+  from {
+    transform: translateX(-30cqw);
+  }
+  to {
+    transform: translateX(130cqw);
+  }
+}
+.nube {
+  animation: nube linear infinite;
+}
+
+@keyframes subir-y-desvanecer {
+  0% {
+    transform: translate(-50%, 0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    transform: translate(-50%, -10px) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -60px) scale(1);
+    opacity: 0;
+  }
+}
+.flotante {
+  animation: subir-y-desvanecer 0.9s ease-out forwards;
+}
+
+@keyframes estrella {
+  0% {
+    transform: scale(0) rotate(-40deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.estrella-entra {
+  animation: estrella 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+@keyframes latir {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+.latir {
+  animation: latir 1.4s ease-in-out infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.girar-lento {
+  animation: girar 40s linear infinite;
+}
+
+@keyframes patitas {
+  0%,
+  100% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+.corriendo .pata-a {
+  animation: patitas 0.32s ease-in-out infinite;
+}
+.corriendo .pata-b {
+  animation: patitas 0.32s ease-in-out infinite reverse;
+}
+
+@keyframes reventar {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+.reventar {
+  animation: reventar 0.22s ease-out forwards;
+}
+
+@keyframes chispa {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.3);
+    opacity: 0;
+  }
+}
+.chispa {
+  animation: chispa 0.55s ease-out forwards;
+}
+
+/* Cartas que se voltean (Memoria). */
+.carta {
+  perspective: 900px;
+  container-type: inline-size;
+}
+.carta-interior {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.3, 0.7, 0.3, 1.2);
+  transform-style: preserve-3d;
+}
+.carta.volteada .carta-interior {
+  transform: rotateY(180deg);
+}
+.carta-cara {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 12cqi;
+}
+.carta-frente {
+  transform: rotateY(180deg);
+}
+@keyframes brillo {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 201 60 / 0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 6cqi rgb(255 201 60 / 0);
+  }
+}
+.carta.encontrada .carta-frente {
+  animation: brillo 0.7s ease-out;
+}
