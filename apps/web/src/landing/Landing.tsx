@@ -38,7 +38,7 @@ const PASOS = [
   },
   {
     titulo: 'Elige lo que necesitas',
-    texto: 'Una canción, un juego, un crucigrama, un examen o una adaptación. Solo lo que vas a usar.',
+    texto: 'Una canción, un juego, un crucigrama o tu examen adaptado. Solo lo que vas a usar.',
     color: 'var(--cancion)',
   },
   {
@@ -50,8 +50,8 @@ const PASOS = [
 
 const HERRAMIENTAS: { nombre: string; texto: string; color: string; icono: ComponentType<LucideProps>; ancho?: boolean }[] = [
   {
-    nombre: 'Examen divertido',
-    texto: 'Tu misma evaluación, contada con lo que le gusta a tu clase: fútbol, animales, cocina. Evalúa exactamente lo mismo.',
+    nombre: 'Adapta tu examen',
+    texto: 'Sube tu examen de siempre y recibe un PDF listo para imprimir: contado con lo que le gusta a tu clase o adaptado para quien le cuesta concentrarse o leer. Evalúa exactamente lo mismo.',
     color: 'var(--examen)',
     icono: FileText,
     ancho: true,
@@ -73,12 +73,6 @@ const HERRAMIENTAS: { nombre: string; texto: string; color: string; icono: Compo
     texto: 'Con tus palabras y tus pistas, del tamaño que quieras. Imprímelo o descárgalo como imagen.',
     color: 'var(--crucigrama)',
     icono: Grid3x3,
-  },
-  {
-    nombre: 'Adaptar para inclusión',
-    texto: 'Versiones para quien le cuesta concentrarse, leer o necesita apoyos visuales, con consejos para el aula.',
-    color: 'var(--adaptar)',
-    icono: HeartHandshake,
   },
 ]
 
@@ -262,7 +256,7 @@ export function Landing() {
       <section id="herramientas" className="scroll-mt-20 py-20 sm:py-28">
         <Contenedor className="flex flex-col gap-12">
           <div className="flex max-w-2xl flex-col gap-4">
-            <Titulo>Cinco herramientas. Una sola idea: que aprendan con ganas.</Titulo>
+            <Titulo>Cuatro herramientas. Una sola idea: que aprendan con ganas.</Titulo>
             <p className="text-lg text-ink-soft">Todas parten de tu tema, así que no tienes que explicar nada dos veces.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">

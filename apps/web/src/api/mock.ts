@@ -8,7 +8,6 @@ import {
   JUEGO_AGUA,
   JUEGO_EJEMPLO,
   JUEGO_SUSTANTIVOS,
-  adaptacionEjemplo,
   cancionEjemplo,
   examenEjemplo,
   juegoDesdeVocabulario,
@@ -55,22 +54,14 @@ export const mockApi: Api = {
     await esperar(2200)
     return { url: null, duracionSeg: 102 }
   },
-  async generarExamen(_ficha, { examenPropio: _, ...opciones }) {
-    await esperar(1300)
-    return examenEjemplo(opciones)
-  },
-  async generarIlustraciones(examen) {
-    await esperar(1800)
-    return { ...examen, preguntas: examen.preguntas.map((p) => ({ ...p, ilustracion: 'ejemplo' })) }
+  async adaptarExamen(_ficha, { examen, ...opciones }) {
+    await esperar(1500)
+    return examenEjemplo(opciones, examen.name)
   },
   async generarJuego(ficha) {
     await esperar(1200)
     const t = ficha.titulo.toLowerCase()
     return /fracci/.test(t) ? JUEGO_EJEMPLO : /agua|lluvia|nube/.test(t) ? JUEGO_AGUA : /sustantiv/.test(t) ? JUEGO_SUSTANTIVOS : juegoDesdeVocabulario(ficha)
-  },
-  async adaptar(_ficha, necesidades) {
-    await esperar(1200)
-    return adaptacionEjemplo(necesidades)
   },
   async biblioteca() {
     await esperar(300)

@@ -1,171 +1,294 @@
-import { CircleCheck, Eye, ImagePlus, Printer, Upload } from 'lucide-react'
+import { Check, CircleCheck, Download, Eye, FileText, Printer, Sparkles, Upload, X } from 'lucide-react'
 import { useState } from 'react'
-import { api, COSTOS, type OpcionesExamen } from '../api'
+import { api, COSTOS, MODO_EJEMPLO, type Necesidad, type OpcionesExamen } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Desplegable, Editable, Generando, Hoja, NotaCreditos, Pastel, Pregunta, imprimir, tinte } from '../components/ui'
+import { Acciones, Boton, Chip, Desplegable, Generando, Hoja, NotaCreditos, Pregunta, cx, descargar, imprimir, tinte } from '../components/ui'
+import { nombreArchivo, pdfExamen } from '../lib/pdfExamen'
 
-const POR_DEFECTO: OpcionesExamen = { interes: 'Fútbol', formato: 'mision' }
 const COLOR = 'var(--examen)'
 
-function ElegirInteres({ opciones, cambiar }: { opciones: OpcionesExamen; cambiar: (o: OpcionesExamen) => void }) {
-  const [otro, setOtro] = useState(!INTERESES.includes(opciones.interes))
+// Primero lo que el docente observa en el aula; el nombre técnico va después, en pequeño.
+const NECESIDADES: { id: Necesidad; titulo: string; nombre: string }[] = [
+  { id: 'tdah', titulo: 'Le cuesta concentrarse', nombre: 'TDAH' },
+  { id: 'dislexia', titulo: 'Le cuesta leer', nombre: 'Dislexia' },
+  { id: 'tea', titulo: 'Necesita instrucciones claras y literales', nombre: 'TEA' },
+  { id: 'facil', titulo: 'Necesita textos más simples', nombre: 'Lectura fácil' },
+]
+
+type Eleccion = Omit<OpcionesExamen, 'examen'>
+
+const POR_DEFECTO: Eleccion = { interes: null, necesidades: [] }
+
+// El último examen que subió el docente en cada tema, para volver a adaptarlo sin subirlo otra vez.
+const SUBIDOS = new Map<string, File>()
+
+/** Una opción que se marca y se desmarca, con su casilla. */
+function Opcion({ activa, onClick, titulo, detalle }: { activa: boolean; onClick: () => void; titulo: string; detalle?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={activa}
+      className="flex items-center gap-3 rounded-2xl border-2 bg-surface p-4 text-left transition hover:bg-surface-2"
+      style={{ borderColor: activa ? COLOR : 'var(--line)', background: activa ? tinte(COLOR, 8) : undefined }}
+    >
+      <span
+        className="grid size-6 shrink-0 place-items-center rounded-md border-2"
+        style={{ borderColor: activa ? COLOR : 'var(--line)', background: activa ? COLOR : undefined }}
+        aria-hidden
+      >
+        {activa && <Check className="size-4 text-on-tool" />}
+      </span>
+      <span className="flex flex-col">
+        <span className="text-lg font-medium">{titulo}</span>
+        {detalle && <span className="text-sm text-ink-soft">{detalle}</span>}
+      </span>
+    </button>
+  )
+}
+
+/** Cómo adaptarlo: ambientarlo en lo que le gusta a la clase y/o para quien aprende distinto. */
+function ElegirAdaptacion({ eleccion, cambiar }: { eleccion: Eleccion; cambiar: (e: Eleccion) => void }) {
+  const [otro, setOtro] = useState(eleccion.interes !== null && !INTERESES.includes(eleccion.interes))
+  const conInteres = eleccion.interes !== null
+  const alternar = (n: Necesidad) =>
+    cambiar({ ...eleccion, necesidades: eleccion.necesidades.includes(n) ? eleccion.necesidades.filter((x) => x !== n) : [...eleccion.necesidades, n] })
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-2">
-        {INTERESES.map((i) => (
-          <Chip
-            key={i}
-            grande
-            activo={!otro && opciones.interes === i}
-            color={COLOR}
-            onClick={() => {
-              setOtro(false)
-              cambiar({ ...opciones, interes: i })
-            }}
-          >
-            {i}
-          </Chip>
+      <Opcion
+        activa={conInteres}
+        onClick={() => cambiar({ ...eleccion, interes: conInteres ? null : INTERESES[0] })}
+        titulo="Con lo que le gusta a tu clase"
+        detalle="Las mismas preguntas, contadas con fútbol, animales, cocina o lo que elijas."
+      />
+      {conInteres && (
+        <div className="-mt-1 flex flex-col gap-3 pl-1">
+          <div className="flex flex-wrap gap-2">
+            {INTERESES.map((i) => (
+              <Chip
+                key={i}
+                activo={!otro && eleccion.interes === i}
+                color={COLOR}
+                onClick={() => {
+                  setOtro(false)
+                  cambiar({ ...eleccion, interes: i })
+                }}
+              >
+                {i}
+              </Chip>
+            ))}
+            <Chip activo={otro} color={COLOR} onClick={() => setOtro(true)}>
+              Otra cosa
+            </Chip>
+          </div>
+          {otro && (
+            <label htmlFor="examen-interes" className="flex max-w-md flex-col gap-1">
+              <span className="text-ink-soft">¿Qué le gusta a tu clase?</span>
+              <input
+                id="examen-interes"
+                autoFocus
+                value={eleccion.interes && !INTERESES.includes(eleccion.interes) ? eleccion.interes : ''}
+                onChange={(e) => cambiar({ ...eleccion, interes: e.target.value })}
+                placeholder="Ej.: dinosaurios, superhéroes, la chacra"
+                className="h-12 rounded-xl border-2 border-line bg-surface px-4 text-lg focus:border-ink focus:outline-none"
+              />
+            </label>
+          )}
+        </div>
+      )}
+
+      <p className="mt-2 font-medium">Para quien aprende distinto</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {NECESIDADES.map((n) => (
+          <Opcion key={n.id} activa={eleccion.necesidades.includes(n.id)} onClick={() => alternar(n.id)} titulo={n.titulo} detalle={n.nombre} />
         ))}
-        <Chip grande activo={otro} color={COLOR} onClick={() => setOtro(true)}>
-          Otra cosa
-        </Chip>
       </div>
-      {otro && (
-        <label htmlFor="examen-interes" className="flex max-w-md flex-col gap-1">
-          <span className="text-ink-soft">¿Qué le gusta a tu clase?</span>
-          <input
-            id="examen-interes"
-            autoFocus
-            value={INTERESES.includes(opciones.interes) ? '' : opciones.interes}
-            onChange={(e) => cambiar({ ...opciones, interes: e.target.value })}
-            placeholder="Ej.: dinosaurios, superhéroes, la chacra"
-            className="h-12 rounded-xl border-2 border-line bg-surface px-4 text-lg focus:border-ink focus:outline-none"
-          />
-        </label>
+    </div>
+  )
+}
+
+function SubirExamen({ archivo, cambiar }: { archivo: File | null; cambiar: (f: File | null) => void }) {
+  if (archivo) {
+    return (
+      <div className="flex max-w-xl items-center gap-3 rounded-2xl border-2 border-line bg-surface px-4 py-3">
+        <FileText className="size-6 shrink-0" style={{ color: COLOR }} aria-hidden />
+        <span className="min-w-0 flex-1 truncate font-medium">{archivo.name}</span>
+        <button type="button" onClick={() => cambiar(null)} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface-2 hover:text-ink" aria-label="Quitar el examen">
+          <X className="size-5" />
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <label
+        htmlFor="examen-archivo"
+        className="flex w-full max-w-xl cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-line bg-surface px-6 py-8 text-center hover:border-ink-soft"
+      >
+        <Upload className="size-7" style={{ color: COLOR }} aria-hidden />
+        <span className="text-lg font-semibold">Elegir mi examen</span>
+        <span className="text-sm text-ink-soft">PDF o foto de la hoja</span>
+        <input
+          id="examen-archivo"
+          type="file"
+          accept=".pdf,application/pdf,image/*"
+          className="sr-only"
+          onChange={(e) => cambiar(e.target.files?.[0] ?? null)}
+        />
+      </label>
+      {MODO_EJEMPLO && (
+        <button
+          type="button"
+          onClick={() => cambiar(new File(['ejemplo'], 'Examen de fracciones - 4.º B.pdf', { type: 'application/pdf' }))}
+          className="text-sm text-ink-soft underline underline-offset-4 hover:text-ink"
+        >
+          Probar con un examen de ejemplo
+        </button>
       )}
     </div>
   )
 }
 
-function MasOpciones({ opciones, cambiar }: { opciones: OpcionesExamen; cambiar: (o: OpcionesExamen) => void }) {
-  return (
-    <>
-      <div className="flex flex-col gap-2">
-        <p className="font-medium">Estilo</p>
-        <div className="flex flex-wrap gap-2">
-          <Chip activo={opciones.formato === 'mision'} color={COLOR} onClick={() => cambiar({ ...opciones, formato: 'mision' })}>
-            Una misión con niveles
-          </Chip>
-          <Chip activo={opciones.formato === 'contextualizado'} color={COLOR} onClick={() => cambiar({ ...opciones, formato: 'contextualizado' })}>
-            Solo cambiar la historia de las preguntas
-          </Chip>
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <p className="font-medium">¿Ya tienes tu examen?</p>
-        <p className="text-sm text-ink-soft">Súbelo y lo transformamos manteniendo tus mismas preguntas.</p>
-        <label
-          htmlFor="examen-propio"
-          className="inline-flex h-11 cursor-pointer items-center gap-2 self-start rounded-xl border border-line bg-surface px-4 font-medium hover:bg-surface-2"
-        >
-          <Upload className="size-5" aria-hidden />
-          {opciones.examenPropio ? opciones.examenPropio.name : 'Subir mi examen (foto o PDF)'}
-          <input
-            id="examen-propio"
-            type="file"
-            accept="image/*,.pdf,.doc,.docx"
-            className="sr-only"
-            onChange={(e) => cambiar({ ...opciones, examenPropio: e.target.files?.[0] })}
-          />
-        </label>
-      </div>
-    </>
-  )
-}
+const resumen = (e: Eleccion) =>
+  [e.interes && `con ${e.interes.toLowerCase()}`, ...NECESIDADES.filter((n) => e.necesidades.includes(n.id)).map((n) => n.titulo.toLowerCase())]
+    .filter(Boolean)
+    .join(' · ')
 
 export function Examen() {
   const { ficha, resultados, guardar, avisar, creditos } = useStore()
   const { ocupado, generar } = useGeneracion()
   const examen = resultados.examen
-  const [opciones, setOpciones] = useState<OpcionesExamen>(examen?.opciones ?? POR_DEFECTO)
+  const [archivo, setArchivo] = useState<File | null>(null)
+  const [eleccion, setEleccion] = useState<Eleccion>(examen?.opciones ?? POR_DEFECTO)
   const [respuestas, setRespuestas] = useState(false)
   const [original, setOriginal] = useState(false)
-  const [dibujando, setDibujando] = useState(false)
+  const [armando, setArmando] = useState(false)
 
   if (!ficha) return <SinTema />
 
-  const listo = opciones.interes.trim().length > 1
-  const costoDibujos = (examen?.preguntas.length ?? 0) * COSTOS.ilustracion
-  const conDibujos = !!examen?.preguntas.some((p) => p.ilustracion)
+  const eligio = (eleccion.interes !== null && eleccion.interes.trim().length > 1) || eleccion.necesidades.length > 0
+  const listo = !!archivo && eligio
 
-  async function crear() {
-    const nuevo = await generar(COSTOS.examen, 'Examen', () => api.generarExamen(ficha!, opciones))
-    if (nuevo) guardar('examen', nuevo)
+  const anterior = SUBIDOS.get(ficha.id) ?? (MODO_EJEMPLO && examen ? new File(['ejemplo'], examen.archivo, { type: 'application/pdf' }) : undefined)
+  const aAdaptar = archivo ?? anterior
+
+  async function adaptar() {
+    if (!aAdaptar) return
+    SUBIDOS.set(ficha!.id, aAdaptar)
+    const nuevo = await generar(COSTOS.examen, 'Examen adaptado', () => api.adaptarExamen(ficha!, { ...eleccion, examen: aAdaptar }))
+    if (nuevo) {
+      guardar('examen', nuevo)
+      setArchivo(null)
+    }
   }
 
-  async function dibujar() {
+  async function bajarPdf(conRespuestas: boolean) {
     if (!examen) return
-    setDibujando(true)
-    const nuevo = await generar(costoDibujos, 'Dibujos', () => api.generarIlustraciones(examen))
-    if (nuevo) guardar('examen', nuevo)
-    setDibujando(false)
+    setArmando(true)
+    try {
+      const pdf = await pdfExamen(examen, ficha!.grado, { respuestas: conRespuestas })
+      await descargar(pdf, nombreArchivo(examen.titulo, conRespuestas ? 'respuestas' : 'adaptado'), avisar)
+    } catch {
+      avisar('No pudimos armar el PDF. Intenta de nuevo.', 'error')
+    } finally {
+      setArmando(false)
+    }
   }
 
   if (!examen) {
     return (
       <>
         <EncabezadoHerramienta id="examen" />
-        <Pregunta titulo="¿Qué le gusta a tu clase?">
-          <p className="-mt-1 text-ink-soft">Las preguntas evalúan lo mismo, pero cuentan una historia que les interesa.</p>
-          <ElegirInteres opciones={opciones} cambiar={setOpciones} />
+        <Pregunta titulo="1. Sube tu examen">
+          <p className="-mt-1 text-ink-soft">El de siempre. Mantenemos tus mismas preguntas y lo que evalúan.</p>
+          <SubirExamen archivo={archivo} cambiar={setArchivo} />
+        </Pregunta>
+        <Pregunta titulo="2. ¿Cómo lo adaptamos?">
+          <p className="-mt-1 text-ink-soft">Elige una o varias. No hace falta poner el nombre de ningún estudiante.</p>
+          <ElegirAdaptacion eleccion={eleccion} cambiar={setEleccion} />
         </Pregunta>
         <div className="flex flex-col items-start gap-2">
-          <Boton tam="lg" variante="herramienta" herramienta="examen" onClick={crear} cargando={ocupado} disabled={!listo}>
-            Crear el examen
+          <Boton tam="lg" variante="herramienta" herramienta="examen" onClick={adaptar} cargando={ocupado} disabled={!listo}>
+            <Sparkles className="size-5" aria-hidden /> Adaptar mi examen
           </Boton>
+          <p className="text-sm text-ink-soft">
+            {!archivo ? 'Primero sube tu examen.' : !eligio ? 'Elige cómo adaptarlo.' : 'Recibirás el examen adaptado en PDF, listo para imprimir.'}
+          </p>
           <NotaCreditos n={COSTOS.examen} quedan={creditos} />
         </div>
-        {ocupado && <Generando texto="Escribiendo cada pregunta con lo que le gusta a tu clase…" />}
-        <Desplegable titulo="Más opciones">
-          <MasOpciones opciones={opciones} cambiar={setOpciones} />
-        </Desplegable>
+        {ocupado && <Generando texto="Leyendo tu examen y adaptando cada pregunta…" />}
       </>
     )
   }
 
+  const n = examen.opciones.necesidades
+  const grande = n.includes('dislexia') || n.includes('facil')
+
   return (
     <>
       <EncabezadoHerramienta id="examen" />
+      <p className="-mt-3 text-ink-soft print:hidden">
+        Tu examen «{examen.archivo}», adaptado {resumen(examen.opciones)}.
+      </p>
 
-      {ocupado && !dibujando ? (
-        <Generando texto="Escribiendo otra versión del examen…" />
+      <Acciones>
+        <Boton variante="herramienta" herramienta="examen" tam="lg" onClick={() => bajarPdf(false)} cargando={armando}>
+          <Download className="size-5" aria-hidden /> Descargar PDF
+        </Boton>
+        <Boton variante="contorno" onClick={() => bajarPdf(true)} disabled={armando}>
+          <CircleCheck className="size-5" aria-hidden /> PDF de respuestas
+        </Boton>
+        <Boton variante="contorno" onClick={() => imprimir(avisar)}>
+          <Printer className="size-5" aria-hidden /> Imprimir
+        </Boton>
+        <Boton variante="suave" onClick={() => setOriginal(!original)}>
+          <Eye className="size-5" aria-hidden /> {original ? 'Ocultar original' : 'Comparar con el original'}
+        </Boton>
+      </Acciones>
+
+      {ocupado ? (
+        <Generando texto="Adaptando otra vez tu examen…" />
       ) : (
-        <Hoja>
-          <header className="flex flex-col gap-2 rounded-xl p-4 sm:p-5" style={{ background: tinte(COLOR, 10) }}>
-            <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
-              <span style={{ color: COLOR }}>{examen.titulo}</span>
-            </Editable>
-            <Editable>{examen.intro}</Editable>
-            <p className="text-ink-soft">Nombre: ______________________ · {ficha.grado}</p>
+        <Hoja className={cx(grande && 'text-lg leading-loose tracking-wide')}>
+          <header className="flex flex-col gap-2">
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">{examen.titulo}</h2>
+            <p className="text-ink-soft">Nombre: ______________________ · {ficha.grado} · Fecha: __________</p>
+            <p className="rounded-xl bg-surface-2 px-4 py-3">{examen.instrucciones}</p>
           </header>
           <ol className="flex flex-col gap-7">
             {examen.preguntas.map((p, i) => (
-              <li key={i} className="flex gap-4">
-                <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <li key={i} className={cx('flex flex-col gap-2', n.includes('tdah') && 'border-b border-line pb-6 last:border-0')}>
+                <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-semibold" style={{ color: COLOR }}>
                     {examen.etiquetaPaso} {i + 1}
                   </p>
-                  {original && <p className="rounded-lg bg-surface-2 px-3 py-2 text-sm text-ink-soft print:hidden">Original: {p.original}</p>}
-                  <Editable className="text-lg">{p.texto}</Editable>
-                  {respuestas ? <p className="rounded-lg bg-ok/10 px-3 py-2 text-ok">Respuesta: {p.respuesta}</p> : <div className="renglones" aria-hidden />}
+                  {n.includes('tdah') && (
+                    <span className="flex items-center gap-1.5 text-xs text-ink-soft">
+                      Listo <span className="size-5 rounded border-2 border-ink-soft" aria-hidden />
+                    </span>
+                  )}
                 </div>
-                {p.ilustracion && p.fraccion && (
-                  <div className="grid size-24 shrink-0 place-items-center rounded-xl border border-line sm:size-28">
-                    <Pastel fraccion={p.fraccion} tam={64} color={COLOR} />
-                  </div>
+                {original && <p className="rounded-lg bg-surface-2 px-3 py-2 text-sm text-ink-soft print:hidden">Original: {p.original}</p>}
+                <p className="text-lg">{p.texto}</p>
+                {p.alternativas && (
+                  <ul className="flex flex-col gap-1.5">
+                    {p.alternativas.map((a, k) => (
+                      <li key={a} className="flex items-center gap-2.5">
+                        <span className="size-4 shrink-0 rounded-full border-2 border-ink-soft" aria-hidden />
+                        {String.fromCharCode(97 + k)}) {a}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {p.apoyo && <p className="rounded-lg border border-dashed border-line px-3 py-2 text-ink-soft">Ayuda: {p.apoyo}</p>}
+                {respuestas ? (
+                  <p className="rounded-lg bg-ok/10 px-3 py-2 text-ok">Respuesta: {p.respuesta}</p>
+                ) : (
+                  !p.alternativas && <div className="renglones" aria-hidden />
                 )}
               </li>
             ))}
@@ -174,30 +297,18 @@ export function Examen() {
       )}
 
       <Acciones>
-        <Boton variante="herramienta" herramienta="examen" onClick={() => imprimir(avisar)}>
-          <Printer className="size-5" aria-hidden /> Imprimir
-        </Boton>
-        <Boton variante="contorno" onClick={() => setRespuestas(!respuestas)}>
-          <CircleCheck className="size-5" aria-hidden /> {respuestas ? 'Ocultar respuestas' : 'Ver respuestas'}
-        </Boton>
-        {!conDibujos && (
-          <Boton variante="contorno" onClick={dibujar} cargando={dibujando} disabled={ocupado}>
-            <ImagePlus className="size-5" aria-hidden /> Agregar dibujos
-          </Boton>
-        )}
-        <Boton variante="suave" onClick={() => setOriginal(!original)}>
-          <Eye className="size-5" aria-hidden /> {original ? 'Ocultar original' : 'Ver original'}
+        <Boton variante="suave" onClick={() => setRespuestas(!respuestas)}>
+          <CircleCheck className="size-5" aria-hidden /> {respuestas ? 'Ocultar respuestas' : 'Ver respuestas en pantalla'}
         </Boton>
       </Acciones>
-      {!conDibujos && <p className="-mt-4 text-sm text-ink-soft print:hidden">Los dibujos usan {costoDibujos} de tus {creditos} créditos.</p>}
 
-      <Desplegable titulo="Cambiar la historia o crear otra versión">
-        <p className="font-medium">¿Qué le gusta a tu clase?</p>
-        <ElegirInteres opciones={opciones} cambiar={setOpciones} />
-        <MasOpciones opciones={opciones} cambiar={setOpciones} />
+      <Desplegable titulo="Adaptarlo de otra forma o subir otro examen">
+        <SubirExamen archivo={archivo} cambiar={setArchivo} />
+        {!archivo && anterior && <p className="-mt-2 text-sm text-ink-soft">Si no subes otro, volvemos a adaptar «{examen.archivo}».</p>}
+        <ElegirAdaptacion eleccion={eleccion} cambiar={setEleccion} />
         <div className="flex flex-wrap items-center gap-3">
-          <Boton onClick={crear} cargando={ocupado && !dibujando} disabled={!listo}>
-            Crear otra versión
+          <Boton onClick={adaptar} cargando={ocupado} disabled={!eligio || !aAdaptar}>
+            Adaptar de nuevo
           </Boton>
           <NotaCreditos n={COSTOS.examen} quedan={creditos} />
         </div>

@@ -5,10 +5,8 @@ export const COSTOS = {
   letra: 1,
   audio: 3,
   examen: 1,
-  ilustracion: 1,
   juego: 1,
   crucigrama: 0,
-  adaptacion: 1,
   biblioteca: 0,
 } as const
 

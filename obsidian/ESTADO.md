@@ -17,7 +17,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **Resultados de los alumnos:** el niño pone su nombre en un popup la primera vez (sin cuenta; el código viene en el link) y cuando supera su puntaje lo manda a `api/resultados.ts` (Blob, `resultados/CODIGO/ID.json`; solo escribe si mejora, para cuidar las 2.000 escrituras/mes del plan Hobby). El docente lo ve en "Resultados de juegos" del menú, de todos sus temas: alumno, puntaje más alto, estrellas. Para verlos usa una clave que recibió al publicar y que se guarda en su navegador. En `npm run dev`, sin token de Blob, las funciones usan un Blob en memoria.
 
 ## Siguiente paso
-- Backend `/api` con Claude (ficha, letra, examen, juego, adaptación): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada generación debe partir de los desempeños de `packages/curriculo` para el `gradoId`/`areaId` del tema.
+- Backend `/api` con Claude (ficha, letra, examen adaptado, juego): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada generación debe partir de los desempeños de `packages/curriculo` para el `gradoId`/`areaId` del tema.
 - Audio con ElevenLabs, persistencia (biblioteca, créditos, links/QR), pictogramas ARASAAC.
 - Juegos: que `/api/juego` cree más preguntas de las que entran en una partida (hoy las del tema se repiten al reintentar; el cálculo ya es procedural), clasificar en grupos y, cuando haya cuentas, pasar la clave de resultados a la cuenta del docente.
 

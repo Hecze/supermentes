@@ -6,7 +6,7 @@ import type { Api } from './types'
 export const MODO_EJEMPLO = import.meta.env.VITE_API !== 'real'
 
 // ponytail: solo ficha, examen y letra de canción tienen backend; el resto sigue con ejemplos hasta que exista su endpoint.
-export const api: Api = MODO_EJEMPLO ? mockApi : { ...mockApi, prepararFicha: realApi.prepararFicha, generarExamen: realApi.generarExamen, generarCancion: realApi.generarCancion }
+export const api: Api = MODO_EJEMPLO ? mockApi : { ...mockApi, prepararFicha: realApi.prepararFicha, adaptarExamen: realApi.adaptarExamen, generarCancion: realApi.generarCancion }
 
 export * from './types'
 export { COSTOS, CREDITOS_MENSUALES, textoCosto } from './costos'
