@@ -67,7 +67,7 @@ export type PropsJuego = {
   terminar: (r: Resultado) => void
 }
 
-export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta' | 'duelo' | 'invasion' | 'concurso'
+export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta' | 'duelo' | 'invasion' | 'concurso' | 'verdad' | 'une' | 'condor' | 'carriles' | 'michi'
 
 /** Dónde se juega mejor: en el celular de cada alumno o proyectado para toda la clase. */
 export type Donde = 'celular' | 'clase'

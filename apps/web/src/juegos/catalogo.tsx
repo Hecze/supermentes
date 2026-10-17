@@ -4,12 +4,37 @@ import { lazy } from 'react'
 import { normalizar } from '../lib/crucigrama'
 import { conRetos, cortos, largo } from './contenido'
 import { indiceGrado } from './matematica/habilidades'
-import { MiniCarrera, MiniConcurso, MiniDuelo, MiniGlobos, MiniInvasion, MiniMemoria, MiniPalabra, MiniPupiletras, MiniRapido, MiniRuleta, MiniSoga, MiniTopo } from './miniaturas'
+import {
+  MiniCarrera,
+  MiniCarriles,
+  MiniConcurso,
+  MiniCondor,
+  MiniDuelo,
+  MiniGlobos,
+  MiniInvasion,
+  MiniMemoria,
+  MiniMichi,
+  MiniPalabra,
+  MiniPupiletras,
+  MiniRapido,
+  MiniRuleta,
+  MiniSoga,
+  MiniTopo,
+  MiniUne,
+  MiniVerdad,
+} from './miniaturas'
 import type { Contenido, DefinicionJuego, JuegoId, Ritmo } from './tipos'
 
 /** Parejas que caben en una carta: textos cortos o un dibujo. */
 function paresCortos(c: Contenido): Contenido | null {
   const cabe = (l: { texto: string; visual?: unknown }) => !!l.visual || (largo(l.texto) > 0 && largo(l.texto) <= 16)
+  const pares = c.pares.filter((p) => cabe(p.a) && cabe(p.b))
+  return pares.length >= 4 ? { ...c, pares } : null
+}
+
+/** Parejas que caben en una tarjeta de "Une con flechas" (más ancha que una carta de Memoria). */
+function paresUne(c: Contenido): Contenido | null {
+  const cabe = (l: { texto: string; visual?: unknown }) => !!l.visual || (largo(l.texto) > 0 && largo(l.texto) <= 26)
   const pares = c.pares.filter((p) => cabe(p.a) && cabe(p.b))
   return pares.length >= 4 ? { ...c, pares } : null
 }
@@ -50,6 +75,77 @@ export const JUEGOS: DefinicionJuego[] = [
     preparar: (c) => conRetos(c, cortos(12, 3), 4),
     Miniatura: MiniGlobos,
     Componente: lazy(() => import('./globos/Globos')),
+  },
+  {
+    id: 'verdad',
+    estilo: 'neutro',
+    nombre: '¿Verdad o mentira?',
+    lema: 'Una carta con una respuesta: la deslizan a "verdad" o a "mentira". Las mentiras son los errores típicos.',
+    accion: 'deciden si la respuesta de cada carta es correcta o es un error típico',
+    instrucciones: '¿La respuesta de la carta está bien? Deslízala a la derecha si es verdad o a la izquierda si es mentira. También puedes tocar los botones.',
+    donde: ['celular', 'clase'],
+    color: '#2f7bff',
+    inspirado: 'Verdadero o falso (Wordwall) y las cartas que se deslizan',
+    preparar: (c) => conRetos(c, (r) => (largo(r.pregunta) <= 140 ? cortos(30, 2)(r) : null), 4),
+    Miniatura: MiniVerdad,
+    Componente: lazy(() => import('./verdad/VerdadMentira')),
+  },
+  {
+    id: 'une',
+    estilo: 'infantil',
+    nombre: 'Une con flechas',
+    lema: 'Relacionan columnas: tocan un lado y luego su pareja, y quedan unidos con una línea.',
+    accion: 'relacionan cada elemento con su pareja, uniendo las dos columnas',
+    instrucciones: 'Toca uno de la izquierda y luego su pareja de la derecha. Si están bien, quedan unidos con una línea.',
+    donde: ['celular', 'clase'],
+    color: '#ff9f68',
+    inspirado: 'Relaciona columnas (cuadernos) y Match up (Wordwall)',
+    preparar: paresUne,
+    Miniatura: MiniUne,
+    Componente: lazy(() => import('./une/UneFlechas')),
+  },
+  {
+    id: 'condor',
+    estilo: 'neutro',
+    nombre: 'Vuela, cóndor',
+    lema: 'Como Flappy Bird: tocan para aletear y pasan por el hueco con la respuesta.',
+    accion: 'leen la pregunta y guían al cóndor por el hueco con la respuesta correcta',
+    instrucciones: 'Toca la pantalla para aletear. Pasa por el hueco de las nubes que tiene la respuesta correcta. Tienes tres vidas.',
+    donde: ['celular'],
+    color: '#5ab8ff',
+    inspirado: 'Flappy Bird',
+    desde: 'primaria-2',
+    preparar: (c) => conRetos(c, (r) => (largo(r.pregunta) <= 120 ? cortos(10, 2)(r) : null), 4),
+    Miniatura: MiniCondor,
+    Componente: lazy(() => import('./condor/VuelaCondor')),
+  },
+  {
+    id: 'carriles',
+    estilo: 'neutro',
+    nombre: 'Corre, cuy',
+    lema: 'Como Subway Surfers: el cuy corre y se cambia al carril de la respuesta.',
+    accion: 'leen la pregunta y se cambian al carril con la respuesta correcta antes de que llegue',
+    instrucciones: 'Toca un carril o desliza para mover al cuy. Ponte en el carril de la respuesta correcta antes de que lleguen las cajas.',
+    donde: ['celular'],
+    color: '#d9a86c',
+    inspirado: 'Subway Surfers',
+    preparar: (c) => conRetos(c, (r) => (largo(r.pregunta) <= 120 ? cortos(10, 3)(r) : null), 4),
+    Miniatura: MiniCarriles,
+    Componente: lazy(() => import('./carriles/CorreCuy')),
+  },
+  {
+    id: 'michi',
+    estilo: 'neutro',
+    nombre: 'Michi',
+    lema: 'Tres en raya contra la compu: para marcar una casilla hay que responder bien.',
+    accion: 'responden una pregunta por cada casilla que quieren marcar y piensan su jugada',
+    instrucciones: 'Elige una casilla y responde la pregunta. Si aciertas, la casilla es tuya; si fallas, juega la compu. Gana quien haga tres en raya.',
+    donde: ['celular', 'clase'],
+    color: '#7b5cff',
+    inspirado: 'Tres en raya (michi)',
+    preparar: (c) => conRetos(c, (r) => (largo(r.pregunta) <= 160 ? cortos(30, 3)(r) : null), 4),
+    Miniatura: MiniMichi,
+    Componente: lazy(() => import('./michi/Michi')),
   },
   {
     id: 'rapido',

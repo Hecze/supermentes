@@ -3,7 +3,7 @@ import { timingSafeEqual } from 'node:crypto'
 import { get } from '@vercel/blob'
 
 export const CODIGO = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
-export const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta', 'duelo', 'invasion', 'concurso'])
+export const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta', 'duelo', 'invasion', 'concurso', 'verdad', 'une', 'condor', 'carriles', 'michi'])
 
 export function json(datos: unknown, estado = 200, cabeceras: Record<string, string> = {}) {
   return new Response(JSON.stringify(datos), {
