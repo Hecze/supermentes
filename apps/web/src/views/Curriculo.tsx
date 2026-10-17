@@ -150,6 +150,24 @@ export function VisorCurriculo() {
                       </p>
                     )}
 
+                    {c.temas && c.temas.length > 0 && (
+                      <div className="flex flex-col gap-1.5 print:hidden">
+                        <p className="text-sm text-ink-soft">Temas que trabaja, como suelen llamarse en libros y sesiones (no es texto oficial):</p>
+                        <div className="flex flex-wrap gap-2">
+                          {c.temas.map((t) => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => abrirNuevoTema({ texto: t, gradoId, areaId, indiceCompetencia: i })}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-sm hover:border-ink"
+                            >
+                              <Plus className="size-3.5" aria-hidden /> {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* En pantallas anchas: capacidades y estándar a la izquierda, desempeños a la derecha. */}
                     <div className="grid gap-x-8 gap-y-3 xl:grid-cols-2">
                       <div className="flex flex-col gap-3">
@@ -188,26 +206,6 @@ export function VisorCurriculo() {
                         </ul>
                       </div>
                     </div>
-
-                    {c.temas && c.temas.length > 0 && (
-                      <div className="flex flex-col gap-1.5 print:hidden">
-                        <h4 className="font-semibold">
-                          Temas que trabaja <span className="text-sm font-normal text-ink-soft">(como suelen llamarse en libros y sesiones; no es texto oficial)</span>
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {c.temas.map((t) => (
-                            <button
-                              key={t}
-                              type="button"
-                              onClick={() => abrirNuevoTema({ texto: t, gradoId, areaId, indiceCompetencia: i })}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-sm hover:border-ink"
-                            >
-                              <Plus className="size-3.5" aria-hidden /> {t}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </section>
                 ))}
               </div>

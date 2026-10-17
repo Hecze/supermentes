@@ -93,8 +93,8 @@ export function NuevoTema() {
 
   const resultados = useMemo(() => (grado ? buscarEnGrado(grado, NOMBRES[gradoId] ?? gradoId, q, areaId || undefined) : []), [grado, gradoId, q, areaId])
 
-  // Si no aparece en el grado elegido, se busca entre los temas de los demás grados.
-  const sinResultados = q.trim().length > 2 && grado !== null && resultados.length === 0
+  // Si en el grado elegido no aparece tal cual, se busca también entre los temas de los demás grados.
+  const sinResultados = q.trim().length > 2 && grado !== null && !resultados.some((r) => !r.parcial)
   useEffect(() => {
     setOtros(null)
     if (!sinResultados) return
@@ -374,32 +374,35 @@ export function NuevoTema() {
                       </section>
                     ))}
                 </div>
-              ) : resultados.length ? (
-                <ul className="-mx-3 flex flex-col">
-                  {resultados.map((r) => (
-                    <FilaResultado key={`${r.areaId}-${r.tema}-${r.cita ?? ''}`} r={r} elegir={elegir} />
-                  ))}
-                </ul>
               ) : (
                 <div className="flex flex-col gap-3">
-                  <p className="px-0.5">
-                    No encontramos «{q.trim()}» en el currículo de {NOMBRES[gradoId]}
-                    {areaId && ` (${areaPorId(gradoId, areaId)?.nombre})`}. El currículo nombra los temas por lo que el estudiante aprende: prueba
-                    con una palabra más general{areaId && ' o busca en todos los cursos'}.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQ('')
-                      buscador.current?.focus()
-                    }}
-                    className="self-start text-sm text-ink-soft underline underline-offset-4 hover:text-ink"
-                  >
-                    Ver los temas de cada curso
-                  </button>
-                  {otros && otros.length > 0 && (
+                  {resultados.length > 0 ? (
+                    <ul className="-mx-3 flex flex-col">
+                      {resultados.map((r) => (
+                        <FilaResultado key={`${r.areaId}-${r.tema}-${r.cita ?? ''}`} r={r} elegir={elegir} />
+                      ))}
+                    </ul>
+                  ) : (
+                    <>
+                      <p className="px-0.5">
+                        No encontramos «{q.trim()}» en el currículo de {NOMBRES[gradoId]}
+                        {areaId && ` (${areaPorId(gradoId, areaId)?.nombre})`}. Prueba con otra palabra{areaId && ' o busca en todos los cursos'}.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQ('')
+                          buscador.current?.focus()
+                        }}
+                        className="self-start text-sm text-ink-soft underline underline-offset-4 hover:text-ink"
+                      >
+                        Ver los temas de cada curso
+                      </button>
+                    </>
+                  )}
+                  {sinResultados && otros && otros.length > 0 && (
                     <div className="flex flex-col gap-1">
-                      <p className="text-sm text-ink-soft">Aparece en otros grados:</p>
+                      <p className="text-sm text-ink-soft">{resultados.length ? 'Tal cual aparece en otros grados:' : 'Aparece en otros grados:'}</p>
                       <ul className="-mx-3 flex flex-col">
                         {otros.map((r) => (
                           <FilaResultado key={`${r.gradoId}-${r.areaId}-${r.tema}`} r={r} otroGrado elegir={elegir} />

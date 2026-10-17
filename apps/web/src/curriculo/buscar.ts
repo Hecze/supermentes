@@ -14,6 +14,8 @@ export type Resultado = {
   cita?: string
   /** Índice de la competencia a la que pertenece el tema, si se sabe. */
   indiceCompetencia?: number
+  /** Solo coincide una parte de las palabras buscadas. */
+  parcial?: boolean
 }
 
 /** Lo que pide el currículo para un tema: la competencia y los desempeños más cercanos. */
@@ -82,7 +84,7 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
       if (n === b.length) {
         completos++
         res.push({ ...base(a), tema: t, indiceCompetencia, orden: normalizar(t).startsWith(normalizar(q.trim())) ? 0 : 1 })
-      } else if (parecido(n, b)) res.push({ ...base(a), tema: t, indiceCompetencia, orden: 2 })
+      } else if (parecido(n, b)) res.push({ ...base(a), tema: t, indiceCompetencia, parcial: true, orden: 2 })
     }
     if (completos) continue
     // Un desempeño por curso: el que tenga más palabras de la búsqueda.
@@ -92,7 +94,7 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
       if (n > mejor.n) mejor = { n, cita: t }
     }
     if (mejor.n === b.length) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, orden: 3 })
-    else if (parecido(mejor.n, b)) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, orden: 4 })
+    else if (parecido(mejor.n, b)) res.push({ ...base(a), tema: capitalizar(q.trim()), cita: mejor.cita, parcial: true, orden: 4 })
   }
   return res.sort((x, y) => x.orden - y.orden).map(({ orden: _, ...r }) => r)
 }
