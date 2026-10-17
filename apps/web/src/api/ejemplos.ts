@@ -35,6 +35,7 @@ export const FICHA_EJEMPLO: Ficha = {
   curriculo: {
     competencia: 'Resuelve problemas de cantidad',
     capacidad: 'Comunica su comprensión sobre los números y las operaciones',
+    desempenos: ['Expresa con diversas representaciones y lenguaje numérico (números, signos y expresiones verbales) su comprensión de: La unidad de millar como unidad del sistema de numeración decimal, sus equivalencias entre unidades menores, el valor posicional de un dígito en números de cuatro cifras y la comparación y el orden de números. La multiplicación y división con números naturales, así como las propiedades conmutativa y asociativa de la multiplicación. La fracción como parte-todo (cantidad discreta o continua), así como equivalencias y operaciones de adición y sustracción entre fracciones usuales usando fracciones equivalentes.'],
   },
   conceptos: [
     'Un entero se divide en partes iguales.',
@@ -71,6 +72,7 @@ export const FICHA_AGUA: Ficha = {
   curriculo: {
     competencia: 'Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
     capacidad: 'Comprende y usa conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
+    desempenos: ['Describe que los objetos pueden sufrir cambios reversibles e irreversibles por acción de la energía. Ejemplo: El estudiante describe por qué un cubo de hielo se disuelve por acción del calor del ambiente y por qué puede volver a ser un cubo de hielo al colocar el líquido en un refrigerador.'],
   },
   conceptos: [
     'El sol calienta el agua de mares, ríos y lagos, y se evapora.',
@@ -106,6 +108,7 @@ export const FICHA_SUSTANTIVOS: Ficha = {
   curriculo: {
     competencia: 'Escribe diversos tipos de textos en su lengua materna',
     capacidad: 'Utiliza convenciones del lenguaje escrito de forma pertinente',
+    desempenos: ['Utiliza recursos gramaticales y ortográficos (por ejemplo, el punto seguido y las comas enumerativas) que contribuyen a dar sentido a su texto, e incorpora algunos recursos textuales (por ejemplo, el tamaño de la letra) para reforzar dicho sentido. Emplea comparaciones y adjetivaciones para caracterizar personas, personajes y escenarios, y elabora rimas y juegos verbales apelando al ritmo y la musicalidad de las palabras, con el fin de expresar sus experiencias y emociones.', 'Explica el efecto de su texto en los lectores considerando su propósito al momento de escribirlo. Asimismo, explica la importancia de los aspectos gramaticales y ortográficos más comunes.'],
   },
   conceptos: [
     'Los sustantivos nombran personas, animales, cosas y lugares.',

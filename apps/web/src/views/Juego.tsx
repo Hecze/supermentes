@@ -1,4 +1,4 @@
-import { ArrowLeft, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, TriangleAlert, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
@@ -11,11 +11,12 @@ import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } fro
 import { Qr } from '../juegos/compartir/Qr'
 import { guardarEnviado } from '../juegos/compartir/resultados'
 import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/matematica/deducir'
-import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../juegos/matematica/habilidades'
+import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara, type Habilidad } from '../juegos/matematica/habilidades'
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
 import { AtajoResultados } from './ResultadosJuegos'
+import { InfoCurricular, textoGrados, useSustento, type Sustento } from './SustentoJuego'
 import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
@@ -32,17 +33,6 @@ function nombreFuente(f: Fuente, ficha: Ficha) {
   return f.fuente === 'calculo' ? nombrePractica(f) : `Palabras y preguntas de «${ficha.titulo}»`
 }
 
-/** "3.º y 4.º de primaria", "Inicial 5 años y 1.º de primaria". */
-function textoGrados(grados: string[]) {
-  const partes: string[] = []
-  for (const nivel of ['inicial', 'primaria', 'secundaria']) {
-    const ns = grados.filter((g) => g.startsWith(nivel)).map((g) => g.split('-')[1])
-    if (!ns.length) continue
-    if (nivel === 'inicial') partes.push(`Inicial ${ns.join(' y ')} años`)
-    else partes.push(`${ns.map((n) => `${n}.º`).join(' y ')} de ${nivel}`)
-  }
-  return partes.join(' y ')
-}
 
 function Insignias({ def }: { def: DefinicionJuego }) {
   const insignia = 'inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-soft'
@@ -67,27 +57,31 @@ function Insignias({ def }: { def: DefinicionJuego }) {
   )
 }
 
-function TarjetaJuego({ def, onClick }: { def: DefinicionJuego; onClick: () => void }) {
+function TarjetaJuego({ def, onClick, sustento }: { def: DefinicionJuego; onClick: () => void; sustento: Sustento | null }) {
   const { Miniatura } = def
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex flex-col overflow-hidden rounded-2xl border-2 border-line bg-surface text-left transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:-translate-y-0.5"
-    >
-      <span className="block overflow-hidden border-b-2 border-line">
-        <span className="block transition duration-300 group-hover:scale-[1.04]">
-          <Miniatura />
+    <div className="relative flex">
+      <button
+        type="button"
+        onClick={onClick}
+        className="group flex w-full flex-col overflow-hidden rounded-2xl border-2 border-line bg-surface text-left transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:-translate-y-0.5"
+      >
+        <span className="block overflow-hidden border-b-2 border-line">
+          <span className="block transition duration-300 group-hover:scale-[1.04]">
+            <Miniatura />
+          </span>
         </span>
-      </span>
-      <span className="flex flex-1 flex-col gap-1.5 p-4">
-        <span className="font-display text-xl font-bold leading-tight">{def.nombre}</span>
-        <span className="text-sm text-ink-soft">{def.lema}</span>
-        <span className="mt-auto pt-2">
-          <Insignias def={def} />
+        <span className="flex flex-1 flex-col gap-1.5 p-4">
+          <span className="font-display text-xl font-bold leading-tight">{def.nombre}</span>
+          <span className="text-sm text-ink-soft">{def.lema}</span>
+          <span className="mt-auto pt-2">
+            <Insignias def={def} />
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+      {/* Fuera del botón de la tarjeta: abrir el sustento no abre el juego. */}
+      <InfoCurricular sustento={sustento} def={def} className="absolute right-2.5 top-2.5 z-10" />
+    </div>
   )
 }
 
@@ -111,7 +105,8 @@ function ElegirPractica({
   const [borrador, setBorrador] = useState<Fuente>(actual)
   const deducidas = useMemo(() => habilidadesDelTema(ficha), [ficha])
   // Si el tema no dice qué calcular, se sugiere lo típico del grado.
-  const sugeridas = deducidas.length ? deducidas : [practicaDelGrado(ficha.gradoId)]
+  const delGrado = practicaDelGrado(ficha.gradoId)
+  const sugeridas = deducidas.length ? deducidas : delGrado ? [delGrado] : []
 
   useEffect(() => {
     const d = dialogo.current
@@ -123,6 +118,9 @@ function ElegirPractica({
     if (!abierta && d.open) d.close()
   }, [abierta, actual])
 
+  // Primero lo que el currículo pide en el grado del tema (niveles con cita del desempeño); lo demás, aparte.
+  const delCurriculo = (h: Habilidad) => h.niveles.some((n) => n.grados.includes(ficha.gradoId))
+  const otrosGrados = HABILIDADES.filter((h) => !delCurriculo(h))
   const hab = borrador.fuente === 'calculo' ? habilidadPorId(borrador.habilidad) : undefined
   const recomendado = hab ? nivelPara(hab, ficha.gradoId) : -1
   const muestra = useMemo(() => (borrador.fuente === 'calculo' ? (contenidoMatematica(borrador, 7)?.retos.slice(0, 4) ?? []) : []), [borrador])
@@ -194,11 +192,32 @@ function ElegirPractica({
               </div>
             </div>
           )}
-          {GRUPOS_HABILIDAD.map((g) => (
-            <div key={g} className="flex flex-col gap-1.5">
-              <p className="text-sm text-ink-soft">{g}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {HABILIDADES.filter((h) => h.grupo === g).map((h) => (
+          {GRUPOS_HABILIDAD.map((g) => {
+            const delGrupo = HABILIDADES.filter((h) => h.grupo === g && delCurriculo(h))
+            if (!delGrupo.length) return null
+            return (
+              <div key={g} className="flex flex-col gap-1.5">
+                <p className="text-sm text-ink-soft">{g}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {delGrupo.map((h) => (
+                    <Chip
+                      key={h.id}
+                      activo={borrador.fuente === 'calculo' && borrador.habilidad === h.id}
+                      color={COLOR}
+                      onClick={() => elegirHabilidad({ habilidad: h.id, nivel: nivelPara(h, ficha.gradoId) })}
+                    >
+                      {h.nombre}
+                    </Chip>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+          {otrosGrados.length > 0 && (
+            <details className="flex flex-col gap-1.5" open={!!hab && !delCurriculo(hab)}>
+              <summary className="cursor-pointer text-sm text-ink-soft">De otros grados ({otrosGrados.length}): el currículo no los pide en {ficha.grado}</summary>
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
+                {otrosGrados.map((h) => (
                   <Chip
                     key={h.id}
                     activo={borrador.fuente === 'calculo' && borrador.habilidad === h.id}
@@ -209,8 +228,8 @@ function ElegirPractica({
                   </Chip>
                 ))}
               </div>
-            </div>
-          ))}
+            </details>
+          )}
         </section>
 
         {hab && borrador.fuente === 'calculo' && (
@@ -410,6 +429,9 @@ export function Juego() {
     [ficha, claveFuente, resultados.juego],
   )
   const compatibles = useMemo(() => (contenido && ficha ? juegosCompatibles(contenido, ficha.gradoId) : []), [contenido, ficha])
+  // fuente se recrea en cada render: se memoriza por su clave para no rearmar el sustento.
+  const fuenteEstable = useMemo(() => fuente, [claveFuente]) // eslint-disable-line react-hooks/exhaustive-deps
+  const sustento = useSustento(ficha, fuenteEstable)
 
   if (!ficha) return <SinTema />
 
@@ -433,9 +455,12 @@ export function Juego() {
           <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3">
             <ArrowLeft className="size-5" aria-hidden /> Todos los juegos
           </Boton>
-          <p className="text-sm text-ink-soft">
-            Practican: <TextoMat texto={nombreFuente(fuente, ficha)} className="font-medium text-ink" />
-          </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <p className="text-sm text-ink-soft">
+              Practican: <TextoMat texto={nombreFuente(fuente, ficha)} className="font-medium text-ink" />
+            </p>
+            <InfoCurricular sustento={sustento} def={enJuego.def} chip />
+          </div>
         </div>
         <Partida
           key={`${elegido}-${claveFuente}`}
@@ -510,7 +535,19 @@ export function Juego() {
             <p className="font-semibold">
               <TextoMat texto={nombreFuente(fuente, ficha)} />
             </p>
+            {sustento && fuente.fuente === 'calculo' && (
+              <p className={cx('mt-0.5 flex items-center gap-1.5 text-sm font-medium', sustento.desempeno ? 'text-ok' : 'text-warn')}>
+                {sustento.desempeno ? <BadgeCheck className="size-4" aria-hidden /> : <TriangleAlert className="size-4" aria-hidden />}
+                {sustento.desempeno ? `Lo pide el currículo de ${ficha.grado}` : `No figura en el currículo de ${ficha.grado}`}
+              </p>
+            )}
+            {sustento && fuente.fuente === 'tema' && sustento.tema.desempeno && (
+              <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-ok">
+                <BadgeCheck className="size-4" aria-hidden /> Parte de un desempeño del currículo de {ficha.grado}
+              </p>
+            )}
           </div>
+          <InfoCurricular sustento={sustento} chip />
           <Boton variante="contorno" tam="sm" onClick={() => setEligiendo(true)}>
             Cambiar
           </Boton>
@@ -528,7 +565,7 @@ export function Juego() {
               {compatibles
                 .filter(({ def }) => def.donde.includes('celular'))
                 .map(({ def }) => (
-                  <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
+                  <TarjetaJuego key={def.id} def={def} sustento={sustento} onClick={() => setElegido(def.id)} />
                 ))}
             </div>
             {compatibles.some(({ def }) => !def.donde.includes('celular')) && (
@@ -543,7 +580,7 @@ export function Juego() {
                   {compatibles
                     .filter(({ def }) => !def.donde.includes('celular'))
                     .map(({ def }) => (
-                      <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
+                      <TarjetaJuego key={def.id} def={def} sustento={sustento} onClick={() => setElegido(def.id)} />
                     ))}
                 </div>
               </>

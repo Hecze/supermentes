@@ -68,6 +68,8 @@ export type DefinicionJuego = {
   nombre: string
   /** Una línea para el docente: de qué se trata. */
   lema: string
+  /** Qué hacen los alumnos al jugar, para el sustento curricular: "eligen la respuesta correcta entre varias…". */
+  accion: string
   /** Cómo se juega, para la portada. */
   instrucciones: string
   donde: Donde[]

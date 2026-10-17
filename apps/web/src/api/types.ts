@@ -37,7 +37,12 @@ export type Ficha = {
   fuente: string
   proposito: string
   /** Alineación al Currículo Nacional de Educación Básica (CNEB) del Perú. */
-  curriculo: { competencia: string; capacidad: string }
+  curriculo: {
+    competencia: string
+    capacidad: string
+    /** Desempeños oficiales del grado de los que parte el tema, copiados tal cual de packages/curriculo. */
+    desempenos?: string[]
+  }
   conceptos: string[]
   /** Se reutiliza en el crucigrama y en "Adivina la palabra" sin volver a llamar a la IA. */
   vocabulario: { palabra: string; definicion: string }[]
