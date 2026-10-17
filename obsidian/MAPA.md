@@ -33,7 +33,7 @@ flowchart LR
 | Currículo | CNEB de Inicial, Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
 | Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude (lee foto/PDF) |
 | Canción | Letra con ritmo peruano y luego el audio | Ejemplo | 1 + 3 créditos | `/api/cancion` (Claude) y `/api/audio` (ElevenLabs) |
-| Adaptar examen | El docente sube su examen (PDF o foto) y descarga un PDF ambientado en lo que le gusta a la clase y/o para TDAH, dislexia, TEA o lectura fácil (formato incluido: letra grande, casillas, apoyos) | Código real (`api/examen.ts`; PDF en el navegador). En producción sale el ejemplo hasta configurar la clave | 1 crédito | `ANTHROPIC_API_KEY` y `VITE_API=real` en Vercel |
+| Adaptar examen | El docente sube su examen (PDF o foto) y descarga un PDF ambientado en lo que le gusta a la clase y/o para TDAH, dislexia, TEA o lectura fácil (formato incluido: letra grande, casillas, apoyos) | Código real (`api/examen.ts`; PDF en el navegador). En producción sale el ejemplo hasta configurar la clave | 1 crédito | `OPENROUTER_API_KEY` y `VITE_API=real` en Vercel |
 | Juego web | 6 juegos para cualquier tema; 22 habilidades de cálculo | **Real** con cálculo y vocabulario | Gratis / 1 crédito | `/api/juego` para preguntas del tema |
 | Compartir juego | Código de 6 letras y QR para el celular del alumno | **Real** (`api/juegos-compartidos.ts`) | Gratis | Probar en el aula |
 | Crucigrama | Grilla con las palabras del docente | **Real** (algoritmo) | Gratis | — |

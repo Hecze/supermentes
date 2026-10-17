@@ -19,7 +19,7 @@ const rutasDelAlumno: Plugin = {
 }
 
 // En desarrollo, /api/<nombre> corre la función de Vercel de api/<nombre>.ts, como en producción.
-// Las claves (ANTHROPIC_API_KEY…) salen del .env.local de la raíz del repo.
+// Las claves (OPENROUTER_API_KEY, AI_MODEL…) salen del .env.local de la raíz del repo.
 const funcionesDeVercel: Plugin = {
   name: 'funciones-de-vercel',
   configureServer(server) {
