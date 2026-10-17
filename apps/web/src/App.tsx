@@ -7,9 +7,11 @@ import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
 import { Juego } from './views/Juego'
 import { ResultadosJuegos } from './views/ResultadosJuegos'
+import { Sesion } from './views/Sesion'
 
 const VISTAS = {
   ficha: Ficha,
+  sesion: Sesion,
   cancion: Cancion,
   examen: Examen,
   juego: Juego,

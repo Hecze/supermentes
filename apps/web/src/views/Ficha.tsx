@@ -10,6 +10,7 @@ export function Ficha() {
   if (!ficha) return <SinTema />
 
   const listos: Partial<Record<string, boolean>> = {
+    sesion: !!resultados.sesion,
     cancion: !!resultados.cancion,
     examen: !!resultados.examen,
     juego: !!resultados.juego,

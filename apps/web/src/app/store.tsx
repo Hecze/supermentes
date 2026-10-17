@@ -1,9 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
+import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego, type Sesion } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
-export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
+export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
@@ -15,6 +15,7 @@ export type FilaCrucigrama = { id: number; palabra: string; pista: string }
 export type Resultados = {
   /** Palabras y pistas que eligió el docente. */
   crucigrama?: { filas: FilaCrucigrama[] }
+  sesion?: Sesion
   cancion?: Cancion
   audio?: AudioCancion
   examen?: Examen

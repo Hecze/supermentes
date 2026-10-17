@@ -1,4 +1,4 @@
-import { FileText, Gamepad2, Grid3x3, Music, type LucideProps } from 'lucide-react'
+import { ClipboardList, FileText, Gamepad2, Grid3x3, Music, type LucideProps } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { COSTOS, textoCosto, type HerramientaId } from '../api'
 
@@ -13,9 +13,18 @@ export type Herramienta = {
   costo: string
 }
 
-export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['cancion', 'examen', 'juego', 'crucigrama']
+export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['sesion', 'cancion', 'examen', 'juego', 'crucigrama']
 
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
+  sesion: {
+    id: 'sesion',
+    pedido: 'Mi sesión de aprendizaje',
+    nombre: 'Sesión de aprendizaje',
+    descripcion: 'Lista para presentar, en el formato del MINEDU.',
+    icono: ClipboardList,
+    color: 'var(--adaptar)',
+    costo: textoCosto(COSTOS.sesion),
+  },
   cancion: {
     id: 'cancion',
     pedido: 'Una canción',

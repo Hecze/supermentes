@@ -31,6 +31,8 @@ async function pedir<T>(ruta: string, init: RequestInit, limite = LIMITE_MS): Pr
     if (e instanceof DOMException && (e.name === 'TimeoutError' || e.name === 'AbortError')) {
       throw new Error('La IA está tardando demasiado. Vuelve a intentarlo en un momento.')
     }
+    // Sin internet o sin respuesta, fetch falla con un mensaje en inglés ("Failed to fetch").
+    if (e instanceof TypeError) throw new Error('No pudimos conectar con Supermentes. Revisa tu internet y vuelve a intentarlo.')
     throw e
   }
 }

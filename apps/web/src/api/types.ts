@@ -1,7 +1,7 @@
 // Contratos de datos entre la UI y el backend.
 // Los datos de ejemplo (mock.ts) y el backend real (real.ts) devuelven exactamente estos tipos.
 
-export type HerramientaId = 'cancion' | 'examen' | 'juego' | 'crucigrama'
+export type HerramientaId = 'sesion' | 'cancion' | 'examen' | 'juego' | 'crucigrama'
 
 /** El tema elegido en el Currículo Nacional: con esto la IA completa la ficha (ideas clave, vocabulario…). */
 export type EntradaTema = {
