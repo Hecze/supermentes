@@ -24,6 +24,7 @@ const funcionesDeVercel: Plugin = {
   name: 'funciones-de-vercel',
   configureServer(server) {
     Object.assign(process.env, loadEnv('development', repo, ''))
+    server.watcher.add(resolve(repo, 'api')) // para que un cambio en api/ se vea sin reiniciar
     server.middlewares.use(async (req, res, next) => {
       const nombre = req.url?.match(/^\/api\/([a-z-]+)(?:\?|$)/)?.[1]
       if (!nombre) return next()
