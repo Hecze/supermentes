@@ -2209,5 +2209,1285 @@
       "Calentamiento global"
     ],
     "resumen": "Explica que los autos, las fábricas y el uso de electricidad producen gases de invernadero que causan el calentamiento global y enferman a la Tierra."
+  },
+  {
+    "id": "mBMdpW4gJn0",
+    "titulo": "¡A pintar!",
+    "canal": "TukuToon",
+    "duracion": "2:34",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "experimenta maneras en que los elementos del arte (movimientos, acciones, formas, colores o sonidos) pueden usarse o ser repetidos para comunicar una idea"
+    },
+    "temas": [
+      "Colores y formas",
+      "Dibujo y pintura libre"
+    ],
+    "resumen": "Canción para pintar con amarillo, rojo, azul, lila y blanco, dando vida a un pollito, un león y un tiburón."
+  },
+  {
+    "id": "FhgExRs__ro",
+    "titulo": "¿Qué suena? Juego musical con sonidos y partes del cuerpo",
+    "canal": "Dos Cocos",
+    "duracion": "2:03",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "Usa los sentidos para identificar, con la ayuda del docente, los elementos visuales, táctiles, sonoros y kinestésicos",
+      "primaria-2": "Describe o registra líneas, formas, sonidos y movimientos que encuentra en la naturaleza, el entorno y en diversas manifestaciones artísticas"
+    },
+    "temas": [
+      "Los sentidos y el arte",
+      "Exploración sensorial",
+      "Líneas, formas y sonidos"
+    ],
+    "resumen": "Juego musical para reconocer el timbre de distintos instrumentos y asociar cada sonido con una parte del cuerpo."
+  },
+  {
+    "id": "gjm0qw1vFLU",
+    "titulo": "Canción mágica de mezcla de colores",
+    "canal": "Babanana Español",
+    "duracion": "1:15",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "Experimenta con los medios, los materiales y las técnicas artísticas para crear efectos visuales",
+      "primaria-3": "realiza mezclas de color con témperas, para crear diferentes tonos de color"
+    },
+    "temas": [
+      "Mezcla de colores",
+      "Colores primarios y secundarios",
+      "Materiales y técnicas"
+    ],
+    "resumen": "Canción que muestra qué color nuevo aparece al mezclar dos colores."
+  },
+  {
+    "id": "qkJgGqbeECQ",
+    "titulo": "Canción rítmica: El ritmo que vamos a hacer",
+    "canal": "El Pequeño Caracolito",
+    "duracion": "1:49",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "El estudiante realiza movimientos según los ritmos que toca el profesor en un tambor",
+      "primaria-4": "decide cuánto debe durar cada sonido y con qué ritmo lo debe tocar"
+    },
+    "temas": [
+      "Movimientos con ritmo",
+      "Ritmo y duración de sonidos",
+      "Movimiento y sonido"
+    ],
+    "resumen": "Canción para juegos rítmicos que introduce de forma visual las figuras musicales negra y corchea."
+  },
+  {
+    "id": "CqwDQgQu82A",
+    "titulo": "Huayno de la arañita",
+    "canal": "Canta Maestra",
+    "duracion": "1:37",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "Menciona y describe las experiencias que tiene con manifestaciones artísticas en su entorno familiar y en su comunidad"
+    },
+    "temas": [
+      "Música de mi comunidad",
+      "Canciones infantiles",
+      "Arte de mi comunidad"
+    ],
+    "resumen": "Canción infantil peruana en ritmo de huayno sobre una arañita que sube y baja tejiendo su tela y un picaflor que busca flores."
+  },
+  {
+    "id": "iiPTdaDFiIc",
+    "titulo": "Si hago silencio",
+    "canal": "Soy Solcito",
+    "duracion": "3:04",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-1": "Usa los sentidos para identificar, con la ayuda del docente, los elementos visuales, táctiles, sonoros y kinestésicos que hay en la naturaleza",
+      "primaria-2": "describe y compara diversos sonidos que escucha en el entorno"
+    },
+    "temas": [
+      "Sonidos de la naturaleza",
+      "Sonidos del entorno",
+      "Los sentidos y el arte"
+    ],
+    "resumen": "Canción sobre hacer silencio para escuchar el corazón, un pájaro, el viento, un perro y la lluvia."
+  },
+  {
+    "id": "u0I8UxkjtP4",
+    "titulo": "La canción de los instrumentos",
+    "canal": "HiDino Canciones Para Niños",
+    "duracion": "2:22",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-2": "Describe o registra líneas, formas, sonidos y movimientos que encuentra en la naturaleza, el entorno y en diversas manifestaciones artísticas",
+      "primaria-4": "Describe y analiza los elementos del arte que identifica en el entorno y en manifestaciones artístico-culturales, e identifica los medios utilizados"
+    },
+    "temas": [
+      "Líneas, formas y sonidos",
+      "Técnicas y medios artísticos",
+      "Elementos del arte"
+    ],
+    "resumen": "Canción que presenta ocho instrumentos musicales: tambor, guitarra, violín, maracas, piano, xilófono, flauta y trompeta."
+  },
+  {
+    "id": "m__e_1iUDJM",
+    "titulo": "Colores secundarios",
+    "canal": "Cantando Aprendo a Hablar",
+    "duracion": "2:51",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-3": "realiza mezclas de color con témperas, para crear diferentes tonos de color"
+    },
+    "temas": [
+      "Colores primarios y secundarios",
+      "Mezcla de colores",
+      "Pintura con témperas"
+    ],
+    "resumen": "Canción para jugar pintando y mezclando rojo, amarillo y azul para crear nuevos colores."
+  },
+  {
+    "id": "rapbwWhCKTU",
+    "titulo": "Las notas musicales",
+    "canal": "Bichikids",
+    "duracion": "2:11",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-3": "Identifica y describe los elementos básicos del arte que encuentra en su entorno y en manifestaciones artístico-culturales diversas",
+      "primaria-5": "Explora los elementos de los lenguajes de las artes visuales, la música, el teatro y la danza"
+    },
+    "temas": [
+      "Elementos básicos del arte",
+      "Expresión musical",
+      "Composición musical sencilla"
+    ],
+    "resumen": "Los bichitos aprenden las siete notas musicales (do, re, mi, fa, sol, la, si) y cómo combinarlas para crear una melodía."
+  },
+  {
+    "id": "Ws2zVXQCcJo",
+    "titulo": "Los colores primarios: amarillo, azul y rojo",
+    "canal": "Nacho Aprende",
+    "duracion": "2:20",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-3": "Identifica y describe los elementos básicos del arte que encuentra en su entorno"
+    },
+    "temas": [
+      "Colores primarios y secundarios",
+      "Mezcla de colores",
+      "Elementos básicos del arte"
+    ],
+    "resumen": "Nacho enseña cuáles son los colores primarios y qué colores nuevos se obtienen al mezclarlos."
+  },
+  {
+    "id": "dAsJFCWvjyk",
+    "titulo": "El rap de las cualidades del sonido",
+    "canal": "Juan A Esparza",
+    "duracion": "2:49",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-4": "Describe y analiza los elementos del arte que identifica en el entorno y en manifestaciones artístico-culturales",
+      "primaria-5": "Describe las características de manifestaciones artístico-culturales que observa, analiza sus elementos",
+      "primaria-6": "Describe y analiza las cualidades de los elementos visuales, táctiles, sonoros y kinestésicos"
+    },
+    "temas": [
+      "Elementos del arte",
+      "Expresión musical",
+      "Cualidades de los elementos",
+      "Elementos visuales, sonoros y kinestésicos"
+    ],
+    "resumen": "Rap cantado por alumnos de 4.º de primaria que explica las cualidades del sonido."
+  },
+  {
+    "id": "Vj0PRdMBLrc",
+    "titulo": "Y se llama Perú (música criolla para niños)",
+    "canal": "Chikiti Pop",
+    "duracion": "2:14",
+    "idioma": "es",
+    "area": "arte-y-cultura",
+    "grados": {
+      "primaria-4": "describe qué instrumentos se usan en la música tradicional peruana que está escuchando",
+      "primaria-5": "identifica cómo el arte cumple diversas funciones (socializar, entretener, contar historias, celebrar)",
+      "primaria-6": "manifestaciones artístico-culturales tradicionales y contemporáneas transmiten las características de una sociedad"
+    },
+    "temas": [
+      "Música tradicional peruana",
+      "Funciones del arte",
+      "Arte tradicional y contemporáneo",
+      "Arte y sociedad"
+    ],
+    "resumen": "Versión para niños de «Y se llama Perú», en música criolla, pensada para Fiestas Patrias."
+  },
+  {
+    "id": "z6yC9IOhcrQ",
+    "titulo": "Bebamos agua",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "3:18",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "Busca satisfacer sus necesidades corporales cuando tiene sed",
+      "primaria-2": "explica la importancia de hidratarse",
+      "primaria-4": "Incorpora el autocuidado relacionado con los ritmos de actividad-descanso, hidratación y exposición a los rayos solares"
+    },
+    "temas": [
+      "Hidratación",
+      "La hidratación",
+      "Hidratación y protección solar"
+    ],
+    "resumen": "Juny y Tony recuerdan beber agua al despertar, antes de comer, en los días calurosos y después de sudar."
+  },
+  {
+    "id": "tBMr7WwTjHc",
+    "titulo": "Cepilla tus dientes",
+    "canal": "Super Simple Español - Canciones Infantiles Y Más",
+    "duracion": "2:15",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "Realiza con autonomía prácticas de cuidado personal al asearse"
+    },
+    "temas": [
+      "Higiene personal",
+      "Higiene y cuidado personal"
+    ],
+    "resumen": "Canción para cantar juntos a la hora de cepillarse los dientes."
+  },
+  {
+    "id": "OkjtI6Umevk",
+    "titulo": "Comer sano ¡me gusta!",
+    "canal": "Bichikids",
+    "duracion": "2:16",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "Describe los alimentos de su dieta familiar",
+      "primaria-2": "Diferencia los alimentos saludables y nutritivos que forman parte de su dieta personal y familiar"
+    },
+    "temas": [
+      "Alimentación saludable",
+      "Alimentos de mi dieta familiar",
+      "Alimentos saludables y nutritivos"
+    ],
+    "resumen": "En una kermés, los bichitos prueban comida sana que les ayuda a sentirse sanos y fuertes."
+  },
+  {
+    "id": "E1Ww2E3yxR4",
+    "titulo": "Congelado",
+    "canal": "Canta Maestra",
+    "duracion": "2:27",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "respeta las reglas de juego propuestas (por ellos mismos, por el maestro o por las condiciones del entorno) en diferentes actividades lúdicas",
+      "primaria-2": "Utiliza su cuerpo y el movimiento para expresar ideas y emociones en la práctica de actividades lúdicas con diferentes tipos de ritmos y música",
+      "primaria-3": "Vivencia el ritmo y se apropia de secuencias rítmicas corporales en situaciones de juego"
+    },
+    "temas": [
+      "Reglas de juego",
+      "Juegos de ritmo",
+      "Expresión corporal con música",
+      "Juegos rítmicos"
+    ],
+    "resumen": "Juego de bailar moviendo el cuerpo de lado a lado y quedarse congelado cuando la música se pausa."
+  },
+  {
+    "id": "z6DoPp-LkTA",
+    "titulo": "El baile del cuerpo",
+    "canal": "Diverplay | Canciones & Coreografías Infantiles ",
+    "duracion": "3:21",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "Explora de manera autónoma las posibilidades de su cuerpo en diferentes acciones para mejorar sus movimientos",
+      "primaria-2": "Explora de manera autónoma sus posibilidades de movimiento al realizar con seguridad y confianza habilidades motrices básicas"
+    },
+    "temas": [
+      "Esquema corporal",
+      "Partes de mi cuerpo",
+      "Habilidades motrices básicas",
+      "Expresión corporal"
+    ],
+    "resumen": "Coreografía de «Yo tengo un cuerpo y lo voy a mover» para descubrir y mover cada parte del cuerpo."
+  },
+  {
+    "id": "h-0NPK09ANo",
+    "titulo": "La canción de lavarse las manos",
+    "canal": "Super Simple Español - Canciones Infantiles Y Más",
+    "duracion": "2:43",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "Realiza con autonomía prácticas de cuidado personal al asearse",
+      "primaria-2": "Incorpora prácticas de cuidado al asearse y vestirse"
+    },
+    "temas": [
+      "Lavado de manos",
+      "Higiene personal",
+      "Aseo y vestido"
+    ],
+    "resumen": "Canción para lavarse las manos paso a paso con agua y jabón, frotando ambos lados; el coro dura veinte segundos."
+  },
+  {
+    "id": "dU2FhkoCdEo",
+    "titulo": "Ponerse protector solar es más fácil cuando cantas",
+    "canal": "Plaza Sésamo",
+    "duracion": "2:37",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "El estudiante usa diversos medios de protección frente a la radiación solar",
+      "primaria-4": "exposición a los rayos solares, para mejorar el funcionamiento de su organismo"
+    },
+    "temas": [
+      "Protección frente al sol",
+      "Protección frente a los rayos solares",
+      "Hidratación y protección solar"
+    ],
+    "resumen": "Elmo, Comegalletas y Abby cantan para no olvidar el protector solar al ir a la playa o estar fuera de casa."
+  },
+  {
+    "id": "YbOzD1eRJNY",
+    "titulo": "Respira con tus pulmones",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "1:16",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "identifica en sí mismo y en otros la diferencia entre inspiración y espiración"
+    },
+    "temas": [
+      "Inspiración y espiración"
+    ],
+    "resumen": "Canción de la serie del cuerpo humano de Juny y Tony sobre cómo respiramos con los pulmones."
+  },
+  {
+    "id": "FgJ08ugzbdc",
+    "titulo": "Toca tu cabeza",
+    "canal": "Canta Maestra",
+    "duracion": "1:14",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-1": "reconociendo su lado izquierdo y derecho"
+    },
+    "temas": [
+      "Lado dominante y lateralidad",
+      "Correr, saltar y lanzar",
+      "Partes de mi cuerpo"
+    ],
+    "resumen": "Baile corto: tocar la cabeza, sacudir los hombros, dar una vuelta y saltar a la derecha y a la izquierda."
+  },
+  {
+    "id": "AW2QbMEd-Xk",
+    "titulo": "¿Por qué nos vacunamos?",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "3:29",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-2": "reconoce la importancia del autocuidado para prevenir enfermedades",
+      "primaria-6": "Explica la importancia de la vacunación y sus consecuencias en la salud"
+    },
+    "temas": [
+      "Prevención de enfermedades",
+      "Las vacunas",
+      "Importancia de la vacunación"
+    ],
+    "resumen": "Juny y Tony explican cómo las vacunas nos ayudan a prevenir algunas enfermedades."
+  },
+  {
+    "id": "5lxYVu0Hawc",
+    "titulo": "¿Por qué sudamos?",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "4:10",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-2": "identifica los signos y síntomas relacionados con el ritmo cardiaco, la respiración agitada y la sudoración",
+      "primaria-3": "relacionados con el ritmo cardiaco, la respiración y la sudoración"
+    },
+    "temas": [
+      "La sudoración",
+      "Respiración y sudoración",
+      "Ritmo cardiaco y respiración"
+    ],
+    "resumen": "Canción de curiosidad de Juny y Tony sobre por qué sudamos cuando hace calor."
+  },
+  {
+    "id": "aSha5__SgHk",
+    "titulo": "El juego del calentamiento",
+    "canal": "ChiquitinesTV",
+    "duracion": "2:51",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-2": "Explica la importancia de la activación corporal (calentamiento)",
+      "primaria-3": "Explica la importancia de la activación corporal (calentamiento)",
+      "primaria-4": "Selecciona actividades para la activación corporal (calentamiento)"
+    },
+    "temas": [
+      "El calentamiento",
+      "Calentamiento corporal"
+    ],
+    "resumen": "Canción-juego animada para calentar el cuerpo siguiendo las indicaciones de la letra."
+  },
+  {
+    "id": "BKew9kctfAY",
+    "titulo": "Juguemos en el bosque",
+    "canal": "Luli Pampín",
+    "duracion": "3:43",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-2": "Resuelve de manera compartida situaciones producidas en los diferentes tipos de juegos (tradicionales, autóctonos, etc.)"
+    },
+    "temas": [
+      "Juegos tradicionales",
+      "Rondas y canciones con movimiento"
+    ],
+    "resumen": "Versión de Luli Pampín de la ronda tradicional «Juguemos en el bosque» para jugar al lobo."
+  },
+  {
+    "id": "b1ZhbO6yii4",
+    "titulo": "¡A moverse! Ejercicio en familia",
+    "canal": "Pinkfong en español - Canciones Infantiles",
+    "duracion": "2:27",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-3": "Practica diferentes actividades lúdicas adaptando su esfuerzo y aplicando los conocimientos de los beneficios de la práctica de actividad física"
+    },
+    "temas": [
+      "Beneficios de la actividad física",
+      "Actividad física y salud"
+    ],
+    "resumen": "Pinkfong anima a dejar la cama y hacer ejercicio en familia como hábito saludable."
+  },
+  {
+    "id": "lDTY-OD1jJk",
+    "titulo": "¿Por qué debemos dormir?",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "4:11",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-3": "Incorpora el autocuidado relacionado con los ritmos de actividad-descanso, para mejorar el funcionamiento de su organismo",
+      "primaria-4": "incorpora el autocuidado relacionado con los ritmos de actividad-descanso para mejorar el funcionamiento de su organismo"
+    },
+    "temas": [
+      "Ritmos de actividad y descanso",
+      "Actividad y descanso"
+    ],
+    "resumen": "Canción de curiosidad de Juny y Tony sobre por qué es importante dormir."
+  },
+  {
+    "id": "Z2HSl3cKois",
+    "titulo": "Comida sana vs. comida chatarra",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "2:24",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-3": "los clasifica en saludables o no, de acuerdo a la actividad física que realiza",
+      "primaria-5": "describe las prácticas alimenticias beneficiosas y perjudiciales para el organismo",
+      "primaria-6": "evita hábitos perjudiciales para su organismo, como el consumo de comida rápida"
+    },
+    "temas": [
+      "Alimentos saludables y no saludables",
+      "Hábitos alimenticios",
+      "La comida rápida",
+      "Hábitos perjudiciales"
+    ],
+    "resumen": "La tortuga y el conejo vuelven a competir: el conejo se prepara con comida chatarra y la tortuga con la cantidad justa de comida saludable."
+  },
+  {
+    "id": "D0PFUuXfo60",
+    "titulo": "El rock del estiramiento",
+    "canal": "Diverplay | Canciones & Coreografías Infantiles ",
+    "duracion": "4:10",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-3": "Explica la importancia de la activación corporal (calentamiento) y psicológica (atención, concentración y motivación)",
+      "primaria-4": "Selecciona actividades para la activación corporal (calentamiento) y psicológica (atención, concentración y motivación) antes de la actividad",
+      "primaria-5": "Realiza actividades de activación corporal, psicológica y de recuperación antes, durante y después de la práctica de actividad física"
+    },
+    "temas": [
+      "El calentamiento",
+      "Calentamiento corporal",
+      "Calentamiento y vuelta a la calma",
+      "Calentamiento y recuperación"
+    ],
+    "resumen": "Canción de rock con estiramientos divertidos y una pequeña meditación final para volver a la calma y concentrarse."
+  },
+  {
+    "id": "3IYcdD91qMs",
+    "titulo": "Gira que gira (pausa activa)",
+    "canal": "Canta Maestra",
+    "duracion": "2:38",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-3": "se apropia de secuencias rítmicas corporales en situaciones de juego para expresarse corporalmente a través de la música"
+    },
+    "temas": [
+      "Secuencias rítmicas corporales",
+      "Secuencias rítmicas",
+      "Expresión corporal con música"
+    ],
+    "resumen": "Pausa activa para girar, moverse y seguir secuencias como «codo en rodilla» y «mano en pie»."
+  },
+  {
+    "id": "9IycqR_yIlE",
+    "titulo": "¡A comer saludable! Carbohidratos, proteínas y grasas",
+    "canal": "JunyTony en Español - Canciones Infantiles",
+    "duracion": "2:27",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-4": "Selecciona e incorpora en su dieta personal y familiar los alimentos nutritivos y energéticos",
+      "primaria-5": "planifica dietas saludables adaptadas a su edad y sus recursos",
+      "primaria-6": "proporciona el fundamento respectivo y desarrolla dietas saludables"
+    },
+    "temas": [
+      "Alimentos nutritivos",
+      "Alimentos energéticos",
+      "Dieta balanceada",
+      "Dieta saludable"
+    ],
+    "resumen": "Juny y Tony explican los carbohidratos, las proteínas y las grasas que el cuerpo necesita para crecer sano y con energía."
+  },
+  {
+    "id": "GVY0u5Vx01E",
+    "titulo": "Vuelta a la calma",
+    "canal": "La caja de cuentos y canciones infantiles.",
+    "duracion": "1:59",
+    "idioma": "es",
+    "area": "educacion-fisica",
+    "grados": {
+      "primaria-5": "Realiza actividades de activación corporal, psicológica y de recuperación antes, durante y después de la práctica de actividad física"
+    },
+    "temas": [
+      "Calentamiento y vuelta a la calma",
+      "Calentamiento y recuperación"
+    ],
+    "resumen": "Canción suave para respirar profundo, relajar el cuerpo y volver a la calma después del recreo o de una actividad muy movida."
+  },
+  {
+    "id": "ho0jqU6L88U",
+    "titulo": "Big Small Action Song",
+    "canal": "Dream English Kids",
+    "duracion": "3:11",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "adjetivos calificativos de tamaño"
+    },
+    "temas": [
+      "Adjetivos de tamaño"
+    ],
+    "resumen": "Canción de acciones para decir si algo es «big» o «small», como un elefante, un avión o un ratón."
+  },
+  {
+    "id": "DR-cfDsHCGA",
+    "titulo": "Counting 1-10 Song",
+    "canal": "The Singing Walrus - English Songs For Kids",
+    "duracion": "2:42",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "números del 1 al 10"
+    },
+    "temas": [
+      "Números del 1 al 10",
+      "Colores y números"
+    ],
+    "resumen": "Canción para contar del 1 al 10 en inglés y repetir los números en voz alta."
+  },
+  {
+    "id": "dbklZrO5H78",
+    "titulo": "Do You Have a Crayon?",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:15",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "hablar sobre la edad, objetos de la clase y colores"
+    },
+    "temas": [
+      "Objetos del aula en inglés",
+      "Objetos del aula",
+      "Los colores en inglés"
+    ],
+    "resumen": "La profesora y sus alumnos preguntan «Do you have a crayon?» por los útiles escolares y responden «Yes, I do» o «No, I don't»."
+  },
+  {
+    "id": "RuqvGiZi0qg",
+    "titulo": "Head Shoulders Knees and Toes",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "1:46",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "mencionar las partes del cuerpo humano"
+    },
+    "temas": [
+      "Partes del cuerpo en inglés",
+      "Partes del cuerpo"
+    ],
+    "resumen": "Clásica canción de movimiento para nombrar y tocar la cabeza, los hombros, las rodillas y los pies en inglés."
+  },
+  {
+    "id": "IjnlkdZvYTE",
+    "titulo": "Rooms of the House Song",
+    "canal": "Dream English Kids",
+    "duracion": "2:11",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "describir su casa, decir la ubicación de las personas en la casa",
+      "primaria-3": "hablar acerca de las partes de la casa, artefactos y muebles"
+    },
+    "temas": [
+      "Partes de la casa",
+      "Mi casa",
+      "Partes de la casa en inglés"
+    ],
+    "resumen": "Matt canta los ambientes de la casa (kitchen, living room, bedroom, dining room y bathroom) en una canción con acciones."
+  },
+  {
+    "id": "yDua9ms9_eg",
+    "titulo": "The People in My Family",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:27",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "describir a las personas de su familia, hablar de relaciones familiares"
+    },
+    "temas": [
+      "La familia en inglés",
+      "La familia"
+    ],
+    "resumen": "Presenta a los miembros de una familia (mother, father, sister, brother y más) saludándolos uno por uno."
+  },
+  {
+    "id": "HrHqq8xJiU4",
+    "titulo": "What Are You Doing? Song 1",
+    "canal": "Dream English Kids",
+    "duracion": "2:03",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "describir actividades realizadas en el momento",
+      "primaria-2": "present continuous; subject pronouns -I, you, he, she, it, they"
+    },
+    "temas": [
+      "Presente continuo",
+      "Verbos de acción"
+    ],
+    "resumen": "Pregunta «What are you doing?» y responde con acciones como walking, running, jumping, dancing o reading, en presente continuo."
+  },
+  {
+    "id": "3n7g6NCMLi4",
+    "titulo": "What's This? What's That?",
+    "canal": "Rhymington Square - Songs & Rhymes for Kids!",
+    "duracion": "1:46",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "demonstrative adjectives- this, that"
+    },
+    "temas": [
+      "This y that",
+      "Preguntas con what y who"
+    ],
+    "resumen": "Jimmy juega a «What's this? What's that?» y responde con frases como «This is a dog, that is a cat»."
+  },
+  {
+    "id": "zxIpA5nF_LY",
+    "titulo": "What's Your Favorite Color?",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:02",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "wh-questions - what, what color"
+    },
+    "temas": [
+      "Los colores en inglés",
+      "Colores y números",
+      "Preguntas con what y who"
+    ],
+    "resumen": "Los títeres preguntan «What's your favorite color?» y cada uno responde con su color favorito, por ejemplo «My favorite color's blue»."
+  },
+  {
+    "id": "yqlbn_nI2w8",
+    "titulo": "What's Your Name?",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "1:34",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-1": "saludar a alguien; presentarse"
+    },
+    "temas": [
+      "Saludos y presentaciones",
+      "Me presento en inglés",
+      "Saludos y despedidas en inglés"
+    ],
+    "resumen": "Los títeres de Super Simple se saludan con «Hello, hello» y se presentan respondiendo «What's your name?» con su nombre."
+  },
+  {
+    "id": "frN3nvhIHUk",
+    "titulo": "Do You Like Broccoli Ice Cream?",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:43",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "expresar preferencias sobre comidas"
+    },
+    "temas": [
+      "Gustos con like y don't like",
+      "Comidas y bebidas en inglés",
+      "Gustos y preferencias"
+    ],
+    "resumen": "Canción graciosa para preguntar «Do you like…?» y decir si te gustan o no distintas comidas."
+  },
+  {
+    "id": "rD6FRDd9Hew",
+    "titulo": "How's the Weather?",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:07",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "hablar acerca del clima y de las estaciones"
+    },
+    "temas": [
+      "El clima en inglés",
+      "Clima y estaciones"
+    ],
+    "resumen": "Pregunta «How's the weather today?» y responde si está soleado, lluvioso, nublado o nevando."
+  },
+  {
+    "id": "ckKQclquAXU",
+    "titulo": "Jobs Song: What Do You Do?",
+    "canal": "Fun Kids English",
+    "duracion": "2:52",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "responder y preguntar acerca de ocupaciones y lugares de trabajo"
+    },
+    "temas": [
+      "Ocupaciones en inglés",
+      "Ocupaciones y lugares de trabajo"
+    ],
+    "resumen": "Un profesor, una doctora, un dentista, un carpintero y un piloto responden «What do you do?» contando su trabajo."
+  },
+  {
+    "id": "DHb4-CCif7U",
+    "titulo": "On, In, Under, By Song",
+    "canal": "Maple Leaf Learning",
+    "duracion": "1:23",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "lugares en la comunidad, ocupaciones y preposiciones de lugar",
+      "primaria-3": "prepositions - in, on, under, between, next to"
+    },
+    "temas": [
+      "Preposiciones de lugar",
+      "Ubicación de objetos en casa"
+    ],
+    "resumen": "Canción sencilla para practicar las preposiciones on, in, under y by al decir dónde están las cosas."
+  },
+  {
+    "id": "vD98OvvDNEs",
+    "titulo": "The Alphabet Song",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "3:05",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "deletrear nombres; intercambiar información personal",
+      "primaria-3": "obtener información de contacto; deletrear nombres"
+    },
+    "temas": [
+      "El abecedario en inglés",
+      "Deletreo de nombres"
+    ],
+    "resumen": "Canción del abecedario en inglés que primero presenta las letras despacio y con claridad, y luego las canta."
+  },
+  {
+    "id": "C_Sc5ZjdfFI",
+    "titulo": "The Seasons Song",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "2:59",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "hablar acerca del clima y de las estaciones"
+    },
+    "temas": [
+      "Las estaciones del año",
+      "Clima y estaciones"
+    ],
+    "resumen": "Recorre las cuatro estaciones (winter, spring, summer y fall) con vocabulario propio de cada una."
+  },
+  {
+    "id": "FIo1_1-xg60",
+    "titulo": "Today I Am Wearing",
+    "canal": "Dream English Kids",
+    "duracion": "1:25",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "identificar ropa, discutir sobre la ropa de estación, describir lo que alguien está usando"
+    },
+    "temas": [
+      "La ropa en inglés",
+      "La ropa",
+      "Presente continuo"
+    ],
+    "resumen": "Matt enseña los nombres de la ropa y a decir lo que lleva puesto con «Today I'm wearing a t-shirt»."
+  },
+  {
+    "id": "OkfROvtrDl8",
+    "titulo": "Where Are You Going? Places Song",
+    "canal": "English Tree",
+    "duracion": "2:54",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-2": "hablar de lugares de una ciudad"
+    },
+    "temas": [
+      "Lugares de la comunidad",
+      "Preguntas con where y how"
+    ],
+    "resumen": "Pregunta «Where are you going?» y responde con lugares de la ciudad como la tienda, la escuela, el parque, el hospital o el banco."
+  },
+  {
+    "id": "mXMofxtDPUQ",
+    "titulo": "Days of the Week Song",
+    "canal": "The Singing Walrus - English Songs For Kids",
+    "duracion": "2:29",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "actividades diarias, días de la semana, adverbios de frecuencia"
+    },
+    "temas": [
+      "Días de la semana",
+      "Días de la semana en inglés"
+    ],
+    "resumen": "Canción para aprender los siete días de la semana en inglés."
+  },
+  {
+    "id": "WPTu1j6-B30",
+    "titulo": "How Often Do You Do the Laundry?",
+    "canal": "BIGBOX",
+    "duracion": "2:13",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "preguntar acerca de la frecuencia de las actividades"
+    },
+    "temas": [
+      "Preguntas con how often",
+      "Adverbios de frecuencia"
+    ],
+    "resumen": "Canción que pregunta «How often…?» sobre tareas de la casa para hablar de cada cuánto las hacemos."
+  },
+  {
+    "id": "OwRmivbNgQk",
+    "titulo": "Let's Go to the Zoo",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "4:00",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "señala las características de personas, animales, objetos, lugares de su entorno inmediato y comunidad"
+    },
+    "temas": [
+      "Los animales",
+      "Animales en inglés",
+      "Verbos de acción"
+    ],
+    "resumen": "Paseo por el zoológico moviéndose como los animales: pisar fuerte como elefantes, saltar como canguros, columpiarse como monos y nadar como osos polares."
+  },
+  {
+    "id": "TC-dN4bIaQ8",
+    "titulo": "There Is, There Are",
+    "canal": "Little Songs",
+    "duracion": "2:03",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "there is / are; prepositions - in, on, under, between, next to"
+    },
+    "temas": [
+      "There is / there are",
+      "There is y there are"
+    ],
+    "resumen": "Canción que explica cuándo usar «there is» y cuándo «there are»."
+  },
+  {
+    "id": "eUXkj6j6Ezw",
+    "titulo": "Wake Up! Daily Routines Song",
+    "canal": "Dream English Kids",
+    "duracion": "2:52",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "preguntar y responder acerca de rutinas diarias, discutir acciones habituales y rutinas"
+    },
+    "temas": [
+      "Rutinas diarias",
+      "Escribo mi rutina diaria"
+    ],
+    "resumen": "Canción para cantar y actuar las rutinas diarias en inglés, empezando por «Wake up!»."
+  },
+  {
+    "id": "RBvmO7NgUp0",
+    "titulo": "What's the Time?",
+    "canal": "KidsTV123",
+    "duracion": "2:00",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "wh-questions - what time"
+    },
+    "temas": [
+      "La hora",
+      "La hora en inglés"
+    ],
+    "resumen": "Canción para preguntar «What's the time?» y practicar cómo decir la hora en inglés."
+  },
+  {
+    "id": "_Ir0Mc6Qilo",
+    "titulo": "Yes, I Can!",
+    "canal": "Super Simple Songs - Kids Songs",
+    "duracion": "3:37",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-3": "preguntar y responder acerca de las habilidades de los animales"
+    },
+    "temas": [
+      "Habilidades con can",
+      "Habilidades de los animales",
+      "Preguntas con can"
+    ],
+    "resumen": "Canción de animales para preguntar qué acciones puedes hacer como ellos y responder «Yes, I can!»."
+  },
+  {
+    "id": "P7-UNYm0P2w",
+    "titulo": "Big, Bigger, Biggest",
+    "canal": "Baby Shark - Pinkfong Kids’ Songs & Stories",
+    "duracion": "2:31",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "comparative adjectives"
+    },
+    "temas": [
+      "Adjetivos comparativos"
+    ],
+    "resumen": "Canción de Baby Shark para comparar tamaños con big, bigger y biggest."
+  },
+  {
+    "id": "QkHQ0CYwjaI",
+    "titulo": "Body Parts Song: This Is Me!",
+    "canal": "ELF Kids Videos",
+    "duracion": "2:24",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "animales, hábitats, partes del cuerpo, enfermedades y medicinas"
+    },
+    "temas": [
+      "Partes del cuerpo",
+      "Partes del cuerpo en inglés"
+    ],
+    "resumen": "Canción con movimientos para nombrar las partes del cuerpo, de la cabeza a la barbilla y a los dedos."
+  },
+  {
+    "id": "byvf7jwdvOI",
+    "titulo": "Habitats Song",
+    "canal": "Hopscotch Songs",
+    "duracion": "3:31",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "preguntar y responder acerca de los hábitats de los animales"
+    },
+    "temas": [
+      "Animales y hábitats",
+      "Preguntas sobre hábitats",
+      "Lectura sobre animales y hábitats"
+    ],
+    "resumen": "Canción para conocer algunos de los hábitats de la Tierra."
+  },
+  {
+    "id": "8gTr9gAukIM",
+    "titulo": "Health and Illnesses Song: What's the Matter?",
+    "canal": "Planet Pop | English Learning",
+    "duracion": "2:20",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "describir dolores y malestares o síntomas"
+    },
+    "temas": [
+      "Enfermedades y consejos",
+      "Síntomas y malestares",
+      "Enfermedades y medicinas"
+    ],
+    "resumen": "Planet Pop presenta síntomas y malestares en inglés con la pregunta «What's the matter?»."
+  },
+  {
+    "id": "KAsacxmPh1Q",
+    "titulo": "I Was, You Were",
+    "canal": "Rockin' English Lessons",
+    "duracion": "1:23",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "past tense be - was"
+    },
+    "temas": [
+      "Pasado del verbo to be",
+      "Expresiones de tiempo pasado"
+    ],
+    "resumen": "Canción de rock que enseña el verbo to be en pasado: I was, you were, he, she, it was, we were, they were, con «yesterday» y «last week»."
+  },
+  {
+    "id": "ahZ5xyPKnQY",
+    "titulo": "What Did You Do Yesterday?",
+    "canal": "English Singsing",
+    "duracion": "3:02",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-4": "describir actividades pasadas y preguntar y responder acerca de actividades pasadas",
+      "primaria-5": "preguntar y responder acerca de eventos pasados, describir eventos pasados"
+    },
+    "temas": [
+      "Actividades pasadas",
+      "Contar un evento pasado",
+      "Pasado simple",
+      "Preguntas sobre eventos pasados"
+    ],
+    "resumen": "Pregunta «What did you do yesterday?» y «How was it?» para contar en pasado lo que hicimos el día anterior."
+  },
+  {
+    "id": "mfReSbQ7jzE",
+    "titulo": "Fruit Song",
+    "canal": "The Singing Walrus - English Songs For Kids",
+    "duracion": "3:23",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "comida en casa, frutas y vegetales, comida saludable"
+    },
+    "temas": [
+      "Frutas y verduras",
+      "Frutas y verduras en inglés"
+    ],
+    "resumen": "Canción para aprender en inglés los nombres de distintas frutas."
+  },
+  {
+    "id": "fE8lezHs19s",
+    "titulo": "Healthy Food vs Junk Food Song",
+    "canal": "English Tree",
+    "duracion": "2:41",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "identificar alimentos saludables y no saludables"
+    },
+    "temas": [
+      "Comida saludable",
+      "Preferencias alimenticias"
+    ],
+    "resumen": "Canción que pregunta «Do you like…?» por distintas comidas y muestra la diferencia entre comida saludable y comida chatarra."
+  },
+  {
+    "id": "0b4rsDuzThE",
+    "titulo": "Learn Past Tense Verbs #1",
+    "canal": "ELF Kids Videos",
+    "duracion": "1:54",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "verbos regulares e irregulares"
+    },
+    "temas": [
+      "Pasado simple",
+      "Verbos regulares e irregulares"
+    ],
+    "resumen": "Canto para practicar «What did you do today?» y verbos en pasado como washed, dried y cleaned."
+  },
+  {
+    "id": "WCYTlVF-djw",
+    "titulo": "Sports Song: Do You Like Sports?",
+    "canal": "Fun Kids English",
+    "duracion": "3:05",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "expresar preferencias musicales y deportivas"
+    },
+    "temas": [
+      "Deportes favoritos",
+      "Preferencias musicales y deportivas",
+      "Gerundios con like"
+    ],
+    "resumen": "Pregunta «Do you like playing soccer, baseball, tennis o basketball?» y practica «Can you kick a ball?»."
+  },
+  {
+    "id": "90LfcLAjLiI",
+    "titulo": "The Hobbies Song: What Do You Like to Do?",
+    "canal": "Fun Kids English",
+    "duracion": "3:31",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "preguntar y responder acerca de hobbies"
+    },
+    "temas": [
+      "Hobbies y pasatiempos",
+      "Preguntas sobre hobbies"
+    ],
+    "resumen": "Canción sobre pasatiempos como tocar guitarra, nadar, montar bicicleta, leer, cocinar o bailar, con la pregunta «What do you like to do?»."
+  },
+  {
+    "id": "6GgzAc5Ezsk",
+    "titulo": "The Musical Instruments Song",
+    "canal": "HiDino Kids Songs With Fun Stories",
+    "duracion": "2:21",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "actividades de ocio y hobbies, deportes, instrumentos musicales"
+    },
+    "temas": [
+      "Instrumentos musicales",
+      "Instrumentos musicales en inglés"
+    ],
+    "resumen": "Canción para aprender en inglés los nombres de ocho instrumentos musicales."
+  },
+  {
+    "id": "RE5tvaveVak",
+    "titulo": "Vegetable Song",
+    "canal": "The Singing Walrus - English Songs For Kids",
+    "duracion": "4:18",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-5": "comida en casa, frutas y vegetales, comida saludable"
+    },
+    "temas": [
+      "Frutas y verduras",
+      "Frutas y verduras en inglés"
+    ],
+    "resumen": "Canción que enseña los nombres de nueve verduras comunes en inglés, de tres en tres."
+  },
+  {
+    "id": "872gqAJjc1g",
+    "titulo": "Comparative Superlative Song",
+    "canal": "Rockin' English Lessons",
+    "duracion": "1:21",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-6": "comparative and superlative adjectives"
+    },
+    "temas": [
+      "Adjetivos comparativos y superlativos",
+      "Adjetivos superlativos",
+      "Adjetivos comparativos"
+    ],
+    "resumen": "Canción de rock con formas comparativas y superlativas como good, better, the best y big, bigger, the biggest."
+  },
+  {
+    "id": "kd8o_DTCs6o",
+    "titulo": "How Much Is This? It's Four Dollars",
+    "canal": "English Singsing",
+    "duracion": "1:13",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-6": "hablar acerca de precios"
+    },
+    "temas": [
+      "Preguntar precios",
+      "Precios y compras",
+      "Compras en la tienda"
+    ],
+    "resumen": "Canción animada para preguntar «How much is this?» en una tienda y responder el precio."
+  },
+  {
+    "id": "3sFcFZhZE0g",
+    "titulo": "Months of the Year: What Month Is Your Birthday?",
+    "canal": "Hello Carrie",
+    "duracion": "2:53",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-6": "hablar sobre la fecha de un evento"
+    },
+    "temas": [
+      "Preposiciones de tiempo",
+      "Preposiciones in y on"
+    ],
+    "resumen": "Canción de los meses del año que pregunta en qué mes es tu cumpleaños."
+  },
+  {
+    "id": "pxL1138Sw_g",
+    "titulo": "What Are You Going to Do?",
+    "canal": "BIGBOX",
+    "duracion": "2:16",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-6": "future with be going to"
+    },
+    "temas": [
+      "Planes con going to",
+      "Futuro con going to",
+      "Mis planes futuros"
+    ],
+    "resumen": "Canción educativa que pregunta «What are you going to do?» para hablar de planes."
+  },
+  {
+    "id": "eejZ4UvMqoc",
+    "titulo": "What Do You Want to Be?",
+    "canal": "Planet Pop | English Learning",
+    "duracion": "2:54",
+    "idioma": "en",
+    "area": "ingles",
+    "grados": {
+      "primaria-6": "responder y preguntar acerca de ocupaciones"
+    },
+    "temas": [
+      "Ocupaciones y profesiones",
+      "Preguntas sobre ocupaciones",
+      "Infinitivos con want to",
+      "Want to con infinitivo"
+    ],
+    "resumen": "Canción del día de las profesiones para preguntar y responder «What do you want to be?»."
   }
 ]
