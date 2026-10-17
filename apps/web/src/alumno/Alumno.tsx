@@ -13,6 +13,20 @@ type Estado =
   | { fase: 'cargando' }
   | { fase: 'listo'; publicado: Publicado; contenido: Contenido }
 
+/** Los alumnos juegan en el celular de la familia: solo se ofrecen juegos pensados para celular. */
+function deCelular(contenido: Contenido, grado?: string) {
+  return juegosCompatibles(contenido, grado).filter((j) => j.def.donde.includes('celular'))
+}
+
+/** Container queries llegaron en 2022 (Chrome 105, Safari 16). Sin ellas los juegos se desarman. */
+function navegadorAlDia() {
+  try {
+    return CSS.supports('width', '1cqmin')
+  } catch {
+    return false
+  }
+}
+
 /** El código puede venir en la ruta (/j/ABC234), como ?c= o, si no hubo servidor, todo el juego en #d=. */
 function leerUbicacion() {
   const ruta = /^\/j\/([A-Za-z0-9]{6})\/?$/.exec(window.location.pathname)?.[1]
@@ -79,8 +93,8 @@ function PedirCodigo({ error, entrar }: { error?: string; entrar: (c: string) =>
   )
 }
 
-function OtroJuego({ contenido, actual, elegir, cerrar }: { contenido: Contenido; actual: JuegoId; elegir: (id: JuegoId) => void; cerrar: () => void }) {
-  const otros = juegosCompatibles(contenido).filter((j) => j.def.id !== actual)
+function OtroJuego({ contenido, grado, actual, elegir, cerrar }: { contenido: Contenido; grado?: string; actual: JuegoId; elegir: (id: JuegoId) => void; cerrar: () => void }) {
+  const otros = deCelular(contenido, grado).filter((j) => j.def.id !== actual)
   return (
     <div className="fixed inset-0 z-[90] overflow-y-auto bg-[rgb(30_20_80/0.6)] p-4 backdrop-blur-sm" role="dialog" aria-modal aria-label="Elegir otro juego">
       <div className="tarjeta-juego relative mx-auto my-6 flex max-w-2xl flex-col gap-4 p-5">
@@ -150,10 +164,20 @@ export function Alumno() {
   const listo = estado.fase === 'listo' ? estado : null
   const elegido = useMemo(() => {
     if (!listo || !juego) return null
+    // El juego compartido se abre aunque sea de clase (el docente lo eligió); si ya no cabe, el primero de celular.
     const compatibles = juegosCompatibles(listo.contenido)
-    // Si el juego compartido ya no cabe con este contenido, se abre el primero que sí.
-    return compatibles.find((j) => j.def.id === juego) ?? compatibles[0] ?? null
+    return compatibles.find((j) => j.def.id === juego) ?? deCelular(listo.contenido, listo.publicado.grado)[0] ?? null
   }, [listo, juego])
+
+  if (!navegadorAlDia()) {
+    return (
+      <Fondo>
+        <Llama colores={LLAMAS.crema} tam={150} />
+        <h1 className="text-3xl font-bold leading-tight text-white sombra-texto">Este celular necesita un navegador más nuevo</h1>
+        <p className="text-lg font-medium text-[#1d3b6b]">Abre el link en Chrome actualizado (o actualiza el celular) para jugar.</p>
+      </Fondo>
+    )
+  }
 
   if (estado.fase === 'codigo') return <PedirCodigo error={estado.error} entrar={entrar} />
 
@@ -178,12 +202,13 @@ export function Alumno() {
         contenido={elegido.contenido}
         ritmo={listo.publicado.ritmo}
         pantalla={pantalla}
-        alSalir={juegosCompatibles(listo.contenido).length > 1 ? () => setEligiendo(true) : undefined}
+        alSalir={deCelular(listo.contenido, listo.publicado.grado).length > 1 ? () => setEligiendo(true) : undefined}
         className="h-full w-full"
       />
       {eligiendo && (
         <OtroJuego
           contenido={listo.contenido}
+          grado={listo.publicado.grado}
           actual={elegido.def.id}
           elegir={(id) => {
             setJuego(id)

@@ -145,7 +145,7 @@ export default function BotonesRapidos({ contenido, ritmo, semilla, terminar }: 
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-[3cqmin] px-[4cqmin] pb-[4cqmin] pt-[2cqmin]">
         <div key={ronda.id} className="tarjeta-juego entrar flex min-h-[18cqh] w-full max-w-[min(92cqw,760px)] items-center justify-center px-[3cqmin] py-[2cqmin]">
-          <Enunciado reto={ronda.reto} tam="clamp(26px, 8cqmin, 72px)" />
+          <Enunciado reto={ronda.reto} tam="clamp(28px, 8cqmin, 72px)" />
         </div>
         <div className="grid w-full max-w-[min(94cqw,820px)] gap-[2cqmin]" style={{ gridTemplateColumns: `repeat(${col}, minmax(0, 1fr))` }}>
           {ronda.opciones.map((o, i) => (

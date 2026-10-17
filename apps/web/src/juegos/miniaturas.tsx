@@ -1,6 +1,7 @@
 // Ilustraciones de cada juego para el catálogo y la portada. Todas en SVG: pesan poco y se ven nítidas al proyectar.
 import { useId } from 'react'
 import { Cuy } from './motor/Cuy'
+import { Robot, ROBOTS } from './motor/Robot'
 import { Llama, LLAMAS } from './motor/Llama'
 
 const marco = { viewBox: '0 0 160 100', className: 'block h-auto w-full', 'aria-hidden': true } as const
@@ -306,6 +307,105 @@ export function MiniRuleta() {
         <circle r={7} fill="#fff" stroke="#ffc93c" strokeWidth={2} />
       </g>
       <path d="M72 6 H88 L80 22 Z" fill="#ffc93c" stroke="#fff" strokeWidth={2} strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function MiniDuelo() {
+  return (
+    <svg {...marco}>
+      <Fondo de="#2a1158" a="#090a1c" />
+      <path d="M0 62 V44 h10 V34 h9 V50 h8 V28 h11 V42 h9 V22 h12 V46 h7 V36 h10 V52 h9 V30 h13 V44 h8 V26 h11 V48 h9 V38 h10 V54 h9 V40 h10 V62 Z" fill="#1a1440" />
+      <rect y={62} width={160} height={1.4} fill="#ff3dc8" />
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        <line key={i} x1={80} y1={63} x2={-60 + i * 35} y2={100} stroke="#ff3dc8" strokeOpacity={0.45} strokeWidth={0.8} />
+      ))}
+      {[70, 78, 90].map((y) => (
+        <line key={y} x1={0} y1={y} x2={160} y2={y} stroke="#ff3dc8" strokeOpacity={0.4} strokeWidth={0.8} />
+      ))}
+      <rect x={8} y={8} width={58} height={6} rx={1.5} fill="#3a0d1f" stroke="#fff" strokeOpacity={0.7} strokeWidth={0.8} />
+      <rect x={8} y={8} width={40} height={6} rx={1.5} fill="#22e3f5" />
+      <rect x={94} y={8} width={58} height={6} rx={1.5} fill="#3a0d1f" stroke="#fff" strokeOpacity={0.7} strokeWidth={0.8} />
+      <rect x={118} y={8} width={34} height={6} rx={1.5} fill="#ff3dc8" />
+      <text x={80} y={15} textAnchor="middle" fontSize={8} fill="#ffc23d" fontFamily="'Russo One', sans-serif">
+        VS
+      </text>
+      <svg x={22} y={30} width={44} height={56} viewBox="0 0 120 150">
+        <Robot colores={ROBOTS.volt} />
+      </svg>
+      <g transform="translate(138 0) scale(-1 1)">
+        <svg x={0} y={30} width={44} height={56} viewBox="0 0 120 150">
+          <Robot colores={ROBOTS.nova} />
+        </svg>
+      </g>
+      <path d="M80 44 l3 6 6 1 -4.5 4 1.2 6 -5.7 -3 -5.7 3 1.2 -6 -4.5 -4 6 -1 Z" fill="#fff6a8" />
+    </svg>
+  )
+}
+
+export function MiniInvasion() {
+  const dron = (x: number, y: number, c: string, t: string) => (
+    <g transform={`translate(${x} ${y})`}>
+      <path d="M-14 0 L-9 -8 H9 L14 0 L9 8 H-9 Z" fill="#1d2048" stroke={c} strokeWidth={1.4} />
+      <circle r={3.4} fill={c} />
+      <rect x={-10} y={11} width={20} height={9} rx={2} fill="#0b0d24" stroke={c} strokeWidth={1} />
+      <text y={18.2} textAnchor="middle" fontSize={7} fill="#fff" fontFamily="'Russo One', sans-serif">
+        {t}
+      </text>
+    </g>
+  )
+  return (
+    <svg {...marco}>
+      <Fondo de="#05051a" a="#3b1470" />
+      {[12, 40, 66, 98, 120, 148, 30, 84, 134].map((x, i) => (
+        <circle key={i} cx={x} cy={(i * 23) % 60 + 4} r={0.8} fill="#fff" opacity={0.8} />
+      ))}
+      {dron(34, 30, '#22e3f5', '54')}
+      {dron(80, 18, '#ff3dc8', '56')}
+      {dron(124, 34, '#b6ff3b', '48')}
+      <line x1={80} y1={84} x2={80} y2={30} stroke="#b6ff3b" strokeWidth={2} />
+      <rect y={86} width={160} height={1.2} fill="#ff3dc8" />
+      <path d="M66 100 Q66 86 80 84 Q94 86 94 100 Z" fill="#1d2048" stroke="#22e3f5" strokeWidth={1.5} />
+    </svg>
+  )
+}
+
+export function MiniConcurso() {
+  const fichas = [
+    { c: '#e21b3c', d: 'M0 -6 L6 5 H-6 Z' },
+    { c: '#1368ce', d: 'M0 -6 L6 0 L0 6 L-6 0 Z' },
+    { c: '#d89e00', d: 'M0 -6 A6 6 0 1 1 -0.1 -6 Z' },
+    { c: '#26890c', d: 'M-5 -5 H5 V5 H-5 Z' },
+  ]
+  return (
+    <svg {...marco}>
+      <rect width={160} height={100} fill="#46178f" />
+      <circle cx={18} cy={82} r={20} fill="#fff" opacity={0.07} />
+      <rect x={10} y={6} width={140} height={18} rx={3} fill="#fff" />
+      <text x={80} y={19} textAnchor="middle" fontSize={10} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
+        ¿Cuánto es 8 × 7?
+      </text>
+      <circle cx={22} cy={40} r={9} fill="#864cbf" />
+      <text x={22} y={43.5} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
+        18
+      </text>
+      <rect x={124} y={33} width={28} height={14} rx={3} fill="#2e0f63" />
+      <text x={138} y={43} textAnchor="middle" fontSize={7.5} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
+        2 450
+      </text>
+      {fichas.map((f, i) => {
+        const x = 8 + (i % 2) * 74
+        const y = 54 + Math.floor(i / 2) * 22
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={70} height={19} rx={2.5} fill={f.c} />
+            <path d={f.d} transform={`translate(${x + 11} ${y + 9.5})`} fill="#fff" />
+            <text x={x + 40} y={y + 13} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
+              {['54', '56', '48', '63'][i]}
+            </text>
+          </g>
+        )
+      })}
     </svg>
   )
 }

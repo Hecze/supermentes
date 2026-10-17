@@ -1,5 +1,23 @@
 # Juegos
 
+## Cómo se usan de verdad
+
+- **El docente usa laptop.** Elige el tema, prueba el juego y toca "Enviar a las familias".
+- **Los alumnos juegan en el celular de sus papás.** El link llega al grupo de WhatsApp de las familias; los papás le prestan el celular a su hijo o hija. Muchas veces se abre dentro de WhatsApp, en un celular Android de gama baja y con datos limitados.
+- **Nos centramos en primaria.** Los juegos de estilo juvenil (Duelo, Invasión) aparecen primero solo en 5.º y 6.º.
+- El proyector es un uso secundario: Tira y afloja y la Ruleta son solo para la clase y no se mandan por link.
+
+Reglas para todo lo que juega el alumno:
+
+1. **Celular en vertical primero**, y que también funcione al girarlo. Probar a 360 × 640.
+2. **Botones para el pulgar:** al menos ~54 px de alto, separados, y nada que dependa del teclado ni del mouse (ni hover, ni doble clic).
+3. **Letra grande:** las preguntas, desde 22–26 px en un celular chico. Los niños de los primeros grados recién están leyendo.
+4. **Liviano:** cada juego se descarga solo al abrirlo (2–4 KB comprimidos), sin imágenes ni audio que bajar: dibujos SVG y sonidos sintetizados.
+5. **Sin salidas:** ni publicidad ni links fuera del juego; al terminar, "Otra vez" u "Otro juego" (solo de celular).
+6. **Navegador viejo:** si no soporta lo que usamos (container queries, 2022+), la página del alumno lo dice en lugar de verse rota.
+
+## Diseño
+
 Repositorio de juegos educativos para la clase. La idea central: **un juego no es "de fracciones" ni "de sustantivos"; consume una forma de contenido**. Así un mismo juego sirve para cualquier tema y nivel, y el docente ve todos los juegos compatibles con su tema.
 
 ```
@@ -37,9 +55,9 @@ Cada juego declara `preparar(contenido)`: deja solo lo que cabe (respuestas cort
 
 ## Compartir con los alumnos (`compartir/`)
 
-El docente toca "Compartir con mis alumnos" y la app publica un `Publicado`: qué juego, el ritmo y de dónde sale el contenido. El cálculo se guarda como habilidad y nivel (el celular del alumno genera los ejercicios); el tema guarda su contenido. `api/juegos-compartidos.ts` lo valida, lo guarda en Vercel Blob y devuelve un código de 6 letras sin caracteres confusos (sin I, L, O, 0 ni 1).
+El docente toca "Enviar a las familias" y la app publica un `Publicado`: qué juego, el ritmo y de dónde sale el contenido. El cálculo se guarda como habilidad y nivel (el celular del alumno genera los ejercicios); el tema guarda su contenido. `api/juegos-compartidos.ts` lo valida, lo guarda en Vercel Blob y devuelve un código de 6 letras sin caracteres confusos (sin I, L, O, 0 ni 1).
 
-Los alumnos entran a `/j/CODIGO` (QR, WhatsApp) o escriben el código en `/j`. La página (`src/alumno/`) es liviana: solo el juego, con "Otro juego" para seguir con el mismo contenido. Si el servidor no responde, el juego viaja comprimido dentro del link (`/j/#d=…`) y abre igual.
+Los papás reciben `/j/CODIGO` por WhatsApp (en clase también sirve el QR o escribir el código en `/j`). La página (`src/alumno/`) es liviana: solo el juego, con "Otro juego" (solo juegos de celular) para seguir con el mismo contenido. Si el servidor no responde, el juego viaja comprimido dentro del link (`/j/#d=…`) y abre igual.
 
 ## Juegos
 
@@ -54,3 +72,6 @@ Los alumnos entran a `/j/CODIGO` (QR, WhatsApp) o escriben el código en `/j`. L
 | Pupiletras | Sopa de letras (también se imprime) | Celular y proyector |
 | Atrapa al cuy | Whack-a-mole (Wordwall) | Celular y proyector |
 | Ruleta de preguntas | Ruleta aleatoria (Wordwall), la guía el docente | Proyector |
+| Concurso | Kahoot: reloj, cuatro colores con figuras y puntos por rapidez | Celular y proyector |
+| Duelo de robots | Juegos de pelea, sin sangre (contra la máquina o de a dos) | Celular y proyector (5.º–6.º) |
+| Invasión | Arcades de naves (Space Invaders), sin violencia | Celular y proyector (5.º–6.º) |

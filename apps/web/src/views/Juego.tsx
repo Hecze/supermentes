@@ -46,14 +46,14 @@ function Insignias({ def }: { def: DefinicionJuego }) {
   const insignia = 'inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-0.5 text-xs text-ink-soft'
   return (
     <span className="flex flex-wrap gap-1.5">
-      {def.donde.includes('clase') && (
-        <span className={insignia}>
-          <Presentation className="size-3.5" aria-hidden /> Proyectado
-        </span>
-      )}
       {def.donde.includes('celular') && (
         <span className={insignia}>
           <Smartphone className="size-3.5" aria-hidden /> Celular
+        </span>
+      )}
+      {def.donde.includes('clase') && (
+        <span className={insignia}>
+          <Presentation className="size-3.5" aria-hidden /> Proyector
         </span>
       )}
       {def.id === 'soga' && (
@@ -304,13 +304,14 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
   if (!enlace) {
     return (
       <section ref={panel} className="flex items-center gap-3 rounded-2xl print:hidden border-2 bg-surface p-5 text-ink-soft" style={{ borderColor: COLOR }} role="status">
-        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para tus alumnos…
+        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
       </section>
     )
   }
 
   const sitio = `${origen().replace(/^https?:\/\/(www\.)?/, '')}/j`
-  const mensaje = `¡Hola! Hoy jugamos «${nombreJuego}» para practicar ${publicado.tema}. Entra aquí: ${enlace.url}${enlace.codigo ? ` (código ${enlace.codigo})` : ''}`
+  // Lo leen los papás en el grupo de WhatsApp: ellos le prestan el celular a su hijo o hija.
+  const mensaje = `Hola, familias 👋\nHoy en clase vimos «${publicado.tema}». Para practicar en casa, préstenle el celular a su hijo o hija y que juegue «${nombreJuego}» aquí:\n${enlace.url}\nNo necesita cuenta ni descargar nada. ¡Gracias!`
 
   async function copiar() {
     try {
@@ -328,11 +329,12 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
       </button>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <div className="flex flex-col gap-1">
-          <p className="font-semibold">Tus alumnos escanean el código con el celular</p>
+          <p className="font-semibold">Mándalo al grupo de WhatsApp de las familias</p>
+          <p className="text-ink-soft">Los niños juegan desde el celular de casa, sin cuenta ni descargas.</p>
           {enlace.codigo ? (
-            <p className="text-ink-soft">
-              O entran a <strong className="text-ink">{sitio}</strong> y escriben el código{' '}
-              <strong className="rounded-md bg-surface-2 px-1.5 font-mono text-lg tracking-widest text-ink">{enlace.codigo}</strong>. No necesitan cuenta.
+            <p className="text-sm text-ink-soft">
+              En clase también pueden escanear el código o entrar a <strong className="text-ink">{sitio}</strong> y escribir{' '}
+              <strong className="rounded-md bg-surface-2 px-1.5 font-mono text-base tracking-widest text-ink">{enlace.codigo}</strong>.
             </p>
           ) : (
             <p className="text-sm text-ink-soft">No pudimos crear un código corto: el link funciona igual, con todo el juego adentro.</p>
@@ -346,7 +348,7 @@ function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJue
             className="inline-flex h-11 items-center gap-2 rounded-xl px-4 font-medium text-on-tool hover:opacity-90"
             style={{ background: COLOR }}
           >
-            <MessageCircle className="size-5" aria-hidden /> Enviar por WhatsApp
+            <MessageCircle className="size-5" aria-hidden /> Enviar a las familias
           </a>
           <Boton variante="contorno" onClick={copiar}>
             <Copy className="size-5" aria-hidden /> Copiar link
@@ -398,7 +400,7 @@ export function Juego() {
     // fuente se recrea en cada render; claveFuente cambia solo si cambia lo elegido.
     [ficha, claveFuente, resultados.juego],
   )
-  const compatibles = useMemo(() => (contenido ? juegosCompatibles(contenido) : []), [contenido])
+  const compatibles = useMemo(() => (contenido && ficha ? juegosCompatibles(contenido, ficha.gradoId) : []), [contenido, ficha])
 
   if (!ficha) return <SinTema />
 
@@ -414,6 +416,7 @@ export function Juego() {
   }
 
   if (enJuego && contenido) {
+    const deCelular = enJuego.def.donde.includes('celular')
     return (
       <>
         <EncabezadoHerramienta id="juego" />
@@ -435,12 +438,23 @@ export function Juego() {
           className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
         <Acciones>
-          <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
-            <Presentation className="size-5" aria-hidden /> Proyectar en clase
-          </Boton>
-          <Boton variante="contorno" onClick={() => setCompartir(!compartir)}>
-            <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
-          </Boton>
+          {deCelular ? (
+            <>
+              <Boton variante="herramienta" herramienta="juego" onClick={() => setCompartir(!compartir)}>
+                <Share2 className="size-5" aria-hidden /> Enviar a las familias
+              </Boton>
+              <Boton variante="contorno" onClick={pantalla.alternar}>
+                <Presentation className="size-5" aria-hidden /> Proyectar en clase
+              </Boton>
+            </>
+          ) : (
+            <>
+              <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
+                <Presentation className="size-5" aria-hidden /> Proyectar en clase
+              </Boton>
+              <p className="text-sm text-ink-soft">Este juego es para la clase, en una sola pantalla. Para mandar a casa, elige uno de celular.</p>
+            </>
+          )}
           {enJuego.def.id === 'pupiletras' && (
             <Boton variante="contorno" onClick={() => imprimir(avisar)}>
               <Printer className="size-5" aria-hidden /> Imprimir pupiletras
@@ -448,7 +462,7 @@ export function Juego() {
           )}
         </Acciones>
         {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
-        {compartir && (
+        {compartir && deCelular && (
           <Compartir
             nombreJuego={enJuego.def.nombre}
             publicado={{
@@ -456,6 +470,7 @@ export function Juego() {
               juego: enJuego.def.id,
               ritmo: ritmoDe(ficha.gradoId),
               tema: ficha.titulo,
+              grado: ficha.gradoId,
               fuente:
                 fuente.fuente === 'calculo'
                   ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
@@ -489,11 +504,38 @@ export function Juego() {
         </div>
 
         {compatibles.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {compatibles.map(({ def }) => (
-              <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
-            ))}
-          </div>
+          <>
+            <div className="flex flex-col gap-0.5">
+              <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Smartphone className="size-5" style={{ color: COLOR }} aria-hidden /> Para jugar en casa, en el celular
+              </h3>
+              <p className="text-sm text-ink-soft">Los mandas al WhatsApp de las familias y los niños juegan con el celular de sus papás.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {compatibles
+                .filter(({ def }) => def.donde.includes('celular'))
+                .map(({ def }) => (
+                  <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
+                ))}
+            </div>
+            {compatibles.some(({ def }) => !def.donde.includes('celular')) && (
+              <>
+                <div className="mt-2 flex flex-col gap-0.5">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold">
+                    <Presentation className="size-5" style={{ color: COLOR }} aria-hidden /> Para la clase, con el proyector
+                  </h3>
+                  <p className="text-sm text-ink-soft">Se juegan en una sola pantalla, con toda la clase.</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {compatibles
+                    .filter(({ def }) => !def.donde.includes('celular'))
+                    .map(({ def }) => (
+                      <TarjetaJuego key={def.id} def={def} onClick={() => setElegido(def.id)} />
+                    ))}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <p className="rounded-2xl border-2 border-dashed border-line bg-surface p-6 text-ink-soft">
             Con esto todavía no hay juegos. Crea preguntas del tema o elige algo de cálculo en «Cambiar».

@@ -795,6 +795,9 @@ export const habilidadPorId = (id: string) => HABILIDADES.find((h) => h.id === i
 
 const ORDEN_GRADOS = [...I(3, 4, 5), ...P(1, 2, 3, 4, 5, 6), ...S(1, 2, 3, 4, 5)]
 
+/** Posición del grado de inicial a secundaria (−1 si no se conoce). */
+export const indiceGrado = (gradoId: string) => ORDEN_GRADOS.indexOf(gradoId)
+
 /** El nivel que se suele trabajar en ese grado: el más avanzado de los que lo incluyen, o el más cercano. */
 export function nivelPara(h: Habilidad, gradoId: string): number {
   let ultimo = -1

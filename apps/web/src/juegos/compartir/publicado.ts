@@ -11,6 +11,8 @@ export type Publicado = {
   ritmo: Ritmo
   /** Título del tema, para saludar al alumno. */
   tema: string
+  /** Grado del tema: ordena los juegos por edad cuando el alumno elige "Otro juego". */
+  grado?: string
   /** El cálculo se guarda como habilidad y nivel: el celular del alumno genera los ejercicios. */
   fuente: { tipo: 'calculo'; habilidad: string; nivel: number } | { tipo: 'tema'; contenido: ContenidoGuardado }
 }

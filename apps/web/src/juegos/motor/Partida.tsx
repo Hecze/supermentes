@@ -6,6 +6,7 @@ import type { Contenido, DefinicionJuego, Resultado, Ritmo } from '../tipos'
 import { nuevaSemilla } from './azar'
 import { Confeti } from './Confeti'
 import { Llama } from './Llama'
+import { num } from '../matematica/formato'
 import { Estrellas, TextoMat } from './piezas'
 import { activarAudio, alternarSilencio, sonar, useSilencio } from './sonido'
 import '../juegos.css'
@@ -98,10 +99,15 @@ function Controles({ pantalla }: { pantalla: PantallaCompleta }) {
 
 function Portada({ def, contenido, jugar }: { def: DefinicionJuego; contenido: Contenido; jugar: () => void }) {
   const { Miniatura } = def
+  const oscuro = def.estilo === 'juvenil'
   return (
     <div
       className="absolute inset-0 flex flex-col items-center justify-center gap-[2.6cqmin] overflow-hidden px-[5cqmin] text-center text-white"
-      style={{ background: `radial-gradient(circle at 50% 35%, color-mix(in oklab, ${def.color} 70%, white), ${def.color} 70%)` }}
+      style={{
+        background: oscuro
+          ? `radial-gradient(circle at 50% 35%, color-mix(in oklab, ${def.color} 45%, #090a1c), #090a1c 75%)`
+          : `radial-gradient(circle at 50% 35%, color-mix(in oklab, ${def.color} 70%, white), ${def.color} 70%)`,
+      }}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-25"
@@ -111,7 +117,10 @@ function Portada({ def, contenido, jugar }: { def: DefinicionJuego; contenido: C
       <div className="entrar relative w-[min(46cqw,44cqh)] -rotate-2 overflow-hidden rounded-[3cqmin] border-[1cqmin] border-white shadow-xl">
         <Miniatura />
       </div>
-      <h2 className="entrar relative font-bold leading-none sombra-texto" style={{ fontSize: 'clamp(30px, 9cqmin, 88px)', animationDelay: '80ms' }}>
+      <h2
+        className={`entrar relative font-bold leading-none ${oscuro ? 'texto-neon uppercase' : 'sombra-texto'}`}
+        style={{ fontSize: 'clamp(30px, 9cqmin, 88px)', animationDelay: '80ms', '--brillo': def.color } as CSSProperties}
+      >
         {def.nombre}
       </h2>
       <p className="relative max-w-[60ch] font-medium leading-snug" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
@@ -158,7 +167,7 @@ function Final({
         </p>
         {resultado.puntaje !== undefined && record > 0 && (
           <p className="rounded-full bg-[#fff4cf] px-4 py-1 font-semibold text-[#8a5a00]" style={{ fontSize: 'clamp(14px, 3cqmin, 22px)' }}>
-            {nuevoRecord ? '¡Nuevo récord en este dispositivo!' : `Récord: ${record}`}
+            {nuevoRecord ? '¡Nuevo récord en este dispositivo!' : `Récord: ${num(record)}`}
           </p>
         )}
         <div className="mt-[1cqmin] flex flex-wrap justify-center gap-[2cqmin]" style={{ fontSize: 'clamp(17px, 4cqmin, 30px)' }}>
@@ -239,7 +248,7 @@ export function Partida({
   return (
     <div
       ref={pantalla.ref as RefObject<HTMLDivElement>}
-      className={`escena relative overflow-hidden bg-[#bfe8ff] ${pantalla.fija ? 'escena-fija' : ''} ${className ?? ''}`}
+      className={`escena relative overflow-hidden bg-[#bfe8ff] ${def.estilo === 'juvenil' ? 'escena-oscura' : ''} ${pantalla.fija ? 'escena-fija' : ''} ${className ?? ''}`}
     >
       {fase === 'portada' ? (
         <Portada def={def} contenido={contenido} jugar={jugar} />

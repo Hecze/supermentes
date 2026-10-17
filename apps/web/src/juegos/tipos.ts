@@ -58,7 +58,7 @@ export type PropsJuego = {
   terminar: (r: Resultado) => void
 }
 
-export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta'
+export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta' | 'duelo' | 'invasion' | 'concurso'
 
 /** Dónde se juega mejor: en el celular de cada alumno o proyectado para toda la clase. */
 export type Donde = 'celular' | 'clase'
@@ -75,6 +75,13 @@ export type DefinicionJuego = {
   color: string
   /** El juego viral en el que se inspira (referencia interna). */
   inspirado: string
+  /**
+   * Infantil (llamas, globos, colores) o juvenil (oscuro, neón, arcade). En 5.º y 6.º de primaria y en secundaria
+   * los juveniles aparecen primero: a los más grandes lo "de niños" los aleja.
+   */
+  estilo: 'infantil' | 'juvenil' | 'neutro'
+  /** Desde qué grado se ofrece (por ejemplo, el de terror suave no se muestra a los más chicos). */
+  desde?: string
   /** Prepara el contenido que usa el juego, o null si con este contenido no se puede jugar. */
   preparar: (c: Contenido) => Contenido | null
   Miniatura: ComponentType

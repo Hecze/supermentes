@@ -22,7 +22,7 @@ function Corredora({ pasos, meta, colores, carril, corriendo }: { pasos: number;
       {carril === 0 && (
         <span className="absolute -top-[1.6cqmin] left-[66%] block h-[2.4cqmin] w-[3cqmin] -translate-x-1/2 bg-[#ff4d6d]" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} aria-hidden />
       )}
-      <Llama colores={colores} tam={carril === 0 ? 'clamp(54px, 15cqmin, 150px)' : 'clamp(46px, 12.5cqmin, 125px)'} corriendo={corriendo} />
+      <Llama colores={colores} tam={carril === 0 ? 'clamp(60px, min(20cqmin, 15cqh), 150px)' : 'clamp(50px, min(17cqmin, 12.5cqh), 125px)'} corriendo={corriendo} />
     </div>
   )
 }
@@ -130,7 +130,7 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
       {/* Pregunta */}
       <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-[2.4cqmin] p-[3cqmin]">
         <div key={ronda.n} className="tarjeta-juego entrar flex w-full max-w-[min(94cqw,820px)] items-center justify-center px-[3cqmin] py-[2cqmin]">
-          <Enunciado reto={ronda.reto} tam="clamp(20px, 5.6cqmin, 52px)" />
+          <Enunciado reto={ronda.reto} tam="clamp(24px, 5.6cqmin, 52px)" />
         </div>
         <div className={`grid w-full max-w-[min(94cqw,820px)] gap-[1.8cqmin] ${largas ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {ronda.opciones.map((o, i) => {
@@ -142,8 +142,8 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
                 type="button"
                 onClick={() => elegir(o)}
                 disabled={elegida !== null}
-                className={`b3d sombra-texto px-[2cqmin] py-[1.4cqmin] ${largas ? 'text-left' : ''} ${correcta ? 'bien' : ''} ${mal ? 'mal' : ''} ${elegida && !correcta && !mal ? 'apagado' : ''}`}
-                style={{ ...colorBoton(i), fontSize: largas ? 'clamp(15px, 3.4cqmin, 30px)' : 'clamp(18px, 4.6cqmin, 42px)' }}
+                className={`b3d sombra-texto min-h-[clamp(54px,10cqh,110px)] px-[2cqmin] py-[1.4cqmin] ${largas ? 'text-left' : ''} ${correcta ? 'bien' : ''} ${mal ? 'mal' : ''} ${elegida && !correcta && !mal ? 'apagado' : ''}`}
+                style={{ ...colorBoton(i), fontSize: largas ? 'clamp(17px, 3.4cqmin, 30px)' : 'clamp(24px, 4.6cqmin, 42px)' }}
               >
                 <TextoMat texto={o} />
               </button>

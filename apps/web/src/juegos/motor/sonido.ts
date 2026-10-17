@@ -100,6 +100,26 @@ export const sonar = {
       { f: 1047, dur: 0.45, en: 0.39 },
       { f: 784, dur: 0.45, en: 0.39, vol: 0.08 },
     ]),
+  golpe: () => {
+    ruido(0.12, 0.35)
+    tocar([{ f: 160, hasta: 55, dur: 0.18, tipo: 'square', vol: 0.12 }])
+  },
+  laser: () => tocar([{ f: 1500, hasta: 220, dur: 0.16, tipo: 'square', vol: 0.06 }]),
+  explosion: () => {
+    ruido(0.35, 0.3)
+    tocar([{ f: 120, hasta: 40, dur: 0.35, tipo: 'sawtooth', vol: 0.08 }])
+  },
+  especial: () =>
+    tocar([
+      { f: 220, hasta: 880, dur: 0.35, tipo: 'sawtooth', vol: 0.07 },
+      { f: 330, hasta: 1320, dur: 0.35, tipo: 'square', vol: 0.04, en: 0.05 },
+    ]),
+  latido: () =>
+    tocar([
+      { f: 62, hasta: 45, dur: 0.12, tipo: 'sine', vol: 0.5 },
+      { f: 58, hasta: 42, dur: 0.14, tipo: 'sine', vol: 0.4, en: 0.2 },
+    ]),
+  puerta: () => tocar([{ f: 140, hasta: 90, dur: 0.6, tipo: 'sawtooth', vol: 0.05 }, { f: 300, hasta: 200, dur: 0.5, tipo: 'triangle', vol: 0.04, en: 0.1 }]),
   fin: () =>
     tocar([
       { f: 523, dur: 0.18 },

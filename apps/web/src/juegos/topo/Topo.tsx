@@ -175,7 +175,7 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
           </span>
         </div>
         <div key={reto.n} className="tarjeta-juego entrar px-[3.5cqmin] py-[1.4cqmin]" style={{ maxWidth: 'min(86cqw, 720px)' }}>
-          <Enunciado reto={reto.reto} tam="clamp(20px, 5.4cqmin, 48px)" />
+          <Enunciado reto={reto.reto} tam="clamp(24px, 5.4cqmin, 48px)" />
         </div>
       </div>
 

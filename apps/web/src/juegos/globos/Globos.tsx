@@ -322,7 +322,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
         </div>
         {reto && (
           <div key={aciertos} className="tarjeta-juego entrar px-[3.5cqmin] py-[1.6cqmin]" style={{ maxWidth: 'min(86cqw, 720px)' }}>
-            <Enunciado reto={reto} tam="clamp(22px, 6cqmin, 52px)" />
+            <Enunciado reto={reto} tam="clamp(26px, 6cqmin, 52px)" />
           </div>
         )}
       </div>

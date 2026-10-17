@@ -11,7 +11,7 @@ import { get, put } from '@vercel/blob'
 const PREFIJO = 'juegos/'
 const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODIGO = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
-const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta'])
+const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta', 'duelo', 'invasion', 'concurso'])
 const MAXIMO_BYTES = 200_000
 
 type Visual = { tipo: 'fraccion'; partes: [number, number] } | { tipo: 'contar'; figura: string; cantidad: number }
@@ -75,13 +75,14 @@ function validar(datos: unknown) {
   const ritmo = entero(o.ritmo, 1, 3)
   if (ritmo === null) return 'Falta el ritmo.'
   const tema = texto(o.tema, 120)
+  const grado = /^(inicial|primaria|secundaria)-\d$/.test(texto(o.grado, 20)) ? texto(o.grado, 20) : undefined
   const f = objeto(o.fuente)
 
   if (f.tipo === 'calculo') {
     const habilidad = texto(f.habilidad, 40)
     const nivel = entero(f.nivel, 0, 20)
     if (!/^[a-z-]{2,40}$/.test(habilidad) || nivel === null) return 'Habilidad inválida.'
-    return { v: 1, juego, ritmo, tema, fuente: { tipo: 'calculo', habilidad, nivel } }
+    return { v: 1, juego, ritmo, tema, grado, fuente: { tipo: 'calculo', habilidad, nivel } }
   }
 
   if (f.tipo === 'tema') {
@@ -98,7 +99,7 @@ function validar(datos: unknown) {
       .map((p) => ({ palabra: texto(objeto(p).palabra, 40), pista: texto(objeto(p).pista, 200) }))
       .filter((p) => p.palabra && p.pista)
     if (!retos.length && !pares.length && !palabras.length) return 'El juego no tiene contenido.'
-    return { v: 1, juego, ritmo, tema, fuente: { tipo: 'tema', contenido: { titulo: texto(c.titulo, 120) || tema, retos, pares, palabras } } }
+    return { v: 1, juego, ritmo, tema, grado, fuente: { tipo: 'tema', contenido: { titulo: texto(c.titulo, 120) || tema, retos, pares, palabras } } }
   }
 
   return 'Falta de dónde sale el contenido.'
