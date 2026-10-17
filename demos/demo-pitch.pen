@@ -1,0 +1,4880 @@
+{
+  "version": "2.21",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bBnlE",
+      "x": 0,
+      "y": 0,
+      "name": "Diagrama sketch",
+      "clip": true,
+      "width": 1400,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "gap": 22,
+      "padding": 40,
+      "children": [
+        {
+          "type": "frame",
+          "id": "E07UW",
+          "name": "Encabezado",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 6,
+          "children": [
+            {
+              "type": "text",
+              "id": "mGDFI",
+              "name": "Reemplazo de la caja neg",
+              "fill": "#1e1e1e",
+              "content": "Reemplazo de la caja negra · arquitectura",
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "bEiJA",
+              "name": "Arriba: cómo descubrimos",
+              "fill": "#666666",
+              "content": "Arriba: cómo descubrimos el comportamiento. Abajo: el servicio que responde al set oficial.",
+              "fontFamily": "Kalam",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gRVie",
+          "name": "Descubrimiento",
+          "width": "fill_container",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ZDlY7",
+              "name": "Original",
+              "width": "fill_container",
+              "fill": "#e9ecef",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                18,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fmNRi",
+                  "name": "Original",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Original",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "OJWSL",
+                  "name": "caja negra · canarios ca",
+                  "fill": "#444444",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "caja negra · canarios cada 2 h",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "e6gOe",
+              "name": "Flecha request",
+              "width": 70,
+              "layout": "vertical",
+              "gap": 2,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "N3O5SG",
+                  "name": "request",
+                  "fill": "#555555",
+                  "content": "request",
+                  "fontFamily": "Kalam",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "xnMe4",
+                  "name": "←",
+                  "fill": "#1e1e1e",
+                  "content": "←",
+                  "fontFamily": "Kalam",
+                  "fontSize": 26,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m8ifc",
+              "name": "probe.mjs",
+              "rotation": 0.6,
+              "width": "fill_container",
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                18,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fEUXm",
+                  "name": "probe.mjs",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "probe.mjs",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "f83Oa",
+                  "name": "sonda con hipótesis",
+                  "fill": "#444444",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "sonda con hipótesis",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pctUI",
+              "name": "Flecha",
+              "width": 70,
+              "layout": "vertical",
+              "gap": 2,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "UPM7l",
+                  "name": "→",
+                  "fill": "#1e1e1e",
+                  "content": "→",
+                  "fontFamily": "Kalam",
+                  "fontSize": 26,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pePc6",
+              "name": "experimentos.jsonl",
+              "rotation": -0.6,
+              "width": "fill_container",
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                18,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "StwI7",
+                  "name": "experimentos.jsonl",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "experimentos.jsonl",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "kXef0",
+                  "name": "log = evidencia = tests",
+                  "fill": "#444444",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "log = evidencia = tests",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "TnQWf",
+              "name": "Flecha",
+              "width": 70,
+              "layout": "vertical",
+              "gap": 2,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ksWDM",
+                  "name": "→",
+                  "fill": "#1e1e1e",
+                  "content": "→",
+                  "fontFamily": "Kalam",
+                  "fontSize": 26,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Tlx6I",
+              "name": "Especificación",
+              "width": "fill_container",
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": [
+                18,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "h1Ag1",
+                  "name": "Especificación",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Especificación",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "auARg",
+                  "name": "generada desde reglas.mj",
+                  "fill": "#444444",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "generada desde reglas.mjs",
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "DwBR0",
+          "name": "Puente",
+          "fill": "#555555",
+          "content": "↓  replay del log (local, sin red)          ↓  reglas.mjs genera spec y código",
+          "fontFamily": "Kalam",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "oi4Xh",
+          "name": "Servidor",
+          "rotation": 0.6,
+          "width": "fill_container",
+          "fill": "#ffffff",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "l1QwJ",
+              "name": "server.mjs · Railway, 1 ",
+              "fill": "#2f9e44",
+              "content": "worker.mjs · Cloudflare Worker + Durable Object · un proceso con estado · sin dependencias",
+              "fontFamily": "Kalam",
+              "fontSize": 16,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "fabHu",
+              "name": "Capas",
+              "width": "fill_container",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ALUxx",
+                  "name": "Ruta + token",
+                  "rotation": -0.6,
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    18,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wiGk9",
+                      "name": "Ruta + token",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Ruta + token",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cl5ND",
+                      "name": "E404 · E001",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "E404 · E001",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "cjPvy",
+                  "name": "Flecha",
+                  "width": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BRcgH",
+                      "name": "→",
+                      "fill": "#1e1e1e",
+                      "content": "→",
+                      "fontFamily": "Kalam",
+                      "fontSize": 26,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "S0ftv",
+                  "name": "Parser",
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    18,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jDyc9",
+                      "name": "Parser",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Parser",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IuDOl",
+                      "name": "E100 · E102 · E103 · E10",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "E100 · E102 · E103 · E104",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WubtN",
+                  "name": "Flecha",
+                  "width": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RQyjE",
+                      "name": "→",
+                      "fill": "#1e1e1e",
+                      "content": "→",
+                      "fontFamily": "Kalam",
+                      "fontSize": 26,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "z6rqRi",
+                  "name": "Control mod 97",
+                  "rotation": 0.6,
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    18,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "r9FVpv",
+                      "name": "Control mod 97",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Control mod 97",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uvTp3",
+                      "name": "E201 · E202",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "E201 · E202",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FhhnJ",
+                  "name": "Flecha",
+                  "width": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Gqr7K",
+                      "name": "→",
+                      "fill": "#1e1e1e",
+                      "content": "→",
+                      "fontFamily": "Kalam",
+                      "fontSize": 26,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QyJ10",
+                  "name": "Comandos",
+                  "rotation": -0.6,
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    18,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qPGxd",
+                      "name": "Comandos",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Comandos",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yLR86",
+                      "name": "PING ALTA CONSULTA DEPOS",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "PING ALTA CONSULTA DEPOSITO TRANSFER ANULA HALT · E3xx–E5xx",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YKFcC",
+                  "name": "Flecha",
+                  "width": 28,
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TAKPD",
+                      "name": "→",
+                      "fill": "#1e1e1e",
+                      "content": "→",
+                      "fontFamily": "Kalam",
+                      "fontSize": 26,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pDdMW",
+                  "name": "Estado",
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": [
+                    18,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "efdnI",
+                      "name": "Estado",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Estado",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rtqM4",
+                      "name": "cuentas · ops · contador",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "cuentas · saldo en centavos · bloqueos",
+                      "textAlign": "center",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BlEOr",
+          "name": "Set oficial",
+          "width": "fill_container",
+          "gap": 24,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "emGk4",
+              "name": "Caja set",
+              "rotation": 0.6,
+              "fill": "#ffec99",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "padding": [
+                16,
+                28
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "dtj9p",
+                  "name": "↑ Set oficial (100 tests",
+                  "fill": "#1e1e1e",
+                  "content": "↑ Set oficial (100 tests)",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LaIfh",
+              "name": "Contrato",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "c2G29",
+                  "name": "POST /__reset antes de c",
+                  "fill": "#1e1e1e",
+                  "content": "POST /__reset antes de cada test · Bearer token del equipo · GET /health · 5 s por paso",
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "U2VIOt",
+                  "name": "El reemplazo nunca llama",
+                  "fill": "#e03131",
+                  "content": "El reemplazo nunca llama al original",
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "V4GT1",
+          "name": "Ciclo de mejora",
+          "rotation": -0.6,
+          "width": "fill_container",
+          "fill": "#d0bfff",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            12,
+            16
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "kE2c9",
+              "name": "⟲  Ciclo de mejora: cont",
+              "fill": "#6741d9",
+              "content": "Ciclo de mejora: conteo oficial X/100 + fallas del replay → corrigen reglas.mjs → redeploy",
+              "fontFamily": "Kalam",
+              "fontSize": 15,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Z0ih5c",
+          "name": "Decisiones",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "id": "LAVWe",
+              "name": "Decisiones (alternativa ",
+              "fill": "#1e1e1e",
+              "content": "Decisiones (alternativa descartada)",
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "h9jYh",
+              "name": "Tarjetas",
+              "width": "fill_container",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WtJfq",
+                  "name": "Railway, 1 réplica",
+                  "width": "fill_container",
+                  "fill": "#ffd8a8",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "tU6l4",
+                      "name": "Railway, 1 réplica",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Cloudflare + Durable Object",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g8Ov3i",
+                      "name": "Descartado serverless: p",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Descartado serverless normal (pierde el estado) y Railway (pedía login)",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "XCfQx",
+                  "name": "Node stdlib",
+                  "rotation": 0.6,
+                  "width": "fill_container",
+                  "fill": "#ffd8a8",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BQoEW",
+                      "name": "Node stdlib",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Node stdlib",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n1snj5",
+                      "name": "Descartado Express: camb",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Descartado Express: cambia 404 y errores JSON",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RPpet",
+                  "name": "reglas.mjs (tabla única)",
+                  "rotation": -0.6,
+                  "width": "fill_container",
+                  "fill": "#ffd8a8",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "p9dmiB",
+                      "name": "reglas.mjs (tabla única)",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "reglas.mjs (tabla única)",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "p4GnE",
+                      "name": "Descartado LLM / grabar:",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Descartado LLM / grabar: no generaliza",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Lequy",
+                  "name": "HALT → E520 copiado",
+                  "width": "fill_container",
+                  "fill": "#ffd8a8",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dpM2m",
+                      "name": "HALT → E520 copiado",
+                      "fill": "#1e1e1e",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "HALT;1 → E599 copiado",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rujde",
+                      "name": "Confirmación cerrada: no",
+                      "fill": "#444444",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Se copia igual y se documenta como riesgo R-03: quitarlo de la API pública",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zbaAg",
+          "name": "Línea de tiempo",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "id": "V3h2OI",
+              "name": "Línea de tiempo y riesgo",
+              "fill": "#1e1e1e",
+              "content": "Línea de tiempo y riesgo",
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "gIeqc",
+              "name": "Hitos",
+              "width": "fill_container",
+              "stroke": "#1e1e1e",
+              "strokeWidth": {
+                "top": 2
+              },
+              "padding": [
+                12,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "eJ3FT",
+                  "name": "12:00",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ek5u8",
+                      "name": "● 12:00",
+                      "fill": "#1e1e1e",
+                      "content": "● 12:00",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "GzIrd",
+                      "name": "ejecución",
+                      "fill": "#444444",
+                      "content": "ejecución",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "jQDs6",
+                  "name": "12:30",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fYHCB",
+                      "name": "● 12:30",
+                      "fill": "#1e1e1e",
+                      "content": "● 12:30",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IcYJx",
+                      "name": "1er deploy + conteo",
+                      "fill": "#444444",
+                      "content": "1er deploy + conteo",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "B0FG5E",
+                  "name": "15:30",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "iPP9G",
+                      "name": "● 15:30",
+                      "fill": "#e03131",
+                      "content": "● 15:30",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "E7FCNR",
+                      "name": "incidente → canarios",
+                      "fill": "#444444",
+                      "content": "incidente v2 → canarios",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tCPTr",
+                  "name": "19:00",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "trxEd",
+                      "name": "● 19:00",
+                      "fill": "#1e1e1e",
+                      "content": "● 19:00",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gtEch",
+                      "name": "congelar",
+                      "fill": "#444444",
+                      "content": "congelar",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wvXfn",
+                  "name": "20:00",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L0Stpg",
+                      "name": "● 20:00",
+                      "fill": "#e03131",
+                      "content": "● 20:00",
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "UKUY9",
+                      "name": "tokens off · evaluación ",
+                      "fill": "#444444",
+                      "content": "tokens off · evaluación final",
+                      "fontFamily": "Kalam",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "GlOqw",
+              "name": "Cambios v2",
+              "fill": "#e03131",
+              "content": "v2 a las 15:30: límite 100.000 → 50.000 · saldo en centavos, se muestra con 2 decimales · bloqueo E510 tras 3 E506 seguidos (se levanta con un depósito)",
+              "fontFamily": "Kalam",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "W3o21",
+      "x": 1520,
+      "y": 0,
+      "name": "Doc de diseño",
+      "width": 1100,
+      "fill": "#ffffff",
+      "layout": "vertical",
+      "gap": 20,
+      "padding": 56,
+      "children": [
+        {
+          "type": "text",
+          "id": "FVuVv",
+          "name": "Título",
+          "fill": "#1e1e1e",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Reemplazo de la caja negra · Doc de diseño",
+          "lineHeight": 1.45,
+          "fontFamily": "Kalam",
+          "fontSize": 40,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "c2bUYe",
+          "name": "Byline",
+          "fill": "#495057",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Harold Medrano · Frontier BOG/26 · Reto 2",
+          "lineHeight": 1.45,
+          "fontFamily": "Kalam",
+          "fontSize": 17,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "YTdZW",
+          "name": "Problema y límites",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "u7vxs",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Shhj0",
+                  "name": "Problema y límites",
+                  "fill": "#1e1e1e",
+                  "content": "Problema y límites",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "z84lo",
+              "name": "Un servicio HTTP de 10 a",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Un servicio HTTP de 10 años, sin código ni docs, procesa mensajes COMANDO;args;control de un mini-banco (cuentas, depósitos, transferencias, anulaciones). Hay que reemplazarlo idéntico en status y cuerpo, errores incluidos, y especificarlo para que otro ingeniero lo reimplemente. Éxito = 100 tests ocultos (secuencias de 1 a 12 pasos tras /__reset, 5 s por paso) contra el original vigente a las 20:00. Los headers no se comparan.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q4aSM",
+          "name": "Lo que ya sabemos (≈830 requests; los números citan el log)",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "jea4m",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#b2f2bb",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xJKd8",
+                  "name": "Lo que ya sabemos (≈830 requests; los números citan el log)",
+                  "fill": "#1e1e1e",
+                  "content": "Lo que ya sabemos (≈830 requests; los números citan el log)",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "DEC1e",
+              "name": "•  Control = ISO 7064 ti",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Control = ISO 7064 tipo IBAN: letras A=1…Z=26, dígitos tal cual, resto descartado, +\"00\", 98 − n mod 97. Calza 20/20 ejemplos y una predicción nueva (699–700). PING no lo valida (s1).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "V32idC",
+              "name": "•  Orden observado: ruta",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Orden observado: ruta E404 → token E001 (776–778) → JSON E100 → m E102 → forma del control E103/E104/E201 → control E202 → comando E301 (716–718) → aridad E302 (719–720) → monto E303 → mismas cuentas E304 (821–823) → cuenta E401 (784) → límite E506 → saldo E507 (782).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "saD7H",
+              "name": "•  Validación temprana: ",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Validación temprana: un prototipo del reemplazo ya reproduce 849/849 respuestas (20 ejemplos + log completo) con el mismo comparador del set.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "WJcEs",
+              "name": "•  Estado: contadores AC",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Estado: contadores AC-nnnn/OP-nnnn, saldos, anulaciones. Límite de 100.000 por operación, no acumulado (752–755).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "J3n7Tq",
+          "name": "Supuestos",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "txlWG",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#ffec99",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "A8XCq",
+                  "name": "Supuestos",
+                  "fill": "#1e1e1e",
+                  "content": "Supuestos",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "N9I1h",
+              "name": "•  Un proceso con estado",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Un proceso con estado en memoria basta: el set le habla a uno solo y resetea antes de cada test.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "C4ezUN",
+              "name": "•  Lo no observado copia",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Lo no observado copia el caso observado más cercano y la spec lo marca como supuesto, nunca como hecho (una afirmación falsa resta).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "fVFp9",
+              "name": "•  El original cambia en",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  El original cambia en el día: todo hallazgo de la mañana se re-verifica antes de las 20:00.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xLuP1",
+          "name": "Casos difíciles",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "v62gY",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#ffc9c9",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "XnSms",
+                  "name": "Casos difíciles",
+                  "fill": "#1e1e1e",
+                  "content": "Casos difíciles",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "YQskV",
+              "name": "•  Copiar los defectos, ",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Copiar los defectos, no arreglarlos: \"recieved\", cuentaId vs cuenta_id, espacio final en \"comando desconocido \", sugerencia solo a veces.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "UV4Ly",
+              "name": "•  ANULA deja saldos neg",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  ANULA deja saldos negativos (785–787) y la segunda anulación responde {\"ok\":false,\"motivo\":\"ya anulada\"}.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "tdi6E",
+              "name": "•  Control 03 ≠ 3 (E202)",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Control 03 ≠ 3 (E202), pero 064 pasa en PING. Montos: 10.000.000 pasa, 99.999.999.999 da E303 (cota desconocida).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "BFxYW",
+              "name": "•  Comando oculto HALT (",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Comando oculto HALT (revelado por la sugerencia de HELP, log 806): con argumento responde 409 E520 \"operación destructiva: detiene el servicio; reenvía con confirmación\" (828). No lo confirmamos contra el original para no tumbarlo; en el reemplazo la confirmación queda cerrada y declarada como supuesto y riesgo.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "MNJzo",
+              "name": "•  Incidente anunciado a",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Incidente anunciado a las 15:30 y a las 20:00 los tokens dejan de funcionar contra el original: un cambio tardío no se podría ver. Por eso congelamos a las 19:00.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "GLQ6u",
+          "name": "Fuera de alcance (y por qué)",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "wM0BT",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#e9ecef",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jy248",
+                  "name": "Fuera de alcance (y por qué)",
+                  "fill": "#1e1e1e",
+                  "content": "Fuera de alcance (y por qué)",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "q1rWO",
+              "name": "•  Headers (x-req): el s",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Headers (x-req): el set no los compara.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "l2NmiW",
+              "name": "•  Persistencia: /__rese",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Persistencia: /__reset antes de cada test la vuelve inútil.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "s7kJnH",
+              "name": "•  LLM: el servicio es d",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  LLM: el servicio es determinista y un LLM solo suma variación y latencia.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "s4NHC",
+          "name": "Arquitectura",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "u1uON",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#d0bfff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "v6zlz",
+                  "name": "Arquitectura",
+                  "fill": "#1e1e1e",
+                  "content": "Arquitectura",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "R0ydmu",
+              "name": "probe.mjs → experimentos",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "probe.mjs → experimentos.jsonl (log = evidencia = tests) → reglas.mjs: una tabla única (id, comportamiento, evidencia, parámetros) → genera el reemplazo server.mjs (ruta/token → parser → control → comandos → estado) y la especificación. Ver el diagrama a la izquierda.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "e1kqP",
+          "name": "Decisiones (tesis → antítesis → síntesis)",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "r2GcBc",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#ffd8a8",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BtEij",
+                  "name": "Decisiones (tesis → antítesis → síntesis)",
+                  "fill": "#1e1e1e",
+                  "content": "Decisiones (tesis → antítesis → síntesis)",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "s5O0N",
+              "name": "Tabla",
+              "width": "fill_container",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vAk3g",
+                  "name": "Fila 0",
+                  "width": "fill_container",
+                  "fill": "#fff4e6",
+                  "stroke": "#1e1e1e",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "UWQeL",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "H3tOp",
+                          "name": "Tesis",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Tesis",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 18,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mhL5Z",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "jXeSk",
+                          "name": "Antítesis",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Antítesis",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 18,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oZySz",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "J3iyOj",
+                          "name": "Síntesis",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Síntesis",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 18,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LLd4W",
+                  "name": "Fila 1",
+                  "width": "fill_container",
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": {
+                    "top": 1.5
+                  },
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "COBmz",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AZArO",
+                          "name": "Reglas a mano en el códi",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Reglas a mano en el código; spec escrita aparte",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "haXZ4",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Tb6x4",
+                          "name": "El incidente de las 15:3",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "El incidente de las 15:30 obliga a reescribir bajo presión, y la spec se desincroniza (una afirmación falsa resta)",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tIfDW",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TChdl",
+                          "name": "Tabla única de reglas: c",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Tabla única de reglas: código y spec salen de ahí; una regla es confirmado solo si su evidencia pasa en el replay. Un cambio = editar un dato",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xqi8n",
+                  "name": "Fila 2",
+                  "width": "fill_container",
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": {
+                    "top": 1.5
+                  },
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "B1Jhw",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rwLhZ",
+                          "name": "Medir con fuzzer diferen",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Medir con fuzzer diferencial contra el original",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HkFOJ",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "D6VnFi",
+                          "name": "Gasta tokens y depende d",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Gasta tokens y depende de que el original siga arriba; ignora que el set oculto corre en cada validación",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iseB4",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DWefy",
+                          "name": "Métrica principal = cont",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Métrica principal = conteo oficial de 100 tests, validando tras cada deploy. Fuzzer solo donde el conteo se estanca",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CDGNX",
+                  "name": "Fila 3",
+                  "width": "fill_container",
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": {
+                    "top": 1.5
+                  },
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CEJVr",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PymeD",
+                          "name": "Sondear los 6 comandos d",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Sondear los 6 comandos de los ejemplos",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hlb0F",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cXDOD",
+                          "name": "Solo hallamos lo que pre",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Solo hallamos lo que preguntamos; un comando oculto se come tests de 1 paso",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "RQTaj",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "C9AoFL",
+                          "name": "Usar la sugerencia de E3",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Usar la sugerencia de E301 como oráculo para enumerar comandos (~1 request por candidato)",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "JqtYB",
+                  "name": "Fila 4",
+                  "width": "fill_container",
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": {
+                    "top": 1.5
+                  },
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Ts23x",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "C8GIEe",
+                          "name": "Railway, 1 réplica",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Railway, 1 réplica",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mBMNB",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "W9wGg",
+                          "name": "Punto único de falla has",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Punto único de falla hasta ~22:15",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "StZvI",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "n4kPZ",
+                          "name": "1 réplica (varias rompen",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "1 réplica (varias rompen el estado) + reinicio automático, healthcheck y chequeo cada 5 min",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mmNjw",
+                  "name": "Fila 5",
+                  "width": "fill_container",
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": {
+                    "top": 1.5
+                  },
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "S0fJuJ",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ruMH2",
+                          "name": "Node stdlib · reglas exp",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Node stdlib · reglas explícitas",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zWkAX",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h5KQwr",
+                          "name": "Express / LLM / respuest",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Express / LLM / respuestas grabadas",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "e8qWJS",
+                      "name": "Celda",
+                      "width": "fill_container",
+                      "stroke": "#1e1e1e",
+                      "strokeWidth": {
+                        "left": 1.5
+                      },
+                      "layout": "vertical",
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h6ibyF",
+                          "name": "Frameworks cambian 404 y",
+                          "fill": "#1e1e1e",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Frameworks cambian 404 y errores de JSON; un LLM agrega variación; grabar no generaliza a secuencias nuevas",
+                          "lineHeight": 1.45,
+                          "fontFamily": "Kalam",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PTUBJ",
+          "name": "Plan para medir",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            4,
+            0
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "UXLNY",
+              "name": "Etiqueta",
+              "rotation": -0.6,
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "padding": [
+                4,
+                12
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "C8EvT",
+                  "name": "Plan para medir",
+                  "fill": "#1e1e1e",
+                  "content": "Plan para medir",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "R6H8BC",
+              "name": "•  Conteo oficial (princ",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Conteo oficial (principal): deploy a las 12:30 y validación tras cada cambio. Meta: ≥ 95/100 a las 19:00 (no 100: hay conductas no observables sin riesgo, como HALT confirmado).",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "WQzzA",
+              "name": "•  Replay del log (local",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Replay del log (local, sin red): las ~800 líneas reproducidas exactas, mismo comparador que el set. Meta: 100% antes de cada deploy.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "Slclj",
+              "name": "•  8 casos de prueba des",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  8 casos de prueba desde el diseño (canarios cada 2 h y a las 15:30): ALTA;Zoe;3→201 y ;4→E202 · ALTA;Zoe;03→E202 · TRANSFER de 100.001→E506 y 100.000→200 · TRANSFER;AC-0001;AC-0001;0→E303 · DEPOSITO;AC-0009;abc→E303 · depósito→transfer→ANULA del depósito→saldo negativo · HALT;AC-0001→409 E520 · POST /nope sin token→E404.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "Z9meDu",
+              "name": "•  Presupuesto de 8.000:",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Presupuesto de 8.000: ~800 usados · 2.500 sondeo y oráculo · 1.500 fuzzer · 400 canarios · resto reserva.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "keXsk",
+              "name": "•  Hitos: 12:30 deploy ·",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "•  Hitos: 12:30 deploy · 15:00 log 100% · 15:30 incidente · 19:00 congelar · 19:30 validación final.",
+              "lineHeight": 1.45,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Sq4jf",
+      "x": -1520,
+      "y": 0,
+      "name": "Problema y solución",
+      "width": 1400,
+      "fill": "#ffffff",
+      "layout": "vertical",
+      "gap": 28,
+      "padding": 56,
+      "children": [
+        {
+          "type": "frame",
+          "id": "bkoAw",
+          "name": "Etiqueta El problema",
+          "rotation": -0.8,
+          "fill": "#ffc9c9",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "rGV4y",
+              "name": "El problema",
+              "fill": "#1e1e1e",
+              "content": "El problema",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 28,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vOjyQ",
+          "name": "Flujo",
+          "width": "fill_container",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "VyFEl",
+              "name": "Set oficial",
+              "rotation": 0.6,
+              "width": 190,
+              "fill": "#ffec99",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "v9L5l1",
+                  "name": "Set oficial",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Set oficial",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "lhxFc",
+                  "name": "100 tests ocultos",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "100 tests ocultos",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A79Z3",
+              "name": "Flecha",
+              "width": 70,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TgqGu",
+                  "name": "POST /msg",
+                  "fill": "#495057",
+                  "content": "POST /msg",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "oGmwf",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Lgytb",
+              "name": "Request",
+              "rotation": -0.5,
+              "width": 250,
+              "fill": "#ffffff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "sgJWP",
+                  "name": "{\"m\":\"TRANSFER;AC-0001;A",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "{\"m\":\"TRANSFER;AC-0001;\n      AC-0002;40000;86\"}",
+                  "lineHeight": 1.4,
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "coowF",
+                  "name": "comando · argumentos · d",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "comando · argumentos · dígito de control",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gOq3z",
+              "name": "Flecha",
+              "width": 70,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "TSszM",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PPrg8",
+              "name": "Caja negra",
+              "rotation": 0.8,
+              "width": 200,
+              "fill": "#1e1e1e",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 22,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "n0IA9D",
+                  "name": "?",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "?",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 56,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "zuiZU",
+                  "name": "mini-banco de 10 años",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "mini-banco de 10 años",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 17,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "jVhPD",
+                  "name": "sin código · sin docs",
+                  "fill": "#adb5bd",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "sin código · sin docs",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DpACb",
+              "name": "Flecha",
+              "width": 70,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qXAtI",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OmqtL",
+              "name": "Respuesta",
+              "rotation": -0.4,
+              "width": "fill_container",
+              "fill": "#ffffff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kOP45",
+                  "name": "200 {\"status\":\"recieved\"",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "200 {\"status\":\"recieved\",\n     \"operacionId\":\"OP-0002\"}",
+                  "lineHeight": 1.4,
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "hS6Jp",
+                  "name": "422 {\"error\":\"E506\",\"men",
+                  "fill": "#e03131",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "422 {\"error\":\"E506\",\n     \"mensaje\":\"límite excedido\"}",
+                  "lineHeight": 1.4,
+                  "fontFamily": "JetBrains Mono",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AC9vs",
+          "name": "Meta",
+          "rotation": -0.3,
+          "width": "fill_container",
+          "fill": "#fff5f5",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "layout": "vertical",
+          "gap": 8,
+          "padding": 22,
+          "children": [
+            {
+              "type": "text",
+              "id": "IXWol",
+              "name": "Reemplazarla idéntica: m",
+              "fill": "#1e1e1e",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Reemplazarla idéntica: mismo status y mismo cuerpo, con errores y defectos incluidos (\"recieved\" mal escrito también).",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "X6ghfw",
+              "name": "Y escribir la especifica",
+              "fill": "#495057",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Y escribir la especificación para que otro ingeniero la reimplemente.",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 19,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "DFeuF",
+          "name": "Reglas del juego",
+          "width": "fill_container",
+          "gap": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Uz3vI",
+              "name": "Secuencias de 1 a 12 pasos",
+              "rotation": 1,
+              "width": "fill_container",
+              "fill": "#ffec99",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "M8vqX",
+                  "name": "Secuencias de 1 a 12 pas",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Secuencias de 1 a 12 pasos",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "j1Im7",
+                  "name": "/__reset antes de cada t",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "/__reset antes de cada test · 5 s por paso",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vL8nC",
+              "name": "8.000 requests",
+              "rotation": -1,
+              "width": "fill_container",
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "N2sxjr",
+                  "name": "8.000 requests",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "8.000 requests",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Gugqo",
+                  "name": "de presupuesto para sond",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "de presupuesto para sondear el original",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HZFuI",
+              "name": "15:30",
+              "rotation": 0.6,
+              "width": "fill_container",
+              "fill": "#ffc9c9",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "f89Np",
+                  "name": "15:30",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "15:30",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "g4rZrc",
+                  "name": "el servicio cambia sin a",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "el servicio cambia sin avisar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "bHSlL",
+              "name": "20:00",
+              "rotation": -0.6,
+              "width": "fill_container",
+              "fill": "#ffc9c9",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "c53rve",
+                  "name": "20:00",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "20:00",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "rnz4Z",
+                  "name": "se apagan los tokens: se",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "se apagan los tokens: se evalúa contra la versión vigente",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XMYOR",
+              "name": "Una afirmación falsa resta",
+              "rotation": 1.2,
+              "width": "fill_container",
+              "fill": "#e9ecef",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "K4xsz",
+                  "name": "Una afirmación falsa res",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Una afirmación falsa resta",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "PEfg8",
+                  "name": "en la spec, mejor \"supue",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "en la spec, mejor \"supuesto\" que inventar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "rectangle",
+          "id": "AjiOX",
+          "name": "Separador",
+          "fill": "#1e1e1e",
+          "width": "fill_container",
+          "height": 2
+        },
+        {
+          "type": "frame",
+          "id": "IYdeA",
+          "name": "Etiqueta La solución",
+          "rotation": -0.8,
+          "fill": "#b2f2bb",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "DldfV",
+              "name": "La solución",
+              "fill": "#1e1e1e",
+              "content": "La solución",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 28,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "v3r2VL",
+          "name": "No adivinamos: preguntam",
+          "fill": "#495057",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "No adivinamos: preguntamos. Cada request al original lleva una hipótesis y queda en un log.",
+          "lineHeight": 1.4,
+          "fontFamily": "Kalam",
+          "fontSize": 22,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "jDQCF",
+          "name": "Pasos",
+          "width": "fill_container",
+          "gap": 8,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "hMisF",
+              "name": "Paso 1",
+              "rotation": -0.7,
+              "width": "fill_container",
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HmyDA",
+                  "name": "1",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "1",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "CAt5V",
+                  "name": "Preguntar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Preguntar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "kZMUU",
+                  "name": "probe.mjs manda cada req",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "probe.mjs manda cada request con su hipótesis",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Rb6zb",
+                  "name": "4.013 experimentos → log",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "4.013 experimentos → log = evidencia = tests",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "WfmLr",
+              "name": "Flecha",
+              "width": 90,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xTuIT",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "x0Azg0",
+              "name": "Paso 2",
+              "rotation": 0.5,
+              "width": "fill_container",
+              "fill": "#d0bfff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "mLaj6",
+                  "name": "2",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "2",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "jXQ0W",
+                  "name": "Una tabla de reglas",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Una tabla de reglas",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "FdYwO",
+                  "name": "reglas.mjs: errores, ari",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "reglas.mjs: errores, aridades y límites",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "sGOzP",
+                  "name": "de ahí salen el código y",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "de ahí salen el código y la spec: nunca se contradicen",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m9Vl4",
+              "name": "Flecha",
+              "width": 90,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PWorJ",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Osirp",
+              "name": "Paso 3",
+              "rotation": -0.4,
+              "width": "fill_container",
+              "fill": "#b2f2bb",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "fh6hC",
+                  "name": "3",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "3",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "AJXLV",
+                  "name": "Comprobar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Comprobar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Ozv8U",
+                  "name": "replay del log con el mi",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "replay del log con el mismo comparador del set",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "uBr02",
+                  "name": "849/849 idénticas en v1",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "849/849 idénticas en v1",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "f1MWw8",
+              "name": "Flecha",
+              "width": 90,
+              "layout": "vertical",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qPQT8",
+                  "name": "⟶",
+                  "fill": "#1e1e1e",
+                  "content": "⟶",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 34,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MxgwW",
+              "name": "Paso 4",
+              "rotation": 0.7,
+              "width": "fill_container",
+              "fill": "#ffd8a8",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "udIdS",
+                  "name": "4",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "4",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 30,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "IJLQo",
+                  "name": "Desplegar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Desplegar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "jWV9q",
+                  "name": "Cloudflare Worker + Dura",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Cloudflare Worker + Durable Object",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "b0n6A",
+                  "name": "un solo proceso con memo",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "un solo proceso con memoria: cuentas y saldos",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FRZbk",
+          "name": "Hallazgos",
+          "width": "fill_container",
+          "gap": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "iPZtv",
+              "name": "El propio servicio nos ayudó",
+              "rotation": 0.6,
+              "width": "fill_container",
+              "fill": "#fff3bf",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "OniuJ",
+                  "name": "El propio servicio nos a",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "El propio servicio nos ayudó",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "POCu8",
+                  "name": "Cuando escribes mal un c",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Cuando escribes mal un comando sugiere el correcto. Con HELP nos sugirió HALT: un comando oculto que apaga el servicio.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vAOhL",
+              "name": "15:30: el incidente",
+              "rotation": -0.5,
+              "width": "fill_container",
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xBprr",
+                  "name": "15:30: el incidente",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "15:30: el incidente",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "maN2u",
+                  "name": "Los canarios vieron 8 re",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Los canarios vieron 8 respuestas distintas en un minuto. 3 cambios: límite 50.000, saldo en centavos con 2 decimales, bloqueo E510 tras 3 E506. Se adaptó editando la tabla: fuzz v2 con 0 diferencias.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gLQJ0",
+              "name": "Copiar y documentar",
+              "rotation": 0.4,
+              "width": "fill_container",
+              "fill": "#e7f5ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kNGk6",
+                  "name": "Copiar y documentar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Copiar y documentar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 20,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "u1MCp",
+                  "name": "Copiamos los defectos, p",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Copiamos los defectos, pero la spec dice cómo cerrarlos: homónimos que evaden el límite, saldo negativo al anular, HALT expuesto.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "krQEi",
+      "x": -1520,
+      "y": 1465.9295038724313,
+      "name": "Nuestro proceso",
+      "width": 1400,
+      "fill": "#ffffff",
+      "layout": "vertical",
+      "gap": 26,
+      "padding": 56,
+      "children": [
+        {
+          "type": "frame",
+          "id": "H6kkt",
+          "name": "Etiqueta Nuestro proceso",
+          "rotation": -0.8,
+          "fill": "#d0bfff",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "lWvSy",
+              "name": "Nuestro proceso",
+              "fill": "#1e1e1e",
+              "content": "Nuestro proceso",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 28,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "G6i0Yc",
+          "name": "Un ciclo corto que se re",
+          "fill": "#495057",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Un ciclo corto que se repite: cada duda se vuelve una pregunta al original, y cada respuesta se vuelve una regla con su evidencia.",
+          "lineHeight": 1.4,
+          "fontFamily": "Kalam",
+          "fontSize": 21,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "wTHTD",
+          "name": "Ciclo",
+          "width": "fill_container",
+          "gap": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "d896X",
+              "name": "Paso 1",
+              "rotation": -0.6,
+              "width": "fill_container",
+              "height": 190,
+              "fill": "#ffec99",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "nfXT5",
+                  "name": "1",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "1",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ULJQr",
+                  "name": "Hipótesis",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Hipótesis",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 21,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "ixeWk",
+                  "name": "\"¿El control es un mod 9",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "\"¿El control es un mod 97, como un IBAN?\"",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "c39rf",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "jcusv",
+              "name": "Paso 2",
+              "rotation": 0.5,
+              "width": "fill_container",
+              "height": 190,
+              "fill": "#a5d8ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "k1XSe",
+                  "name": "2",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "2",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "L4azSu",
+                  "name": "Preguntar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Preguntar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 21,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "LN0si",
+                  "name": "probe.mjs manda 1 reques",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "probe.mjs manda 1 request por hipótesis y lo guarda en experimentos.jsonl",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "fcOQa",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "TydZ3",
+              "name": "Paso 3",
+              "rotation": -0.4,
+              "width": "fill_container",
+              "height": 190,
+              "fill": "#d0bfff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "cPsNO",
+                  "name": "3",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "3",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "pnfsw",
+                  "name": "Regla",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Regla",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 21,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "zbr7g",
+                  "name": "se anota en reglas.mjs c",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "se anota en reglas.mjs con su evidencia: las líneas del log que la prueban",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "b7N1t",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "FhJMj",
+              "name": "Paso 4",
+              "rotation": 0.6,
+              "width": "fill_container",
+              "height": 190,
+              "fill": "#b2f2bb",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Mzxvi",
+                  "name": "4",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "4",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "MsPDk",
+                  "name": "Replay",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Replay",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 21,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "AqlSF",
+                  "name": "el log es la suite de te",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "el log es la suite de tests: la regla queda \"confirmada\" solo si pasa",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "JJ5WM",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "zN9ZY",
+              "name": "Paso 5",
+              "rotation": -0.5,
+              "width": "fill_container",
+              "height": 190,
+              "fill": "#ffd8a8",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "zGCUX",
+                  "name": "5",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "5",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "XSvcE",
+                  "name": "Desplegar y contar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Desplegar y contar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 21,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "MqDMG",
+                  "name": "Cloudflare + conteo ofic",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Cloudflare + conteo oficial X/100 en cada cambio",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RtCHs",
+          "name": "Vuelta",
+          "rotation": 0.25,
+          "width": "fill_container",
+          "fill": "#f3f0ff",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "gap": 12,
+          "padding": [
+            12,
+            18
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "eR7eZ",
+              "name": "⟲",
+              "fill": "#6741d9",
+              "content": "⟲",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "mdRs6",
+              "name": "¿Algo no calza en el rep",
+              "fill": "#6741d9",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "¿Algo no calza en el replay o en el conteo? → eso es la próxima hipótesis. Vuelta al paso 1.",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 19,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "YdDMr",
+          "name": "Salida",
+          "width": "fill_container",
+          "gap": 16,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "MjYZ6",
+              "name": "Tabla",
+              "rotation": -0.6,
+              "width": 300,
+              "fill": "#d0bfff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Vvnw2",
+                  "name": "reglas.mjs",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "reglas.mjs",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "LVcYk",
+                  "name": "una sola tabla",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "una sola tabla",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "Kalam",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "fMZ7o",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "FsYZG",
+              "name": "Dos salidas",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "iEkgk",
+                  "name": "Código",
+                  "rotation": 0.4,
+                  "width": "fill_container",
+                  "fill": "#b2f2bb",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "gap": 10,
+                  "padding": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yrtJD",
+                      "name": "El reemplazo",
+                      "fill": "#1e1e1e",
+                      "content": "El reemplazo",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Kalam",
+                      "fontSize": 19,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "QL2cP",
+                      "name": "logica.mjs → worker.mjs ",
+                      "fill": "#495057",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "logica.mjs → worker.mjs en Cloudflare",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "w85EF",
+                  "name": "Spec",
+                  "rotation": -0.4,
+                  "width": "fill_container",
+                  "fill": "#a5d8ff",
+                  "cornerRadius": 6,
+                  "stroke": "#1e1e1e",
+                  "strokeWidth": 2,
+                  "gap": 10,
+                  "padding": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "d1BJb",
+                      "name": "La especificación",
+                      "fill": "#1e1e1e",
+                      "content": "La especificación",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Kalam",
+                      "fontSize": 19,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VrmJ0",
+                      "name": "spec.mjs la genera con i",
+                      "fill": "#495057",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "spec.mjs la genera con id, evidencia y estado de cada regla",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Kalam",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "YVWrJ",
+              "name": "Por eso código y spec nu",
+              "fill": "#6741d9",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Por eso código y spec nunca se contradicen: un cambio = editar un dato.",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 17,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "E9XrX",
+          "name": "Etiqueta Dos atajos",
+          "rotation": -0.8,
+          "fill": "#fff3bf",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "P0yAuk",
+              "name": "Dos atajos",
+              "fill": "#1e1e1e",
+              "content": "Dos atajos",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 22,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NEdbr",
+          "name": "Atajos",
+          "width": "fill_container",
+          "gap": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "JmCfr",
+              "name": "El servicio como oráculo",
+              "rotation": 0.5,
+              "width": "fill_container",
+              "fill": "#fff3bf",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xfJNx",
+                  "name": "El servicio como oráculo",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "El servicio como oráculo",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "n53bK",
+                  "name": "Cuando un comando no exi",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Cuando un comando no existe, E301 sugiere el más parecido. Mandamos casi-nombres (SALDO, RETIRO, HELP…) y así salió HALT, un comando oculto. ~1 request por candidato.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "e7moo",
+              "name": "Medir con el set, no gastar requests",
+              "rotation": -0.5,
+              "width": "fill_container",
+              "fill": "#e7f5ff",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "m3zfO",
+                  "name": "Medir con el set, no gas",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Medir con el set, no gastar requests",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 19,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "O8D9e5",
+                  "name": "La métrica es el conteo ",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "La métrica es el conteo oficial X/100, que corre gratis en cada validación. El fuzzer solo donde el conteo se estanca.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "b1AMRi",
+          "name": "Etiqueta Cuando el servicio cambió (15:30)",
+          "rotation": -0.8,
+          "fill": "#ffc9c9",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "HCPgC",
+              "name": "Cuando el servicio cambi",
+              "fill": "#1e1e1e",
+              "content": "Cuando el servicio cambió (15:30)",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 22,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dCghM",
+          "name": "Incidente",
+          "width": "fill_container",
+          "gap": 6,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SaCLr",
+              "name": "Canarios",
+              "rotation": 0.5,
+              "width": "fill_container",
+              "height": 120,
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bQXHp",
+                  "name": "Canarios",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Canarios",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "RjY7e",
+                  "name": "re-corren los 20 ejemplo",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "re-corren los 20 ejemplos: 8 diferencias en 1 minuto",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "hIA1M",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Sf6XB",
+              "name": "Re-jugar",
+              "rotation": -0.4,
+              "width": "fill_container",
+              "height": 120,
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YF5cs",
+                  "name": "Re-jugar",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Re-jugar",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "cwl2B",
+                  "name": "los experimentos de la m",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "los experimentos de la mañana contra la v2 (v2-rejuego)",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "d3Ab1",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "r7HgEF",
+              "name": "3 cambios",
+              "rotation": 0.6,
+              "width": "fill_container",
+              "height": 120,
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "J6zzf3",
+                  "name": "3 cambios",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "3 cambios",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "nmloY",
+                  "name": "límite 50.000 · saldo en",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "límite 50.000 · saldo en centavos · bloqueo E510",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "U2NVqH",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "V1jCpW",
+              "name": "Editar la tabla",
+              "rotation": -0.5,
+              "width": "fill_container",
+              "height": 120,
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "hiR7f",
+                  "name": "Editar la tabla",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Editar la tabla",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "hz4AR",
+                  "name": "no la lógica: datos en r",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "no la lógica: datos en reglas.mjs",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "II5nR",
+              "name": "Flecha",
+              "fill": "#1e1e1e",
+              "content": "⟶",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 30,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Tz4zx",
+              "name": "Fuzz v2",
+              "rotation": 0.4,
+              "width": "fill_container",
+              "height": 120,
+              "fill": "#b2f2bb",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "orhmp",
+                  "name": "Fuzz v2",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Fuzz v2",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "CR2xV",
+                  "name": "0 diferencias → deploy",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "0 diferencias → deploy",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "hZNhk",
+          "name": "Etiqueta Las sesiones de sondeo",
+          "rotation": -0.8,
+          "fill": "#e9ecef",
+          "cornerRadius": 6,
+          "stroke": "#1e1e1e",
+          "strokeWidth": 2,
+          "padding": [
+            4,
+            14
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "yrT3B",
+              "name": "Las sesiones de sondeo",
+              "fill": "#1e1e1e",
+              "content": "Las sesiones de sondeo",
+              "lineHeight": 1.4,
+              "fontFamily": "Kalam",
+              "fontSize": 22,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q7uEDQ",
+          "name": "Sesiones",
+          "width": "fill_container",
+          "gap": 10,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Ot48G",
+              "name": "s1–s5",
+              "rotation": -0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "p4AIDQ",
+                  "name": "s1–s5",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s1–s5",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "PYXZw",
+                  "name": "dígito de control",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "dígito de control",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tvvzL",
+              "name": "s6",
+              "rotation": 0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "C9Fq7s",
+                  "name": "s6",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s6",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "z91pDi",
+                  "name": "comandos",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "comandos",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P8vPnD",
+              "name": "s7",
+              "rotation": -0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xsdUj",
+                  "name": "s7",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s7",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "QAg71",
+                  "name": "orden de errores",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "orden de errores",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LQEP4",
+              "name": "s8",
+              "rotation": 0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "SjW9y",
+                  "name": "s8",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s8",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "cbzl0",
+                  "name": "oráculo",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "oráculo",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OJRwJ",
+              "name": "s9",
+              "rotation": -0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jGQNU",
+                  "name": "s9",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s9",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Uz7ZM",
+                  "name": "HALT",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "HALT",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fTWCq",
+              "name": "s10–s11",
+              "rotation": 0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qEt9F",
+                  "name": "s10–s11",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s10–s11",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "TDqS5",
+                  "name": "bordes y titulares",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "bordes y titulares",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "bVP6B",
+              "name": "s13",
+              "rotation": -0.8,
+              "width": "fill_container",
+              "fill": "#f8f9fa",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jwww8",
+                  "name": "s13",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "s13",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "so1uQ",
+                  "name": "confirmaciones",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "confirmaciones",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Bap9X",
+              "name": "v2-*",
+              "rotation": 0.8,
+              "width": "fill_container",
+              "fill": "#ffe3e3",
+              "cornerRadius": 6,
+              "stroke": "#1e1e1e",
+              "strokeWidth": 2,
+              "layout": "vertical",
+              "gap": 2,
+              "padding": [
+                8,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "imi5x",
+                  "name": "v2-*",
+                  "fill": "#1e1e1e",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "v2-*",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "t4wYy",
+                  "name": "el incidente",
+                  "fill": "#495057",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "el incidente",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Kalam",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "fileToken": "5e7a0cb1-2781-4caa-8b96-7d3064f2b313"
+}
