@@ -29,5 +29,6 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/VISION.md`: visión y principios del producto.
 - `obsidian/HACKATHON.md`: condiciones del evento, entrega y créditos gratis.
+- `obsidian/TRACCION.md`: plan para conseguir docentes reales antes de la entrega (canales, textos listos, anuncio de S/50 y cómo medir).
 - `README.md` de la raíz: páginas, lista de espera, currículo, principios de diseño, endpoints y costos.
 - `packages/curriculo/README.md`: fuentes oficiales y formato de los JSON.
