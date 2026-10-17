@@ -25,10 +25,9 @@ actualizado: 2026-10-17
 2. Se arma la **ficha del tema**: competencia y desempeños del currículo, ideas clave, vocabulario y un ejemplo.
 3. El docente elige **solo lo que va a usar**:
    - **Canción** pegajosa con ritmo peruano (cumbia, huayno, festejo…) o con una melodía que ya conocen.
-   - **Examen gamificado**, ambientado en lo que le gusta a su clase.
+   - **Adaptar examen**: sube su examen de siempre en PDF o foto y descarga un PDF adaptado: ambientado en lo que le gusta a su clase y/o para quien aprende distinto (TDAH, dislexia, TEA, lectura fácil).
    - **Juego web** proyectado o en el celular, con QR o WhatsApp y sin cuenta para el alumno.
    - **Crucigrama** con sus propias palabras y pistas, para imprimir o descargar como imagen.
-   - **Adaptación para inclusión**: una versión para quien aprende distinto (TDAH, dislexia, TEA, lectura fácil).
 4. **Biblioteca**: el currículo de cada grado y curso, y los materiales que crearon otros profes.
 
 ## Principios

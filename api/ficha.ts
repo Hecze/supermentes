@@ -9,7 +9,8 @@ import { bloqueArchivo, fallo, generar, json } from './_ia'
 const Esquema = z.object({
   titulo: z.string().describe('Nombre corto del tema, como lo diría el docente'),
   proposito: z.string().describe('Una oración: "Que los estudiantes…"'),
-  capacidad: z.string().describe('Capacidad del CNEB que se trabaja; usa la indicada si te la dan'),
+  competencia: z.string().describe('Competencia del CNEB tal como la nombra el MINEDU (p. ej. "Se comunica oralmente en su lengua materna"); usa la indicada o la del archivo'),
+  capacidad: z.string().describe('Capacidad del CNEB que se trabaja; usa la indicada o la del archivo'),
   conceptos: z.array(z.string()).describe('3 a 5 ideas clave, una oración cada una'),
   vocabulario: z
     .array(z.object({ palabra: z.string().describe('Una sola palabra, sin espacios'), definicion: z.string() }))
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
       fuente:
         tipo === 'foto' ? 'Foto del libro' : archivo instanceof File ? `Archivo: ${archivo.name}` : `Currículo Nacional: ${area}, ${grado}`,
       proposito: f.proposito,
-      curriculo: { competencia: competencia || area, capacidad: capacidad || f.capacidad },
+      curriculo: { competencia: competencia || f.competencia, capacidad: capacidad || f.capacidad },
       conceptos: f.conceptos,
       vocabulario: f.vocabulario,
       ejemplo: f.ejemplo,

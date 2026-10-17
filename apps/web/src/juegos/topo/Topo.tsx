@@ -124,6 +124,7 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
               estrellas: vidas,
               titulo: '¡Atrapaste a todos!',
               detalle: vidas === VIDAS ? `${meta} respuestas correctas sin ningún error.` : `${meta} respuestas correctas y ${VIDAS - vidas} ${VIDAS - vidas === 1 ? 'error' : 'errores'}.`,
+              puntaje: meta * 100 + vidas * 100,
             }),
           900,
         )
@@ -152,6 +153,7 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
             estrellas: aciertos >= meta / 2 ? 1 : 0,
             titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
             detalle: `Atrapaste ${aciertos} de ${meta}. La respuesta era ${reto.reto.respuesta}.`,
+            puntaje: aciertos * 100,
           }),
         1000,
       )

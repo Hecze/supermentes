@@ -16,15 +16,14 @@ punta, con IA real, desde el link y en una ventana privada.
 1. El docente busca su tema en el Currículo Nacional (grado, curso, tema). **Listo.**
 2. Supermentes arma la **ficha** con Claude. **Listo** (`api/ficha.ts`).
 3. Elige qué necesita:
-   - **Examen** gamificado, ambientado en lo que le gusta a su clase, imprimible. **Listo** (`api/examen.ts`).
+   - **Adaptar examen**: sube su examen de siempre (PDF o foto) y descarga el PDF adaptado: ambientado en lo que le gusta a su clase y/o para quien aprende distinto. **Listo** (`api/examen.ts`, PDF con jsPDF).
    - **Canción**: letra con ritmo peruano **lista** (`api/cancion.ts`); audio con ElevenLabs **pendiente**
      (falta la key).
-   - **Juego** con preguntas del tema, compartido por QR a los celulares. Los juegos y el QR funcionan;
-     **falta** `api/juego.ts` para que las preguntas del tema salgan de la IA.
+   - **Juego** con preguntas del tema, compartido por QR a los celulares. **Listo** (`api/juego.ts`): preguntas, parejas y palabras del tema con IA; los juegos y el QR ya funcionaban.
 4. La landing con lista de espera mide la tracción. **Listo.**
 
 ## Lo que falta, en orden
-1. **Producción:** Hector carga `ANTHROPIC_API_KEY` y `VITE_API=real` en Vercel. Sin esto, nada de lo
+1. **Producción:** Hector carga `OPENROUTER_API_KEY` (la de Harold) y `VITE_API=real` en Vercel. Sin esto, nada de lo
    anterior se ve en el link que abre el jurado.
 2. `api/juego.ts` con Claude (preguntas, parejas y palabras del tema).
 3. Audio de la canción con ElevenLabs, si llega la key a tiempo. Si no, la demo muestra la letra.
@@ -35,8 +34,8 @@ punta, con IA real, desde el link y en una ventana privada.
 ## Qué no hacer (hasta después del evento)
 - **No migrar a Next ni a Mastra.** Vite + funciones de Vercel ya resuelven todo; migrar rompe lo que
   Hector sube en paralelo. Mastra recién si aparece un flujo con forma de agente.
-- **No adaptar para inclusión con IA.** Se muestra con el ejemplo y se cuenta como lo que viene.
-- **No ilustraciones del examen.** Caras, lentas y no cambian la demo.
+- **La inclusión va dentro de "Adaptar examen"**: ya no es una herramienta aparte (los alumnos no dan exámenes en el celular; el docente quiere su PDF adaptado y listo).
+- **No ilustraciones del examen.** Caras, lentas y no cambian la demo (se quitaron).
 - **No cuentas, login, créditos en el servidor ni pagos.** Para la demo, todo abierto.
 - **No biblioteca compartida ni persistencia.** El currículo ya da la biblioteca que se ve.
 - **No audio con "melodías que ya conocen".** Ahí el profe canta; generarlas choca con derechos de autor.

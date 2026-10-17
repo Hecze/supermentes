@@ -1,4 +1,4 @@
-// Los colores de las cinco herramientas, en el mismo orden que la barra lateral.
+// Los colores del logo: uno por herramienta (el último era de "Adaptar para inclusión", hoy dentro de "Adaptar examen").
 const PLUMONES = ['var(--cancion)', 'var(--examen)', 'var(--juego)', 'var(--crucigrama)', 'var(--adaptar)']
 const ALTOS = [18, 14, 20, 12, 16]
 

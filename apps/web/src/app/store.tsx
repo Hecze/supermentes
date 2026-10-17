@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Adaptacion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
-import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES, examenEjemplo } from '../api/ejemplos'
+import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
+import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 
-export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
+export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
@@ -20,7 +20,6 @@ export type Resultados = {
   juego?: Juego
   /** Con qué se juega este tema: sus palabras y preguntas, o una habilidad de cálculo (src/juegos). */
   juegos?: { fuente: 'tema' } | { fuente: 'calculo'; habilidad: string; nivel: number }
-  adaptacion?: Adaptacion
 }
 
 /** Lo que la ventana de "Nuevo tema" trae ya escrito (por ejemplo, desde un tema del currículo). */
@@ -84,9 +83,9 @@ function temaActual(): Tema {
   }
 }
 
-// En modo ejemplo la docente ya tiene tres temas; en el de fracciones, el examen y el juego están listos.
+// En modo ejemplo la docente ya tiene tres temas; en el de fracciones, el juego está listo.
 const RESULTADOS_INICIALES: Record<string, Resultados> = MODO_EJEMPLO
-  ? { [FICHA_EJEMPLO.id]: { examen: examenEjemplo({ interes: 'Fútbol', formato: 'mision' }), juego: JUEGO_EJEMPLO } }
+  ? { [FICHA_EJEMPLO.id]: { juego: JUEGO_EJEMPLO } }
   : {}
 
 export function StoreProvider({ children }: { children: ReactNode }) {

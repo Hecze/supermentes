@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Search, Sun, Trophy, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
@@ -80,6 +80,9 @@ function ContenidoLateral() {
       <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
         <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
           Biblioteca
+        </ItemNav>
+        <ItemNav vista="resultados" icono={<Trophy className="size-5" />}>
+          Resultados de juegos
         </ItemNav>
       </nav>
 

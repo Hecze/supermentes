@@ -1,10 +1,114 @@
 // Ilustraciones de cada juego para el catálogo y la portada. Todas en SVG: pesan poco y se ven nítidas al proyectar.
+// Muestran el contenido elegido (muestraDe): si el tema es de fracciones, Globos muestra fracciones y no "7 × 8".
+// Sin muestra, cada una tiene su dibujo de siempre.
 import { useId } from 'react'
+import { crearAzar } from './motor/azar'
 import { Cuy } from './motor/Cuy'
 import { Robot, ROBOTS } from './motor/Robot'
 import { Llama, LLAMAS } from './motor/Llama'
+import type { Contenido, Lado, Muestra, Reto, Visual } from './tipos'
 
 const marco = { viewBox: '0 0 160 100', className: 'block h-auto w-full', 'aria-hidden': true } as const
+
+// ---------- La muestra del contenido ----------
+
+const largo = (t: string) => [...t].length
+
+/**
+ * Un ejemplo corto del contenido para dibujarlo: en una miniatura solo caben textos breves. La respuesta correcta
+ * queda en `opciones[1]` (el globo grande, el dron del láser, el cartel del cuy).
+ */
+export function muestraDe(c: Contenido): Muestra {
+  const azar = crearAzar(7)
+  const candidatos: Reto[] = c.generar ? Array.from({ length: 12 }, () => c.generar!(azar)) : c.retos
+  const peso = (r: Reto) => Math.max(largo(r.pregunta || r.consigna || '') / 3, largo(r.respuesta), ...r.distractores.slice(0, 3).map(largo))
+  const r = candidatos.filter((x) => x.distractores.length > 0).sort((a, b) => peso(a) - peso(b))[0]
+  const palabras = c.palabras.map((p) => p.palabra.toUpperCase()).filter((p) => /^[A-ZÁÉÍÓÚÑÜ]{3,}$/.test(p))
+  return {
+    reto: r && { pregunta: r.pregunta || r.consigna || '', visual: r.visual, opciones: [r.distractores[0], r.respuesta, ...r.distractores.slice(1, 5)] },
+    par: c.pares.find((p) => (p.a.visual || largo(p.a.texto) <= 9) && (p.b.visual || largo(p.b.texto) <= 9)) ?? c.pares[0],
+    palabras: [...palabras].sort((a, b) => largo(a) - largo(b)),
+  }
+}
+
+const cabe = (texto: string, s: number, w: number) => largo(texto) * s * 0.56 <= w
+
+/** El tamaño de letra con el que entran todos los textos de un grupo (botones, globos), sin bajar de `min`. */
+function tamComun(textos: string[], w: number, tam: number, min: number) {
+  let s = tam
+  while (s > min && textos.some((t) => !cabe(t, s, w))) s -= 0.5
+  return s
+}
+
+/** Texto que entra en `w`: achica la letra hasta `min` (legible) y, si aun así no entra, lo corta con "…". `y` es el centro. */
+function Texto({ x, y, w, t, tam, min = 7, fill = '#2b2d5c', fuente = 'Fredoka, sans-serif' }: { x: number; y: number; w: number; t: string; tam: number; min?: number; fill?: string; fuente?: string }) {
+  let s = tam
+  while (s > min && !cabe(t, s, w)) s -= 0.5
+  let texto = t
+  while (!cabe(texto, s, w) && largo(texto) > 2) texto = `${[...texto].slice(0, -2).join('')}…`
+  return (
+    <text x={x} y={y + s * 0.36} textAnchor="middle" fontSize={s} fontWeight={700} fill={fill} fontFamily={fuente}>
+      {texto}
+    </text>
+  )
+}
+
+/** Pastel de fracción: k de n porciones pintadas. */
+function PastelMini({ x, y, r, partes: [k, n] }: { x: number; y: number; r: number; partes: [number, number] }) {
+  const punto = (i: number) => {
+    const a = (i / n) * 2 * Math.PI - Math.PI / 2
+    return `${x + r * Math.cos(a)} ${y + r * Math.sin(a)}`
+  }
+  return (
+    <g>
+      <circle cx={x} cy={y} r={r} fill="#fff" stroke="#2b2d5c" strokeWidth={0.8} />
+      {Array.from({ length: n }, (_, i) => (
+        <path key={i} d={`M${x} ${y} L${punto(i)} A${r} ${r} 0 0 1 ${punto(i + 1)} Z`} fill={i < k ? '#ff9636' : '#fff'} stroke="#2b2d5c" strokeWidth={0.6} />
+      ))}
+    </g>
+  )
+}
+
+function VisualMini({ x, y, tam, visual }: { x: number; y: number; tam: number; visual: Visual }) {
+  if (visual.tipo === 'fraccion') return <PastelMini x={x} y={y} r={tam / 2} partes={visual.partes} />
+  return <Texto x={x} y={y} w={tam * 2.6} t={visual.figura.repeat(Math.min(visual.cantidad, 5))} tam={tam * 0.55} />
+}
+
+/** La pregunta de la muestra dentro de un recuadro de ancho `w` centrado en (x, y). */
+function Pregunta({ x, y, w, tam, muestra, defecto }: { x: number; y: number; w: number; tam: number; muestra?: Muestra; defecto: string }) {
+  const r = muestra?.reto
+  if (r?.visual) {
+    return (
+      <g>
+        <VisualMini x={x - tam * 0.7} y={y} tam={tam * 1.3} visual={r.visual} />
+        <Texto x={x + tam * 0.9} y={y} w={tam * 2} t="= ?" tam={tam} />
+      </g>
+    )
+  }
+  return <Texto x={x} y={y} w={w} t={r?.pregunta || defecto} tam={tam} />
+}
+
+/** Las opciones de la muestra, o las de siempre. */
+const opciones = (muestra: Muestra | undefined, defecto: string[]) => {
+  const o = muestra?.reto?.opciones.filter(Boolean)
+  return o && o.length >= 2 ? o : defecto
+}
+
+/** Un lado de una pareja en una carta: su dibujo, una fracción apilada o el texto. */
+function LadoMini({ x, y, lado }: { x: number; y: number; lado: Lado }) {
+  if (lado.visual) return <VisualMini x={x} y={y} tam={16} visual={lado.visual} />
+  const f = /^(\d+)\/(\d+)$/.exec(lado.texto)
+  if (f) {
+    return (
+      <g>
+        <Texto x={x} y={y - 5} w={20} t={f[1]} tam={9} />
+        <rect x={x - 5} y={y - 0.6} width={10} height={1.2} fill="#2b2d5c" />
+        <Texto x={x} y={y + 6} w={20} t={f[2]} tam={9} />
+      </g>
+    )
+  }
+  return <Texto x={x} y={y} w={21} t={lado.texto} tam={8} min={5.5} />
+}
 
 function Fondo({ de, a }: { de: string; a: string }) {
   // Cada dibujo tiene su propio degradado: la misma miniatura puede estar dos veces en pantalla.
@@ -22,44 +126,43 @@ function Fondo({ de, a }: { de: string; a: string }) {
   )
 }
 
-function Globo({ x, y, c, texto, escala = 1 }: { x: number; y: number; c: string; texto: string; escala?: number }) {
+function Globo({ x, y, c, texto, escala = 1, tam = 11 }: { x: number; y: number; c: string; texto: string; escala?: number; tam?: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${escala})`}>
       <path d="M0 22 q-3 5 0 10 q3 5 0 10" fill="none" stroke="#5a5480" strokeWidth={0.8} />
       <ellipse cx={0} cy={0} rx={13} ry={16} fill={c} />
       <path d="M-3 17 L0 14 L3 17 Z" fill={c} />
       <ellipse cx={-5} cy={-6} rx={3} ry={5.5} fill="#fff" opacity={0.5} transform="rotate(25 -5 -6)" />
-      <text y={4} textAnchor="middle" fontSize={11} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
-        {texto}
-      </text>
+      <Texto x={0} y={0} w={24} t={texto} tam={tam} min={tam} fill="#fff" />
     </g>
   )
 }
 
-export function MiniGlobos() {
+export function MiniGlobos({ muestra }: { muestra?: Muestra }) {
+  const [a, b, c, d] = opciones(muestra, ['54', '56', '48', '63'])
+  const t = tamComun([a, b, c, d].filter(Boolean), 24, 11, 6.5)
   return (
     <svg {...marco}>
       <Fondo de="#62bfff" a="#d8f1ff" />
       <circle cx={16} cy={14} r={11} fill="#ffd84a" />
       <ellipse cx={128} cy={20} rx={16} ry={6} fill="#fff" />
       <ellipse cx={138} cy={16} rx={10} ry={6} fill="#fff" />
-      <rect x={44} y={6} width={72} height={18} rx={6} fill="#fff" />
-      <text x={80} y={19} textAnchor="middle" fontSize={11} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
-        7 × 8 = ?
-      </text>
-      <Globo x={34} y={56} c="#ff5d73" texto="54" />
-      <Globo x={68} y={44} c="#2fc46f" texto="56" escala={1.1} />
-      <Globo x={102} y={60} c="#9f63ff" texto="48" />
-      <Globo x={134} y={48} c="#ff9636" texto="63" />
+      <rect x={36} y={4} width={88} height={22} rx={6} fill="#fff" />
+      <Pregunta x={80} y={15} w={82} tam={11} muestra={muestra} defecto="7 × 8 = ?" />
+      <Globo x={34} y={56} c="#ff5d73" texto={a} tam={t} />
+      <Globo x={68} y={44} c="#2fc46f" texto={b} escala={1.1} tam={t} />
+      {c && <Globo x={102} y={60} c="#9f63ff" texto={c} tam={t} />}
+      {d && <Globo x={134} y={48} c="#ff9636" texto={d} tam={t} />}
       <path d="M0 84 Q30 72 60 82 T120 80 T160 76 V100 H0 Z" fill="#7ad65a" />
       <path d="M0 92 Q40 82 85 90 T160 88 V100 H0 Z" fill="#4fbf45" />
     </svg>
   )
 }
 
-export function MiniRapido() {
+export function MiniRapido({ muestra }: { muestra?: Muestra }) {
   const colores = ['#ff5d73', '#ff9636', '#ffc93c', '#2fc46f', '#2fb2ff', '#9f63ff']
-  const numeros = ['24', '28', '32', '36', '40', '45']
+  const numeros = opciones(muestra, ['24', '28', '32', '36', '40', '45']).slice(0, 6)
+  const t = tamComun(numeros, 36, 12, 7)
   return (
     <svg {...marco}>
       <Fondo de="#7b5cff" a="#4b37c9" />
@@ -73,19 +176,15 @@ export function MiniRapido() {
         42
       </text>
       <rect x={52} y={11} width={92} height={24} rx={7} fill="#fff" />
-      <text x={98} y={28} textAnchor="middle" fontSize={13} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
-        4 × 9
-      </text>
+      <Pregunta x={98} y={23} w={86} tam={13} muestra={muestra} defecto="4 × 9" />
       {numeros.map((n, i) => {
         const x = 14 + (i % 3) * 46
         const y = 44 + Math.floor(i / 3) * 27
         return (
-          <g key={n}>
+          <g key={i}>
             <rect x={x} y={y + 3} width={40} height={20} rx={6} fill="rgb(20 10 60 / 0.35)" />
             <rect x={x} y={y} width={40} height={20} rx={6} fill={colores[i]} />
-            <text x={x + 20} y={y + 14.5} textAnchor="middle" fontSize={12} fontWeight={700} fill={i === 2 ? '#5a3a00' : '#fff'} fontFamily="Fredoka, sans-serif">
-              {n}
-            </text>
+            <Texto x={x + 20} y={y + 10} w={36} t={n} tam={t} min={t} fill={i === 2 ? '#5a3a00' : '#fff'} />
           </g>
         )
       })}
@@ -128,7 +227,8 @@ export function MiniSoga() {
   )
 }
 
-export function MiniMemoria() {
+export function MiniMemoria({ muestra }: { muestra?: Muestra }) {
+  const par = muestra?.par
   const cartas = [
     { x: 14, y: 12, tapada: true },
     { x: 50, y: 12, texto: '3/4' },
@@ -156,7 +256,9 @@ export function MiniMemoria() {
           ) : (
             <>
               <rect x={c.x} y={c.y} width={24} height={34} rx={4} fill="#fff" stroke="#ffc93c" strokeWidth={1.5} />
-              {c.pastel ? (
+              {par ? (
+                <LadoMini x={c.x + 12} y={c.y + 17} lado={c.pastel ? par.b : par.a} />
+              ) : c.pastel ? (
                 <g transform={`translate(${c.x + 12} ${c.y + 17})`}>
                   <circle r={8} fill="#fff" stroke="#2b2d5c" strokeWidth={1} />
                   <path d="M0 0 L0 -8 A8 8 0 1 1 -8 0 Z" fill="#ff9636" stroke="#2b2d5c" strokeWidth={1} />
@@ -207,8 +309,12 @@ export function MiniCarrera() {
   )
 }
 
-export function MiniPalabra() {
-  const letras = ['L', '', 'A', 'M', '']
+export function MiniPalabra({ muestra }: { muestra?: Muestra }) {
+  // La palabra más corta del tema, con algunas letras por descubrir.
+  const palabra = muestra?.palabras.find((p) => largo(p) <= 7)
+  const letras = palabra ? [...palabra].map((l, i) => (i % 3 === 1 ? '' : l)) : ['L', '', 'A', 'M', '']
+  const caja = Math.min(18, 128 / letras.length - 4)
+  const inicio = 80 - (letras.length * (caja + 4) - 4) / 2
   return (
     <svg {...marco}>
       <Fondo de="#ff9cc9" a="#ffe3f0" />
@@ -229,25 +335,43 @@ export function MiniPalabra() {
       </g>
       {letras.map((l, i) => (
         <g key={i}>
-          <rect x={28 + i * 22} y={78} width={18} height={16} rx={4} fill="#fff" />
-          <text x={37 + i * 22} y={90.5} textAnchor="middle" fontSize={11} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
-            {l}
-          </text>
+          <rect x={inicio + i * (caja + 4)} y={78} width={caja} height={16} rx={4} fill="#fff" />
+          <Texto x={inicio + i * (caja + 4) + caja / 2} y={86} w={caja} t={l} tam={11} />
         </g>
       ))}
     </svg>
   )
 }
 
-export function MiniPupiletras() {
-  const letras = ['NUBEQA', 'ROVAPE', 'LLUVIA', 'MARSOL', 'GTIERA']
+/** Una sopa de 6 × 5 con hasta dos palabras del tema en filas, rellenada siempre igual. */
+function sopa(palabras: string[]) {
+  const cortas = palabras.filter((p) => largo(p) <= 6).slice(0, 2)
+  if (!cortas.length) return null
+  const azar = crearAzar(3)
+  const relleno = () => 'ABCDEFGILMNOPRSTU'[Math.floor(azar() * 17)]
+  const filas = Array.from({ length: 5 }, () => Array.from({ length: 6 }, relleno))
+  cortas.forEach((p, i) => [...p].forEach((l, c) => (filas[i * 2 + 1][c] = l)))
+  return { filas: filas.map((f) => f.join('')), cortas }
+}
+
+export function MiniPupiletras({ muestra }: { muestra?: Muestra }) {
+  const propia = muestra && sopa(muestra.palabras)
+  const letras = propia?.filas ?? ['NUBEQA', 'ROVAPE', 'LLUVIA', 'MARSOL', 'GTIERA']
   return (
     <svg {...marco}>
       <Fondo de="#6fe3cf" a="#17998f" />
       <rect x={34} y={8} width={92} height={84} rx={8} fill="#fff" />
-      <line x1={44} y1={22} x2={86} y2={22} stroke="#ff9636" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
-      <line x1={44} y1={54} x2={114} y2={54} stroke="#2fb2ff" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
-      <line x1={58} y1={38} x2={100} y2={70} stroke="#ff6fbf" strokeOpacity={0.5} strokeWidth={11} strokeLinecap="round" />
+      {propia ? (
+        propia.cortas.map((p, i) => (
+          <line key={p} x1={44} y1={38 + i * 32} x2={44 + (largo(p) - 1) * 14} y2={38 + i * 32} stroke={i ? '#2fb2ff' : '#ff9636'} strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
+        ))
+      ) : (
+        <>
+          <line x1={44} y1={22} x2={86} y2={22} stroke="#ff9636" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
+          <line x1={44} y1={54} x2={114} y2={54} stroke="#2fb2ff" strokeOpacity={0.55} strokeWidth={11} strokeLinecap="round" />
+          <line x1={58} y1={38} x2={100} y2={70} stroke="#ff6fbf" strokeOpacity={0.5} strokeWidth={11} strokeLinecap="round" />
+        </>
+      )}
       {letras.map((fila, f) =>
         [...fila].map((l, c) => (
           <text key={`${f}-${c}`} x={44 + c * 14} y={26 + f * 16} textAnchor="middle" fontSize={11} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
@@ -259,27 +383,25 @@ export function MiniPupiletras() {
   )
 }
 
-export function MiniTopo() {
+export function MiniTopo({ muestra }: { muestra?: Muestra }) {
+  const [mal, bien] = opciones(muestra, ['56', '54'])
+  const t = tamComun([mal, bien], 27, 10, 7)
   return (
     <svg {...marco}>
       <Fondo de="#a6e98f" a="#45b03a" />
-      <rect x={48} y={6} width={64} height={16} rx={5} fill="#fff" />
-      <text x={80} y={18} textAnchor="middle" fontSize={10} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
-        9 × 6 = ?
-      </text>
+      <rect x={40} y={4} width={80} height={20} rx={5} fill="#fff" />
+      <Pregunta x={80} y={14} w={74} tam={10} muestra={muestra} defecto="9 × 6 = ?" />
       {[
-        { x: 30, y: 62, texto: '54', arriba: true },
+        { x: 30, y: 62, texto: bien, arriba: true },
         { x: 80, y: 74, texto: '', arriba: false },
-        { x: 130, y: 62, texto: '56', arriba: true },
+        { x: 130, y: 62, texto: mal, arriba: true },
       ].map((h, i) => (
         <g key={i}>
           <ellipse cx={h.x} cy={h.y + 14} rx={20} ry={6} fill="#4a2f22" />
           {h.arriba && (
             <>
               <rect x={h.x - 15} y={h.y - 30} width={30} height={14} rx={3} fill="#f6d6a3" stroke="#b7804a" strokeWidth={1.5} />
-              <text x={h.x} y={h.y - 19.5} textAnchor="middle" fontSize={10} fontWeight={700} fill="#4a2c00" fontFamily="Fredoka, sans-serif">
-                {h.texto}
-              </text>
+              <Texto x={h.x} y={h.y - 23} w={27} t={h.texto} tam={t} min={t} fill="#4a2c00" />
               <svg x={h.x - 15} y={h.y - 16} width={30} height={26} viewBox="0 0 100 80">
                 <Cuy />
               </svg>
@@ -343,15 +465,15 @@ export function MiniDuelo() {
   )
 }
 
-export function MiniInvasion() {
-  const dron = (x: number, y: number, c: string, t: string) => (
+export function MiniInvasion({ muestra }: { muestra?: Muestra }) {
+  const [uno, dos, tres] = opciones(muestra, ['54', '56', '48'])
+  const t = tamComun([uno, dos, tres].filter(Boolean), 19, 7, 5.5)
+  const dron = (x: number, y: number, c: string, texto: string) => (
     <g transform={`translate(${x} ${y})`}>
       <path d="M-14 0 L-9 -8 H9 L14 0 L9 8 H-9 Z" fill="#1d2048" stroke={c} strokeWidth={1.4} />
       <circle r={3.4} fill={c} />
       <rect x={-10} y={11} width={20} height={9} rx={2} fill="#0b0d24" stroke={c} strokeWidth={1} />
-      <text y={18.2} textAnchor="middle" fontSize={7} fill="#fff" fontFamily="'Russo One', sans-serif">
-        {t}
-      </text>
+      <Texto x={0} y={15.5} w={19} t={texto} tam={t} min={t} fill="#fff" fuente="'Russo One', sans-serif" />
     </g>
   )
   return (
@@ -360,9 +482,9 @@ export function MiniInvasion() {
       {[12, 40, 66, 98, 120, 148, 30, 84, 134].map((x, i) => (
         <circle key={i} cx={x} cy={(i * 23) % 60 + 4} r={0.8} fill="#fff" opacity={0.8} />
       ))}
-      {dron(34, 30, '#22e3f5', '54')}
-      {dron(80, 18, '#ff3dc8', '56')}
-      {dron(124, 34, '#b6ff3b', '48')}
+      {dron(34, 30, '#22e3f5', uno)}
+      {dron(80, 18, '#ff3dc8', dos)}
+      {tres && dron(124, 34, '#b6ff3b', tres)}
       <line x1={80} y1={84} x2={80} y2={30} stroke="#b6ff3b" strokeWidth={2} />
       <rect y={86} width={160} height={1.2} fill="#ff3dc8" />
       <path d="M66 100 Q66 86 80 84 Q94 86 94 100 Z" fill="#1d2048" stroke="#22e3f5" strokeWidth={1.5} />
@@ -370,7 +492,9 @@ export function MiniInvasion() {
   )
 }
 
-export function MiniConcurso() {
+export function MiniConcurso({ muestra }: { muestra?: Muestra }) {
+  const textos = opciones(muestra, ['54', '56', '48', '63']).slice(0, 4)
+  const t = tamComun(textos, 50, 9, 7)
   const fichas = [
     { c: '#e21b3c', d: 'M0 -6 L6 5 H-6 Z' },
     { c: '#1368ce', d: 'M0 -6 L6 0 L0 6 L-6 0 Z' },
@@ -382,9 +506,7 @@ export function MiniConcurso() {
       <rect width={160} height={100} fill="#46178f" />
       <circle cx={18} cy={82} r={20} fill="#fff" opacity={0.07} />
       <rect x={10} y={6} width={140} height={18} rx={3} fill="#fff" />
-      <text x={80} y={19} textAnchor="middle" fontSize={10} fontWeight={700} fill="#2b2d5c" fontFamily="Fredoka, sans-serif">
-        ¿Cuánto es 8 × 7?
-      </text>
+      <Pregunta x={80} y={15} w={134} tam={10} muestra={muestra} defecto="¿Cuánto es 8 × 7?" />
       <circle cx={22} cy={40} r={9} fill="#864cbf" />
       <text x={22} y={43.5} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
         18
@@ -393,16 +515,14 @@ export function MiniConcurso() {
       <text x={138} y={43} textAnchor="middle" fontSize={7.5} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
         2 450
       </text>
-      {fichas.map((f, i) => {
+      {fichas.slice(0, textos.length).map((f, i) => {
         const x = 8 + (i % 2) * 74
         const y = 54 + Math.floor(i / 2) * 22
         return (
           <g key={i}>
             <rect x={x} y={y} width={70} height={19} rx={2.5} fill={f.c} />
             <path d={f.d} transform={`translate(${x + 11} ${y + 9.5})`} fill="#fff" />
-            <text x={x + 40} y={y + 13} textAnchor="middle" fontSize={9} fontWeight={700} fill="#fff" fontFamily="Fredoka, sans-serif">
-              {['54', '56', '48', '63'][i]}
-            </text>
+            <Texto x={x + 40} y={y + 9.5} w={50} t={textos[i]} tam={t} min={t} fill="#fff" />
           </g>
         )
       })}

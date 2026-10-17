@@ -53,6 +53,7 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
         estrellas: r >= 1 ? 3 : r >= 0.6 ? 2 : r > 0 ? 1 : 0,
         titulo: adivinadas === total ? '¡Adivinaron todas!' : `¡${adivinadas} de ${total}!`,
         detalle: adivinadas === total ? 'Ningún globo se quedó sin dueño.' : 'Cada intento ayuda a recordar las palabras del tema.',
+        puntaje: adivinadas * 100,
       })
       return
     }

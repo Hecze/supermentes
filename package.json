@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json"
+    "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",
+    "verificar:curriculo": "npm run verificar:curriculo -w @supermentes/web"
   },
   "devDependencies": {
     "turbo": "^2.11.9"

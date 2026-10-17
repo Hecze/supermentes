@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un examen gamificado, un juego web, un crucigrama o una versión adaptada para estudiantes con TDAH, dislexia o TEA.
+Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama o su propio examen adaptado (sube el PDF y recibe un PDF ambientado en lo que le gusta a la clase o adaptado para estudiantes con TDAH, dislexia, TEA o que necesitan lectura fácil).
 
 Proyecto para Hack the Andes 2026.
 
@@ -13,6 +13,7 @@ Proyecto para Hack the Andes 2026.
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 | `/j/CODIGO` | Juego compartido para los alumnos: solo el juego, sin cuenta (`j/index.html`, `src/alumno/`). En `/j` se escribe el código |
 | `/api/juegos-compartidos` | Guarda cada juego compartido en Vercel Blob con un código de 6 letras (`api/juegos-compartidos.ts`) |
+| `/api/resultados` | Guarda el mejor puntaje de cada alumno en un juego compartido y se los muestra al docente que lo envió (`api/resultados.ts`) |
 
 ## Currículo nacional (base de conocimiento)
 
@@ -50,15 +51,17 @@ Ya funciona sin backend:
 - **Crucigrama:** el docente escribe sus palabras y pistas (la app solo sugiere las del tema); la grilla se ajusta sola, sin pasar de 20 × 20 para que quepa en una hoja, y la arma un algoritmo (`src/lib/crucigrama.ts`) en vivo. Se imprime o se descarga como PNG con fondo transparente (solo las casillas en blanco).
 - **Juegos:** doce juegos que sirven para cualquier tema (Concurso estilo Kahoot, Globos, Botones rápidos, Memoria, Carrera de llamas, Atrapa al cuy, Adivina la palabra, Pupiletras, Duelo de robots, Invasión, Tira y afloja y Ruleta de preguntas): el docente ve solo los compatibles con lo que practica. Con cálculo (22 habilidades con niveles por grado, generadas con algoritmos) y con el vocabulario del tema son gratis y sin fin. El pupiletras también se imprime. Ver `src/juegos/README.md`.
 - **Mandar un juego a las familias:** el docente toca "Enviar a las familias" y sale el mensaje de WhatsApp para el grupo de papás con el link (`supermentes.app/j/CODIGO`); los niños juegan en el celular de casa, sin cuenta. También hay código para escribir en `/j` y QR en grande para la clase. Si el servidor no responde, el juego viaja dentro del link y abre igual.
+- **Resultados de los alumnos:** la primera vez, el niño escribe su nombre en un popup (sin cuenta; el código ya viene en el link). Cuando supera su puntaje, se guarda, y el docente ve en **Resultados de juegos** (en el menú, sin importar el tema abierto) una tabla simple: quién jugó, su puntaje más alto y sus estrellas. Los ejercicios de cálculo cambian en cada intento, así que reintentar no es memorizar.
+- **Sustento curricular en cada juego:** el icono "i" muestra, con texto oficial del MINEDU, qué competencia y desempeño abarca el tema y qué parte exacta del desempeño practica el juego. Cada nivel de cálculo cita su desempeño grado por grado y `npm run verificar:curriculo` comprueba que la cita exista tal cual. Las miniaturas de los juegos muestran el contenido del tema.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
-- **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
+- **Imprimir:** imprime solo la hoja (examen, crucigrama o letra), siempre en blanco. El examen adaptado además se descarga como PDF (`apps/web/src/lib/pdfExamen.ts`, con jsPDF en el navegador), y aparte el PDF de respuestas.
 
 ## Correr el proyecto
 
 ```bash
 npm install
 npm run dev            # landing en http://localhost:5173 y app en /app/ (la lista de espera solo funciona desplegada)
-npm run typecheck
+npm run typecheck      # tipos y verificador del currículo (npm run verificar:curriculo)
 npm run build
 npm run build:preview -w @supermentes/web  # un solo HTML en apps/web/dist-preview/supermentes.html para compartir
 ```
@@ -92,10 +95,8 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | `POST /api/ficha` | `multipart/form-data`: `tipo`, `texto`, `archivo`, `grado`, `area`, `duracion` | `Ficha` |
 | `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
 | `POST /api/audio` | `{ cancion }` | `AudioCancion` |
-| `POST /api/examen` | `{ ficha, opciones }` | `Examen` |
-| `POST /api/ilustraciones` | `{ examen }` | `Examen` con `ilustracion` en cada pregunta |
+| `POST /api/examen` | multipart: `ficha`, `opciones` (`{ interes, necesidades }`), `examen` (PDF o foto) | `Examen` adaptado |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
-| `POST /api/adaptar` | `{ ficha, necesidades }` | `Adaptacion` |
 | `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
@@ -104,7 +105,7 @@ La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no ga
 
 ## Pendiente para que funcione de verdad
 
-1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen, juego y adaptación.
+1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen adaptado y juego.
 2. Audio de canciones con ElevenLabs.
 3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
-4. Pictogramas de ARASAAC en la adaptación para TEA.
+4. Pictogramas de ARASAAC en el examen adaptado para TEA.

@@ -31,6 +31,8 @@ con audio, más créditos). Los **colegios privados** pagan una licencia por doc
 - **PISA 2025** (publicado set. 2026): matemática 382, lectura 390; 69.5% bajo el nivel 2 en matemática y 58.2% en lectura [S] https://www.infobae.com/peru/2026/09/08/pisa-2025-peru-cae-9-puntos-en-matematica-y-7-de-cada-10-estudiantes-no-alcanzan-el-nivel-basico/
 - **ENLA 2025, % satisfactorio:** 4.º primaria lectura 32.7% y matemática 30.0%; 2.º secundaria 18.5% y 12.7%; 5.º secundaria 11.3% y 12.8% [V] http://umc.minedu.gob.pe/wp-content/uploads/2026/05/Resumen-ejecutivo-ENLA-2025.pdf
 - **Carga (ENDO 2021, n = 12,075):** fuera del horario, el 63.7% dedica más de 3 h por semana a preparar clases y labores administrativas; 51.3% más de 3 h a retroalimentar y evaluar [V, misma URL de ENDO]. 55.8% reporta estrés [V] https://revistas.upch.edu.pe/index.php/RNP/article/view/6380
+- **Horas extra en promedio:** no hay un promedio oficial; la ENDO solo da rangos. Contando lo mínimo de cada rango ("1 a 3 h" = 1 h; "más de 3 h" = 3 h): preparar clases y papeleo 2.3 h, evaluar 2.0 h, atender a padres 1.4 h, trabajo con colegas 1.5 h → **al menos 7 h por semana** fuera del horario, **4 h** de ellas para preparar clases y evaluar. Con una cuenta menos estricta (0.5, 2 y 4 h) salen ~11 h. Ojo: 2021 fue año de clases a distancia.
+- **Qué significa cada nivel:** ENLA "satisfactorio" = logró lo que el CNEB espera para su grado (4.º primaria lectura: 32.7% satisfactorio, 40.4% en proceso, 24.9% en inicio, 2.1% previo). PISA "nivel 2" = el nivel básico que la OCDE espera al terminar la secundaria: plantear con matemática una situación simple, como comparar la distancia de dos rutas o convertir un precio a otra moneda [S, ejemplos citados por prensa a partir de la OCDE].
 - **TALIS 2024 (Perú no participó):** preparar clases toma 9.3 h por semana en Brasil y 8.7 h en Chile; promedio OCDE 7.4 h [S]
 
 ## Ya usan IA
@@ -110,7 +112,7 @@ ventaja es **canción + juego + inclusión**, con palabras del aula y para el do
 - **Ley 32289 (2025):** al menos 2 vacantes por aula para estudiantes con discapacidad [V] https://busquedas.elperuano.pe/dispositivo/NL/2387534-3 · **D.S. 007-2021-MINEDU** define el DUA [V] https://busquedas.elperuano.pe/dispositivo/NL/1951686-1 · 63,191 estudiantes con discapacidad en EBR/EBA (2021) [V]
 
 ## Evidencia de juegos y canciones
-- **Gamificación:** g = 0.49 en aprendizaje (Sailer y Homner 2020, 19 estudios) [S] https://link.springer.com/article/10.1007/s10648-019-09498-w · g = 0.82 en general y **1.29 en primaria** (Li, Ma y Shi 2023) [V] https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1253549/full
+- **Gamificación:** g = 0.49 en aprendizaje (Sailer y Homner 2020, 19 estudios) [S]: el alumno promedio que aprende jugando supera al 69% de los que aprenden sin juegos (sube 19 puestos de cada 100) https://link.springer.com/article/10.1007/s10648-019-09498-w · g = 0.82 en general y **1.29 en primaria** (Li, Ma y Shi 2023) [V] https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1253549/full
 - **Canciones:** ayudan a memorizar vocabulario (Odo 2021, 28 estudios) [V]. **Cuidado:** la formación musical
   no mejora la cognición general (Sala y Gobet 2020, g ≈ 0) https://pmc.ncbi.nlm.nih.gov/articles/PMC7683441.
   Decir "ayuda a recordar", nunca "te hace más inteligente".

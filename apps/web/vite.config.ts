@@ -19,11 +19,12 @@ const rutasDelAlumno: Plugin = {
 }
 
 // En desarrollo, /api/<nombre> corre la función de Vercel de api/<nombre>.ts, como en producción.
-// Las claves (ANTHROPIC_API_KEY…) salen del .env.local de la raíz del repo.
+// Las claves (OPENROUTER_API_KEY, AI_MODEL…) salen del .env.local de la raíz del repo.
 const funcionesDeVercel: Plugin = {
   name: 'funciones-de-vercel',
   configureServer(server) {
     Object.assign(process.env, loadEnv('development', repo, ''))
+    server.watcher.add(resolve(repo, 'api')) // para que un cambio en api/ se vea sin reiniciar
     server.middlewares.use(async (req, res, next) => {
       const nombre = req.url?.match(/^\/api\/([a-z-]+)(?:\?|$)/)?.[1]
       if (!nombre) return next()
@@ -48,8 +49,9 @@ const funcionesDeVercel: Plugin = {
 
 // Tres páginas: la landing en /, la app en /app y los juegos para alumnos en /j.
 // El modo "artifact" genera solo la app en un HTML para compartir el prototipo por link.
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const vistaPrevia = mode === 'artifact'
+  const blobEnMemoria = command === 'serve' && !loadEnv('development', repo, '').BLOB_READ_WRITE_TOKEN
   const paginas: Record<string, string> = vistaPrevia
     ? { app: resolve(raiz, 'app/index.html') }
     : { inicio: resolve(raiz, 'index.html'), app: resolve(raiz, 'app/index.html'), jugar: resolve(raiz, 'j/index.html') }
@@ -57,6 +59,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss(), rutasDelAlumno, funcionesDeVercel],
     envDir: repo,
+    // Sin BLOB_READ_WRITE_TOKEN en el .env.local, las funciones usan un Blob en memoria: compartir juegos, ver
+    // resultados y la lista de espera se prueban sin claves y sin tocar los datos de producción.
+    resolve: blobEnMemoria ? { alias: { '@vercel/blob': resolve(raiz, 'scripts/blob-en-memoria.mjs') } } : undefined,
     base: vistaPrevia ? './' : '/',
     build: {
       rollupOptions: { input: paginas },

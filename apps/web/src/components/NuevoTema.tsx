@@ -141,7 +141,8 @@ export function NuevoTema() {
         capacidad: elegido.capacidad,
         desempenos: elegido.desempenos,
       })
-      setFicha(nueva)
+      // El tema guarda los desempeños oficiales de los que partió: con ellos se sustenta todo lo que se cree después.
+      setFicha({ ...nueva, curriculo: { ...nueva.curriculo, desempenos: nueva.curriculo.desempenos ?? elegido.desempenos } })
       cerrarNuevoTema()
       ir('ficha')
     } catch {

@@ -1,12 +1,12 @@
 import { StoreProvider, useStore } from './app/store'
 import { Shell } from './components/Shell'
-import { Adaptar } from './views/Adaptar'
 import { Biblioteca } from './views/Biblioteca'
 import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
 import { Juego } from './views/Juego'
+import { ResultadosJuegos } from './views/ResultadosJuegos'
 
 const VISTAS = {
   ficha: Ficha,
@@ -14,8 +14,8 @@ const VISTAS = {
   examen: Examen,
   juego: Juego,
   crucigrama: Crucigrama,
-  adaptar: Adaptar,
   biblioteca: Biblioteca,
+  resultados: ResultadosJuegos,
 }
 
 function Pantalla() {

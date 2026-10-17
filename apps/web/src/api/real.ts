@@ -48,17 +48,14 @@ export const realApi: Api = {
   },
   generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
   generarAudio: (cancion) => post('audio', { cancion }),
-  async generarExamen(ficha, { examenPropio, ...opciones }) {
-    if (!examenPropio) return post('examen', { ficha, opciones })
+  async adaptarExamen(ficha, { examen, ...opciones }) {
     const datos = new FormData()
     datos.set('ficha', JSON.stringify(ficha))
     datos.set('opciones', JSON.stringify(opciones))
-    datos.set('examen', await achicar(examenPropio))
+    datos.set('examen', await achicar(examen))
     return leer(await fetch('/api/examen', { method: 'POST', body: datos }))
   },
-  generarIlustraciones: (examen) => post('ilustraciones', { examen }),
   generarJuego: (ficha) => post('juego', { ficha }),
-  adaptar: (ficha, necesidades) => post('adaptar', { ficha, necesidades }),
   async biblioteca() {
     return leer(await fetch('/api/biblioteca'))
   },

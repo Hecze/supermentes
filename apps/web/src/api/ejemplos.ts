@@ -1,12 +1,10 @@
 // Datos de ejemplo para el prototipo. Tienen la misma forma que devolverá el backend real.
 import type {
-  Adaptacion,
   Cancion,
   Examen,
   Ficha,
   Juego,
   Material,
-  Necesidad,
   OpcionesCancion,
   OpcionesExamen,
   PreguntaExamen,
@@ -35,6 +33,7 @@ export const FICHA_EJEMPLO: Ficha = {
   curriculo: {
     competencia: 'Resuelve problemas de cantidad',
     capacidad: 'Comunica su comprensión sobre los números y las operaciones',
+    desempenos: ['Expresa con diversas representaciones y lenguaje numérico (números, signos y expresiones verbales) su comprensión de: La unidad de millar como unidad del sistema de numeración decimal, sus equivalencias entre unidades menores, el valor posicional de un dígito en números de cuatro cifras y la comparación y el orden de números. La multiplicación y división con números naturales, así como las propiedades conmutativa y asociativa de la multiplicación. La fracción como parte-todo (cantidad discreta o continua), así como equivalencias y operaciones de adición y sustracción entre fracciones usuales usando fracciones equivalentes.'],
   },
   conceptos: [
     'Un entero se divide en partes iguales.',
@@ -71,6 +70,7 @@ export const FICHA_AGUA: Ficha = {
   curriculo: {
     competencia: 'Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
     capacidad: 'Comprende y usa conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
+    desempenos: ['Describe que los objetos pueden sufrir cambios reversibles e irreversibles por acción de la energía. Ejemplo: El estudiante describe por qué un cubo de hielo se disuelve por acción del calor del ambiente y por qué puede volver a ser un cubo de hielo al colocar el líquido en un refrigerador.'],
   },
   conceptos: [
     'El sol calienta el agua de mares, ríos y lagos, y se evapora.',
@@ -106,6 +106,7 @@ export const FICHA_SUSTANTIVOS: Ficha = {
   curriculo: {
     competencia: 'Escribe diversos tipos de textos en su lengua materna',
     capacidad: 'Utiliza convenciones del lenguaje escrito de forma pertinente',
+    desempenos: ['Utiliza recursos gramaticales y ortográficos (por ejemplo, el punto seguido y las comas enumerativas) que contribuyen a dar sentido a su texto, e incorpora algunos recursos textuales (por ejemplo, el tamaño de la letra) para reforzar dicho sentido. Emplea comparaciones y adjetivaciones para caracterizar personas, personajes y escenarios, y elabora rimas y juegos verbales apelando al ritmo y la musicalidad de las palabras, con el fin de expresar sus experiencias y emociones.', 'Explica el efecto de su texto en los lectores considerando su propósito al momento de escribirlo. Asimismo, explica la importancia de los aspectos gramaticales y ortográficos más comunes.'],
   },
   conceptos: [
     'Los sustantivos nombran personas, animales, cosas y lugares.',
@@ -210,23 +211,32 @@ export function cancionEjemplo(opciones: OpcionesCancion): Cancion {
 
 // ---------- Examen ----------
 
-const ORIGINALES = [
+// El examen "de siempre" de la docente, como lo leería la IA del PDF.
+const ORIGINALES: { original: string; respuesta: string; alternativas?: string[] }[] = [
   { original: 'Escribe la fracción que representa 3 partes de 4.', respuesta: '3/4' },
   { original: '¿Cuál es el denominador en 5/8? ¿Qué indica?', respuesta: '8: el entero se dividió en 8 partes iguales.' },
-  { original: '¿Qué fracción es mayor: 1/2 o 1/4?', respuesta: '1/2' },
-  { original: 'Completa: 1/2 = ▢/4', respuesta: '2/4' },
+  { original: '¿Qué fracción es mayor: 1/2 o 1/4?', alternativas: ['1/2', '1/4', 'Son iguales'], respuesta: '1/2' },
+  { original: 'Completa: 1/2 = __/4', respuesta: '2' },
 ]
 
-const FRACCIONES: [number, number][] = [
-  [3, 4],
-  [5, 8],
-  [1, 2],
-  [2, 4],
+// Las mismas preguntas en frases cortas y literales (lectura fácil, TEA, TDAH).
+const SIMPLES = [
+  'Un entero tiene 4 partes iguales. Tomas 3 partes. Escribe la fracción.',
+  'Mira la fracción 5/8. El número de abajo es el denominador. ¿Qué número es? ¿Qué te dice?',
+  '¿Qué fracción es más grande: 1/2 o 1/4? Marca una respuesta.',
+  'Escribe el número que falta: 1/2 = __/4',
 ]
 
-const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso: string; textos: string[] }> = {
+const APOYOS = [
+  'Arriba va lo que tomas (3). Abajo va en cuántas partes está dividido (4).',
+  'El denominador es el número de abajo.',
+  'Piensa en una pizza: ¿qué pedazo es más grande, la mitad o un cuarto?',
+  'Si partes en 4, ¿cuántos cuartos hacen la mitad?',
+]
+
+const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso: string; textos: string[]; alternativas: string[] }> = {
   Fútbol: {
-    titulo: 'Misión: ¡la final del campeonato!',
+    titulo: 'La final del campeonato',
     intro: 'Tu equipo llegó a la final. Resuelve cada jugada para levantar la copa.',
     etiquetaPaso: 'Jugada',
     textos: [
@@ -235,9 +245,10 @@ const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso
       'En la tribuna, Sofía toma 1/2 jarra de chicha morada y Luis toma 1/4. ¿Quién tomó más?',
       'El entrenador divide la práctica en 4 partes iguales y la mitad es calentamiento. ¿Cuántos cuartos son de calentamiento?',
     ],
+    alternativas: ['Sofía (1/2)', 'Luis (1/4)', 'Tomaron lo mismo'],
   },
   Animales: {
-    titulo: 'Misión: rescate en la Amazonía',
+    titulo: 'Rescate en la Amazonía',
     intro: 'Los animales del bosque necesitan tu ayuda. Cada respuesta correcta libera a uno.',
     etiquetaPaso: 'Rescate',
     textos: [
@@ -246,9 +257,10 @@ const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso
       'Un perezoso come 1/2 hoja y un mono come 1/4 de otra hoja igual. ¿Quién comió más?',
       'El río tiene 4 tramos iguales y la mitad tiene pirañas. ¿Cuántos cuartos del río tienen pirañas?',
     ],
+    alternativas: ['El perezoso (1/2)', 'El mono (1/4)', 'Comieron lo mismo'],
   },
   Cocina: {
-    titulo: 'Misión: chef por un día',
+    titulo: 'Chef por un día',
     intro: 'Hoy cocinas para todo el salón. Cada receta resuelta suma una estrella.',
     etiquetaPaso: 'Receta',
     textos: [
@@ -257,21 +269,44 @@ const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso
       'Para el queque, Ana usa 1/2 taza de azúcar y Pedro 1/4 de taza. ¿Quién usó más azúcar?',
       'La receta tiene 4 pasos iguales y ya hiciste la mitad. ¿Cuántos cuartos de la receta terminaste?',
     ],
+    alternativas: ['Ana (1/2)', 'Pedro (1/4)', 'Usaron lo mismo'],
   },
 }
 
-export function examenEjemplo(opciones: OpcionesExamen): Examen {
-  const tema = TEMAS_EXAMEN[opciones.interes] ?? TEMAS_EXAMEN.Fútbol
+/** El examen de la docente adaptado según lo que pidió (sin backend, siempre es el de fracciones). */
+export function examenEjemplo(opciones: Omit<OpcionesExamen, 'examen'>, archivo = 'Examen de fracciones.pdf'): Examen {
+  const { interes, necesidades } = opciones
+  const tema = interes ? (TEMAS_EXAMEN[interes] ?? TEMAS_EXAMEN.Fútbol) : null
+  const simple = necesidades.some((n) => n === 'facil' || n === 'tea' || n === 'tdah')
+  const conApoyo = necesidades.some((n) => n === 'tdah' || n === 'tea')
+
+  const instrucciones = [
+    tema?.intro,
+    necesidades.includes('tea')
+      ? `Este examen tiene ${ORIGINALES.length} preguntas. Responde en orden, de la 1 a la ${ORIGINALES.length}. Escribe cada respuesta en las líneas.`
+      : 'Lee cada pregunta y escribe tu respuesta en las líneas.',
+    necesidades.includes('tdah') && 'Resuelve una pregunta a la vez y marca el cuadrito cuando termines.',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   const preguntas: PreguntaExamen[] = ORIGINALES.map((o, i) => ({
-    ...o,
-    texto: tema.textos[i],
-    fraccion: FRACCIONES[i],
-    ilustracion: null,
+    original: o.original,
+    texto: tema ? tema.textos[i] : simple ? SIMPLES[i] : o.original,
+    // En la versión ambientada, las alternativas son los personajes de la historia.
+    alternativas: o.alternativas && tema ? tema.alternativas : o.alternativas,
+    apoyo: conApoyo ? APOYOS[i] : undefined,
+    respuesta: o.alternativas && tema ? tema.alternativas[0] : o.respuesta,
   }))
-  if (opciones.formato === 'contextualizado') {
-    return { opciones, titulo: `Evaluación: fracciones (${opciones.interes.toLowerCase()})`, intro: 'Resuelve cada problema.', etiquetaPaso: 'Pregunta', preguntas }
+
+  return {
+    opciones: { interes, necesidades },
+    archivo,
+    titulo: tema ? tema.titulo : 'Evaluación de fracciones',
+    instrucciones,
+    etiquetaPaso: tema ? tema.etiquetaPaso : 'Pregunta',
+    preguntas,
   }
-  return { opciones, titulo: tema.titulo, intro: tema.intro, etiquetaPaso: tema.etiquetaPaso, preguntas }
 }
 
 // ---------- Juego ----------
@@ -368,54 +403,6 @@ export function juegoDesdeVocabulario(ficha: Ficha): Juego {
   }
 }
 
-// ---------- Adaptación ----------
-
-const CONSEJOS: Record<Necesidad, string[]> = {
-  tdah: [
-    'Da una consigna a la vez y verifica que se entendió antes de pasar a la siguiente.',
-    'Ofrece pausas activas cortas cada 10 a 15 minutos.',
-    'Usa un temporizador visible para cada paso.',
-  ],
-  dislexia: [
-    'Lee las consignas en voz alta además de escribirlas en la pizarra.',
-    'Cuando puedas, evalúa la comprensión de forma oral.',
-    'Da más tiempo para leer y escribir, sin penalizar la ortografía en este tema.',
-  ],
-  tea: [
-    'Anticipa la actividad con la agenda visual al empezar la clase.',
-    'Usa lenguaje literal y evita frases con doble sentido.',
-    'Avisa unos minutos antes de cambiar de actividad.',
-  ],
-  facil: [
-    'Una idea por frase.',
-    'Usa ejemplos de la vida diaria del estudiante.',
-    'Acompaña el texto con imágenes.',
-  ],
-}
-
-export function adaptacionEjemplo(necesidades: Necesidad[]): Adaptacion {
-  return {
-    necesidades,
-    material: 'Examen: Misión ¡la final del campeonato!',
-    original:
-      'Lee atentamente cada situación problemática y resuelve en tu cuaderno. Escribe la fracción que representa cada caso, luego compara las fracciones obtenidas y ordénalas de menor a mayor, justificando tu respuesta con un gráfico.',
-    agenda: [
-      { picto: 'saludar', texto: 'Saludo' },
-      { picto: 'leer', texto: 'Leer' },
-      { picto: 'escribir', texto: 'Resolver' },
-      { picto: 'pausa', texto: 'Pausa' },
-      { picto: 'compartir', texto: 'Compartir' },
-    ],
-    pasos: [
-      { picto: 'leer', texto: 'Lee la situación 1 en voz baja.', textoFacil: 'Lee el problema 1.' },
-      { picto: 'escribir', texto: 'Escribe en tu cuaderno la fracción que representa la situación.', textoFacil: 'Escribe el número de arriba y el de abajo.' },
-      { picto: 'dibujar', texto: 'Dibuja un círculo y pinta las partes que indica la fracción.', textoFacil: 'Pinta las partes en el círculo.' },
-      { picto: 'comparar', texto: 'Compara tus fracciones: ¿cuál es más grande?', textoFacil: 'Mira: ¿cuál tiene más parte pintada?' },
-    ],
-    consejos: CONSEJOS,
-  }
-}
-
 // ---------- Biblioteca ----------
 
 export const BIBLIOTECA_EJEMPLO: Material[] = [
@@ -425,7 +412,7 @@ export const BIBLIOTECA_EJEMPLO: Material[] = [
   { id: 'm4', titulo: 'Trivia: animales de la Amazonía', tipo: 'juego', grado: '2.º primaria', area: 'Ciencia y Tecnología', autor: 'Miguel Vargas', lugar: 'Iquitos', usos: 133 },
   { id: 'm5', titulo: 'Misión: el ciclo del agua', tipo: 'examen', grado: '5.º primaria', area: 'Ciencia y Tecnología', autor: 'Lucía Torres', lugar: 'Trujillo', usos: 98 },
   { id: 'm6', titulo: 'Crucigrama de sustantivos y adjetivos', tipo: 'crucigrama', grado: '3.º primaria', area: 'Comunicación', autor: 'Ana Rojas', lugar: 'Cusco', usos: 77 },
-  { id: 'm7', titulo: 'Tablas de multiplicar en lectura fácil', tipo: 'adaptar', grado: '3.º primaria', area: 'Matemática', autor: 'Elena Castro', lugar: 'Lima', usos: 61 },
+  { id: 'm7', titulo: 'Examen de tablas de multiplicar en lectura fácil', tipo: 'examen', grado: '3.º primaria', area: 'Matemática', autor: 'Elena Castro', lugar: 'Lima', usos: 61 },
   { id: 'm8', titulo: 'Adivina la palabra: la Independencia', tipo: 'juego', grado: '6.º primaria', area: 'Personal Social', autor: 'Pedro Salas', lugar: 'Ica', usos: 88 },
   { id: 'm9', titulo: 'El huayno de las regiones del Perú', tipo: 'cancion', grado: '4.º primaria', area: 'Personal Social', autor: 'Rosa Quispe', lugar: 'Lima', usos: 45, esMio: true },
 ]

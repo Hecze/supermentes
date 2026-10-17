@@ -181,6 +181,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
               estrellas: vidas,
               titulo: '¡Reventaste todos!',
               detalle: vidas === VIDAS ? `${meta} respuestas correctas sin ningún error.` : `${meta} respuestas correctas y ${VIDAS - vidas} ${VIDAS - vidas === 1 ? 'error' : 'errores'}.`,
+              puntaje: meta * 100 + vidas * 100,
             }),
           900,
         )
@@ -204,6 +205,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
             estrellas: aciertos >= meta / 2 ? 1 : 0,
             titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
             detalle: `Reventaste ${aciertos} de ${meta}. La respuesta era ${reto?.respuesta}. ¡Otra vez!`,
+            puntaje: aciertos * 100,
           }),
         1000,
       )
