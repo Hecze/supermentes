@@ -13,6 +13,10 @@ export type EntradaTema = {
   /** Nombres para mostrar. */
   grado: string
   area: string
+  /** Lo que pide el currículo para este tema (ver curriculo/buscar.ts). */
+  competencia?: string
+  capacidad?: string
+  desempenos?: string[]
   duracion?: string
 }
 

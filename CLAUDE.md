@@ -4,6 +4,7 @@ Herramientas de IA para docentes del Perú, hechas para Hack the Andes 2026 (ent
 
 Antes de trabajar, lee:
 - `obsidian/VISION.md`: qué construimos, para quién y los principios de diseño.
+- `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/ESTADO.md`: dónde quedamos, qué sigue y los riesgos conocidos.
 - `obsidian/HACKATHON.md`: condiciones del evento, reto de tracción y créditos gratis.
 - `README.md`: páginas, principios de diseño, endpoints y costos.

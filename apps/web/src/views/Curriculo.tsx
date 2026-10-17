@@ -150,39 +150,64 @@ export function VisorCurriculo() {
                       </p>
                     )}
 
-                    {c.capacidades.length > 0 && (
+                    {/* En pantallas anchas: capacidades y estándar a la izquierda, desempeños a la derecha. */}
+                    <div className="grid gap-x-8 gap-y-3 xl:grid-cols-2">
+                      <div className="flex flex-col gap-3">
+                        {c.capacidades.length > 0 && (
+                          <div className="flex flex-col gap-1">
+                            <h4 className="font-semibold">Capacidades</h4>
+                            <ul className="flex flex-col gap-1">
+                              {c.capacidades.map((cap) => (
+                                <li key={cap} className="flex gap-2">
+                                  <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-ink" aria-hidden />
+                                  {cap}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {c.estandar && (
+                          <div className="flex flex-col gap-1">
+                            <h4 className="font-semibold">Estándar de aprendizaje del ciclo {cur.grado.ciclo}</h4>
+                            <blockquote className="border-l-4 border-line pl-4 text-ink-soft">{c.estandar}</blockquote>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex flex-col gap-1">
-                        <h4 className="font-semibold">Capacidades</h4>
-                        <ul className="flex flex-col gap-1">
-                          {c.capacidades.map((cap) => (
-                            <li key={cap} className="flex gap-2">
+                        <h4 className="font-semibold">Desempeños de {grado?.corto}</h4>
+                        {c.desempenos.length === 0 && <p className="text-ink-soft">El programa oficial indica que en esta edad no se evidencian desempeños.</p>}
+                        <ul className="flex flex-col gap-2">
+                          {c.desempenos.map((d) => (
+                            <li key={d} className="flex gap-2.5">
                               <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-ink" aria-hidden />
-                              {cap}
+                              <span>{d}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
-                    )}
+                    </div>
 
-                    {c.estandar && (
-                      <div className="flex flex-col gap-1">
-                        <h4 className="font-semibold">Estándar de aprendizaje del ciclo {cur.grado.ciclo}</h4>
-                        <blockquote className="border-l-4 border-line pl-4 text-ink-soft">{c.estandar}</blockquote>
+                    {c.temas && c.temas.length > 0 && (
+                      <div className="flex flex-col gap-1.5 print:hidden">
+                        <h4 className="font-semibold">
+                          Temas que trabaja <span className="text-sm font-normal text-ink-soft">(como suelen llamarse en libros y sesiones; no es texto oficial)</span>
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {c.temas.map((t) => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={() => abrirNuevoTema({ texto: t, gradoId, areaId, indiceCompetencia: i })}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-sm hover:border-ink"
+                            >
+                              <Plus className="size-3.5" aria-hidden /> {t}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
-
-                    <div className="flex flex-col gap-1">
-                      <h4 className="font-semibold">Desempeños de {grado?.corto}</h4>
-                      {c.desempenos.length === 0 && <p className="text-ink-soft">El programa oficial indica que en esta edad no se evidencian desempeños.</p>}
-                      <ul className="flex flex-col gap-2">
-                        {c.desempenos.map((d) => (
-                          <li key={d} className="flex gap-2.5">
-                            <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-ink" aria-hidden />
-                            <span>{d}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
                   </section>
                 ))}
               </div>

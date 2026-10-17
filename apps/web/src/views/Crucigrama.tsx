@@ -106,196 +106,202 @@ export function Crucigrama() {
     <>
       <EncabezadoHerramienta id="crucigrama" />
 
-      <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:p-6 print:hidden">
-        <div>
-          <h2 className="font-display text-2xl font-bold">Tus palabras</h2>
-          <p className="text-ink-soft">Escribe cada palabra con su pista. El crucigrama se arma solo mientras escribes.</p>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-line">
-          <table className="w-full border-collapse">
-            <thead className="bg-surface-2 text-left text-sm text-ink-soft">
-              <tr>
-                <th className="w-10 px-3 py-2 font-medium">#</th>
-                <th className="w-[32%] border-l border-line px-3 py-2 font-medium">Palabra</th>
-                <th className="border-l border-line px-3 py-2 font-medium">Pista</th>
-                <th className="w-12" />
-              </tr>
-            </thead>
-            <tbody>
-              {filas.map((f, i) => (
-                <tr key={f.id} className="border-t border-line">
-                  <td className="px-3 text-sm text-ink-soft tabular-nums">{i + 1}</td>
-                  <td className="border-l border-line p-0">
-                    <input
-                      id={`cruci-palabra-${f.id}`}
-                      aria-label={`Palabra ${i + 1}`}
-                      value={f.palabra}
-                      onChange={(e) => editar(f.id, 'palabra', e.target.value)}
-                      placeholder="Ej.: numerador"
-                      className="h-11 w-full bg-transparent px-3 font-medium placeholder:font-normal placeholder:text-ink-soft/60 focus:bg-surface-2 focus:outline-none"
-                    />
-                  </td>
-                  <td className="border-l border-line p-0">
-                    <input
-                      aria-label={`Pista ${i + 1}`}
-                      value={f.pista}
-                      onChange={(e) => editar(f.id, 'pista', e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          if (i === filas.length - 1) agregar()
-                          else enfocar(filas[i + 1].id)
-                        }
-                      }}
-                      placeholder="Ej.: Número de arriba de la fracción"
-                      className="h-11 w-full bg-transparent px-3 placeholder:text-ink-soft/60 focus:bg-surface-2 focus:outline-none"
-                    />
-                  </td>
-                  <td className="text-center">
-                    <button type="button" onClick={() => quitar(f.id)} className="rounded-lg p-2 text-ink-soft hover:bg-surface-2 hover:text-danger" aria-label={`Quitar palabra ${i + 1}`}>
-                      <Trash2 className="size-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button type="button" onClick={() => agregar()} className="flex w-full items-center gap-2 border-t border-line px-3 py-2.5 text-left text-ink-soft hover:bg-surface-2 hover:text-ink">
-            <Plus className="size-4" aria-hidden /> Agregar palabra
-          </button>
-        </div>
-
-        {sugerencias.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-baseline gap-x-3">
-              <p className="font-medium">Sugerencias de tu tema</p>
-              <button type="button" onClick={agregarTodas} className="text-sm text-ink-soft underline underline-offset-4 hover:text-ink">
-                Agregar todas
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {sugerencias.map((v) => (
-                <Chip key={v.palabra} onClick={() => agregar(v.palabra, v.definicion)}>
-                  <Plus className="size-3.5" aria-hidden /> {v.palabra}
-                </Chip>
-              ))}
-            </div>
+      {/* En pantallas anchas: las palabras a la izquierda y el crucigrama a la derecha. */}
+      <div className="grid gap-7 2xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] 2xl:items-start print:block">
+        <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:p-6 2xl:sticky 2xl:top-6 print:hidden">
+          <div>
+            <h2 className="font-display text-2xl font-bold">Tus palabras</h2>
+            <p className="text-ink-soft">Escribe cada palabra con su pista. El crucigrama se arma solo mientras escribes.</p>
           </div>
-        )}
 
-      </section>
+          <div className="overflow-hidden rounded-xl border border-line">
+            <table className="w-full border-collapse">
+              <thead className="bg-surface-2 text-left text-sm text-ink-soft">
+                <tr>
+                  <th className="w-10 px-3 py-2 font-medium">#</th>
+                  <th className="w-[32%] border-l border-line px-3 py-2 font-medium">Palabra</th>
+                  <th className="border-l border-line px-3 py-2 font-medium">Pista</th>
+                  <th className="w-12" />
+                </tr>
+              </thead>
+              <tbody>
+                {filas.map((f, i) => (
+                  <tr key={f.id} className="border-t border-line">
+                    <td className="px-3 text-sm text-ink-soft tabular-nums">{i + 1}</td>
+                    <td className="border-l border-line p-0">
+                      <input
+                        id={`cruci-palabra-${f.id}`}
+                        aria-label={`Palabra ${i + 1}`}
+                        value={f.palabra}
+                        onChange={(e) => editar(f.id, 'palabra', e.target.value)}
+                        placeholder="Ej.: numerador"
+                        className="h-11 w-full bg-transparent px-3 font-medium placeholder:font-normal placeholder:text-ink-soft/60 focus:bg-surface-2 focus:outline-none"
+                      />
+                    </td>
+                    <td className="border-l border-line p-0">
+                      <textarea
+                        rows={1}
+                        aria-label={`Pista ${i + 1}`}
+                        value={f.pista}
+                        onChange={(e) => editar(f.id, 'pista', e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            if (i === filas.length - 1) agregar()
+                            else enfocar(filas[i + 1].id)
+                          }
+                        }}
+                        placeholder="Ej.: Número de arriba de la fracción"
+                        className="block min-h-11 w-full resize-none bg-transparent px-3 py-2.5 leading-snug [field-sizing:content] placeholder:text-ink-soft/60 focus:bg-surface-2 focus:outline-none"
+                      />
+                    </td>
+                    <td className="text-center">
+                      <button type="button" onClick={() => quitar(f.id)} className="rounded-lg p-2 text-ink-soft hover:bg-surface-2 hover:text-danger" aria-label={`Quitar palabra ${i + 1}`}>
+                        <Trash2 className="size-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button type="button" onClick={() => agregar()} className="flex w-full items-center gap-2 border-t border-line px-3 py-2.5 text-left text-ink-soft hover:bg-surface-2 hover:text-ink">
+              <Plus className="size-4" aria-hidden /> Agregar palabra
+            </button>
+          </div>
 
-      {validas.length < 2 ? (
-        <div className="rounded-2xl border-2 border-dashed border-line px-6 py-10 text-center text-ink-soft print:hidden">
-          Escribe al menos dos palabras para ver tu crucigrama.
-        </div>
-      ) : (
-        <>
-          {cruci.sinUbicar.length > 0 && (
-            <p className="rounded-xl bg-warn/10 px-4 py-3 text-warn print:hidden">
-              No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba "Otra forma" o quita alguna palabra: la grilla tiene que caber en una hoja.
-            </p>
-          )}
-
-          <Hoja>
-            <header className="flex flex-col gap-1">
-              <h2 className="font-display text-2xl font-bold sm:text-3xl">Crucigrama: {ficha.titulo.split(':')[0]}</h2>
-              <p className="text-ink-soft">Nombre: ______________________ · {ficha.grado}</p>
-            </header>
-
-            <div className="overflow-x-auto pb-1">
-              <div
-                className="mx-auto grid w-max"
-                style={{ gridTemplateColumns: `repeat(${cruci.cols}, ${celda}px)` }}
-                role="img"
-                aria-label={`Crucigrama de ${cruci.ubicadas.length} palabras`}
-              >
-                {cruci.letras.flatMap((fila, f) =>
-                  fila.map((letra, c) => {
-                    const numero = cruci.numeros[f][c]
-                    return (
-                      <div key={`${f}-${c}`} className={letra ? 'relative -ml-px -mt-px aspect-square border border-ink bg-surface' : 'aspect-square'}>
-                        {numero && <span className="absolute left-0.5 top-0 text-[9px] font-semibold leading-tight">{numero}</span>}
-                        {letra && respuestas && (
-                          <span className="grid h-full place-items-center pt-1 font-display font-bold" style={{ color: COLOR, fontSize: celda * 0.45 }}>
-                            {letra}
-                          </span>
-                        )}
-                      </div>
-                    )
-                  }),
-                )}
+          {sugerencias.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-baseline gap-x-3">
+                <p className="font-medium">Sugerencias de tu tema</p>
+                <button type="button" onClick={agregarTodas} className="text-sm text-ink-soft underline underline-offset-4 hover:text-ink">
+                  Agregar todas
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sugerencias.map((v) => (
+                  <Chip key={v.palabra} onClick={() => agregar(v.palabra, v.definicion)}>
+                    <Plus className="size-3.5" aria-hidden /> {v.palabra}
+                  </Chip>
+                ))}
               </div>
             </div>
+          )}
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              {listas.map(([titulo, lista]) => (
-                <div key={titulo} className="flex flex-col gap-2">
-                  <h3 className="font-semibold">{titulo}</h3>
-                  <ol className="flex flex-col gap-1.5">
-                    {lista.map((u) => (
-                      <li key={u.palabra} className="flex gap-2">
-                        <span className="w-5 shrink-0 text-right font-semibold tabular-nums" style={{ color: COLOR }}>
-                          {u.numero}
-                        </span>
-                        <span className={u.pista ? '' : 'italic text-ink-soft'}>{u.pista || 'Falta la pista'}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))}
+        </section>
+
+        <div className="flex min-w-0 flex-col gap-7">
+          {validas.length < 2 ? (
+            <div className="rounded-2xl border-2 border-dashed border-line px-6 py-10 text-center text-ink-soft print:hidden">
+              Escribe al menos dos palabras para ver tu crucigrama.
             </div>
-
-            {banco && (
-              <div className="flex flex-col gap-1 border-t border-line pt-4">
-                <h3 className="font-semibold">Palabras</h3>
-                <p className="flex flex-wrap gap-x-5 gap-y-1 font-display text-lg">
-                  {[...cruci.ubicadas]
-                    .sort((a, b) => a.palabra.localeCompare(b.palabra))
-                    .map((u) => (
-                      <span key={u.palabra}>{u.palabra}</span>
-                    ))}
+          ) : (
+            <>
+              {cruci.sinUbicar.length > 0 && (
+                <p className="rounded-xl bg-warn/10 px-4 py-3 text-warn print:hidden">
+                  No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba "Otra forma" o quita alguna palabra: la grilla tiene que caber en una hoja.
                 </p>
-              </div>
-            )}
-          </Hoja>
+              )}
 
-          {sinPista > 0 && (
-            <p className="-mt-3 text-sm text-warn print:hidden">
-              {sinPista === 1 ? 'A una palabra le falta la pista.' : `A ${sinPista} palabras les falta la pista.`} Escríbela en la tabla de arriba.
-            </p>
+              <Hoja>
+                <header className="flex flex-col gap-1">
+                  <h2 className="font-display text-2xl font-bold sm:text-3xl">Crucigrama: {ficha.titulo.split(':')[0]}</h2>
+                  <p className="text-ink-soft">Nombre: ______________________ · {ficha.grado}</p>
+                </header>
+
+                <div className="overflow-x-auto pb-1">
+                  <div
+                    className="mx-auto grid w-max"
+                    style={{ gridTemplateColumns: `repeat(${cruci.cols}, ${celda}px)` }}
+                    role="img"
+                    aria-label={`Crucigrama de ${cruci.ubicadas.length} palabras`}
+                  >
+                    {cruci.letras.flatMap((fila, f) =>
+                      fila.map((letra, c) => {
+                        const numero = cruci.numeros[f][c]
+                        return (
+                          <div key={`${f}-${c}`} className={letra ? 'relative -ml-px -mt-px aspect-square border border-ink bg-surface' : 'aspect-square'}>
+                            {numero && <span className="absolute left-0.5 top-0 text-[9px] font-semibold leading-tight">{numero}</span>}
+                            {letra && respuestas && (
+                              <span className="grid h-full place-items-center pt-1 font-display font-bold" style={{ color: COLOR, fontSize: celda * 0.45 }}>
+                                {letra}
+                              </span>
+                            )}
+                          </div>
+                        )
+                      }),
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {listas.map(([titulo, lista]) => (
+                    <div key={titulo} className="flex flex-col gap-2">
+                      <h3 className="font-semibold">{titulo}</h3>
+                      <ol className="flex flex-col gap-1.5">
+                        {lista.map((u) => (
+                          <li key={u.palabra} className="flex gap-2">
+                            <span className="w-5 shrink-0 text-right font-semibold tabular-nums" style={{ color: COLOR }}>
+                              {u.numero}
+                            </span>
+                            <span className={u.pista ? '' : 'italic text-ink-soft'}>{u.pista || 'Falta la pista'}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  ))}
+                </div>
+
+                {banco && (
+                  <div className="flex flex-col gap-1 border-t border-line pt-4">
+                    <h3 className="font-semibold">Palabras</h3>
+                    <p className="flex flex-wrap gap-x-5 gap-y-1 font-display text-lg">
+                      {[...cruci.ubicadas]
+                        .sort((a, b) => a.palabra.localeCompare(b.palabra))
+                        .map((u) => (
+                          <span key={u.palabra}>{u.palabra}</span>
+                        ))}
+                    </p>
+                  </div>
+                )}
+              </Hoja>
+
+              {sinPista > 0 && (
+                <p className="-mt-3 text-sm text-warn print:hidden">
+                  {sinPista === 1 ? 'A una palabra le falta la pista.' : `A ${sinPista} palabras les falta la pista.`} Escríbela en la tabla de arriba.
+                </p>
+              )}
+
+              <Acciones>
+                <Boton variante="herramienta" herramienta="crucigrama" onClick={() => imprimir(avisar)}>
+                  <Printer className="size-5" aria-hidden /> Imprimir
+                </Boton>
+                <Boton variante="contorno" onClick={descargarImagen}>
+                  <ImageDown className="size-5" aria-hidden /> Descargar imagen
+                </Boton>
+                <Boton variante="contorno" onClick={() => setRespuestas(!respuestas)}>
+                  {respuestas ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
+                  {respuestas ? 'Ocultar respuestas' : 'Ver respuestas'}
+                </Boton>
+                <Boton variante="contorno" onClick={() => setSemilla((s) => s + 1)}>
+                  <Shuffle className="size-5" aria-hidden /> Otra forma
+                </Boton>
+              </Acciones>
+
+              <Desplegable titulo="Más opciones">
+                <label htmlFor="cruci-banco" className="flex cursor-pointer items-center gap-3">
+                  <input id="cruci-banco" type="checkbox" checked={banco} onChange={(e) => setBanco(e.target.checked)} className="size-5 accent-[var(--crucigrama)]" />
+                  Mostrar la lista de palabras (más fácil)
+                </label>
+                <p className="text-sm text-ink-soft">
+                  "Descargar imagen" baja solo la grilla en PNG con fondo transparente, para pegarla en tus fichas o diapositivas. Si tienes las respuestas a la
+                  vista, la imagen las incluye.
+                </p>
+                <p className="text-sm text-ink-soft">El crucigrama lo arma un algoritmo con tus palabras, así que no gasta créditos.</p>
+              </Desplegable>
+            </>
           )}
-
-          <Acciones>
-            <Boton variante="herramienta" herramienta="crucigrama" onClick={() => imprimir(avisar)}>
-              <Printer className="size-5" aria-hidden /> Imprimir
-            </Boton>
-            <Boton variante="contorno" onClick={descargarImagen}>
-              <ImageDown className="size-5" aria-hidden /> Descargar imagen
-            </Boton>
-            <Boton variante="contorno" onClick={() => setRespuestas(!respuestas)}>
-              {respuestas ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
-              {respuestas ? 'Ocultar respuestas' : 'Ver respuestas'}
-            </Boton>
-            <Boton variante="contorno" onClick={() => setSemilla((s) => s + 1)}>
-              <Shuffle className="size-5" aria-hidden /> Otra forma
-            </Boton>
-          </Acciones>
-
-          <Desplegable titulo="Más opciones">
-            <label htmlFor="cruci-banco" className="flex cursor-pointer items-center gap-3">
-              <input id="cruci-banco" type="checkbox" checked={banco} onChange={(e) => setBanco(e.target.checked)} className="size-5 accent-[var(--crucigrama)]" />
-              Mostrar la lista de palabras (más fácil)
-            </label>
-            <p className="text-sm text-ink-soft">
-              "Descargar imagen" baja solo la grilla en PNG con fondo transparente, para pegarla en tus fichas o diapositivas. Si tienes las respuestas a la
-              vista, la imagen las incluye.
-            </p>
-            <p className="text-sm text-ink-soft">El crucigrama lo arma un algoritmo con tus palabras, así que no gasta créditos.</p>
-          </Desplegable>
-        </>
-      )}
+        </div>
+      </div>
     </>
   )
 }

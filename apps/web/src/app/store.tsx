@@ -24,7 +24,7 @@ export type Resultados = {
 }
 
 /** Lo que la ventana de "Nuevo tema" trae ya escrito (por ejemplo, desde un tema del currículo). */
-export type PrevioTema = { texto?: string; gradoId?: string; areaId?: string }
+export type PrevioTema = { texto?: string; gradoId?: string; areaId?: string; /** Índice de la competencia del tema, si se conoce. */ indiceCompetencia?: number }
 
 type Store = {
   vista: Vista

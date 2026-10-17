@@ -85,7 +85,7 @@ function MaterialesComunidad() {
           <p className="text-sm text-ink-soft">Prueba con otra palabra o quita el filtro de grado. Si lo creas tú, aparecerá aquí para otros profes.</p>
         </Tarjeta>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {filtrados.map((m) => (
             <Tarjeta key={m.id} className="flex flex-col gap-3">
               <div className="flex items-center gap-2">

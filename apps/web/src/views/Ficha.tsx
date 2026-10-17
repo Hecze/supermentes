@@ -50,7 +50,7 @@ export function Ficha() {
 
       <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl font-bold sm:text-3xl">¿Qué necesitas para tu clase?</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {ORDEN_HERRAMIENTAS.map((id) => {
             const h = HERRAMIENTAS[id]
             const Icono = h.icono
@@ -127,7 +127,7 @@ export function Ficha() {
         </div>
         <div className="flex flex-col gap-1 border-t border-line pt-4 text-sm text-ink-soft">
           <p>
-            Currículo Nacional: {ficha.curriculo.competencia} · {ficha.curriculo.capacidad}
+            Currículo Nacional: {[ficha.curriculo.competencia, ficha.curriculo.capacidad].filter(Boolean).join(' · ')}
           </p>
           <p>Fuente: {ficha.fuente}</p>
         </div>
