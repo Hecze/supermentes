@@ -13,12 +13,21 @@ import { del, get, list, put } from '@vercel/blob'
 const PREFIJO = 'lista-espera/'
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
+/** Celular peruano: 9 dígitos que empiezan con 9, con o sin +51 y espacios. Devuelve +51…, '' si no hay o null si no es válido. */
+function celularDe(v: unknown): string | null {
+  const d = typeof v === 'string' ? v.replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, '') : ''
+  if (!d) return ''
+  return /^9\d{8}$/.test(d) ? `+51${d}` : null
+}
+
 type Registro = {
   correo: string
   nombre: string
   rol: string
   region: string
   colegio: string
+  /** WhatsApp en formato +51XXXXXXXXX (opcional): por ahí se le manda su material, como hace ACET. */
+  celular: string
   /** Código para invitar a otros: supermentes.app/?ref=CODIGO */
   codigo: string
   /** Código de quien invitó a esta persona. */
@@ -103,6 +112,8 @@ export async function POST(request: Request) {
 
   const correo = texto(datos.correo, 254).toLowerCase()
   if (!CORREO.test(correo)) return json({ error: 'Revisa tu correo: parece que le falta algo.' }, 400)
+  const celular = celularDe(datos.celular)
+  if (celular === null) return json({ error: 'Revisa tu WhatsApp: son 9 números y empiezan con 9.' }, 400)
 
   try {
     const h = huella(correo)
@@ -118,6 +129,7 @@ export async function POST(request: Request) {
       rol: texto(datos.rol, 60) || previo?.rol || '',
       region: texto(datos.region, 60) || previo?.region || '',
       colegio: texto(datos.colegio) || previo?.colegio || '',
+      celular: celular || previo?.celular || '',
       codigo,
       invitadoPor: previo ? previo.invitadoPor : invitadoPor && invitadoPor !== codigo ? invitadoPor : null,
       fuente: previo ? previo.fuente : texto(datos.fuente, 60) || null,
@@ -128,7 +140,7 @@ export async function POST(request: Request) {
     }
 
     // Si ya estaba y no cambió nada, no se vuelve a escribir.
-    const cambio = !previo || (['nombre', 'rol', 'region', 'colegio'] as const).some((k) => registro[k] !== previo[k])
+    const cambio = !previo || (['nombre', 'rol', 'region', 'colegio', 'celular'] as const).some((k) => registro[k] !== previo[k])
     if (cambio) {
       await put(ruta, JSON.stringify(registro), {
         access: 'private',
@@ -196,9 +208,9 @@ async function exportar(request: Request, url: URL) {
   const invitados = new Map<string, number>()
   for (const r of registros) if (r.invitadoPor) invitados.set(r.invitadoPor, (invitados.get(r.invitadoPor) ?? 0) + 1)
 
-  const columnas = ['creado', 'correo', 'nombre', 'rol', 'region', 'colegio', 'codigo', 'invitadoPor', 'invitados', 'fuente', 'medio', 'campana']
+  const columnas = ['creado', 'correo', 'celular', 'nombre', 'rol', 'region', 'colegio', 'codigo', 'invitadoPor', 'invitados', 'fuente', 'medio', 'campana']
   const filas = registros.map((r) =>
-    [r.creado, r.correo, r.nombre, r.rol, r.region, r.colegio, r.codigo, r.invitadoPor, invitados.get(r.codigo) ?? 0, r.fuente, r.medio, r.campana]
+    [r.creado, r.correo, r.celular ?? '', r.nombre, r.rol, r.region, r.colegio, r.codigo, r.invitadoPor, invitados.get(r.codigo) ?? 0, r.fuente, r.medio, r.campana]
       .map(celda)
       .join(','),
   )
