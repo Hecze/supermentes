@@ -1,4 +1,4 @@
-import { Coins, LoaderCircle } from 'lucide-react'
+import { ChevronDown, LoaderCircle } from 'lucide-react'
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react'
 import { textoCosto, type Fraccion, type HerramientaId } from '../api'
 import { HERRAMIENTAS } from '../app/herramientas'
@@ -9,10 +9,23 @@ export function cx(...c: (string | false | null | undefined)[]) {
 
 export const tinte = (color: string, pct: number) => `color-mix(in oklab, ${color} ${pct}%, transparent)`
 
+/** Imprime solo la hoja visible. Dentro de un visor embebido no se puede abrir el diálogo, así que se avisa. */
+export function imprimir(avisar: (texto: string) => void) {
+  const embebido = (() => {
+    try {
+      return window.self !== window.top
+    } catch {
+      return true
+    }
+  })()
+  if (embebido) avisar('En la app se abre la ventana para imprimir solo esta hoja (o guardarla como PDF).')
+  else window.print()
+}
+
 type BotonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variante?: 'primario' | 'contorno' | 'suave' | 'herramienta'
   herramienta?: HerramientaId
-  tam?: 'sm' | 'md'
+  tam?: 'sm' | 'md' | 'lg'
   cargando?: boolean
 }
 
@@ -29,8 +42,8 @@ export function Boton({ variante = 'primario', herramienta, tam = 'md', cargando
     <button
       type="button"
       className={cx(
-        'inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-medium transition active:translate-y-px disabled:pointer-events-none disabled:opacity-50',
-        tam === 'sm' ? 'h-9 px-3 text-sm' : 'h-11 px-4',
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-xl font-medium transition active:translate-y-px disabled:pointer-events-none disabled:opacity-50 print:hidden',
+        { sm: 'h-9 px-3 text-sm', md: 'h-11 px-4', lg: 'h-14 rounded-2xl px-7 text-lg' }[tam],
         estilos[variante],
         className,
       )}
@@ -38,24 +51,19 @@ export function Boton({ variante = 'primario', herramienta, tam = 'md', cargando
       disabled={disabled || cargando}
       {...rest}
     >
-      {cargando && <LoaderCircle className="size-4 animate-spin" aria-hidden />}
+      {cargando && <LoaderCircle className="size-5 animate-spin" aria-hidden />}
       {children}
     </button>
   )
 }
 
-export function Costo({ n, className }: { n: number; className?: string }) {
+/** Línea discreta bajo un botón que gasta créditos. */
+export function NotaCreditos({ n, quedan }: { n: number; quedan: number }) {
+  if (n === 0) return <p className="text-sm text-ink-soft">No gasta créditos.</p>
   return (
-    <span
-      className={cx(
-        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums',
-        n === 0 ? 'bg-ok/12 text-ok' : 'bg-warn/12 text-warn',
-        className,
-      )}
-    >
-      {n > 0 && <Coins className="size-3.5" aria-hidden />}
-      {textoCosto(n)}
-    </span>
+    <p className="text-sm text-ink-soft tabular-nums">
+      Usa {textoCosto(n)} de tus {quedan}.
+    </p>
   )
 }
 
@@ -67,8 +75,46 @@ export function Tarjeta({ children, className, style }: { children: ReactNode; c
   )
 }
 
-export function Etiqueta({ children }: { children: ReactNode }) {
-  return <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-soft">{children}</p>
+/** El resultado de cada herramienta: se ve y se imprime como una hoja. */
+export function Hoja({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <article
+      className={cx(
+        'hoja flex flex-col gap-6 rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_0_var(--line),0_12px_32px_-18px_rgb(0_0_0/0.25)] sm:p-10',
+        className,
+      )}
+    >
+      {children}
+    </article>
+  )
+}
+
+/** Fila de acciones debajo de la hoja. No se imprime. */
+export function Acciones({ children }: { children: ReactNode }) {
+  return <div className="flex flex-wrap items-center gap-2 print:hidden">{children}</div>
+}
+
+/** Pregunta simple con su respuesta debajo (chips, opciones…). */
+export function Pregunta({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <h2 className="font-display text-2xl font-bold">{titulo}</h2>
+      {children}
+    </div>
+  )
+}
+
+/** Sección plegada: lo avanzado queda a un clic, sin estorbar. */
+export function Desplegable({ titulo, children, abierto }: { titulo: ReactNode; children: ReactNode; abierto?: boolean }) {
+  return (
+    <details className="group rounded-2xl border border-line bg-surface print:hidden" open={abierto}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 font-medium sm:px-5 [&::-webkit-details-marker]:hidden">
+        {titulo}
+        <ChevronDown className="size-5 shrink-0 text-ink-soft transition group-open:rotate-180" aria-hidden />
+      </summary>
+      <div className="flex flex-col gap-4 border-t border-line px-4 py-4 sm:px-5">{children}</div>
+    </details>
+  )
 }
 
 export function Chip({
@@ -76,11 +122,13 @@ export function Chip({
   onClick,
   children,
   color = 'var(--ink)',
+  grande,
 }: {
   activo?: boolean
   onClick?: () => void
   children: ReactNode
   color?: string
+  grande?: boolean
 }) {
   return (
     <button
@@ -88,7 +136,8 @@ export function Chip({
       onClick={onClick}
       aria-pressed={activo}
       className={cx(
-        'inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm transition',
+        'inline-flex items-center gap-1.5 rounded-full border-2 transition',
+        grande ? 'h-12 px-5 text-base' : 'h-9 px-3.5 text-sm',
         activo ? 'font-semibold' : 'border-line bg-surface text-ink hover:bg-surface-2',
       )}
       style={activo ? { borderColor: color, color, background: tinte(color, 12) } : undefined}
@@ -173,38 +222,23 @@ export function QrEjemplo({ semilla, tam = 148 }: { semilla: string; tam?: numbe
 
 export function Generando({ texto }: { texto: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-dashed border-line bg-surface-2 px-4 py-3 text-sm text-ink-soft" role="status">
-      <LoaderCircle className="size-4 animate-spin" aria-hidden />
+    <div className="flex items-center gap-3 rounded-2xl border border-dashed border-line bg-surface px-5 py-6 text-ink-soft print:hidden" role="status">
+      <LoaderCircle className="size-5 animate-spin" aria-hidden />
       {texto}
     </div>
   )
 }
 
-/** Barra que aparece cuando el docente cambió opciones y falta volver a generar. */
-export function BarraCambios({
-  costo,
-  ocupado,
-  onGenerar,
-  onDescartar,
-  texto = 'Cambiaste las opciones.',
-}: {
-  costo: number
-  ocupado: boolean
-  onGenerar: () => void
-  onDescartar?: () => void
-  texto?: string
-}) {
+/** Texto que el docente puede corregir con un clic, como una celda. */
+export function Editable({ children, className, como: Tag = 'p' }: { children: ReactNode; className?: string; como?: 'p' | 'span' | 'h2' | 'h3' }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-warn/40 bg-warn/8 px-4 py-3">
-      <p className="min-w-0 flex-1 text-sm">{texto}</p>
-      {onDescartar && (
-        <Boton variante="suave" tam="sm" onClick={onDescartar} disabled={ocupado}>
-          Descartar
-        </Boton>
-      )}
-      <Boton tam="sm" onClick={onGenerar} cargando={ocupado}>
-        Generar de nuevo · {textoCosto(costo)}
-      </Boton>
-    </div>
+    <Tag
+      className={cx('rounded-md outline-none transition hover:bg-surface-2/70 focus:bg-surface-2 focus:ring-2 focus:ring-line', className)}
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck
+    >
+      {children}
+    </Tag>
   )
 }

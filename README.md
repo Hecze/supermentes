@@ -4,6 +4,15 @@ Herramientas de IA para docentes del Perú. El docente cuenta qué va a enseñar
 
 Proyecto para Hack the Andes 2026.
 
+## Principios de diseño
+
+Pensado para docentes con poca experiencia digital: simple a primera vista y potente cuando lo necesitas, como una hoja de cálculo.
+
+- **Una pregunta y un botón principal por pantalla.** "¿Qué vas a enseñar hoy?", "¿Con qué ritmo?", "¿Qué le gusta a tu clase?".
+- **El resultado se ve como una hoja.** Lo que ves es lo que se imprime, y cualquier texto se corrige con un clic.
+- **Lo avanzado queda plegado** en "Más opciones" o "Cambiar…", nunca en la primera vista.
+- **Palabras del aula, no técnicas.** "Le cuesta concentrarse" antes que "TDAH"; los créditos solo aparecen bajo el botón que los gasta.
+
 ## Estado
 
 Interfaz completa con **datos de ejemplo**. Todas las pantallas pasan por `src/api`, así que el backend real se conecta ahí sin tocar las pantallas.
@@ -13,6 +22,7 @@ Ya funciona sin backend:
 - **Crucigrama:** la grilla la arma un algoritmo (`src/lib/crucigrama.ts`) con el vocabulario de la ficha.
 - **Juegos:** Memoria, Carrera de preguntas y Adivina la palabra se pueden jugar con el contenido del juego.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
+- **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
 
 ## Correr el proyecto
 
@@ -62,6 +72,5 @@ La ficha, el crucigrama y la biblioteca no gastan créditos. Lo caro (audio e im
 
 1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen, juego y adaptación.
 2. Audio de canciones con ElevenLabs.
-3. Persistencia: biblioteca, juegos publicados con link y QR reales, y créditos en el servidor.
-4. Descarga en PDF lista para imprimir.
-5. Pictogramas de ARASAAC en la adaptación para TEA.
+3. Persistencia: biblioteca, juegos publicados con link y QR reales, créditos en el servidor y guardar lo que el docente corrige en la hoja.
+4. Pictogramas de ARASAAC en la adaptación para TEA.

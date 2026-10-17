@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Adaptacion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
-import { FICHA_EJEMPLO, JUEGO_EJEMPLO, adaptacionEjemplo, cancionEjemplo, examenEjemplo } from '../api/ejemplos'
+import { FICHA_EJEMPLO, JUEGO_EJEMPLO, examenEjemplo } from '../api/ejemplos'
 
 export const VISTAS = ['inicio', 'ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
 export type Vista = (typeof VISTAS)[number]
@@ -63,13 +63,11 @@ function temaActual(): Tema {
   }
 }
 
-// En modo ejemplo la app arranca con un tema ya trabajado hoy, para que cada pantalla muestre algo real.
+// En modo ejemplo la app arranca con un tema a medio trabajar: examen y juego listos, canción y adaptación por crear.
 const RESULTADOS_INICIALES: Resultados = MODO_EJEMPLO
   ? {
-      cancion: cancionEjemplo({ modo: 'ritmo', ritmo: 'Cumbia', melodia: 'Los pollitos dicen' }),
       examen: examenEjemplo({ interes: 'Fútbol', formato: 'mision' }),
       juego: JUEGO_EJEMPLO,
-      adaptacion: adaptacionEjemplo(['tdah', 'tea']),
     }
   : {}
 

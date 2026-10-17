@@ -111,8 +111,8 @@ body {
   background-size: 22px 22px;
   color: var(--ink);
   font-family: var(--ff-body);
-  font-size: 15px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 /* Franja de la zona segura superior en celulares, del color de la barra. */
@@ -209,5 +209,39 @@ h3 {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Al imprimir: solo la hoja, en blanco y negro, sin la app alrededor. */
+@media print {
+  :root,
+  :root:not([data-theme="light"]),
+  :root[data-theme="dark"] {
+    --bg: #ffffff;
+    --grid: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f2f2f2;
+    --ink: #000000;
+    --ink-soft: #444444;
+    --line: #bbbbbb;
+    --on-tool: #ffffff;
+    --cancion: #cf3150;
+    --examen: #2453cc;
+    --juego: #0f7f55;
+    --crucigrama: #b05a06;
+    --adaptar: #7547cc;
+    --ok: #0f7f55;
+    color-scheme: light;
+  }
+  body {
+    background: #ffffff;
+  }
+  body::before {
+    display: none;
+  }
+  .hoja {
+    border: 0;
+    box-shadow: none;
+    padding: 0;
   }
 }

@@ -20,7 +20,7 @@ export const mockApi: Api = {
         : entrada.tipo === 'archivo'
           ? `Archivo: ${entrada.archivo?.name ?? 'Sesión 12 - Fracciones.pdf'}`
           : 'Escrito por la docente'
-    return { ...FICHA_EJEMPLO, grado: entrada.grado, duracion: entrada.duracion, fuente }
+    return { ...FICHA_EJEMPLO, grado: entrada.grado, duracion: entrada.duracion ?? FICHA_EJEMPLO.duracion, fuente }
   },
   async generarCancion(_ficha, opciones) {
     await esperar(1200)
@@ -30,7 +30,7 @@ export const mockApi: Api = {
     await esperar(2200)
     return { url: null, duracionSeg: 102 }
   },
-  async generarExamen(_ficha, opciones) {
+  async generarExamen(_ficha, { examenPropio: _, ...opciones }) {
     await esperar(1300)
     return examenEjemplo(opciones)
   },

@@ -54,7 +54,7 @@ export const FICHA_EJEMPLO: Ficha = {
 }
 
 export const TEMAS_RECIENTES: TemaReciente[] = [
-  { titulo: 'Fracciones: partes de un todo', cuando: 'Hoy', grado: '4.º primaria', herramientas: ['cancion', 'examen', 'juego', 'adaptar'] },
+  { titulo: 'Fracciones: partes de un todo', cuando: 'Hoy', grado: '4.º primaria', herramientas: ['examen', 'juego'] },
   { titulo: 'El ciclo del agua', cuando: 'Ayer', grado: '4.º primaria', herramientas: ['crucigrama', 'adaptar'] },
   { titulo: 'Sustantivos propios y comunes', cuando: 'Lunes', grado: '4.º primaria', herramientas: ['juego'] },
 ]

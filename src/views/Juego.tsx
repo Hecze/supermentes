@@ -1,21 +1,20 @@
-import { Copy, Flag, Footprints, Maximize2, MessageCircle, RotateCcw, Trophy } from 'lucide-react'
+import { Copy, Flag, Footprints, Maximize2, MessageCircle, RotateCcw, Share2, Trophy } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
-import { api, COSTOS, textoCosto, type Carta, type Juego as DatosJuego } from '../api'
+import { api, COSTOS, type Carta, type Juego as DatosJuego } from '../api'
 import { normalizar } from '../lib/crucigrama'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Boton, Costo, Etiqueta, Generando, Pastel, QrEjemplo, Tarjeta, cx, tinte } from '../components/ui'
+import { Acciones, Boton, Generando, NotaCreditos, Pastel, Pregunta, QrEjemplo, cx, tinte } from '../components/ui'
 
 const COLOR = 'var(--juego)'
 
-type Plantilla = 'memoria' | 'carrera' | 'palabra' | 'clasificar'
+type Plantilla = 'memoria' | 'carrera' | 'palabra'
 
-const PLANTILLAS: { id: Plantilla; nombre: string; descripcion: string }[] = [
-  { id: 'memoria', nombre: 'Memoria', descripcion: 'Encuentra cada fracción con su dibujo.' },
-  { id: 'carrera', nombre: 'Carrera de preguntas', descripcion: 'Cada respuesta correcta avanza en la pista.' },
-  { id: 'palabra', nombre: 'Adivina la palabra', descripcion: 'Letra por letra, antes de que se revienten los globos.' },
-  { id: 'clasificar', nombre: 'Clasificar', descripcion: 'Arrastra cada tarjeta a su grupo.' },
+const PLANTILLAS: { id: Plantilla; nombre: string }[] = [
+  { id: 'memoria', nombre: 'Memoria' },
+  { id: 'carrera', nombre: 'Carrera de preguntas' },
+  { id: 'palabra', nombre: 'Adivina la palabra' },
 ]
 
 function barajar<T>(lista: T[], semilla: number) {
@@ -27,6 +26,18 @@ function barajar<T>(lista: T[], semilla: number) {
     ;[a[i], a[j]] = [a[j], a[i]]
   }
   return a
+}
+
+function Ganaste({ texto, otraVez }: { texto: string; otraVez: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-xl p-3" style={{ background: tinte(COLOR, 12) }}>
+      <Trophy className="size-6" style={{ color: COLOR }} aria-hidden />
+      <p className="flex-1 font-semibold">{texto}</p>
+      <Boton variante="contorno" tam="sm" onClick={otraVez}>
+        <RotateCcw className="size-4" aria-hidden /> Otra vez
+      </Boton>
+    </div>
+  )
 }
 
 function CaraCarta({ carta }: { carta: Carta }) {
@@ -48,40 +59,28 @@ function Memoria({ juego }: { juego: DatosJuego }) {
   )
   const [abiertas, setAbiertas] = useState<number[]>([])
   const [encontradas, setEncontradas] = useState<Set<number>>(new Set())
-  const [movidas, setMovidas] = useState(0)
-  const ganaste = encontradas.size === juego.pares.length
+  const [intentos, setIntentos] = useState(0)
 
   function tocar(i: number) {
     if (abiertas.length === 2 || abiertas.includes(i) || encontradas.has(cartas[i].par)) return
     const nuevas = [...abiertas, i]
     setAbiertas(nuevas)
-    if (nuevas.length === 2) {
-      setMovidas((m) => m + 1)
-      const [a, b] = nuevas
-      if (cartas[a].par === cartas[b].par) {
-        setEncontradas((e) => new Set(e).add(cartas[a].par))
-        setAbiertas([])
-      } else {
-        window.setTimeout(() => setAbiertas([]), 900)
-      }
+    if (nuevas.length < 2) return
+    setIntentos((n) => n + 1)
+    const [a, b] = nuevas
+    if (cartas[a].par === cartas[b].par) {
+      setEncontradas((e) => new Set(e).add(cartas[a].par))
+      setAbiertas([])
+    } else {
+      window.setTimeout(() => setAbiertas([]), 900)
     }
-  }
-
-  function reiniciar() {
-    setRonda((r) => r + 1)
-    setAbiertas([])
-    setEncontradas(new Set())
-    setMovidas(0)
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between text-sm tabular-nums">
-        <span>
-          Parejas: {encontradas.size}/{juego.pares.length}
-        </span>
-        <span>Intentos: {movidas}</span>
-      </div>
+      <p className="text-ink-soft tabular-nums">
+        Encuentra las parejas · {encontradas.size} de {juego.pares.length}
+      </p>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6">
         {cartas.map((c, i) => {
           const visible = abiertas.includes(i) || encontradas.has(c.par)
@@ -94,14 +93,11 @@ function Memoria({ juego }: { juego: DatosJuego }) {
               aria-label={visible ? c.carta.texto : 'Carta tapada'}
             >
               <span className="voltear-interior block">
-                <span
-                  className="cara grid place-items-center rounded-xl font-display text-3xl font-bold text-on-tool"
-                  style={{ background: COLOR }}
-                >
+                <span className="cara grid place-items-center rounded-xl font-display text-3xl font-bold text-on-tool" style={{ background: COLOR }}>
                   ?
                 </span>
                 <span
-                  className={cx('cara cara-frente grid place-items-center rounded-xl border-2 bg-surface p-1')}
+                  className="cara cara-frente grid place-items-center rounded-xl border-2 bg-surface p-1"
                   style={{ borderColor: encontradas.has(c.par) ? COLOR : 'var(--line)' }}
                 >
                   <CaraCarta carta={c.carta} />
@@ -111,14 +107,16 @@ function Memoria({ juego }: { juego: DatosJuego }) {
           )
         })}
       </div>
-      {ganaste && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl p-3" style={{ background: tinte(COLOR, 12) }}>
-          <Trophy className="size-6" style={{ color: COLOR }} aria-hidden />
-          <p className="flex-1 font-semibold">¡Lo lograste en {movidas} intentos!</p>
-          <Boton variante="contorno" tam="sm" onClick={reiniciar}>
-            <RotateCcw className="size-4" aria-hidden /> Jugar otra vez
-          </Boton>
-        </div>
+      {encontradas.size === juego.pares.length && (
+        <Ganaste
+          texto={`¡Lo lograron en ${intentos} intentos!`}
+          otraVez={() => {
+            setRonda((r) => r + 1)
+            setAbiertas([])
+            setEncontradas(new Set())
+            setIntentos(0)
+          }}
+        />
       )}
     </div>
   )
@@ -129,52 +127,34 @@ function Carrera({ juego }: { juego: DatosJuego }) {
   const [elegida, setElegida] = useState<number | null>(null)
   const [puntos, setPuntos] = useState(0)
   const total = juego.preguntas.length
-  const terminado = i >= total
   const p = juego.preguntas[Math.min(i, total - 1)]
-
-  function elegir(o: number) {
-    if (elegida !== null) return
-    setElegida(o)
-    if (o === p.correcta) setPuntos((x) => x + 1)
-  }
+  const avance = puntos / total
 
   return (
     <div className="flex flex-col gap-4">
       <div className="relative h-10 rounded-full bg-surface-2" aria-label={`Avance: ${puntos} de ${total}`}>
-        <div className="absolute inset-y-0 left-0 rounded-full transition-all" style={{ width: `${(puntos / total) * 100}%`, background: tinte(COLOR, 30) }} />
+        <div className="absolute inset-y-0 left-0 rounded-full transition-all" style={{ width: `${avance * 100}%`, background: tinte(COLOR, 30) }} />
         <span
           className="absolute top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-on-tool transition-all"
-          style={{ left: `calc(${(puntos / total) * 100}% - ${(puntos / total) * 32}px)`, background: COLOR }}
+          style={{ left: `calc(${avance * 100}% - ${avance * 32}px)`, background: COLOR }}
           aria-hidden
         >
           <Footprints className="size-4" />
         </span>
         <Flag className="absolute right-3 top-1/2 size-5 -translate-y-1/2 text-ink-soft" aria-hidden />
       </div>
-      {terminado ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl p-3" style={{ background: tinte(COLOR, 12) }}>
-          <Trophy className="size-6" style={{ color: COLOR }} aria-hidden />
-          <p className="flex-1 font-semibold">
-            Llegaste a la meta con {puntos} de {total} respuestas correctas.
-          </p>
-          <Boton
-            variante="contorno"
-            tam="sm"
-            onClick={() => {
-              setI(0)
-              setPuntos(0)
-              setElegida(null)
-            }}
-          >
-            <RotateCcw className="size-4" aria-hidden /> Otra carrera
-          </Boton>
-        </div>
+      {i >= total ? (
+        <Ganaste
+          texto={`Llegaron a la meta con ${puntos} de ${total} respuestas correctas.`}
+          otraVez={() => {
+            setI(0)
+            setPuntos(0)
+            setElegida(null)
+          }}
+        />
       ) : (
         <>
-          <p className="text-sm text-ink-soft tabular-nums">
-            Pregunta {i + 1} de {total}
-          </p>
-          <p className="font-display text-xl font-semibold">{p.pregunta}</p>
+          <p className="font-display text-xl font-semibold sm:text-2xl">{p.pregunta}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {p.opciones.map((o, k) => {
               const correcta = elegida !== null && k === p.correcta
@@ -183,9 +163,13 @@ function Carrera({ juego }: { juego: DatosJuego }) {
                 <button
                   key={o}
                   type="button"
-                  onClick={() => elegir(k)}
+                  onClick={() => {
+                    if (elegida !== null) return
+                    setElegida(k)
+                    if (k === p.correcta) setPuntos((x) => x + 1)
+                  }}
                   className={cx(
-                    'min-h-12 rounded-xl border-2 px-4 py-2 text-left font-medium transition',
+                    'min-h-14 rounded-xl border-2 px-4 py-2 text-left text-lg font-medium transition',
                     correcta ? 'border-ok bg-ok/12' : mal ? 'border-danger bg-danger/10' : 'border-line bg-surface hover:bg-surface-2',
                   )}
                 >
@@ -223,11 +207,6 @@ function AdivinaPalabra({ juego }: { juego: DatosJuego }) {
   const gano = palabra.split('').every((l) => usadas.has(l))
   const perdio = errores >= GLOBOS
 
-  function siguiente() {
-    setN(n + 1)
-    setUsadas(new Set())
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-center gap-2 text-2xl" aria-label={`Quedan ${GLOBOS - errores} globos`}>
@@ -237,21 +216,22 @@ function AdivinaPalabra({ juego }: { juego: DatosJuego }) {
           </span>
         ))}
       </div>
-      <p className="text-center text-sm text-ink-soft">Pista: {actual.pista}</p>
+      <p className="text-center text-ink-soft">Pista: {actual.pista}</p>
       <p className="flex flex-wrap justify-center gap-1.5 font-display text-3xl font-bold" aria-live="polite">
         {palabra.split('').map((l, i) => (
-          <span key={i} className="grid h-11 w-8 place-items-end border-b-[3px] border-ink pb-0.5">
+          <span key={i} className="grid h-11 w-8 place-items-end justify-center border-b-[3px] border-ink pb-0.5">
             {usadas.has(l) || perdio ? l : ''}
           </span>
         ))}
       </p>
       {gano || perdio ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl p-3" style={{ background: tinte(gano ? COLOR : 'var(--danger)', 12) }}>
-          <p className="flex-1 font-semibold">{gano ? '¡Adivinaste!' : `La palabra era ${palabra}.`}</p>
-          <Boton variante="contorno" tam="sm" onClick={siguiente}>
-            Otra palabra
-          </Boton>
-        </div>
+        <Ganaste
+          texto={gano ? '¡Adivinaron!' : `La palabra era ${palabra}.`}
+          otraVez={() => {
+            setN(n + 1)
+            setUsadas(new Set())
+          }}
+        />
       ) : (
         <div className="flex flex-wrap justify-center gap-1.5">
           {ABECEDARIO.map((l) => (
@@ -261,7 +241,7 @@ function AdivinaPalabra({ juego }: { juego: DatosJuego }) {
               disabled={usadas.has(l)}
               onClick={() => setUsadas(new Set(usadas).add(l))}
               className={cx(
-                'size-9 rounded-lg border border-line text-sm font-semibold transition disabled:opacity-35',
+                'size-10 rounded-lg border border-line font-semibold transition disabled:opacity-35',
                 usadas.has(l) && palabra.includes(l) ? 'bg-ok/15' : 'bg-surface hover:bg-surface-2',
               )}
             >
@@ -274,46 +254,10 @@ function AdivinaPalabra({ juego }: { juego: DatosJuego }) {
   )
 }
 
-function ClasificarVistaPrevia() {
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap justify-center gap-2">
-        {['1/8', '3/4', '1/3', '2/3'].map((f) => (
-          <span key={f} className="rounded-lg border-2 border-line bg-surface px-3 py-1.5 font-display text-lg font-bold">
-            {f}
-          </span>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        {['Menos de la mitad', 'Más de la mitad'].map((g) => (
-          <div key={g} className="grid min-h-28 place-items-center rounded-xl border-2 border-dashed border-line p-3 text-center text-sm text-ink-soft">
-            {g}
-          </div>
-        ))}
-      </div>
-      <p className="text-center text-sm text-ink-soft">Plantilla en diseño: todavía no se puede jugar.</p>
-    </div>
-  )
-}
-
-export function Juego() {
-  const { ficha, resultados, guardar, avisar } = useStore()
-  const { ocupado, generar } = useGeneracion()
-  const [plantilla, setPlantilla] = useState<Plantilla>('memoria')
-  const escenario = useRef<HTMLDivElement>(null)
-  const juego = resultados.juego
-
-  if (!ficha) return <SinTema />
-
-  async function crear() {
-    const nuevo = await generar(COSTOS.juego, 'Juego', () => api.generarJuego(ficha!))
-    if (nuevo) guardar('juego', nuevo)
-  }
-
-  const enlace = juego ? `supermentes.pe/j/${juego.codigo}` : ''
-  const mensajeWhatsapp = juego
-    ? `¡Hola! Hoy jugamos sobre "${ficha.titulo}". Entra aquí: https://${enlace} (código ${juego.codigo})`
-    : ''
+function Compartir({ juego, titulo }: { juego: DatosJuego; titulo: string }) {
+  const { avisar } = useStore()
+  const enlace = `supermentes.pe/j/${juego.codigo}`
+  const mensaje = `¡Hola! Hoy jugamos sobre "${titulo}". Entra aquí: https://${enlace} (código ${juego.codigo})`
 
   async function copiar() {
     try {
@@ -324,97 +268,112 @@ export function Juego() {
     }
   }
 
-  function pantallaCompleta() {
-    escenario.current?.requestFullscreen?.().catch(() => avisar('Tu navegador no permite pantalla completa aquí.', 'error'))
+  return (
+    <section className="flex flex-col gap-4 rounded-2xl border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
+      <QrEjemplo semilla={juego.codigo} tam={136} />
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div>
+          <p className="font-semibold">Tus alumnos escanean el código con el celular</p>
+          <p className="text-ink-soft">
+            O entran a {enlace} con el código <strong className="text-ink">{juego.codigo}</strong>. No necesitan cuenta.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-11 items-center gap-2 rounded-xl px-4 font-medium text-on-tool hover:opacity-90"
+            style={{ background: COLOR }}
+          >
+            <MessageCircle className="size-5" aria-hidden /> Enviar por WhatsApp
+          </a>
+          <Boton variante="contorno" onClick={copiar}>
+            <Copy className="size-5" aria-hidden /> Copiar link
+          </Boton>
+        </div>
+        <p className="text-xs text-ink-soft">Código y link de ejemplo hasta que el juego se publique desde el servidor.</p>
+      </div>
+    </section>
+  )
+}
+
+export function Juego() {
+  const { ficha, resultados, guardar, avisar, creditos } = useStore()
+  const { ocupado, generar } = useGeneracion()
+  const [plantilla, setPlantilla] = useState<Plantilla>('memoria')
+  const [compartir, setCompartir] = useState(false)
+  const escenario = useRef<HTMLDivElement>(null)
+  const juego = resultados.juego
+
+  if (!ficha) return <SinTema />
+
+  async function crear() {
+    const nuevo = await generar(COSTOS.juego, 'Juego', () => api.generarJuego(ficha!))
+    if (nuevo) guardar('juego', nuevo)
+  }
+
+  if (!juego) {
+    return (
+      <>
+        <EncabezadoHerramienta id="juego" />
+        <Pregunta titulo="Creamos juegos con tu tema">
+          <p className="max-w-2xl text-lg text-ink-soft">
+            Memoria, carrera de preguntas y adivina la palabra. Se juegan proyectados en clase o desde el celular de cada alumno.
+          </p>
+        </Pregunta>
+        <div className="flex flex-col items-start gap-2">
+          <Boton tam="lg" variante="herramienta" herramienta="juego" onClick={crear} cargando={ocupado}>
+            Crear los juegos
+          </Boton>
+          <NotaCreditos n={COSTOS.juego} quedan={creditos} />
+        </div>
+        {ocupado && <Generando texto="Preparando preguntas, parejas y palabras…" />}
+      </>
+    )
   }
 
   return (
     <>
       <EncabezadoHerramienta id="juego" />
 
-      {!juego ? (
-        <Tarjeta className="flex flex-col items-start gap-3">
-          <p className="max-w-xl text-ink-soft">
-            Creamos el contenido una sola vez a partir de tu ficha. Después puedes cambiar de plantilla gratis, porque todas usan el mismo contenido.
-          </p>
-          <Boton variante="herramienta" herramienta="juego" onClick={crear} cargando={ocupado}>
-            Crear el juego · {textoCosto(COSTOS.juego)}
-          </Boton>
-          {ocupado && <Generando texto="Preparando preguntas, parejas y palabras…" />}
-        </Tarjeta>
-      ) : (
-        <>
-          <section className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Etiqueta>Plantilla</Etiqueta>
-              <Costo n={0} />
-              <span className="text-xs text-ink-soft">Cambiar de plantilla no gasta créditos.</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-              {PLANTILLAS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPlantilla(p.id)}
-                  aria-pressed={plantilla === p.id}
-                  className="flex flex-col gap-1 rounded-xl border-2 bg-surface p-3 text-left transition hover:bg-surface-2"
-                  style={{ borderColor: plantilla === p.id ? COLOR : 'var(--line)' }}
-                >
-                  <span className="font-semibold">{p.nombre}</span>
-                  <span className="text-xs text-ink-soft">{p.descripcion}</span>
-                </button>
-              ))}
-            </div>
-          </section>
+      <div className="flex gap-1 overflow-x-auto rounded-2xl bg-surface-2 p-1" role="tablist" aria-label="Juego">
+        {PLANTILLAS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            role="tab"
+            aria-selected={plantilla === p.id}
+            onClick={() => setPlantilla(p.id)}
+            className={cx(
+              'h-11 flex-1 whitespace-nowrap rounded-xl px-4 transition',
+              plantilla === p.id ? 'bg-surface font-semibold shadow-sm' : 'text-ink-soft hover:text-ink',
+            )}
+          >
+            {p.nombre}
+          </button>
+        ))}
+      </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-            <div ref={escenario} className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:p-6">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-display text-xl font-bold" style={{ color: COLOR }}>
-                  {PLANTILLAS.find((p) => p.id === plantilla)?.nombre}
-                </p>
-                <Boton variante="suave" tam="sm" onClick={pantallaCompleta}>
-                  <Maximize2 className="size-4" aria-hidden /> Proyectar
-                </Boton>
-              </div>
-              {plantilla === 'memoria' && <Memoria juego={juego} />}
-              {plantilla === 'carrera' && <Carrera juego={juego} />}
-              {plantilla === 'palabra' && <AdivinaPalabra juego={juego} />}
-              {plantilla === 'clasificar' && <ClasificarVistaPrevia />}
-            </div>
+      <div ref={escenario} className="flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:p-8">
+        {plantilla === 'memoria' && <Memoria juego={juego} />}
+        {plantilla === 'carrera' && <Carrera juego={juego} />}
+        {plantilla === 'palabra' && <AdivinaPalabra juego={juego} />}
+      </div>
 
-            <Tarjeta className="flex flex-col gap-4 self-start">
-              <div>
-                <Etiqueta>Compartir con tu clase</Etiqueta>
-                <p className="mt-1 text-sm text-ink-soft">Tus estudiantes entran desde cualquier celular, sin cuenta ni instalar nada.</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <QrEjemplo semilla={juego.codigo} tam={120} />
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className="text-xs text-ink-soft">Código de la clase</span>
-                  <span className="font-display text-2xl font-bold tracking-wide">{juego.codigo}</span>
-                  <span className="truncate text-sm text-ink-soft">{enlace}</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent(mensajeWhatsapp)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-9 items-center gap-2 rounded-xl px-3 text-sm font-medium text-on-tool hover:opacity-90"
-                  style={{ background: COLOR }}
-                >
-                  <MessageCircle className="size-4" aria-hidden /> Enviar por WhatsApp
-                </a>
-                <Boton variante="contorno" tam="sm" onClick={copiar}>
-                  <Copy className="size-4" aria-hidden /> Copiar link
-                </Boton>
-              </div>
-              <p className="text-xs text-ink-soft">QR y link de ejemplo: se activan cuando el juego se publica desde el backend.</p>
-            </Tarjeta>
-          </div>
-        </>
-      )}
+      <Acciones>
+        <Boton variante="herramienta" herramienta="juego" onClick={() => setCompartir(!compartir)}>
+          <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
+        </Boton>
+        <Boton
+          variante="contorno"
+          onClick={() => escenario.current?.requestFullscreen?.().catch(() => avisar('Tu navegador no permite pantalla completa aquí.', 'error'))}
+        >
+          <Maximize2 className="size-5" aria-hidden /> Proyectar en clase
+        </Boton>
+      </Acciones>
+
+      {compartir && <Compartir juego={juego} titulo={ficha.titulo} />}
     </>
   )
 }

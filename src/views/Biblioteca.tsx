@@ -1,9 +1,9 @@
-import { Library, Search, Users } from 'lucide-react'
+import { Library, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, type HerramientaId, type Material } from '../api'
 import { GRADOS, HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
-import { Boton, Chip, Costo, IconoHerramienta, Tarjeta } from '../components/ui'
+import { Boton, Chip, IconoHerramienta, Tarjeta } from '../components/ui'
 
 export function Biblioteca() {
   const { avisar } = useStore()
@@ -35,27 +35,20 @@ export function Biblioteca() {
     <>
       <header className="flex flex-col gap-2">
         <h1 className="font-display text-4xl font-bold">Biblioteca</h1>
-        <p className="max-w-2xl text-ink-soft">Materiales que crearon profes de todo el Perú. Úsalos tal cual o ajústalos a tu clase.</p>
+        <p className="max-w-2xl text-lg text-ink-soft">Materiales que hicieron profes de todo el Perú. Usarlos es gratis.</p>
       </header>
-
-      <div className="flex items-start gap-3 rounded-2xl border border-ok/35 bg-ok/8 p-4">
-        <Users className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden />
-        <p className="text-sm">
-          <strong>Usar un material de la biblioteca es gratis.</strong> Cada vez que alguien reutiliza algo, nadie paga por generarlo de nuevo.
-        </p>
-      </div>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row">
           <label htmlFor="bib-buscar" className="relative flex-1">
             <span className="sr-only">Buscar</span>
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-soft" aria-hidden />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-ink-soft" aria-hidden />
             <input
               id="bib-buscar"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Busca un tema: fracciones, ciclo del agua…"
-              className="h-11 w-full rounded-xl border border-line bg-surface pl-9 pr-3 focus:border-ink focus:outline-none"
+              className="h-12 w-full rounded-2xl border-2 border-line bg-surface pl-10 pr-3 text-lg focus:border-ink focus:outline-none"
             />
           </label>
           <label htmlFor="bib-grado" className="sr-only">
@@ -65,7 +58,7 @@ export function Biblioteca() {
             id="bib-grado"
             value={grado}
             onChange={(e) => setGrado(e.target.value)}
-            className="h-11 rounded-xl border border-line bg-surface px-3 focus:border-ink focus:outline-none"
+            className="h-12 rounded-2xl border-2 border-line bg-surface px-3 focus:border-ink focus:outline-none"
           >
             <option value="">Todos los grados</option>
             {GRADOS.map((g) => (
@@ -116,7 +109,7 @@ export function Biblioteca() {
                   <span className="text-xs text-ink-soft">Lo compartiste tú</span>
                 ) : (
                   <Boton variante="contorno" tam="sm" onClick={() => avisar(`"${m.titulo}" se agregó a tus materiales.`, 'ok')}>
-                    Usar <Costo n={0} />
+                    Usar
                   </Boton>
                 )}
               </div>

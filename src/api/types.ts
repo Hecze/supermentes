@@ -8,8 +8,9 @@ export type EntradaTema = {
   texto?: string
   archivo?: File
   grado: string
-  area: string
-  duracion: string
+  /** Si no se indica, la IA la deduce del tema. */
+  area?: string
+  duracion?: string
 }
 
 /** Fracción para dibujar: [partes pintadas, partes totales]. Solo aplica a temas de matemática. */
@@ -54,6 +55,8 @@ export type AudioCancion = {
 export type OpcionesExamen = {
   interes: string
   formato: 'mision' | 'contextualizado'
+  /** Examen propio del docente para transformarlo; si no hay, se crea desde la ficha. */
+  examenPropio?: File
 }
 
 export type PreguntaExamen = {

@@ -5,6 +5,8 @@ import { COSTOS, textoCosto, type HerramientaId } from '../api'
 export type Herramienta = {
   id: HerramientaId
   nombre: string
+  /** Cómo lo pide el docente: "Una canción", "Un juego"… */
+  pedido: string
   descripcion: string
   icono: ComponentType<LucideProps>
   color: string
@@ -16,40 +18,45 @@ export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['cancion', 'examen', 'juego'
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   cancion: {
     id: 'cancion',
+    pedido: 'Una canción',
     nombre: 'Canción',
-    descripcion: 'Una canción pegadiza para memorizar el tema.',
+    descripcion: 'Para que memoricen el tema cantando.',
     icono: Music,
     color: 'var(--cancion)',
     costo: `Letra ${textoCosto(COSTOS.letra)} · audio ${textoCosto(COSTOS.audio)}`,
   },
   examen: {
     id: 'examen',
+    pedido: 'Un examen divertido',
     nombre: 'Examen gamificado',
-    descripcion: 'Tu evaluación convertida en una misión con lo que le gusta a tu clase.',
+    descripcion: 'Tu evaluación con lo que le gusta a tu clase.',
     icono: FileText,
     color: 'var(--examen)',
     costo: `${textoCosto(COSTOS.examen)} · ilustraciones aparte`,
   },
   juego: {
     id: 'juego',
+    pedido: 'Un juego',
     nombre: 'Juego web',
-    descripcion: 'Un minijuego que tus estudiantes abren con un QR, sin instalar nada.',
+    descripcion: 'Lo juegan en el celular o proyectado en clase.',
     icono: Gamepad2,
     color: 'var(--juego)',
     costo: textoCosto(COSTOS.juego),
   },
   crucigrama: {
     id: 'crucigrama',
+    pedido: 'Un crucigrama',
     nombre: 'Crucigrama',
-    descripcion: 'Con el vocabulario del tema, listo para imprimir.',
+    descripcion: 'Con las palabras del tema, listo para imprimir.',
     icono: Grid3x3,
     color: 'var(--crucigrama)',
     costo: textoCosto(COSTOS.crucigrama),
   },
   adaptar: {
     id: 'adaptar',
+    pedido: 'Adaptar para un estudiante',
     nombre: 'Adaptar para inclusión',
-    descripcion: 'Versiones para estudiantes con TDAH, dislexia o TEA, con consejos para el aula.',
+    descripcion: 'Una versión para quien aprende distinto.',
     icono: HeartHandshake,
     color: 'var(--adaptar)',
     costo: textoCosto(COSTOS.adaptacion),

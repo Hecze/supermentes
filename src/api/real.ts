@@ -16,8 +16,8 @@ export const realApi: Api = {
     const datos = new FormData()
     datos.set('tipo', entrada.tipo)
     datos.set('grado', entrada.grado)
-    datos.set('area', entrada.area)
-    datos.set('duracion', entrada.duracion)
+    if (entrada.area) datos.set('area', entrada.area)
+    if (entrada.duracion) datos.set('duracion', entrada.duracion)
     if (entrada.texto) datos.set('texto', entrada.texto)
     if (entrada.archivo) datos.set('archivo', entrada.archivo)
     const res = await fetch('/api/ficha', { method: 'POST', body: datos })
@@ -26,7 +26,16 @@ export const realApi: Api = {
   },
   generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
   generarAudio: (cancion) => post('audio', { cancion }),
-  generarExamen: (ficha, opciones) => post('examen', { ficha, opciones }),
+  async generarExamen(ficha, { examenPropio, ...opciones }) {
+    if (!examenPropio) return post('examen', { ficha, opciones })
+    const datos = new FormData()
+    datos.set('ficha', JSON.stringify(ficha))
+    datos.set('opciones', JSON.stringify(opciones))
+    datos.set('examen', examenPropio)
+    const res = await fetch('/api/examen', { method: 'POST', body: datos })
+    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/examen`)
+    return res.json()
+  },
   generarIlustraciones: (examen) => post('ilustraciones', { examen }),
   generarJuego: (ficha) => post('juego', { ficha }),
   adaptar: (ficha, necesidades) => post('adaptar', { ficha, necesidades }),
