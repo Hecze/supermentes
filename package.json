@@ -16,6 +16,8 @@
     "turbo": "^2.11.9"
   },
   "dependencies": {
-    "@vercel/blob": "^2.8.2"
+    "@anthropic-ai/sdk": "^0.135.0",
+    "@vercel/blob": "^2.8.2",
+    "zod": "^4.6.7"
   }
 }

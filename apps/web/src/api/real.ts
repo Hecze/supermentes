@@ -1,14 +1,33 @@
 // Implementación real: llama al backend en /api/*. Cada endpoint devuelve los tipos de types.ts.
 import type { Api } from './types'
 
+// El backend responde { error } con un mensaje para el docente; si no hay, uno genérico.
+async function leer<T>(res: Response): Promise<T> {
+  if (res.ok) return res.json() as Promise<T>
+  const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null
+  throw new Error(cuerpo?.error ?? 'No pudimos conectar con Supermentes. Vuelve a intentarlo.')
+}
+
+// Vercel acepta hasta 4,5 MB por pedido y una foto de celular suele pasarlo: se achica a 1600 px en JPEG.
+async function achicar(archivo: File): Promise<File> {
+  if (!archivo.type.startsWith('image/') || archivo.size < 1_500_000) return archivo
+  const imagen = await createImageBitmap(archivo)
+  const escala = Math.min(1, 1600 / Math.max(imagen.width, imagen.height))
+  const lienzo = document.createElement('canvas')
+  lienzo.width = Math.round(imagen.width * escala)
+  lienzo.height = Math.round(imagen.height * escala)
+  lienzo.getContext('2d')!.drawImage(imagen, 0, 0, lienzo.width, lienzo.height)
+  const blob = await new Promise<Blob | null>((r) => lienzo.toBlob(r, 'image/jpeg', 0.85))
+  return blob ? new File([blob], archivo.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }) : archivo
+}
+
 async function post<T>(ruta: string, cuerpo: unknown): Promise<T> {
   const res = await fetch(`/api/${ruta}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cuerpo),
   })
-  if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/${ruta}`)
-  return res.json() as Promise<T>
+  return leer<T>(res)
 }
 
 export const realApi: Api = {
@@ -24,10 +43,8 @@ export const realApi: Api = {
     if (entrada.desempenos?.length) datos.set('desempenos', JSON.stringify(entrada.desempenos))
     if (entrada.duracion) datos.set('duracion', entrada.duracion)
     if (entrada.texto) datos.set('texto', entrada.texto)
-    if (entrada.archivo) datos.set('archivo', entrada.archivo)
-    const res = await fetch('/api/ficha', { method: 'POST', body: datos })
-    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/ficha`)
-    return res.json()
+    if (entrada.archivo) datos.set('archivo', await achicar(entrada.archivo))
+    return leer(await fetch('/api/ficha', { method: 'POST', body: datos }))
   },
   generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
   generarAudio: (cancion) => post('audio', { cancion }),
@@ -36,17 +53,13 @@ export const realApi: Api = {
     const datos = new FormData()
     datos.set('ficha', JSON.stringify(ficha))
     datos.set('opciones', JSON.stringify(opciones))
-    datos.set('examen', examenPropio)
-    const res = await fetch('/api/examen', { method: 'POST', body: datos })
-    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/examen`)
-    return res.json()
+    datos.set('examen', await achicar(examenPropio))
+    return leer(await fetch('/api/examen', { method: 'POST', body: datos }))
   },
   generarIlustraciones: (examen) => post('ilustraciones', { examen }),
   generarJuego: (ficha) => post('juego', { ficha }),
   adaptar: (ficha, necesidades) => post('adaptar', { ficha, necesidades }),
   async biblioteca() {
-    const res = await fetch('/api/biblioteca')
-    if (!res.ok) throw new Error(`El servidor respondió ${res.status} en /api/biblioteca`)
-    return res.json()
+    return leer(await fetch('/api/biblioteca'))
   },
 }
