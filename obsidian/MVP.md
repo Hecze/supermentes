@@ -23,7 +23,7 @@ punta, con IA real, desde el link y en una ventana privada.
 4. La landing con lista de espera mide la tracción. **Listo.**
 
 ## Lo que falta, en orden
-1. **Producción:** Hector carga `ANTHROPIC_API_KEY` y `VITE_API=real` en Vercel. Sin esto, nada de lo
+1. **Producción:** Hector carga `OPENROUTER_API_KEY` (la de Harold) y `VITE_API=real` en Vercel. Sin esto, nada de lo
    anterior se ve en el link que abre el jurado.
 2. `api/juego.ts` con Claude (preguntas, parejas y palabras del tema).
 3. Audio de la canción con ElevenLabs, si llega la key a tiempo. Si no, la demo muestra la letra.

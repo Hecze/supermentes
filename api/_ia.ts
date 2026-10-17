@@ -3,7 +3,12 @@ import Anthropic from '@anthropic-ai/sdk'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import type { z } from 'zod'
 
-const cliente = new Anthropic()
+// Con OPENROUTER_API_KEY va por OpenRouter (mismo formato de Anthropic); si no, directo con ANTHROPIC_API_KEY.
+const openrouter = process.env.OPENROUTER_API_KEY
+const cliente = openrouter
+  ? new Anthropic({ baseURL: 'https://openrouter.ai/api', apiKey: null, authToken: openrouter })
+  : new Anthropic()
+const MODELO = openrouter ? 'anthropic/claude-opus-5.5' : 'claude-opus-5-5'
 
 export const SISTEMA = `Eres Supermentes, un asistente que prepara material de clase para docentes del Perú (Inicial, Primaria y Secundaria).
 - Escribe en español peruano neutro, claro y cálido, con palabras del aula (nada de jerga técnica ni pedagógica rebuscada).
@@ -14,7 +19,7 @@ export const SISTEMA = `Eres Supermentes, un asistente que prepara material de c
 /** Una llamada a Claude que devuelve JSON validado contra el esquema. */
 export async function generar<T extends z.ZodType>(esquema: T, contenido: Anthropic.ContentBlockParam[]): Promise<z.infer<T>> {
   const res = await cliente.messages.parse({
-    model: 'claude-opus-5-5',
+    model: MODELO,
     max_tokens: 16000,
     // ponytail: effort bajo para que el docente no espere; subir a medium si la calidad no alcanza.
     output_config: { effort: 'low', format: zodOutputFormat(esquema) },
