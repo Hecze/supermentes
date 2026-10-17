@@ -8,6 +8,10 @@
     {
       "source": "/app",
       "destination": "/app/index.html"
+    },
+    {
+      "source": "/j/:codigo",
+      "destination": "/j/index.html"
     }
   ]
 }

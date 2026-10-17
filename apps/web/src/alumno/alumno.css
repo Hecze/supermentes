@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Página del alumno: solo el juego, a pantalla completa, sin el panel del docente. */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #6cc4ff;
+  font-family: "Fredoka", ui-rounded, system-ui, sans-serif;
+  color: #2b2d5c;
+  overscroll-behavior: none;
+}
+
+:focus-visible {
+  outline: 3px solid #2b2d5c;
+  outline-offset: 2px;
+}

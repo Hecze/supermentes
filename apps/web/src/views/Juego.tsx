@@ -1,16 +1,19 @@
-import { ArrowLeft, Calculator, Check, Copy, MessageCircle, Presentation, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, NotaCreditos, QrEjemplo, cx, tinte } from '../components/ui'
+import { Acciones, Boton, Chip, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
 import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
+import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
+import { Qr } from '../juegos/compartir/Qr'
 import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/matematica/deducir'
 import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara } from '../juegos/matematica/habilidades'
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
+import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
 import type { DefinicionJuego, JuegoId } from '../juegos/tipos'
 
 const COLOR = 'var(--juego)'
@@ -248,29 +251,92 @@ function ElegirPractica({
   )
 }
 
-function Compartir({ codigo, titulo }: { codigo: string; titulo: string }) {
+// Un juego se publica una sola vez por sesión aunque se abra y cierre el panel.
+const publicados = new Map<string, Promise<{ url: string; codigo: string | null }>>()
+
+function enlaceDe(p: Publicado) {
+  const clave = JSON.stringify(p)
+  if (!publicados.has(clave)) {
+    publicados.set(
+      clave,
+      publicar(p).then(
+        (codigo) => ({ url: enlaceConCodigo(codigo), codigo }),
+        // Sin servidor (por ejemplo, en desarrollo) el juego viaja dentro del link y funciona igual.
+        async () => {
+          publicados.delete(clave)
+          return { url: await enlaceAutonomo(p), codigo: null }
+        },
+      ),
+    )
+  }
+  return publicados.get(clave)!
+}
+
+function Compartir({ publicado, nombreJuego }: { publicado: Publicado; nombreJuego: string }) {
   const { avisar } = useStore()
-  const enlace = `supermentes.pe/j/${codigo}`
-  const mensaje = `¡Hola! Hoy jugamos sobre "${titulo}". Entra aquí: https://${enlace} (código ${codigo})`
+  const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
+  const [grande, setGrande] = useState(false)
+  const panel = useRef<HTMLElement>(null)
+  const clave = JSON.stringify(publicado)
+
+  // El panel aparece debajo del juego: se desplaza para que se vea entero.
+  useEffect(() => {
+    panel.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [enlace])
+
+  useEffect(() => {
+    let vivo = true
+    setEnlace(null)
+    enlaceDe(publicado).then((e) => vivo && setEnlace(e))
+    return () => {
+      vivo = false
+    }
+    // publicado se recrea en cada render; clave cambia solo si cambia el juego.
+  }, [clave])
+
+  useEffect(() => {
+    if (!grande) return
+    const salir = (e: KeyboardEvent) => e.key === 'Escape' && setGrande(false)
+    window.addEventListener('keydown', salir)
+    return () => window.removeEventListener('keydown', salir)
+  }, [grande])
+
+  if (!enlace) {
+    return (
+      <section ref={panel} className="flex items-center gap-3 rounded-2xl print:hidden border-2 bg-surface p-5 text-ink-soft" style={{ borderColor: COLOR }} role="status">
+        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para tus alumnos…
+      </section>
+    )
+  }
+
+  const sitio = `${origen().replace(/^https?:\/\/(www\.)?/, '')}/j`
+  const mensaje = `¡Hola! Hoy jugamos «${nombreJuego}» para practicar ${publicado.tema}. Entra aquí: ${enlace.url}${enlace.codigo ? ` (código ${enlace.codigo})` : ''}`
 
   async function copiar() {
     try {
-      await navigator.clipboard.writeText(`https://${enlace}`)
+      await navigator.clipboard.writeText(enlace!.url)
       avisar('Link copiado.', 'ok')
     } catch {
-      avisar(`Copia este link: https://${enlace}`)
+      avisar(`Copia este link: ${enlace!.url}`)
     }
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
-      <QrEjemplo semilla={codigo} tam={136} />
+    <section ref={panel} className="flex flex-col gap-5 rounded-2xl print:hidden border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
+      <button type="button" onClick={() => setGrande(true)} className="shrink-0 self-center rounded-xl border border-line bg-white p-1.5" aria-label="Mostrar el código QR en grande">
+        <Qr texto={enlace.url} tam={152} />
+      </button>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div>
+        <div className="flex flex-col gap-1">
           <p className="font-semibold">Tus alumnos escanean el código con el celular</p>
-          <p className="text-ink-soft">
-            O entran a {enlace} con el código <strong className="text-ink">{codigo}</strong>. No necesitan cuenta.
-          </p>
+          {enlace.codigo ? (
+            <p className="text-ink-soft">
+              O entran a <strong className="text-ink">{sitio}</strong> y escriben el código{' '}
+              <strong className="rounded-md bg-surface-2 px-1.5 font-mono text-lg tracking-widest text-ink">{enlace.codigo}</strong>. No necesitan cuenta.
+            </p>
+          ) : (
+            <p className="text-sm text-ink-soft">No pudimos crear un código corto: el link funciona igual, con todo el juego adentro.</p>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <a
@@ -285,15 +351,35 @@ function Compartir({ codigo, titulo }: { codigo: string; titulo: string }) {
           <Boton variante="contorno" onClick={copiar}>
             <Copy className="size-5" aria-hidden /> Copiar link
           </Boton>
+          <Boton variante="contorno" onClick={() => setGrande(true)}>
+            <QrCode className="size-5" aria-hidden /> Mostrar en grande
+          </Boton>
+          <a href={enlace.url} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-xl px-3 font-medium text-ink-soft hover:bg-surface-2 hover:text-ink">
+            <ExternalLink className="size-5" aria-hidden /> Probar
+          </a>
         </div>
-        <p className="text-xs text-ink-soft">Código y link de ejemplo hasta que el juego se publique desde el servidor.</p>
       </div>
+
+      {grande && (
+        <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-[3vh] bg-white p-6 text-center text-[#111]" role="dialog" aria-modal aria-label="Código para escanear">
+          <button type="button" onClick={() => setGrande(false)} className="absolute right-4 top-4 grid size-12 place-items-center rounded-full bg-[#f1f2f6]" aria-label="Cerrar">
+            <X className="size-6" />
+          </button>
+          <p className="font-display text-[clamp(22px,4vw,48px)] font-bold">¡Escanea y a jugar {nombreJuego}!</p>
+          <Qr texto={enlace.url} tam="min(62vh, 82vw)" />
+          {enlace.codigo && (
+            <p className="text-[clamp(18px,3vw,36px)]">
+              {sitio} · código <strong className="font-mono tracking-[0.2em]">{enlace.codigo}</strong>
+            </p>
+          )}
+        </div>
+      )}
     </section>
   )
 }
 
 export function Juego() {
-  const { ficha, resultados, guardar, creditos } = useStore()
+  const { ficha, resultados, guardar, creditos, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
   const [elegido, setElegido] = useState<JuegoId | null>(null)
   const [eligiendo, setEligiendo] = useState(false)
@@ -331,7 +417,7 @@ export function Juego() {
     return (
       <>
         <EncabezadoHerramienta id="juego" />
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
           <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3">
             <ArrowLeft className="size-5" aria-hidden /> Todos los juegos
           </Boton>
@@ -346,7 +432,7 @@ export function Juego() {
           ritmo={ritmoDe(ficha.gradoId)}
           pantalla={pantalla}
           alSalir={() => setElegido(null)}
-          className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)]"
+          className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
         <Acciones>
           <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
@@ -355,8 +441,28 @@ export function Juego() {
           <Boton variante="contorno" onClick={() => setCompartir(!compartir)}>
             <Share2 className="size-5" aria-hidden /> Compartir con mis alumnos
           </Boton>
+          {enJuego.def.id === 'pupiletras' && (
+            <Boton variante="contorno" onClick={() => imprimir(avisar)}>
+              <Printer className="size-5" aria-hidden /> Imprimir pupiletras
+            </Boton>
+          )}
         </Acciones>
-        {compartir && <Compartir codigo={resultados.juego?.codigo ?? 'JUEGO-1'} titulo={ficha.titulo} />}
+        {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
+        {compartir && (
+          <Compartir
+            nombreJuego={enJuego.def.nombre}
+            publicado={{
+              v: 1,
+              juego: enJuego.def.id,
+              ritmo: ritmoDe(ficha.gradoId),
+              tema: ficha.titulo,
+              fuente:
+                fuente.fuente === 'calculo'
+                  ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
+                  : { tipo: 'tema', contenido: { titulo: contenido.titulo, retos: contenido.retos, pares: contenido.pares, palabras: contenido.palabras } },
+            }}
+          />
+        )}
       </>
     )
   }

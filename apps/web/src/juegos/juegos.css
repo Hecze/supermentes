@@ -326,3 +326,30 @@
 .carta.encontrada .carta-frente {
   animation: brillo 0.7s ease-out;
 }
+
+/* Topo: el cuy se asoma y se esconde en su hueco. */
+@keyframes asomar {
+  from {
+    transform: translateY(100%);
+  }
+  70% {
+    transform: translateY(-4%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes esconder {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(105%);
+  }
+}
+.asomar {
+  animation: asomar 0.25s ease-out both;
+}
+.esconder {
+  animation: esconder 0.22s ease-in both;
+}

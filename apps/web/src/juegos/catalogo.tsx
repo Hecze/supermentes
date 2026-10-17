@@ -3,7 +3,7 @@
 import { lazy } from 'react'
 import { normalizar } from '../lib/crucigrama'
 import { conRetos, cortos, largo } from './contenido'
-import { MiniCarrera, MiniGlobos, MiniMemoria, MiniPalabra, MiniRapido, MiniSoga } from './miniaturas'
+import { MiniCarrera, MiniGlobos, MiniMemoria, MiniPalabra, MiniPupiletras, MiniRapido, MiniRuleta, MiniSoga, MiniTopo } from './miniaturas'
 import type { Contenido, DefinicionJuego, JuegoId, Ritmo } from './tipos'
 
 /** Parejas que caben en una carta: textos cortos o un dibujo. */
@@ -13,11 +13,13 @@ function paresCortos(c: Contenido): Contenido | null {
   return pares.length >= 4 ? { ...c, pares } : null
 }
 
-/** Palabras de una sola pieza, de 3 a 12 letras, para adivinar letra por letra. */
-function palabrasSueltas(c: Contenido): Contenido | null {
-  const palabras = c.palabras.filter((p) => !/\s/.test(p.palabra.trim()) && normalizar(p.palabra).length >= 3 && normalizar(p.palabra).length <= 12)
-  return palabras.length >= 1 ? { ...c, palabras } : null
-}
+/** Palabras de una sola pieza, de 3 a 12 letras: para adivinar letra por letra o buscar en el pupiletras. */
+const palabrasSueltas =
+  (minimo: number) =>
+  (c: Contenido): Contenido | null => {
+    const palabras = c.palabras.filter((p) => !/\s/.test(p.palabra.trim()) && normalizar(p.palabra).length >= 3 && normalizar(p.palabra).length <= 12)
+    return palabras.length >= minimo ? { ...c, palabras } : null
+  }
 
 export const JUEGOS: DefinicionJuego[] = [
   {
@@ -88,9 +90,45 @@ export const JUEGOS: DefinicionJuego[] = [
     donde: ['celular', 'clase'],
     color: '#ff4f9a',
     inspirado: 'Ahorcado, sin horca',
-    preparar: palabrasSueltas,
+    preparar: palabrasSueltas(1),
     Miniatura: MiniPalabra,
     Componente: lazy(() => import('./palabra/AdivinaPalabra')),
+  },
+  {
+    id: 'pupiletras',
+    nombre: 'Pupiletras',
+    lema: 'Encuentran las palabras del tema escondidas en la sopa de letras.',
+    instrucciones: 'Arrastra el dedo de la primera a la última letra de cada palabra, o toca una y luego la otra.',
+    donde: ['celular', 'clase'],
+    color: '#17998f',
+    inspirado: 'Pupiletras (sopa de letras)',
+    preparar: palabrasSueltas(4),
+    Miniatura: MiniPupiletras,
+    Componente: lazy(() => import('./pupiletras/Pupiletras')),
+  },
+  {
+    id: 'topo',
+    nombre: 'Atrapa al cuy',
+    lema: 'Los cuyes se asoman con carteles: atrapan al que tiene la respuesta.',
+    instrucciones: 'Lee la pregunta y toca al cuy que tiene la respuesta correcta. ¡Rápido, que se esconden!',
+    donde: ['celular', 'clase'],
+    color: '#45b03a',
+    inspirado: 'Whack-a-mole (Wordwall)',
+    preparar: (c) => conRetos(c, cortos(12, 3), 4),
+    Miniatura: MiniTopo,
+    Componente: lazy(() => import('./topo/Topo')),
+  },
+  {
+    id: 'ruleta',
+    nombre: 'Ruleta de preguntas',
+    lema: 'Giran la ruleta en el proyector, sale una pregunta y toda la clase responde.',
+    instrucciones: 'Gira la ruleta. Lean la pregunta en voz alta, que la clase piense y luego toca «Ver respuesta».',
+    donde: ['clase'],
+    color: '#c2185b',
+    inspirado: 'Ruleta aleatoria (Wordwall)',
+    preparar: (c) => conRetos(c, (r) => (largo(r.pregunta) <= 200 ? cortos(60, 2)(r) : null), 4),
+    Miniatura: MiniRuleta,
+    Componente: lazy(() => import('./ruleta/Ruleta')),
   },
 ]
 

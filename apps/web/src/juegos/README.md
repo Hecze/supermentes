@@ -12,9 +12,9 @@ Habilidad + nivel ─┘
 
 | Forma | Qué es | La usan |
 | --- | --- | --- |
-| `Reto` | Pregunta con una respuesta correcta y distractores (siempre incorrectos) | Globos, Botones rápidos, Tira y afloja, Carrera |
+| `Reto` | Pregunta con una respuesta correcta y distractores (siempre incorrectos) | Globos, Botones rápidos, Tira y afloja, Carrera, Atrapa al cuy, Ruleta |
 | `Par` | Dos cosas que van juntas (3/4 y su dibujo, Rímac y río) | Memoria |
-| `Palabra` | Palabra y pista | Adivina la palabra |
+| `Palabra` | Palabra y pista | Adivina la palabra, Pupiletras |
 
 Un `Contenido` puede traer además `generar()`: retos sin fin, para la matemática.
 
@@ -35,6 +35,12 @@ Cada juego declara `preparar(contenido)`: deja solo lo que cabe (respuestas cort
 
 `motor/` trae lo común: la partida (portada, pantalla final con estrellas y récord), pantalla completa (también en iPhone), sonidos sintetizados (sin archivos), confeti, cuenta regresiva, la llamita y piezas como `TextoMat` (fracciones apiladas) y `Enunciado`.
 
+## Compartir con los alumnos (`compartir/`)
+
+El docente toca "Compartir con mis alumnos" y la app publica un `Publicado`: qué juego, el ritmo y de dónde sale el contenido. El cálculo se guarda como habilidad y nivel (el celular del alumno genera los ejercicios); el tema guarda su contenido. `api/juegos-compartidos.ts` lo valida, lo guarda en Vercel Blob y devuelve un código de 6 letras sin caracteres confusos (sin I, L, O, 0 ni 1).
+
+Los alumnos entran a `/j/CODIGO` (QR, WhatsApp) o escriben el código en `/j`. La página (`src/alumno/`) es liviana: solo el juego, con "Otro juego" para seguir con el mismo contenido. Si el servidor no responde, el juego viaja comprimido dentro del link (`/j/#d=…`) y abre igual.
+
 ## Juegos
 
 | Juego | Inspirado en | Dónde |
@@ -45,3 +51,6 @@ Cada juego declara `preparar(contenido)`: deja solo lo que cabe (respuestas cort
 | Memoria | Matching pairs (Wordwall) | Celular y proyector |
 | Carrera de llamas | Math Racing, sin reloj | Celular y proyector |
 | Adivina la palabra | Ahorcado, sin horca | Celular y proyector |
+| Pupiletras | Sopa de letras (también se imprime) | Celular y proyector |
+| Atrapa al cuy | Whack-a-mole (Wordwall) | Celular y proyector |
+| Ruleta de preguntas | Ruleta aleatoria (Wordwall), la guía el docente | Proyector |
