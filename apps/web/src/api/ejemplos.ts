@@ -53,7 +53,7 @@ export const FICHA_EJEMPLO: Ficha = {
   ],
   ejemplo: 'Si un queque se corta en 8 tajadas iguales y te comes 3, te comiste 3/8 del queque.',
   errorFrecuente: 'Confunden el numerador con el denominador: creen que el número más grande siempre va arriba.',
-  coincidenciasBiblioteca: 3,
+  coincidenciasBiblioteca: 2,
 }
 
 export const FICHA_AGUA: Ficha = {
@@ -406,7 +406,7 @@ export function juegoDesdeVocabulario(ficha: Ficha): Juego {
 // ---------- Biblioteca ----------
 
 export const BIBLIOTECA_EJEMPLO: Material[] = [
-  { id: 'm1', titulo: 'La cumbia de las fracciones', tipo: 'cancion', grado: '4.º primaria', area: 'Matemática', autor: 'Carmen Huamán', lugar: 'Arequipa', usos: 214 },
+  { id: 'm1', titulo: 'El rap del sistema inmune', tipo: 'cancion', grado: '5.º primaria', area: 'Ciencia y Tecnología', autor: 'Carmen Huamán', lugar: 'Arequipa', usos: 214 },
   { id: 'm2', titulo: 'Memoria de fracciones con pizzas', tipo: 'juego', grado: '4.º primaria', area: 'Matemática', autor: 'Jorge Mamani', lugar: 'Puno', usos: 156 },
   { id: 'm3', titulo: 'Misión: fracciones en la cocina', tipo: 'examen', grado: '4.º primaria', area: 'Matemática', autor: 'Diana Flores', lugar: 'Piura', usos: 120 },
   { id: 'm4', titulo: 'Trivia: animales de la Amazonía', tipo: 'juego', grado: '2.º primaria', area: 'Ciencia y Tecnología', autor: 'Miguel Vargas', lugar: 'Iquitos', usos: 133 },
