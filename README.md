@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un examen gamificado, un juego web, un crucigrama o una versión adaptada para estudiantes con TDAH, dislexia o TEA.
+Herramientas de IA para docentes del Perú. El docente crea un tema (escribe qué va a enseñar y, si quiere, agrega una foto de la página del libro o un archivo), Supermentes arma una **ficha del tema** y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama o su propio examen adaptado (sube el PDF y recibe un PDF ambientado en lo que le gusta a la clase o adaptado para estudiantes con TDAH, dislexia, TEA o que necesitan lectura fácil).
 
 Proyecto para Hack the Andes 2026.
 
@@ -53,7 +53,7 @@ Ya funciona sin backend:
 - **Mandar un juego a las familias:** el docente toca "Enviar a las familias" y sale el mensaje de WhatsApp para el grupo de papás con el link (`supermentes.app/j/CODIGO`); los niños juegan en el celular de casa, sin cuenta. También hay código para escribir en `/j` y QR en grande para la clase. Si el servidor no responde, el juego viaja dentro del link y abre igual.
 - **Resultados de los alumnos:** la primera vez, el niño escribe su nombre en un popup (sin cuenta; el código ya viene en el link). Cuando supera su puntaje, se guarda, y el docente ve en **Resultados de juegos** (en el menú, sin importar el tema abierto) una tabla simple: quién jugó, su puntaje más alto y sus estrellas. Los ejercicios de cálculo cambian en cada intento, así que reintentar no es memorizar.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
-- **Imprimir:** imprime solo la hoja (examen, crucigrama, letra o versión adaptada), siempre en blanco. Desde ahí también se guarda como PDF.
+- **Imprimir:** imprime solo la hoja (examen, crucigrama o letra), siempre en blanco. El examen adaptado además se descarga como PDF (`apps/web/src/lib/pdfExamen.ts`, con jsPDF en el navegador), y aparte el PDF de respuestas.
 
 ## Correr el proyecto
 
@@ -94,10 +94,8 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | `POST /api/ficha` | `multipart/form-data`: `tipo`, `texto`, `archivo`, `grado`, `area`, `duracion` | `Ficha` |
 | `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
 | `POST /api/audio` | `{ cancion }` | `AudioCancion` |
-| `POST /api/examen` | `{ ficha, opciones }` | `Examen` |
-| `POST /api/ilustraciones` | `{ examen }` | `Examen` con `ilustracion` en cada pregunta |
+| `POST /api/examen` | multipart: `ficha`, `opciones` (`{ interes, necesidades }`), `examen` (PDF o foto) | `Examen` adaptado |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
-| `POST /api/adaptar` | `{ ficha, necesidades }` | `Adaptacion` |
 | `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
@@ -106,7 +104,7 @@ La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no ga
 
 ## Pendiente para que funcione de verdad
 
-1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen, juego y adaptación.
+1. Backend `/api` con Claude: ficha (lee fotos y PDF), letra, examen adaptado y juego.
 2. Audio de canciones con ElevenLabs.
 3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
-4. Pictogramas de ARASAAC en la adaptación para TEA.
+4. Pictogramas de ARASAAC en el examen adaptado para TEA.

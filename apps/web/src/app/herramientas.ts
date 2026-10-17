@@ -1,4 +1,4 @@
-import { FileText, Gamepad2, Grid3x3, HeartHandshake, Music, type LucideProps } from 'lucide-react'
+import { FileText, Gamepad2, Grid3x3, Music, type LucideProps } from 'lucide-react'
 import type { ComponentType } from 'react'
 import { COSTOS, textoCosto, type HerramientaId } from '../api'
 
@@ -13,7 +13,7 @@ export type Herramienta = {
   costo: string
 }
 
-export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['cancion', 'examen', 'juego', 'crucigrama', 'adaptar']
+export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['cancion', 'examen', 'juego', 'crucigrama']
 
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   cancion: {
@@ -27,12 +27,12 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   },
   examen: {
     id: 'examen',
-    pedido: 'Un examen divertido',
-    nombre: 'Examen gamificado',
-    descripcion: 'Tu evaluación con lo que le gusta a tu clase.',
+    pedido: 'Adaptar mi examen',
+    nombre: 'Adaptar examen',
+    descripcion: 'Sube tu examen y recibe un PDF adaptado a tu clase.',
     icono: FileText,
     color: 'var(--examen)',
-    costo: `${textoCosto(COSTOS.examen)} · ilustraciones aparte`,
+    costo: textoCosto(COSTOS.examen),
   },
   juego: {
     id: 'juego',
@@ -51,15 +51,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     icono: Grid3x3,
     color: 'var(--crucigrama)',
     costo: textoCosto(COSTOS.crucigrama),
-  },
-  adaptar: {
-    id: 'adaptar',
-    pedido: 'Adaptar para un estudiante',
-    nombre: 'Adaptar para inclusión',
-    descripcion: 'Una versión para quien aprende distinto.',
-    icono: HeartHandshake,
-    color: 'var(--adaptar)',
-    costo: textoCosto(COSTOS.adaptacion),
   },
 }
 

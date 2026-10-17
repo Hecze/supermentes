@@ -1,7 +1,7 @@
 // Contratos de datos entre la UI y el backend.
 // Los datos de ejemplo (mock.ts) y el backend real (real.ts) devuelven exactamente estos tipos.
 
-export type HerramientaId = 'cancion' | 'examen' | 'juego' | 'crucigrama' | 'adaptar'
+export type HerramientaId = 'cancion' | 'examen' | 'juego' | 'crucigrama'
 
 export type EntradaTema = {
   tipo: 'texto' | 'foto' | 'archivo'
@@ -64,26 +64,37 @@ export type AudioCancion = {
   duracionSeg: number
 }
 
+/** Lo que necesita quien aprende distinto. Se adapta el texto y también cómo se ve la hoja. */
+export type Necesidad = 'tdah' | 'dislexia' | 'tea' | 'facil'
+
 export type OpcionesExamen = {
-  interes: string
-  formato: 'mision' | 'contextualizado'
-  /** Examen propio del docente para transformarlo; si no hay, se crea desde la ficha. */
-  examenPropio?: File
+  /** Ambientar las preguntas en lo que le gusta a la clase. null: no cambiar la historia. */
+  interes: string | null
+  /** Para quien aprende distinto; puede ir vacío. */
+  necesidades: Necesidad[]
+  /** El examen del docente (PDF o foto). */
+  examen?: File
 }
 
 export type PreguntaExamen = {
+  /** La pregunta tal cual estaba en el examen del docente. */
   original: string
+  /** La pregunta adaptada. */
   texto: string
+  /** Alternativas, si es de opción múltiple. */
+  alternativas?: string[]
+  /** Un apoyo corto para quien lo necesita: los pasos, una pista o un ejemplo. */
+  apoyo?: string
   respuesta: string
-  fraccion?: Fraccion
-  /** URL de la ilustración generada; vacía hasta que el docente pida ilustraciones. */
-  ilustracion?: string | null
 }
 
 export type Examen = {
-  opciones: OpcionesExamen
+  opciones: Omit<OpcionesExamen, 'examen'>
+  /** Nombre del archivo que subió el docente. */
+  archivo: string
   titulo: string
-  intro: string
+  instrucciones: string
+  /** Cómo se llama cada pregunta: "Pregunta", o "Jugada", "Rescate"… si se ambientó. */
   etiquetaPaso: string
   preguntas: PreguntaExamen[]
 }
@@ -95,24 +106,6 @@ export type Juego = {
   pares: { a: Carta; b: Carta }[]
   preguntas: { pregunta: string; opciones: string[]; correcta: number }[]
   palabras: { palabra: string; pista: string }[]
-}
-
-export type Necesidad = 'tdah' | 'dislexia' | 'tea' | 'facil'
-
-export type PasoAdaptado = {
-  /** Clave del pictograma (leer, escribir, dibujar, comparar…). En producción se resuelve con ARASAAC. */
-  picto: string
-  texto: string
-  textoFacil: string
-}
-
-export type Adaptacion = {
-  necesidades: Necesidad[]
-  material: string
-  original: string
-  agenda: { picto: string; texto: string }[]
-  pasos: PasoAdaptado[]
-  consejos: Record<Necesidad, string[]>
 }
 
 export type Material = {
@@ -131,9 +124,8 @@ export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
   generarCancion(ficha: Ficha, opciones: OpcionesCancion): Promise<Cancion>
   generarAudio(cancion: Cancion): Promise<AudioCancion>
-  generarExamen(ficha: Ficha, opciones: OpcionesExamen): Promise<Examen>
-  generarIlustraciones(examen: Examen): Promise<Examen>
+  /** Adapta el examen que sube el docente. */
+  adaptarExamen(ficha: Ficha, opciones: OpcionesExamen & { examen: File }): Promise<Examen>
   generarJuego(ficha: Ficha): Promise<Juego>
-  adaptar(ficha: Ficha, necesidades: Necesidad[]): Promise<Adaptacion>
   biblioteca(): Promise<Material[]>
 }
