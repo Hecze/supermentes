@@ -5,7 +5,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { paresDePartida } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useTamano, useTemporizadores } from '../motor/bucle'
-import { Flotante, TextoMat, VisualDe, elogio } from '../motor/piezas'
+import { Flotante, TextoMat, VisualDe, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { Lado, Par, PropsJuego } from '../tipos'
 
@@ -15,15 +15,10 @@ type Lado2 = 'a' | 'b'
 const COLORES = ['#2fc46f', '#4f6dff', '#9f63ff', '#ff9636', '#2fb2ff', '#ff6fbf']
 type Linea = { i: number; x1: number; y1: number; x2: number; y2: number }
 
-function tamTexto(t: string) {
-  const n = [...t].length
-  return n <= 4 ? 1 : n <= 9 ? 0.82 : n <= 16 ? 0.66 : 0.54
-}
-
-function Contenido({ lado }: { lado: Lado }) {
+function Contenido({ lado, letra }: { lado: Lado; letra: string }) {
   if (lado.visual) return <VisualDe visual={lado.visual} tam="clamp(54px, 13cqmin, 120px)" />
   return (
-    <span className="leading-tight" style={{ fontSize: `calc(clamp(17px, 5cqmin, 42px) * ${tamTexto(lado.texto)})` }}>
+    <span className="leading-tight" style={{ fontSize: letra }}>
       <TextoMat texto={lado.texto} />
     </span>
   )
@@ -122,6 +117,12 @@ export default function UneFlechas({ contenido, ritmo, semilla, terminar }: Prop
 
   // Una función y no un componente: así los botones no se vuelven a montar en cada cambio.
   function columna(lado: Lado2) {
+    // Toda la columna con la misma letra: ninguna opción se delata por su tamaño.
+    const letra = letraOpciones(
+      orden[lado].map((i) => pares[i][lado].texto),
+      '33cqw',
+      'clamp(22px, 5.4cqmin, 42px)',
+    )
     return (
       <div className="flex min-h-0 flex-col justify-center gap-[2cqmin]">
         {orden[lado].map((i) => {
@@ -147,7 +148,7 @@ export default function UneFlechas({ contenido, ritmo, semilla, terminar }: Prop
                 boxShadow: activo ? '0 0 0 0.8cqmin rgb(255 201 60 / 0.55)' : undefined,
               }}
             >
-              <Contenido lado={pares[i][lado]} />
+              <Contenido lado={pares[i][lado]} letra={letra} />
               {hecho && <Check className="absolute right-[0.8cqmin] top-[0.8cqmin] size-[clamp(14px,3cqmin,24px)]" strokeWidth={3.5} aria-hidden />}
             </button>
           )
@@ -164,7 +165,7 @@ export default function UneFlechas({ contenido, ritmo, semilla, terminar }: Prop
         <p className="font-bold" style={{ fontSize: 'clamp(18px, 4.6cqmin, 38px)' }}>
           Une cada uno con su pareja
         </p>
-        <p className="font-medium opacity-80" style={{ fontSize: 'clamp(13px, 3cqmin, 24px)' }}>
+        <p className="font-medium opacity-80" style={{ fontSize: 'clamp(15px, 3.4cqmin, 26px)' }}>
           {rondas.length > 1 ? `Ronda ${r + 1} de ${rondas.length} · ` : ''}
           Toca uno de la izquierda y luego su pareja
         </p>
