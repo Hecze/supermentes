@@ -66,7 +66,7 @@ export async function enviarResultado(codigo: string, alumno: Alumno, juego: Jue
     const res = await fetch('/api/resultados', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codigo, alumno, juego, puntaje, estrellas: r.estrellas }),
+      body: JSON.stringify({ codigo, alumno, juego, puntaje, estrellas: r.estrellas, revision: r.revision }),
     })
     if (!res.ok) return null
     const { nuevoRecord, mejor } = (await res.json()) as { nuevoRecord?: boolean; mejor?: number }
@@ -93,6 +93,8 @@ export type Enviado = {
   grado?: string
   /** Qué practican: "Fracciones: reconocer · Hasta octavos" o las palabras del tema. */
   practica?: string
+  /** Se mandó como tarea: los resultados traen qué preguntas falló cada alumno. */
+  tarea?: true
   fecha: string
 }
 
@@ -119,7 +121,7 @@ export function guardarEnviado(e: Enviado) {
 export type FilaResultado = {
   id: string
   nombre: string
-  mejor: { puntaje: number; estrellas: number; juego: JuegoId; fecha: string }
+  mejor: { puntaje: number; estrellas: number; juego: JuegoId; fecha: string; revision?: Resultado['revision'] }
 }
 
 export async function cargarResultados(e: Enviado): Promise<FilaResultado[]> {

@@ -1,6 +1,6 @@
 // Juegos compartidos con los alumnos: cada uno es un archivo privado en Vercel Blob con un código corto.
 //
-//   POST /api/juegos-compartidos  { v, juego, ritmo, tema, grado, fuente }  → { codigo, clave }
+//   POST /api/juegos-compartidos  { v, juego, ritmo, tema, grado, tarea?, fuente }  → { codigo, clave }
 //   GET  /api/juegos-compartidos?codigo=ABC234                                 → el juego, sin la clave (se cachea en la CDN)
 //
 // La clave queda en la laptop del docente: con ella ve los resultados de sus alumnos (api/resultados.ts).
@@ -66,13 +66,14 @@ function validar(datos: unknown) {
   if (ritmo === null) return 'Falta el ritmo.'
   const tema = texto(o.tema, 120)
   const grado = /^(inicial|primaria|secundaria)-\d$/.test(texto(o.grado, 20)) ? texto(o.grado, 20) : undefined
+  const tarea = o.tarea === true ? true : undefined
   const f = objeto(o.fuente)
 
   if (f.tipo === 'calculo') {
     const habilidad = texto(f.habilidad, 40)
     const nivel = entero(f.nivel, 0, 20)
     if (!/^[a-z-]{2,40}$/.test(habilidad) || nivel === null) return 'Habilidad inválida.'
-    return { v: 1, juego, ritmo, tema, grado, fuente: { tipo: 'calculo', habilidad, nivel } }
+    return { v: 1, juego, ritmo, tema, grado, tarea, fuente: { tipo: 'calculo', habilidad, nivel } }
   }
 
   if (f.tipo === 'tema') {
@@ -89,7 +90,7 @@ function validar(datos: unknown) {
       .map((p) => ({ palabra: texto(objeto(p).palabra, 40), pista: texto(objeto(p).pista, 200) }))
       .filter((p) => p.palabra && p.pista)
     if (!retos.length && !pares.length && !palabras.length) return 'El juego no tiene contenido.'
-    return { v: 1, juego, ritmo, tema, grado, fuente: { tipo: 'tema', contenido: { titulo: texto(c.titulo, 120) || tema, retos, pares, palabras } } }
+    return { v: 1, juego, ritmo, tema, grado, tarea, fuente: { tipo: 'tema', contenido: { titulo: texto(c.titulo, 120) || tema, retos, pares, palabras } } }
   }
 
   return 'Falta de dónde sale el contenido.'

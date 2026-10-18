@@ -203,6 +203,7 @@ export function Partida({
   alSalir,
   alTerminar,
   pie,
+  tarea,
   className,
 }: {
   def: DefinicionJuego
@@ -215,6 +216,8 @@ export function Partida({
   alTerminar?: (r: Resultado) => void
   /** Algo más bajo el botón "¡Jugar!" de la portada (por ejemplo, con qué nombre juega el alumno). */
   pie?: ReactNode
+  /** Tarea para la casa (ver PropsJuego). */
+  tarea?: boolean
   className?: string
 }) {
   const [fase, setFase] = useState<'portada' | 'jugando' | 'final'>('portada')
@@ -263,7 +266,7 @@ export function Partida({
         <Portada def={def} contenido={contenido} jugar={jugar} pie={pie} />
       ) : (
         <Suspense fallback={<Cargando />}>
-          <Juego key={semilla} contenido={contenido} ritmo={ritmo} semilla={semilla} terminar={terminar} />
+          <Juego key={semilla} contenido={contenido} ritmo={ritmo} semilla={semilla} tarea={tarea} terminar={terminar} />
         </Suspense>
       )}
       {fase === 'final' && resultado && (

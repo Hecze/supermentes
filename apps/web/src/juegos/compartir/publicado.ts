@@ -13,6 +13,8 @@ export type Publicado = {
   tema: string
   /** Grado del tema: ordena los juegos por edad cuando el alumno elige "Otro juego". */
   grado?: string
+  /** Tarea para la casa: reloj corto por pregunta y el docente ve qué preguntas fallaron (ver Concurso). */
+  tarea?: true
   /** El cálculo se guarda como habilidad y nivel: el celular del alumno genera los ejercicios. */
   fuente: { tipo: 'calculo'; habilidad: string; nivel: number } | { tipo: 'tema'; contenido: ContenidoGuardado }
 }

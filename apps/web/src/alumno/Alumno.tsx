@@ -269,6 +269,7 @@ export function Alumno() {
         def={elegido.def}
         contenido={elegido.contenido}
         ritmo={listo.publicado.ritmo}
+        tarea={listo.publicado.tarea}
         pantalla={pantalla}
         // Con código, el juego es una tarea del docente: no se cambia por otro.
         alSalir={!codigo && deCelular(listo.contenido, listo.publicado.grado).length > 1 ? () => setEligiendo(true) : undefined}

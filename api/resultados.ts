@@ -1,7 +1,10 @@
 // Resultados de los alumnos en un juego compartido: el mejor puntaje de cada uno.
 //
-//   POST /api/resultados  { codigo, alumno: { id, nombre }, juego, puntaje, estrellas }  → { ok, mejor, nuevoRecord }
-//   GET  /api/resultados?codigo=ABC234&clave=…                                            → { juego, alumnos[] }
+//   POST /api/resultados  { codigo, alumno: { id, nombre }, juego, puntaje, estrellas, revision? }  → { ok, mejor, nuevoRecord }
+//   GET  /api/resultados?codigo=ABC234&clave=…                                                       → { juego, alumnos[] }
+//
+// En una tarea, el resultado trae también cuántas preguntas tuvo y cuáles falló (revision): va en el mismo
+// archivo del alumno, sin escrituras extra.
 //
 // Sin cuentas: el alumno escribe su nombre la primera vez y su celular guarda un id. Cada alumno es un archivo
 // privado (resultados/CODIGO/ID.json), así dos alumnos que terminan a la vez no se pisan. Ver los resultados
@@ -16,7 +19,15 @@ import { CODIGO, JUEGOS, claveCorrecta, demasiadas, entero, json, leerJson, leer
 type Registro = {
   id: string
   nombre: string
-  mejor: { puntaje: number; estrellas: number; juego: string; fecha: string }
+  mejor: { puntaje: number; estrellas: number; juego: string; fecha: string; revision?: Revision }
+}
+type Revision = { preguntas: number; fallos: string[] }
+
+function revision(v: unknown): Revision | undefined {
+  const o = objeto(v)
+  const preguntas = entero(o.preguntas, 1, 50)
+  if (preguntas === null || !Array.isArray(o.fallos)) return undefined
+  return { preguntas, fallos: o.fallos.slice(0, preguntas).map((f) => texto(f, 200)).filter(Boolean) }
 }
 
 const ruta = (codigo: string, id: string) => `resultados/${codigo}/${id}.json`
@@ -24,7 +35,7 @@ const ruta = (codigo: string, id: string) => `resultados/${codigo}/${id}.json`
 export async function POST(request: Request) {
   let datos: Record<string, unknown>
   try {
-    datos = objeto(JSON.parse((await request.text()).slice(0, 5000)))
+    datos = objeto(JSON.parse((await request.text()).slice(0, 12000)))
   } catch {
     return json({ error: 'No pudimos leer el resultado.' }, 400)
   }
@@ -44,7 +55,7 @@ export async function POST(request: Request) {
     const previo = await leerJson<Registro>(ruta(codigo, id))
     if (previo && puntaje <= previo.mejor.puntaje) return json({ ok: true, mejor: previo.mejor.puntaje, nuevoRecord: false })
     if (demasiadas(request, 'resultado', 60)) return json({ error: 'Demasiados puntajes seguidos. Espera unos minutos.' }, 429)
-    const registro: Registro = { id, nombre, mejor: { puntaje, estrellas, juego, fecha: new Date().toISOString() } }
+    const registro: Registro = { id, nombre, mejor: { puntaje, estrellas, juego, fecha: new Date().toISOString(), revision: revision(datos.revision) } }
     await put(ruta(codigo, id), JSON.stringify(registro), { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
     return json({ ok: true, mejor: puntaje, nuevoRecord: true })
   } catch (e) {
@@ -76,7 +87,7 @@ export async function GET(request: Request) {
       alumnos.push(...tanda.filter((r): r is Registro => r !== null))
     }
     alumnos.sort((a, b) => b.mejor.puntaje - a.mejor.puntaje || a.nombre.localeCompare(b.nombre))
-    return json({ juego: { codigo, juego: juego.juego, tema: juego.tema, creado: juego.creado }, alumnos })
+    return json({ juego: { codigo, juego: juego.juego, tema: juego.tema, creado: juego.creado, tarea: juego.tarea === true }, alumnos })
   } catch (e) {
     console.error('No se pudieron leer los resultados', e)
     return json({ error: 'No pudimos traer los resultados. Intenta de nuevo.' }, 500)

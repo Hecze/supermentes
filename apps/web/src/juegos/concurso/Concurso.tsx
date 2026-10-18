@@ -28,12 +28,13 @@ function Forma({ i, className }: { i: number; className?: string }) {
 
 type Fase = 'lee' | 'responde' | 'resultado'
 
-export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJuego) {
+export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
   const siguienteReto = useMemo(() => fuenteDeRetos(contenido, azar), [contenido, azar])
   const total = ritmo === 1 ? 8 : 10
-  // Más tiempo para los chicos y para las preguntas del tema, que hay que leer.
-  const segundos = contenido.generar ? [0, 25, 20, 15][ritmo] : 30
+  // Más tiempo para los chicos y para las preguntas del tema, que hay que leer. En una tarea, lo justo para
+  // pensar y no para copiar la pregunta en otra aplicación.
+  const segundos = tarea ? [0, 20, 15, 12][ritmo] : contenido.generar ? [0, 25, 20, 15][ritmo] : 30
   const lectura = contenido.generar ? 1.6 : 3
   const despues = useTemporizadores()
 
@@ -51,6 +52,7 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
   const [aciertos, setAciertos] = useState(0)
   const [racha, setRacha] = useState(0)
   const [mejorRacha, setMejorRacha] = useState(0)
+  const [fallos, setFallos] = useState<string[]>([])
   const [quedan, setQuedan] = useState(segundos)
   const reloj = useRef(0)
   const barra = useRef<HTMLDivElement>(null)
@@ -92,6 +94,8 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
     } else {
       setGanados(0)
       setRacha(0)
+      const { consigna, pregunta: texto, respuesta } = pregunta.reto
+      setFallos((f) => [...f, (consigna ? `${consigna}${/[?:.!]$/.test(consigna) ? ' ' : ': '}${texto}` : texto).trim() || `La del dibujo (era ${respuesta})`])
       sonar.error()
     }
   }
@@ -112,6 +116,7 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
         titulo: `¡${num(puntos)} puntos!`,
         detalle: `Acertaste ${aciertos} de ${total}.${mejorRacha >= 3 ? ` Tu mejor racha: ${mejorRacha} seguidas.` : ''}`,
         puntaje: puntos,
+        revision: tarea ? { preguntas: total, fallos } : undefined,
       })
       return
     }

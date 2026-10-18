@@ -285,7 +285,7 @@ function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
       publicar(p).then(
         ({ codigo, clave }) => {
           // La laptop del docente guarda la clave: con ella verá quién jugó y su mejor puntaje.
-          guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, ...datos, fecha: new Date().toISOString() })
+          guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, ...datos, tarea: p.tarea, fecha: new Date().toISOString() })
           return { url: enlaceConCodigo(codigo), codigo }
         },
         // Sin servidor (por ejemplo, en desarrollo) el juego viaja dentro del link y funciona igual.
@@ -299,10 +299,29 @@ function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
   return publicados.get(clave)!
 }
 
-function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Publicado; nombreJuego: string; grado: string; practica: string }) {
+function Compartir({
+  publicado: elegido,
+  nombreJuego: nombreElegido,
+  grado,
+  practica,
+  puedeTarea,
+}: {
+  publicado: Publicado
+  nombreJuego: string
+  grado: string
+  practica: string
+  /** Hay preguntas para el Concurso: se puede mandar como tarea revisada. */
+  puedeTarea: boolean
+}) {
   const { avisar } = useStore()
   const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
   const [grande, setGrande] = useState(false)
+  // En la casa el alumno tiene a mano otra app para buscar la respuesta: por defecto va como tarea, con el
+  // Concurso y su reloj corto, y el docente ve qué preguntas fallaron.
+  const [comoTarea, setComoTarea] = useState(puedeTarea)
+  const tarea = comoTarea && puedeTarea
+  const publicado: Publicado = tarea ? { ...elegido, juego: 'concurso', tarea: true } : elegido
+  const nombreJuego = tarea ? 'Concurso' : nombreElegido
   const clave = JSON.stringify(publicado)
 
   useEffect(() => {
@@ -322,17 +341,32 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
     return () => window.removeEventListener('keydown', salir)
   }, [grande])
 
+  const interruptor = puedeTarea && (
+    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-surface-2 p-3">
+      <input type="checkbox" checked={comoTarea} onChange={(e) => setComoTarea(e.target.checked)} className="mt-1 size-5 shrink-0 accent-[var(--juego)]" />
+      <span>
+        <strong>Como tarea</strong>
+        <span className="block text-sm text-ink-soft">Se manda el Concurso: poco tiempo por pregunta y otro orden para cada alumno, así no les da tiempo de copiar. Verás su nota y qué preguntas fallaron.</span>
+      </span>
+    </label>
+  )
+
   if (!enlace) {
     return (
-      <section className="flex items-center gap-3 py-6 text-ink-soft" role="status">
-        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
+      <section className="flex flex-col gap-4">
+        {interruptor}
+        <p className="flex items-center gap-3 py-6 text-ink-soft" role="status">
+          <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
+        </p>
       </section>
     )
   }
 
   const sitio = `${origen().replace(/^https?:\/\/(www\.)?/, '')}/j`
   // Lo leen los papás en el grupo de WhatsApp: ellos le prestan el celular a su hijo o hija.
-  const mensaje = `Hola, familias 👋\nHoy en clase vimos «${publicado.tema}». Para practicar en casa, préstenle el celular a su hijo o hija y que juegue «${nombreJuego}» aquí:\n${enlace.url}\nNo necesita cuenta ni descargar nada. ¡Gracias!`
+  const mensaje = tarea
+    ? `Hola, familias 👋\nHoy en clase vimos «${publicado.tema}». De tarea, préstenle el celular a su hijo o hija para que responda este juego aquí:\n${enlace.url}\nCada pregunta tiene poco tiempo: que la responda solo o sola, sin ayuda. No necesita cuenta ni descargar nada. ¡Gracias!`
+    : `Hola, familias 👋\nHoy en clase vimos «${publicado.tema}». Para practicar en casa, préstenle el celular a su hijo o hija y que juegue «${nombreJuego}» aquí:\n${enlace.url}\nNo necesita cuenta ni descargar nada. ¡Gracias!`
 
   async function copiar() {
     try {
@@ -345,6 +379,7 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
 
   return (
     <section className="flex flex-col gap-4">
+      {interruptor}
       <a
         href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
         target="_blank"
@@ -482,6 +517,7 @@ export function Juego() {
               nombreJuego={enJuego.def.nombre}
               grado={ficha.grado}
               practica={nombreFuente(fuente, ficha)}
+              puedeTarea={compatibles.some((j) => j.def.id === 'concurso')}
               publicado={{
                 v: 1,
                 juego: enJuego.def.id,

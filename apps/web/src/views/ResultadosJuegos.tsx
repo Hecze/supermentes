@@ -69,6 +69,12 @@ function TablaResultados({ envio }: { envio: Enviado }) {
     )
   }
 
+  // Tarea revisada: las preguntas que más alumnos fallaron, para repasarlas en clase.
+  const revisadas = filas.filter((f) => f.mejor.revision)
+  const conteo = new Map<string, number>()
+  for (const f of revisadas) for (const p of new Set(f.mejor.revision!.fallos)) conteo.set(p, (conteo.get(p) ?? 0) + 1)
+  const masFalladas = [...conteo].sort((a, b) => b[1] - a[1]).slice(0, 5)
+
   return (
     <div className="flex flex-col gap-2 px-4 pb-4">
       {filas.length === 0 ? (
@@ -83,6 +89,7 @@ function TablaResultados({ envio }: { envio: Enviado }) {
               <thead>
                 <tr className="border-b border-line text-sm text-ink-soft">
                   <th className="py-2 pr-2 font-medium">Alumno</th>
+                  {revisadas.length > 0 && <th className="py-2 pr-3 text-right font-medium">Correctas</th>}
                   <th className="py-2 pr-3 text-right font-medium">Puntaje más alto</th>
                   <th className="py-2 pr-2 font-medium">Estrellas</th>
                   <th className="py-2 font-medium">Cuándo</th>
@@ -97,6 +104,11 @@ function TablaResultados({ envio }: { envio: Enviado }) {
                       </span>
                       {f.nombre}
                     </td>
+                    {revisadas.length > 0 && (
+                      <td className="py-2 pr-3 text-right font-semibold tabular-nums">
+                        {f.mejor.revision ? `${f.mejor.revision.preguntas - f.mejor.revision.fallos.length} de ${f.mejor.revision.preguntas}` : '—'}
+                      </td>
+                    )}
                     <td className="py-2 pr-3 text-right font-semibold tabular-nums">{num(f.mejor.puntaje)}</td>
                     <td className="whitespace-nowrap py-2 pr-2" aria-label={`${f.mejor.estrellas} de 3 estrellas`}>
                       <span className="text-warn">{'★'.repeat(f.mejor.estrellas)}</span>
@@ -108,6 +120,21 @@ function TablaResultados({ envio }: { envio: Enviado }) {
               </tbody>
             </table>
           </div>
+          {masFalladas.length > 0 && (
+            <div className="mt-2 rounded-xl bg-surface-2 p-3">
+              <h3 className="font-semibold">Las que más fallaron</h3>
+              <ul className="mt-1 flex flex-col gap-1">
+                {masFalladas.map(([pregunta, n]) => (
+                  <li key={pregunta} className="flex items-baseline justify-between gap-3">
+                    <TextoMat texto={pregunta} />
+                    <span className="shrink-0 text-sm text-ink-soft">
+                      {n} de {revisadas.length} {revisadas.length === 1 ? 'alumno' : 'alumnos'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </>
       )}
       {actualizar}
@@ -125,7 +152,10 @@ function FilaEnvio({ envio, abierto, alternar }: { envio: Enviado; abierto: bool
           {Miniatura ? <Miniatura /> : <Gamepad2 className="m-auto size-6" />}
         </span>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="font-semibold">{def?.nombre ?? 'Juego'}</span>
+          <span className="font-semibold">
+            {def?.nombre ?? 'Juego'}
+            {envio.tarea && <span className="ml-2 rounded-full bg-warn/12 px-2 py-0.5 text-xs font-medium text-warn">Tarea</span>}
+          </span>
           {envio.practica && (
             <span className="truncate text-sm text-ink-soft">
               <TextoMat texto={envio.practica} />
