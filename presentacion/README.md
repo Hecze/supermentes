@@ -6,4 +6,4 @@ Es privado hasta compartirlo desde *Share* con acceso por link; probarlo en vent
 Aquí va una copia del contenido para que quede mapeado: `deck.json` (orden y fuentes) y `slides/*.html`
 (una diapositiva por archivo, con las notas para hablar en `<aside>`). Se edita en el deck, no aquí.
 
-Pendiente: las cifras `[__]` de `slides/traccion.html` (inscritos, % por fuente, vistas en TikTok).
+Tracción con cifras reales (18-oct): 1 docente cliente, 3 entrevistas, 3 en la lista de espera. Solución en 3 momentos (preparar, dar la clase, revisar) y demo con tarea por salón.
