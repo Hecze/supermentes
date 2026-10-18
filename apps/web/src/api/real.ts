@@ -57,4 +57,6 @@ export const realApi: Api = {
   async biblioteca() {
     return pedir('biblioteca', {})
   },
+  buscarRecursos: (ficha) =>
+    pedir(`recursos?${new URLSearchParams({ tema: ficha.titulo, grado: ficha.grado, area: ficha.area })}`, {}, 20_000),
 }

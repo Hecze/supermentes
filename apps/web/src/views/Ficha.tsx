@@ -3,6 +3,7 @@ import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { SinTema } from '../components/Shell'
 import { Desplegable, Editable, tinte } from '../components/ui'
+import { RecursosDelTema } from './RecursosDelTema'
 
 export function Ficha() {
   const { ficha, ir, resultados, verCurriculo, completando, completarFicha } = useStore()
@@ -80,6 +81,8 @@ export function Ficha() {
           })}
         </div>
       </section>
+
+      <RecursosDelTema ficha={ficha} />
 
       {ficha.coincidenciasBiblioteca > 0 && (
         <button type="button" onClick={() => ir('biblioteca')} className="flex items-center gap-2 self-start rounded-lg text-ink-soft hover:text-ink">

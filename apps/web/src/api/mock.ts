@@ -68,4 +68,8 @@ export const mockApi: Api = {
     await esperar(300)
     return BIBLIOTECA_EJEMPLO
   },
+  // ponytail: sin ejemplos; la sección se oculta si no hay recursos.
+  async buscarRecursos() {
+    return []
+  },
 }

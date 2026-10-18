@@ -170,6 +170,16 @@ export type Material = {
   esMio?: boolean
 }
 
+/** Un video o una ficha que ya existe en internet para el tema (api/recursos.ts, buscado con Exa). */
+export type Recurso = {
+  tipo: 'video' | 'ficha'
+  titulo: string
+  url: string
+  /** "YouTube" o el dominio de la página. */
+  fuente: string
+  imagen?: string
+}
+
 export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
   generarCancion(ficha: Ficha, opciones: OpcionesCancion): Promise<Cancion>
@@ -179,4 +189,6 @@ export interface Api {
   generarJuego(ficha: Ficha): Promise<Juego>
   generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   biblioteca(): Promise<Material[]>
+  /** Videos y fichas de internet para el tema. */
+  buscarRecursos(ficha: Ficha): Promise<Recurso[]>
 }
