@@ -472,7 +472,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
       )}
 
       <section className="overflow-x-auto rounded-2xl bg-surface p-4">
-        <table className="w-full min-w-[30rem] border-collapse text-left">
+        <table className="w-full border-collapse text-left sm:min-w-[30rem]">
           <thead>
             <tr className="border-b border-line text-sm text-ink-soft">
               <th className="py-2 pr-2 font-medium">Alumno</th>
