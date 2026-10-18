@@ -8,6 +8,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "alias": { "@vercel/blob": "./cloudflare/blob.ts" },
   "assets": { "directory": "apps/web/dist", "binding": "ASSETS", "run_worker_first": true },
+  "d1_databases": [{ "binding": "DB", "database_name": "supermentes", "database_id": "aa69c639-2728-443a-87d0-4cd1464beb61" }],
   "r2_buckets": [{ "binding": "BLOB", "bucket_name": "supermentes" }],
   "routes": [
     { "pattern": "supermentes.app", "custom_domain": true },
