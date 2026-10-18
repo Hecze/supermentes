@@ -1,7 +1,7 @@
 // Arma el deck como una página propia: supermentes.app/presentacion. Lee deck.json (orden y fuentes) y slides/*.html,
 // y escribe apps/web/public/presentacion/index.html. Corre solo en el build de la web (apps/web/package.json), así
 // editar una diapositiva aquí y hacer push la publica. Flechas, espacio o clic para avanzar; #3 abre la tercera.
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -56,9 +56,18 @@ ${slides}
 <div id="pie"></div>
 <script>
   const s = [...document.querySelectorAll('#escena > section')]
+  const videos = [...document.querySelectorAll('#escena video')]
   let i = Math.min(s.length - 1, Math.max(0, (parseInt(location.hash.slice(1)) || 1) - 1))
   const mostrar = () => {
     s.forEach((x, j) => x.classList.toggle('activa', j === i))
+    videos.forEach((v) => {
+      if (v.closest('section').classList.contains('activa')) {
+        try { v.currentTime = 0 } catch {}
+        v.play().catch(() => {})
+      } else {
+        v.pause()
+      }
+    })
     document.getElementById('pie').textContent = (i + 1) + ' / ' + s.length
     history.replaceState(null, '', '#' + (i + 1))
   }
@@ -83,4 +92,6 @@ ${slides}
 const salida = join(aqui, '..', 'apps', 'web', 'public', 'presentacion')
 mkdirSync(salida, { recursive: true })
 writeFileSync(join(salida, 'index.html'), pagina)
-console.log(`Presentación: ${deck.order.length} diapositivas → apps/web/public/presentacion/index.html`)
+copyFileSync(join(aqui, 'demo.mp4'), join(salida, 'demo.mp4'))
+copyFileSync(join(aqui, 'demo-poster.jpg'), join(salida, 'demo-poster.jpg'))
+console.log(`Presentación: ${deck.order.length} diapositivas → apps/web/public/presentacion/index.html (+ demo.mp4)`)
