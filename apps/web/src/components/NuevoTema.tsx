@@ -23,7 +23,7 @@ function gradoGuardado() {
 }
 
 /** Sin escribir nada: dos temas de cada curso principal del grado, para empezar con un clic. */
-function sugerenciasDelGrado(grado: GradoCurriculo): Resultado[] {
+export function sugerenciasDelGrado(grado: GradoCurriculo): Resultado[] {
   const principales = ['matematica', 'comunicacion', 'ciencia-y-tecnologia', 'personal-social']
   return principales.flatMap((id) => {
     const a = grado.areas.find((x) => x.id === id)

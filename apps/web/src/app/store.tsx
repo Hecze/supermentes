@@ -4,7 +4,7 @@ import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { ConfigExamen } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
-export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
+export const VISTAS = ['inicio', 'ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
@@ -77,9 +77,9 @@ const Ctx = createContext<Store | null>(null)
 function vistaDelHash(): Vista {
   try {
     const h = window.location.hash.replace('#', '')
-    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'ficha'
+    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'inicio'
   } catch {
-    return 'ficha'
+    return 'inicio'
   }
 }
 

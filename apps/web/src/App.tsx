@@ -5,11 +5,13 @@ import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
+import { Inicio } from './views/Inicio'
 import { Juego } from './views/Juego'
 import { ResultadosJuegos } from './views/ResultadosJuegos'
 import { Sesion } from './views/Sesion'
 
 const VISTAS = {
+  inicio: Inicio,
   ficha: Ficha,
   sesion: Sesion,
   cancion: Cancion,

@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Search, Sun, Trophy, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, Coins, House, Info, Library, Menu, Moon, Search, Sun, Trophy, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
@@ -62,9 +62,13 @@ function ContenidoLateral() {
   const { ir } = useStore()
   return (
     <>
-      <button type="button" onClick={() => ir('ficha')} className="self-start rounded-lg">
+      <button type="button" onClick={() => ir('inicio')} className="self-start rounded-lg">
         <Logo />
       </button>
+
+      <ItemNav vista="inicio" icono={<House className="size-5" />}>
+        Inicio
+      </ItemNav>
 
       <SelectorTema />
 
