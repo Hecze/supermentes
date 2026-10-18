@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Coins, House, Info, Library, Menu, Moon, Search, Sun, Trophy, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, Coins, House, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
@@ -64,6 +64,31 @@ function Docente() {
   )
 }
 
+const MOMENTOS: { vista: Vista; titulo: string; detalle: string; incluye: Vista[] }[] = [
+  { vista: 'ficha', titulo: 'Preparar', detalle: 'Juego, canción, examen', incluye: ['ficha', ...ORDEN_HERRAMIENTAS.filter((h) => h !== 'sesion')] },
+  { vista: 'clase', titulo: 'Dar la clase', detalle: 'Sesión y guía minuto a minuto', incluye: ['clase', 'sesion'] },
+  { vista: 'resultados', titulo: 'Revisar', detalle: 'Quién jugó y qué reforzar', incluye: ['resultados'] },
+]
+
+function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[number] & { n: number }) {
+  const { ir, vista: actual } = useStore()
+  const activo = incluye.includes(actual)
+  return (
+    <button
+      type="button"
+      onClick={() => ir(vista)}
+      aria-current={activo ? 'page' : undefined}
+      className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition', activo ? 'bg-surface-2' : 'hover:bg-surface-2')}
+    >
+      <span className={cx('grid size-8 shrink-0 place-items-center rounded-full text-sm font-bold', activo ? 'bg-primary text-primary-ink' : 'bg-surface-2 text-ink')}>{n}</span>
+      <span className="flex min-w-0 flex-col">
+        <span className={cx(activo ? 'font-bold' : 'font-medium')}>{titulo}</span>
+        <span className="truncate text-xs text-ink-soft">{detalle}</span>
+      </span>
+    </button>
+  )
+}
+
 function ItemNav({ vista, icono, children }: { vista: Vista; icono: ReactNode; children: ReactNode }) {
   const { ir, vista: actual } = useStore()
   const activo = actual === vista
@@ -98,21 +123,17 @@ function ContenidoLateral() {
 
       <SelectorTema />
 
-      <nav className="flex flex-col gap-1" aria-label="Herramientas">
-        <p className="px-3 pb-1 text-sm text-ink-soft">Herramientas</p>
-        {ORDEN_HERRAMIENTAS.map((id: HerramientaId) => (
-          <ItemNav key={id} vista={id} icono={<IconoHerramienta id={id} tam="sm" />}>
-            {HERRAMIENTAS[id].nombre}
-          </ItemNav>
+      {/* Los 3 momentos de la semana de la docente: preparar, dar la clase y revisar. */}
+      <nav className="flex flex-col gap-1" aria-label="Tu semana">
+        <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">TU SEMANA</p>
+        {MOMENTOS.map((m, i) => (
+          <ItemMomento key={m.vista} n={i + 1} {...m} />
         ))}
       </nav>
 
       <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
         <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
           Biblioteca
-        </ItemNav>
-        <ItemNav vista="resultados" icono={<Trophy className="size-5" />}>
-          Resultados de juegos
         </ItemNav>
       </nav>
 

@@ -1,7 +1,7 @@
-// Inicio: lo primero que ve la docente. El buscador de temas, temas de su grado listos con un clic, cómo les va
-// a sus alumnos en los juegos que mandó y sus temas recientes. Nada de pantallas vacías.
-import { ChevronRight, FileCheck, Gamepad2, Lightbulb, Music, Search, Trophy } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+// Inicio: la semana de la docente en 3 momentos (preparar, dar la clase, revisar), el buscador de temas, temas de su
+// grado listos con un clic y sus temas recientes. Nada de pantallas vacías.
+import { ArrowRight, ChevronRight, FileCheck, Gamepad2, Music, Search } from 'lucide-react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useCuenta } from '../app/cuenta'
 import { usePerfil } from '../app/perfil'
 import { cuando, useStore } from '../app/store'
@@ -12,6 +12,7 @@ import { cx } from '../components/ui'
 import { GRADOS_CURRICULO, nivelDe } from '../curriculo/catalogo'
 import { useCurriculo } from '../curriculo/cargar'
 import { cargarResultados, type FilaResultado } from '../juegos/compartir/resultados'
+import { tramos } from './GuiaClase'
 import { useEnviados } from './ResultadosJuegos'
 
 const CLAVE_GRADO = 'supermentes-grado'
@@ -76,8 +77,8 @@ function TemasDelGrado({ gradoId }: { gradoId: string }) {
 // ponytail: cada envío es una lectura de /api/resultados (cuenta para el límite de Blob); por eso solo los 3 más recientes.
 const ENVIOS_A_LEER = 3
 
-function TusAlumnos() {
-  const { ir } = useStore()
+/** Lo que se ve de los alumnos en la tarjeta «Revisar»: quiénes jugaron y el tema que conviene repasar. */
+function useResumenAlumnos() {
   const envios = useEnviados()
   const recientes = useMemo(() => envios.slice(0, ENVIOS_A_LEER), [envios])
   const [filas, setFilas] = useState<{ tema: string; filas: FilaResultado[] }[] | null>(null)
@@ -94,46 +95,103 @@ function TusAlumnos() {
   }, [recientes])
 
   const todas = filas?.flatMap((f) => f.filas) ?? []
-  const alumnos = new Set(todas.map((f) => f.id)).size
-  const promedio = todas.length ? todas.reduce((s, f) => s + f.mejor.estrellas, 0) / todas.length : 0
   const flojo = (filas ?? [])
     .filter((f) => f.filas.length > 0)
     .map((f) => ({ tema: f.tema, prom: f.filas.reduce((s, x) => s + x.mejor.estrellas, 0) / f.filas.length }))
     .sort((a, b) => a.prom - b.prom)[0]
+  return { enviados: envios.length, cargando: !!envios.length && !filas, alumnos: new Set(todas.map((f) => f.id)).size, flojo }
+}
 
+function Tarjeta({ n, color, etiqueta, titulo, children, accion, onClick }: { n: number; color: string; etiqueta: string; titulo: string; children: ReactNode; accion: string; onClick: () => void }) {
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border-2 border-line bg-surface p-5 sm:p-6">
-      <h2 className="flex items-center gap-2 font-display text-2xl font-bold">
-        <Trophy className="size-6 text-juego" aria-hidden /> Cómo les va a tus alumnos
-      </h2>
-      {!envios.length ? (
-        <p className="text-ink-soft">Cuando mandes un juego al WhatsApp de las familias, aquí verás quién jugó y cuántas estrellas sacó.</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              [filas ? String(alumnos) : '…', alumnos === 1 ? 'alumno jugó' : 'alumnos jugaron'],
-              [filas ? `${promedio.toLocaleString('es-PE', { maximumFractionDigits: 1 })} ★` : '…', 'estrellas en promedio'],
-              [String(envios.length), envios.length === 1 ? 'juego mandado' : 'juegos mandados'],
-            ].map(([n, l]) => (
-              <div key={l} className="flex flex-col rounded-xl bg-surface-2 p-3">
-                <span className="font-display text-3xl font-bold tabular-nums">{n}</span>
-                <span className="text-sm text-ink-soft">{l}</span>
-              </div>
-            ))}
-          </div>
-          {flojo && flojo.prom < 2 && (
-            <p className="flex items-start gap-2 rounded-xl bg-warn/10 px-3 py-2.5">
-              <Lightbulb className="mt-0.5 size-4 shrink-0 text-warn" aria-hidden />
-              En «{flojo.tema}» sacaron menos estrellas. Conviene repasarlo en clase.
-            </p>
-          )}
-          <button type="button" onClick={() => ir('resultados')} className="inline-flex items-center gap-1 self-start font-medium underline underline-offset-4">
-            Ver quién jugó <ChevronRight className="size-4" aria-hidden />
-          </button>
-        </>
-      )}
+    <section className="flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface p-5 sm:p-6">
+      <p className="flex items-center gap-2.5 text-sm font-bold tracking-wide" style={{ color }}>
+        <span className="grid size-8 place-items-center rounded-full text-white" style={{ background: color }}>
+          {n}
+        </span>
+        {etiqueta}
+      </p>
+      <h2 className="font-display text-2xl font-bold leading-tight">{titulo}</h2>
+      <div className="flex flex-1 flex-col gap-2 text-ink-soft">{children}</div>
+      <button
+        type="button"
+        onClick={onClick}
+        className="mt-2 inline-flex h-12 items-center gap-2 self-start rounded-xl px-4 font-semibold text-white hover:opacity-90"
+        style={{ background: color }}
+      >
+        {accion} <ArrowRight className="size-4" aria-hidden />
+      </button>
     </section>
+  )
+}
+
+/** Los 3 momentos de la semana: preparar, dar la clase y revisar (mockup «Dashboard · los 3 momentos» en pen). */
+function Momentos({ gradoId }: { gradoId: string }) {
+  const { ficha, ir, abrirNuevoTema } = useStore()
+  const alumnos = useResumenAlumnos()
+  const [inicio, desarrollo, cierre] = tramos(0, 45, [20, 65, 15])
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      <Tarjeta
+        n={1}
+        color="var(--examen)"
+        etiqueta="PREPARAR"
+        titulo={ficha?.titulo ?? 'Elige el tema de mañana'}
+        accion={ficha ? 'Abrir materiales' : 'Buscar mi tema'}
+        onClick={() => (ficha ? ir('ficha') : abrirNuevoTema({ gradoId }))}
+      >
+        {ficha ? (
+          [
+            [Gamepad2, 'text-juego', 'Juego para el celular'],
+            [Music, 'text-cancion', 'Canción del tema'],
+            [FileCheck, 'text-examen', 'Examen, práctica y balotario'],
+          ].map(([Icono, color, texto]) => (
+            <span key={texto as string} className="flex items-center gap-2 text-ink">
+              <Icono className={`size-4 ${color as string}`} aria-hidden /> {texto as string}
+            </span>
+          ))
+        ) : (
+          <p>Juego, canción y examen del Currículo Nacional, listos con un clic.</p>
+        )}
+      </Tarjeta>
+
+      <Tarjeta n={2} color="var(--sesion)" etiqueta="DAR LA CLASE" titulo="Guía de 45 minutos" accion="Ver la guía" onClick={() => (ficha ? ir('clase') : abrirNuevoTema({ gradoId }))}>
+        <div className="flex h-3.5 gap-1" aria-hidden>
+          <span className="rounded bg-cancion" style={{ flex: inicio[1] - inicio[0] }} />
+          <span className="rounded bg-juego" style={{ flex: desarrollo[1] - desarrollo[0] }} />
+          <span className="rounded bg-examen" style={{ flex: cierre[1] - cierre[0] }} />
+        </div>
+        {ficha ? (
+          <>
+            <p>
+              {inicio[0]}–{inicio[1]} · Canta la canción del tema
+            </p>
+            <p>
+              {desarrollo[0]}–{desarrollo[1]} · Explica y jueguen en el proyector
+            </p>
+            <p>
+              {cierre[0]}–{cierre[1]} · Repaso y tarea al WhatsApp
+            </p>
+          </>
+        ) : (
+          <p>Cuando elijas tu tema, aquí verás qué hacer en cada minuto de la clase.</p>
+        )}
+      </Tarjeta>
+
+      <Tarjeta n={3} color="var(--ok)" etiqueta="REVISAR" titulo={alumnos.enviados ? 'Cómo les va a tus alumnos' : 'Tareas que no se copian'} accion="Revisar y reforzar" onClick={() => ir('resultados')}>
+        {alumnos.enviados ? (
+          <>
+            <p className="flex items-baseline gap-2">
+              <span className="font-display text-4xl font-bold text-ink">{alumnos.cargando ? '…' : alumnos.alumnos}</span>
+              {alumnos.alumnos === 1 ? 'alumno jugó' : 'alumnos jugaron'}
+            </p>
+            {alumnos.flojo && alumnos.flojo.prom < 2 && <p>Conviene repasar «{alumnos.flojo.tema}».</p>}
+          </>
+        ) : (
+          <p>Manda un juego con contador al WhatsApp de las familias: no da tiempo de copiar en ChatGPT, y aquí verás quién lo hizo.</p>
+        )}
+      </Tarjeta>
+    </div>
   )
 }
 
@@ -163,7 +221,7 @@ function Recientes() {
 }
 
 export function Inicio() {
-  const { abrirNuevoTema, temas } = useStore()
+  const { abrirNuevoTema, ficha } = useStore()
   const { nombre } = useCuenta()
   const { perfil } = usePerfil()
   const [gradoId, setGradoId] = useState(gradoGuardado)
@@ -181,7 +239,13 @@ export function Inicio() {
     <>
       <header className="flex flex-col gap-4">
         <p className="text-lg text-ink-soft">Hola, {perfil?.nombre ?? (nombre ? `profe ${nombre}` : DOCENTE.saludo)} 👋</p>
-        <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">¿Qué tema toca mañana?</h1>
+        <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">Tu semana con {GRADOS_CURRICULO.find((g) => g.id === gradoId)?.corto}</h1>
+      </header>
+
+      <Momentos gradoId={gradoId} />
+
+      <section className="flex flex-col gap-4">
+        <h2 className="font-display text-2xl font-bold sm:text-3xl">{ficha ? '¿Otro tema para mañana?' : '¿Qué tema toca mañana?'}</h2>
         <button
           type="button"
           onClick={() => abrirNuevoTema({ gradoId })}
@@ -207,14 +271,11 @@ export function Inicio() {
             </button>
           ))}
         </div>
-      </header>
+      </section>
 
       <TemasDelGrado gradoId={gradoId} />
 
-      <div className={cx('grid gap-4', temas.length > 0 && 'lg:grid-cols-[1fr_26rem]')}>
-        <TusAlumnos />
-        <Recientes />
-      </div>
+      <Recientes />
     </>
   )
 }
