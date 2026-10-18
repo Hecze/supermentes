@@ -79,16 +79,54 @@ function Sincronizar() {
   return null
 }
 
+// El formulario de Clerk con los colores de la app (siguen al modo claro u oscuro) y en tú, no en usted.
+const APARIENCIA = {
+  variables: {
+    colorPrimary: 'var(--primary)',
+    colorPrimaryForeground: 'var(--primary-ink)',
+    colorBackground: 'var(--surface)',
+    colorInput: 'var(--surface-2)',
+    colorForeground: 'var(--ink)',
+    colorMutedForeground: 'var(--ink-soft)',
+    colorBorder: 'var(--line)',
+    colorDanger: 'var(--danger)',
+    fontFamily: 'Lexend, sans-serif',
+    fontSize: '1rem',
+    borderRadius: '0.9rem',
+  },
+  elements: {
+    headerTitle: { fontFamily: '"Shantell Sans", cursive', fontSize: '1.75rem' },
+    socialButtonsBlockButton: { border: '1px solid var(--line)', backgroundColor: 'var(--surface-2)', minHeight: '3rem' },
+    dividerLine: { backgroundColor: 'var(--line)' },
+    formFieldInput: { border: '1px solid var(--line)', minHeight: '3rem' },
+    formButtonPrimary: { minHeight: '3rem' },
+  },
+}
+
+const LOCALIZACION = {
+  ...esES,
+  formFieldInputPlaceholder__emailAddress: 'tucorreo@ejemplo.com',
+  formFieldInputPlaceholder__password: 'Tu contraseña',
+  signIn: {
+    ...esES.signIn,
+    start: { ...esES.signIn?.start, title: 'Entra a Supermentes', titleCombined: 'Entra a Supermentes', subtitle: 'Con Google o con tu correo.', subtitleCombined: 'Con Google o con tu correo.' },
+  },
+  signUp: {
+    ...esES.signUp,
+    start: { ...esES.signUp?.start, title: 'Crea tu cuenta', subtitle: 'Es gratis y toma un minuto.' },
+  },
+}
+
 export function ConCuenta({ children }: { children: ReactNode }) {
   if (!CLAVE_CLERK) return children
   return (
     <ClerkProvider
       publishableKey={CLAVE_CLERK}
-      localization={esES}
+      localization={LOCALIZACION}
       signInUrl="/app"
       signUpUrl="/app"
       afterSignOutUrl="/app/"
-      appearance={{ variables: { colorPrimary: '#172031', fontFamily: 'Lexend, sans-serif', borderRadius: '0.75rem' } }}
+      appearance={APARIENCIA}
     >
       <Sincronizar />
       <Puerta>{children}</Puerta>

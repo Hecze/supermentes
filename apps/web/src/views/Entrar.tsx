@@ -15,7 +15,9 @@ export function Entrar({ children, sinCuenta }: { children: ReactNode; sinCuenta
   return (
     <main className="grid min-h-dvh bg-bg text-ink lg:grid-cols-[1fr_38rem]">
       <section className="flex flex-col gap-10 border-line bg-surface px-6 py-10 sm:px-12 lg:border-r lg:px-20 lg:py-16">
-        <Logo />
+        <span className="hidden lg:block">
+          <Logo />
+        </span>
         <div className="flex flex-col gap-4">
           <h1 className="font-display text-4xl font-bold leading-tight sm:text-6xl">
             Tu clase de mañana,
@@ -39,7 +41,11 @@ export function Entrar({ children, sinCuenta }: { children: ReactNode; sinCuenta
         </p>
       </section>
 
-      <section className="flex flex-col items-center justify-center gap-5 px-6 py-12">
+      {/* En el celular el formulario va primero: es lo que vino a hacer. */}
+      <section className="order-first flex flex-col items-center justify-center gap-5 px-6 py-10 lg:order-none lg:py-12">
+        <span className="self-start lg:hidden">
+          <Logo />
+        </span>
         {children}
         <button type="button" onClick={sinCuenta} className="font-semibold underline underline-offset-4">
           Probar sin cuenta
