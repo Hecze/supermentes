@@ -1,0 +1,13 @@
+// Despliegue en Cloudflare (cuenta personal de Harold). Ver cloudflare/worker.ts.
+// Secretos con `wrangler secret put`: OPENROUTER_API_KEY, EXA_API_KEY, LISTA_CLAVE.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "supermentes",
+  "main": "cloudflare/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "alias": { "@vercel/blob": "./cloudflare/blob.ts" },
+  "assets": { "directory": "apps/web/dist", "binding": "ASSETS", "run_worker_first": true },
+  "r2_buckets": [{ "binding": "BLOB", "bucket_name": "supermentes" }],
+  "observability": { "enabled": true }
+}
