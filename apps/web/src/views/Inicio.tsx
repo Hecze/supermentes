@@ -108,7 +108,8 @@ function Tarjeta({ n, color, etiqueta, titulo, children, accion, onClick }: { n:
   return (
     <section className="flex flex-col gap-3 rounded-2xl border-2 border-line bg-surface p-5 sm:p-6">
       <p className="flex items-center gap-2.5 text-sm font-bold tracking-wide" style={{ color }}>
-        <span className="grid size-8 place-items-center rounded-full text-white" style={{ background: color }}>
+        {/* Texto en el color de la tarjeta: blanco en claro y oscuro en modo oscuro, donde los colores son pastel. */}
+        <span className="grid size-8 place-items-center rounded-full text-surface" style={{ background: color }}>
           {n}
         </span>
         {etiqueta}
@@ -118,7 +119,7 @@ function Tarjeta({ n, color, etiqueta, titulo, children, accion, onClick }: { n:
       <button
         type="button"
         onClick={onClick}
-        className="mt-2 inline-flex h-12 items-center gap-2 self-start rounded-xl px-4 font-semibold text-white hover:opacity-90"
+        className="mt-2 inline-flex h-12 items-center gap-2 self-start rounded-xl px-4 font-semibold text-surface hover:opacity-90"
         style={{ background: color }}
       >
         {accion} <ArrowRight className="size-4" aria-hidden />
