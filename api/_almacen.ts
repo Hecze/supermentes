@@ -6,7 +6,8 @@
 //
 //   almacen(ruta text primary key, datos jsonb, creado timestamptz, actualizado timestamptz)
 //
-// La primera vez que se usa la base, copia lo que ya había en Blob (una sola vez; ver migrarDesdeBlob).
+// La primera vez que se usa la base, copia lo que ya había en Blob (una sola vez; ver migrarDesdeBlob) y, si hay
+// DATABASE_URL_ANTERIOR, lo que había en la base anterior (para cambiar de base sin perder inscritos).
 import { neon } from '@neondatabase/serverless'
 import { del, get, list, put } from '@vercel/blob'
 
@@ -16,8 +17,11 @@ const sql = URL_BASE ? neon(URL_BASE) : null
 /** "postgres" o "blob": para saber dónde quedó cada cosa. */
 export const motor = sql ? 'postgres' : 'blob'
 
+const URL_ANTERIOR = process.env.DATABASE_URL_ANTERIOR
+
 const PREFIJOS_BLOB = ['lista-espera/', 'juegos/', 'resultados/']
 const MARCA_MIGRACION = '_migracion/blob'
+const MARCA_ANTERIOR = '_migracion/anterior'
 
 let lista: Promise<void> | null = null
 
@@ -33,6 +37,10 @@ function preparar() {
     )`
     const [hecha] = await sql`select 1 from almacen where ruta = ${MARCA_MIGRACION}`
     if (!hecha) await migrarDesdeBlob()
+    if (URL_ANTERIOR && URL_ANTERIOR !== URL_BASE) {
+      const [copiada] = await sql`select 1 from almacen where ruta = ${MARCA_ANTERIOR}`
+      if (!copiada) await migrarDesdeAnterior(URL_ANTERIOR)
+    }
   })().catch((e) => {
     lista = null
     throw e
@@ -62,6 +70,23 @@ async function migrarDesdeBlob() {
     console.log(`Migración desde Blob: ${copiados} registros copiados a Postgres`)
   } catch (e) {
     console.error('No se pudo copiar desde Blob (se reintenta en la próxima instancia)', e)
+  }
+}
+
+/** Copia las filas de la base anterior, sin pisar lo que ya esté. Si falla, se reintenta en otra instancia. */
+async function migrarDesdeAnterior(url: string) {
+  if (!sql) return
+  try {
+    const anterior = neon(url)
+    const filas = await anterior`select ruta, datos, creado, actualizado from almacen where not starts_with(ruta, '_migracion/')`
+    for (const f of filas) {
+      await sql`insert into almacen (ruta, datos, creado, actualizado)
+        values (${f.ruta}, ${JSON.stringify(f.datos)}::jsonb, ${f.creado}, ${f.actualizado}) on conflict (ruta) do nothing`
+    }
+    await sql`insert into almacen (ruta, datos) values (${MARCA_ANTERIOR}, ${JSON.stringify({ copiados: filas.length, cuando: new Date().toISOString() })}::jsonb) on conflict (ruta) do nothing`
+    console.log(`Migración desde la base anterior: ${filas.length} registros copiados`)
+  } catch (e) {
+    console.error('No se pudo copiar desde la base anterior (se reintenta en la próxima instancia)', e)
   }
 }
 
