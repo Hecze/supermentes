@@ -150,7 +150,7 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
       style={{ background: claro ? '#f4f7fb' : '#46178f', fontFamily: claro ? 'Lexend, system-ui, sans-serif' : '"Fredoka", system-ui, sans-serif' }}
     >
       {claro && (
-        <div className="relative z-10 flex flex-col gap-[2cqmin] px-[4cqmin] pr-[min(30cqw,140px)] pt-[3cqmin] text-[#172031]">
+        <div className="relative z-10 flex flex-col gap-[2cqmin] px-[4cqmin] pt-[3cqmin] text-[#172031]">
           <div className="flex items-center justify-between gap-3">
             <span className="font-semibold text-[#536075]" style={{ fontSize: 'clamp(15px, 3.6cqmin, 22px)' }}>
               Pregunta {n} de {total}
