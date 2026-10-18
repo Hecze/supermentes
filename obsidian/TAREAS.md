@@ -1,6 +1,6 @@
 ---
 actualizado: 2026-10-18
-estado: propuesta, falta que Harold apruebe el flujo y el prototipo
+estado: decisiones tomadas; falta el visto bueno del prototipo para pasar a código
 ---
 
 # Revisar tareas (problema 3 del ciclo)
@@ -69,7 +69,7 @@ va tercero, después de cuentas y salones.
 - **En la tarea no se elige el juego:** siempre es el Concurso (reloj, una respuesta por pregunta). Los otros juegos
   siguen para practicar.
 - **No se pide el salón para preparar:** solo al asignar una tarea (recomendación del mapa).
-- **No se convierte a AD/A/B/C ni se carga al SIAGIE** en esta versión: se muestran aciertos.
+- **No se convierte a AD/A/B/C ni se carga al SIAGIE:** se muestran aciertos (decidido).
 
 ## 6. El flujo
 
@@ -112,19 +112,18 @@ va tercero, después de cuentas y salones.
 - `TAREA`: `codigo`, `material_id` (el juego, con su contenido y desempeños), `salon_id`, `segundos_por_pregunta`
   (sale del grado) y `vence`.
 - `INTENTO`: `tarea_id`, `alumno_id`, `puntaje`, `segundos`, `por_desempeno` (aciertos y total por desempeño) y su
-  número de intento: **revisar lee solo el primero**. Propuesta: sumar `respuestas` (jsonb: pregunta, elegida,
-  correcta) para mostrar "lo que más costó" y "qué respondieron"; sin eso, solo se ve el desempeño.
+  número de intento: **revisar lee solo el primero**. Suma `respuestas` (jsonb: pregunta, elegida, correcta), que
+  es de donde salen "lo que más costó" y "qué respondieron" (decidido).
 - **Alumno sin datos:** solo el nombre que pegó el docente. La lista es suya, como su registro; el niño no entrega
   nada. Se puede borrar el salón con todo.
 - Pendiente de revisar: la Ley 29733 de datos personales y los menores de edad (no verificado si aplica a una lista
   de nombres del docente).
 - Los resultados de "Para practicar" siguen en `api/resultados.ts` hasta migrarlos a `INTENTO`.
 
-## 8. Decisiones abiertas (Harold)
+## 8. Decisiones (Harold, 2026-10-18)
 
-1. **¿AD/A/B/C o aciertos?** Propuesta: aciertos en v1; después, que el docente fije los cortes una vez.
-2. **¿Cuántas preguntas?** Propuesta: 10 (≈ 5 minutos).
-3. **¿Sumamos `respuestas` a `INTENTO`?** Propuesta: sí. Sin eso, "qué reforzar" se queda en el desempeño, y un tema
-   suele tener uno o dos.
-4. **¿"Ya la hizo" en la lista del alumno?** Evita que dos niños elijan el mismo nombre, pero lo ve todo el salón.
-   Propuesta: sí, sin mostrar puntajes.
+1. **Aciertos** ("8 de 10"), no AD/A/B/C.
+2. **10 preguntas** por tarea.
+3. **`INTENTO` guarda `respuestas`** (pregunta, elegida, correcta): "qué reforzar" muestra la pregunta que más costó y
+   qué respondieron.
+4. **"Ya la hizo" sí** en la lista de nombres del alumno, sin puntajes.
