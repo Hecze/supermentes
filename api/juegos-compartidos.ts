@@ -8,7 +8,7 @@
 // La forma de los datos está en apps/web/src/juegos/compartir/publicado.ts. Aquí se valida y se recorta todo
 // lo que llega, porque cualquiera puede llamar a este endpoint.
 import { randomBytes, randomInt } from 'node:crypto'
-import { get, put } from '@vercel/blob'
+import { guardar, leer } from './_almacen.js'
 import { CODIGO, JUEGOS, demasiadas, entero, json, leerJuego, objeto, rutaJuego, texto } from './_juegos.js'
 
 const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
@@ -98,10 +98,7 @@ function validar(datos: unknown) {
 const nuevoCodigo = () => Array.from({ length: 6 }, () => ALFABETO[randomInt(ALFABETO.length)]).join('')
 const rutaDe = rutaJuego
 
-async function existe(ruta: string) {
-  const r = await get(ruta, { access: 'private', useCache: false })
-  return !!r && r.statusCode === 200
-}
+const existe = async (ruta: string) => (await leer(ruta)) !== null
 
 export async function POST(request: Request) {
   if (demasiadas(request, 'juego', 30)) return json({ error: 'Compartiste muchos juegos seguidos. Espera unos minutos.' }, 429)
@@ -120,12 +117,7 @@ export async function POST(request: Request) {
     let codigo = nuevoCodigo()
     for (let i = 0; i < 4 && (await existe(rutaDe(codigo))); i++) codigo = nuevoCodigo()
     const clave = randomBytes(15).toString('base64url')
-    await put(rutaDe(codigo), JSON.stringify({ ...limpio, clave, creado: new Date().toISOString() }), {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: false,
-    })
+    await guardar(rutaDe(codigo), { ...limpio, clave, creado: new Date().toISOString() })
     return json({ codigo, clave })
   } catch (e) {
     console.error('No se pudo guardar el juego compartido', e)

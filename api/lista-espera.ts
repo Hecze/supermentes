@@ -1,14 +1,14 @@
-// Lista de espera: guarda cada registro como un archivo privado en Vercel Blob.
+// Lista de espera: cada registro se guarda en Postgres (Neon) con api/_almacen.ts; sin DATABASE_URL, en Vercel Blob.
 //
 //   GET  /api/lista-espera                         → { total }  (contador público, cacheado una hora)
-//   POST /api/lista-espera  { correo, nombre, … }  → { ok, nuevo, codigo, total: null }
+//   POST /api/lista-espera  { correo, nombre, … }  → { ok, nuevo, codigo, total }  (total null si se usa Blob)
 //   GET  /api/lista-espera?formato=csv&clave=…     → CSV con todos los registros (requiere LISTA_CLAVE)
 //   DELETE /api/lista-espera?correo=…&clave=…      → borra un registro (pruebas o spam; requiere LISTA_CLAVE)
 //
-// Límite del plan Hobby de Vercel: 2.000 operaciones avanzadas (put, list) al mes; si se pasan, Blob se bloquea
-// 30 días. Por eso cada inscripción hace un solo put, el contador se cachea una hora y hay un tope por conexión.
+// Si se usa Blob: el plan Hobby permite 2.000 operaciones avanzadas (put, list) al mes y se bloquea 30 días si
+// se pasan. Por eso, con Blob, cada inscripción hace un solo put y el contador se cachea una hora.
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { del, get, list, put } from '@vercel/blob'
+import { borrar, contar as contarEn, guardar, leer as leerDe, motor, todos } from './_almacen.js'
 
 const PREFIJO = 'lista-espera/'
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
@@ -53,16 +53,7 @@ const huella = (correo: string) => createHash('sha256').update(correo).digest('h
 const rutaDe = (h: string) => `${PREFIJO}${h.slice(0, 32)}.json`
 const codigoDe = (h: string) => BigInt(`0x${h.slice(0, 12)}`).toString(36).slice(0, 6).toUpperCase()
 
-async function contar() {
-  let total = 0
-  let cursor: string | undefined
-  do {
-    const pagina = await list({ prefix: PREFIJO, cursor, limit: 1000 })
-    total += pagina.blobs.length
-    cursor = pagina.hasMore ? pagina.cursor : undefined
-  } while (cursor)
-  return total
-}
+const contar = () => contarEn(PREFIJO)
 
 // Tope por conexión, en la memoria de cada instancia: frena a un bot sin gastar operaciones de Blob.
 // Es holgado porque en un colegio o una capacitación muchos docentes comparten la misma red.
@@ -80,18 +71,15 @@ function demasiados(request: Request) {
   return recientes.length > MAXIMO_POR_VENTANA
 }
 
-async function leer(ruta: string): Promise<Registro | null> {
-  const r = await get(ruta, { access: 'private', useCache: false })
-  if (!r || r.statusCode !== 200 || !r.stream) return null
-  return JSON.parse(await new Response(r.stream).text()) as Registro
-}
+const leer = (ruta: string) => leerDe<Registro>(ruta)
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
   if (url.searchParams.get('formato') === 'csv') return exportar(request, url)
   try {
-    // El contador se cachea una hora en la CDN: cada list() cuenta contra el límite de operaciones de Blob.
-    return json({ total: await contar() }, 200, { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' })
+    // Con Postgres el conteo es barato (un minuto de caché); con Blob, cada list() gasta operaciones (una hora).
+    const cache = motor === 'postgres' ? 'public, s-maxage=60, stale-while-revalidate=600' : 'public, s-maxage=3600, stale-while-revalidate=86400'
+    return json({ total: await contar() }, 200, { 'Cache-Control': cache })
   } catch (e) {
     console.error('No se pudo contar la lista de espera', e)
     return json({ total: null })
@@ -142,16 +130,11 @@ export async function POST(request: Request) {
     // Si ya estaba y no cambió nada, no se vuelve a escribir.
     const cambio = !previo || (['nombre', 'rol', 'region', 'colegio', 'celular'] as const).some((k) => registro[k] !== previo[k])
     if (cambio) {
-      await put(ruta, JSON.stringify(registro), {
-        access: 'private',
-        contentType: 'application/json',
-        addRandomSuffix: false,
-        allowOverwrite: true,
-      })
+      await guardar(ruta, registro)
     }
 
-    // Sin total: contar la tienda en cada inscripción gastaría otra operación avanzada.
-    return json({ ok: true, nuevo: !previo, codigo, total: null })
+    // Con Blob no se cuenta: gastaría otra operación avanzada en cada inscripción.
+    return json({ ok: true, nuevo: !previo, codigo, total: motor === 'postgres' ? await contar() : null })
   } catch (e) {
     console.error('No se pudo guardar el registro', e)
     return json({ error: 'No pudimos guardar tus datos. Intenta de nuevo en un momento.' }, 500)
@@ -165,7 +148,7 @@ export async function DELETE(request: Request) {
   if (!CORREO.test(correo)) return json({ error: 'Indica el correo que quieres borrar.' }, 400)
   const ruta = rutaDe(huella(correo))
   if (!(await leer(ruta))) return json({ error: 'Ese correo no está en la lista.' }, 404)
-  await del(ruta)
+  await borrar(ruta)
   return json({ ok: true })
 }
 
@@ -190,19 +173,7 @@ function celda(v: string | number | null) {
 async function exportar(request: Request, url: URL) {
   if (!claveValida(claveDe(request, url))) return json({ error: 'Clave incorrecta.' }, 401)
 
-  const rutas: string[] = []
-  let cursor: string | undefined
-  do {
-    const pagina = await list({ prefix: PREFIJO, cursor, limit: 1000 })
-    rutas.push(...pagina.blobs.map((b) => b.pathname))
-    cursor = pagina.hasMore ? pagina.cursor : undefined
-  } while (cursor)
-
-  const registros: Registro[] = []
-  for (let i = 0; i < rutas.length; i += 20) {
-    const tanda = await Promise.all(rutas.slice(i, i + 20).map(leer))
-    registros.push(...tanda.filter((r): r is Registro => r !== null))
-  }
+  const registros = await todos<Registro>(PREFIJO)
   registros.sort((a, b) => a.creado.localeCompare(b.creado))
 
   const invitados = new Map<string, number>()

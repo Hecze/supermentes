@@ -1,6 +1,6 @@
 // Lo común de los juegos compartidos y sus resultados. El "_" hace que Vercel no lo publique como endpoint.
 import { timingSafeEqual } from 'node:crypto'
-import { get } from '@vercel/blob'
+import { leer } from './_almacen.js'
 
 export const CODIGO = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
 export const JUEGOS = new Set(['globos', 'rapido', 'soga', 'memoria', 'carrera', 'palabra', 'pupiletras', 'topo', 'ruleta', 'duelo', 'invasion', 'concurso', 'verdad', 'une', 'condor', 'carriles', 'michi'])
@@ -19,11 +19,7 @@ export const objeto = (v: unknown): Record<string, unknown> => (v && typeof v ==
 
 export const rutaJuego = (codigo: string) => `juegos/${codigo}.json`
 
-export async function leerJson<T>(ruta: string): Promise<T | null> {
-  const r = await get(ruta, { access: 'private', useCache: false })
-  if (!r || r.statusCode !== 200 || !r.stream) return null
-  return JSON.parse(await new Response(r.stream).text()) as T
-}
+export const leerJson = <T>(ruta: string) => leer<T>(ruta)
 
 /** El juego guardado tal cual, con la clave del docente (nunca se manda a los alumnos). */
 export type JuegoGuardado = { juego: string; tema: string; clave?: string; creado: string } & Record<string, unknown>

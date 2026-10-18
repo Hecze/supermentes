@@ -49,7 +49,7 @@ cuello de botella.
 
 - **Repo:** `Hecze/supermentes`, rama `main`, monorepo Turborepo. App en `apps/web` (Vite + React),
   funciones de Vercel en `api/`, currículo en `packages/curriculo`, notas en `obsidian/`.
-- **Producción:** https://www.supermentes.app (Vercel, cuenta de Hecze). Datos en Vercel Blob.
+- **Producción:** https://www.supermentes.app (Vercel, cuenta de Hecze). Datos en Postgres (Neon, `api/_almacen.ts`); audios en Vercel Blob.
 - **Contratos UI ↔ backend:** `apps/web/src/api/types.ts`. Cambiar de ejemplo a real: `VITE_API=real`.
 - **IA prevista:** Claude (texto; lee el examen que sube el docente para adaptarlo), ElevenLabs (audio), ARASAAC (pictogramas).
 

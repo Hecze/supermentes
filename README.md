@@ -12,7 +12,7 @@ Proyecto para Hack the Andes 2026.
 | `/app` | La app para docentes (`app/index.html`, `src/main.tsx`). La landing no la enlaza y no aparece en buscadores (`noindex`) |
 | `/api/lista-espera` | Función de Vercel que guarda la lista de espera (`api/lista-espera.ts`) |
 | `/j/CODIGO` | Juego compartido para los alumnos: solo el juego, sin cuenta (`j/index.html`, `src/alumno/`). En `/j` se escribe el código |
-| `/api/juegos-compartidos` | Guarda cada juego compartido en Vercel Blob con un código de 6 letras (`api/juegos-compartidos.ts`) |
+| `/api/juegos-compartidos` | Guarda cada juego compartido en la base de datos (Postgres) con un código de 6 letras (`api/juegos-compartidos.ts`) |
 | `/api/resultados` | Guarda el mejor puntaje de cada alumno en un juego compartido y se los muestra al docente que lo envió (`api/resultados.ts`) |
 
 ## Currículo nacional (base de conocimiento)
@@ -25,7 +25,7 @@ Proyecto para Hack the Andes 2026.
 
 ## Lista de espera
 
-- Cada registro es un archivo **privado** en Vercel Blob (`lista-espera/<huella del correo>.json`): un archivo por correo, así que no hay duplicados y volver a enviar el formulario solo completa los datos.
+- Cada registro es una fila en **Postgres (Neon)**, tabla `almacen`, con la ruta `lista-espera/<huella del correo>.json` como clave: una por correo, así que no hay duplicados y volver a enviar el formulario solo completa los datos. Lo mismo para juegos compartidos (`juegos/…`) y resultados (`resultados/…`). Todo pasa por `api/_almacen.ts`: con `DATABASE_URL` usa Postgres; sin ella (por ejemplo en `npm run dev`), Vercel Blob. La primera vez copió a Postgres lo que había en Blob.
 - `GET /api/lista-espera` devuelve `{ total }` para el contador de la landing (cacheado 2 minutos en la CDN).
 - `GET /api/lista-espera?formato=csv&clave=LISTA_CLAVE` descarga todos los registros en CSV, con la columna `invitados` (cuántas personas se unieron con el enlace de cada uno). La clave está en las variables de entorno del proyecto en Vercel.
 - `DELETE /api/lista-espera?correo=…&clave=LISTA_CLAVE` borra un registro (pruebas o spam).
