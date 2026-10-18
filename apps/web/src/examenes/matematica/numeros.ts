@@ -31,12 +31,12 @@ function erroresDeLectura(n: number) {
 
 // ---------- El dinero del Perú ----------
 
-const BILLETES: Record<number, { palabra: string; fondo: string; borde: string }> = {
-  200: { palabra: 'DOSCIENTOS SOLES', fondo: '#eadcf2', borde: '#6f4a8c' },
-  100: { palabra: 'CIEN SOLES', fondo: '#d6e2f5', borde: '#36598f' },
-  50: { palabra: 'CINCUENTA SOLES', fondo: '#f6d6d2', borde: '#a34a3f' },
-  20: { palabra: 'VEINTE SOLES', fondo: '#f8e1c6', borde: '#9a5b1c' },
-  10: { palabra: 'DIEZ SOLES', fondo: '#d8eedd', borde: '#3c7a4e' },
+const BILLETES: Record<number, { fondo: string; borde: string }> = {
+  200: { fondo: '#eadcf2', borde: '#6f4a8c' },
+  100: { fondo: '#d6e2f5', borde: '#36598f' },
+  50: { fondo: '#f6d6d2', borde: '#a34a3f' },
+  20: { fondo: '#f8e1c6', borde: '#9a5b1c' },
+  10: { fondo: '#d8eedd', borde: '#3c7a4e' },
 }
 
 const BW = 150
@@ -48,32 +48,28 @@ function billete(valor: number) {
   return [
     rect(0, 0, BW, BH, { relleno: b.fondo, trazo: TINTA, grosor: 1.6, redondeo: 6 }),
     rect(5, 5, BW - 10, BH - 10, { trazo: b.borde, grosor: 0.8, redondeo: 4 }),
-    texto(12, 22, 'S/', { tam: 11, peso: 700, ancla: 'start', color: b.borde }),
-    texto(28, 22, v, { tam: 21, peso: 700, ancla: 'start' }),
-    texto(12, 44, 'PERÚ', { tam: 8, peso: 700, ancla: 'start', color: b.borde }),
-    texto(12, 58, b.palabra, { tam: 7.5, peso: 700, ancla: 'start' }),
+    texto(13, 26, 'S/', { tam: 13, peso: 700, ancla: 'start', color: b.borde }),
+    texto(31, 26, v, { tam: 24, peso: 700, ancla: 'start' }),
     // Medallón con una silueta, para que se lea como billete.
-    circulo(112, 34, 21, { relleno: '#ffffff', trazo: b.borde, grosor: 1.2 }),
-    circulo(112, 28, 7, { relleno: CLARO, trazo: b.borde, grosor: 1 }),
-    `<path d="M98,48 Q112,34 126,48" fill="${CLARO}" stroke="${b.borde}" stroke-width="1"/>`,
-    texto(BW - 10, BH - 13, v, { tam: 13, peso: 700, ancla: 'end' }),
+    circulo(112, 36, 21, { relleno: '#ffffff', trazo: b.borde, grosor: 1.2 }),
+    circulo(112, 30, 7, { relleno: CLARO, trazo: b.borde, grosor: 1 }),
+    `<path d="M98,50 Q112,36 126,50" fill="${CLARO}" stroke="${b.borde}" stroke-width="1"/>`,
+    texto(13, BH - 16, v, { tam: 15, peso: 700, ancla: 'start', color: b.borde }),
   ].join('')
 }
 
-const MONEDAS: Record<number, { r: number; anillo: string; centro: string; palabra: string }> = {
-  5: { r: 31, anillo: '#e3cf86', centro: '#d9d9d9', palabra: 'SOLES' },
-  2: { r: 28, anillo: '#d9d9d9', centro: '#e3cf86', palabra: 'SOLES' },
-  1: { r: 27, anillo: '#dcdcdc', centro: '#dcdcdc', palabra: 'SOL' },
+const MONEDAS: Record<number, { r: number; anillo: string; centro: string }> = {
+  5: { r: 31, anillo: '#e3cf86', centro: '#d9d9d9' },
+  2: { r: 28, anillo: '#d9d9d9', centro: '#e3cf86' },
+  1: { r: 27, anillo: '#dcdcdc', centro: '#dcdcdc' },
 }
 
 function moneda(valor: number) {
   const m = MONEDAS[valor]
   return [
     circulo(0, 0, m.r, { relleno: m.anillo, grosor: 1.6 }),
-    circulo(0, 0, m.r * 0.66, { relleno: m.centro, trazo: GRIS, grosor: 1 }),
-    texto(-5, -2, 'S/', { tam: 9, peso: 700, ancla: 'end' }),
-    texto(3, -2, String(valor), { tam: 22, peso: 700 }),
-    texto(0, m.r * 0.42, m.palabra, { tam: 7, peso: 700 }),
+    circulo(0, 0, m.r * 0.7, { relleno: m.centro, trazo: GRIS, grosor: 1 }),
+    texto(0, 1, `S/ ${valor}`, { tam: 16, peso: 700 }),
   ].join('')
 }
 

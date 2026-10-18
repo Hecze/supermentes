@@ -3,7 +3,8 @@
 // - la cita de un tipo de pregunta no aparece tal cual en un desempeño de su grado, o es de otra competencia;
 // - un tema de un grado con banco no tiene examen listo, o un tema de Matemática tiene menos de 2 tipos con dibujos;
 // - en cientos de versiones al azar, alguna pregunta sale rota: sin texto, con "NaN", alternativas repetidas, la
-//   correcta fuera de rango, una pareja o palabra que no cuadra, o un dibujo más ancho que la hoja.
+//   correcta fuera de rango, una pareja o palabra que no cuadra, o un dibujo más ancho que la hoja;
+// - en un tipo, la correcta cae en la misma letra en más del 65 % de las versiones.
 import type { TemaBanco } from '../banco/banco'
 import type { CurriculoNivel } from '../curriculo/cargar'
 import { ubicarCita } from '../curriculo/citas'
@@ -77,6 +78,7 @@ export function verificarExamenes() {
   for (const t of TIPOS.values()) {
     if (t.cambia !== 'numeros') continue
     let nulos = 0
+    const lugar = [0, 0, 0, 0, 0]
     for (let s = 1; s <= SEMILLAS_TIPO; s++) {
       let g: Generado | null
       try {
@@ -94,7 +96,12 @@ export function verificarExamenes() {
         errores.push(`${t.nombre} (${t.id}), semilla ${s}: ${p}`)
         break
       }
+      if (g.forma === 'opciones') lugar[g.correcta]++
     }
+    // Que la correcta no caiga casi siempre en la misma letra: un alumno vivo lo nota.
+    const marcar = lugar.reduce((a, b) => a + b, 0)
+    if (marcar >= 50 && Math.max(...lugar) > marcar * 0.65)
+      errores.push(`${t.nombre} (${t.id}): la correcta cae en la misma letra en ${Math.round((Math.max(...lugar) / marcar) * 100)} % de las versiones.`)
     if (nulos > SEMILLAS_TIPO * 0.2) errores.push(`${t.nombre} (${t.id}): no arma pregunta en ${nulos} de ${SEMILLAS_TIPO} semillas.`)
   }
 
