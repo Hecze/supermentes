@@ -1,8 +1,10 @@
-// El PDF de los exámenes listos, armado en el navegador (jsPDF se descarga solo al pedirlo). Pensado para la
-// fotocopiadora del colegio: A4, blanco y negro, letra grande, una pregunta nunca se parte entre dos páginas.
-// Los dibujos son los mismos SVG de la pantalla, pasados a imagen.
+// El PDF de las hojas listas (examen, práctica y balotario) y de su clave, armado en el navegador (jsPDF se descarga
+// solo al pedirlo). Pensado para la fotocopiadora del colegio: A4, blanco y negro, letra grande, una pregunta nunca se
+// parte entre dos páginas. Los dibujos son los mismos SVG de la pantalla, pasados a imagen. La clave es para el
+// docente: una tabla de respuestas para corregir rápido y, por pregunta, los pasos como en la pizarra.
 import type { jsPDF as JsPDF } from 'jspdf'
-import type { Dibujo, Item, Version } from './tipos'
+import { porTema } from './armar'
+import type { Clase, Dibujo, Item, Teoria, Version } from './tipos'
 import { letra } from './util'
 
 const ANCHO = 210
@@ -21,6 +23,9 @@ const REEMPLAZOS: [RegExp, string][] = [
   [/≠/g, 'distinto de'],
   [/[▢□☐]/g, '____'],
   [/→/g, '->'],
+  [/≈/g, 'aprox.'],
+  [/[“”]/g, '"'],
+  [/[‘’]/g, "'"],
   [/ /g, ' '],
 ]
 const limpiar = (s: string) => REEMPLAZOS.reduce((t, [re, por]) => t.replace(re, por), s)
@@ -41,22 +46,30 @@ async function aPng(d: Dibujo, escala = 3): Promise<string> {
 }
 
 export type DatosPdf = {
-  tema: string
-  area: string
+  clase: Clase
+  titulo: string
+  /** El curso (o los cursos, en una miscelánea de varios). */
+  curso: string
+  /** Grado y sección, como lo escribió el docente (o el grado del tema). */
   grado: string
+  colegio: string
+  docente: string
+  temas: { tema: string; teoria: Teoria | null }[]
+  /** Con subtítulo por tema: en la miscelánea. */
+  subtitulos: boolean
   versiones: Version[]
-  /** Qué evalúa cada tipo de pregunta, para la hoja de respuestas: su nombre y su cita del currículo. */
-  sustento: (tipo: string) => { nombre: string; competencia?: string; cita?: string }
+  /** Qué evalúa cada tipo de pregunta de cada tema, para la clave: su nombre y su cita del currículo. */
+  sustento: (tema: string, tipo: string) => { nombre: string; competencia?: string; cita?: string }
 }
 
 /**
  * Medidas de un dibujo en el papel: un poco más chico que en la pantalla (así el examen entra en menos hojas y la
  * fotocopia cuesta menos), sin pasar el ancho de la hoja ni 75 mm de alto.
  */
-function medidas(d: Dibujo) {
+function medidas(d: Dibujo, maxW = W - 8, maxH = 75) {
   let w = d.ancho * MM_POR_PX * 0.8
   let h = d.alto * MM_POR_PX * 0.8
-  const k = Math.min(1, (W - 8) / w, 75 / h)
+  const k = Math.min(1, maxW / w, maxH / h)
   w *= k
   h *= k
   return { w, h }
@@ -126,26 +139,66 @@ function carita(doc: JsPDF, cx: number, cy: number, r: number, animo: 1 | 0 | -1
   doc.lines(tramos, puntos[0][0], puntos[0][1], [1, 1], 'S', false)
 }
 
-const PT = 11.5
 
-function encabezado(c: Ctx, d: DatosPdf, v: Version, respuestas: boolean) {
-  const { doc } = c
+const PT = 11.5
+const ROMANOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+
+/** Texto y una línea para escribir a mano a su derecha. Devuelve dónde termina. */
+function campo(doc: JsPDF, texto: string, x: number, y: number, largo: number) {
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10.5)
-  doc.setTextColor(80)
-  doc.text(limpiar(`${d.area} · ${d.grado}`), MARGEN, c.y, { baseline: 'top' })
+  doc.setFontSize(PT)
+  doc.text(texto, x, y, { baseline: 'bottom' })
+  const x0 = x + doc.getTextWidth(texto) + 1.5
+  doc.setDrawColor(120)
+  doc.line(x0, y, x0 + largo, y)
+  return x0 + largo
+}
+
+/** El encabezado: el colegio, el curso, el grado y el docente; la nota (en el examen), el título y el nombre. */
+function encabezado(c: Ctx, d: DatosPdf, v: Version, clave: boolean) {
+  const { doc } = c
+  const y0 = c.y
+  const conNota = d.clase === 'examen' && !clave
+  const ancho = conNota ? W - 28 : W - 40
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  doc.setTextColor(90)
   doc.text([v.fila, `Versión ${v.codigo}`].filter(Boolean).join(' · '), ANCHO - MARGEN, c.y, { baseline: 'top', align: 'right' })
+  if (conNota) {
+    doc.text('Nota', ANCHO - MARGEN - 10, y0 + 6, { baseline: 'top', align: 'center' })
+    doc.setDrawColor(30)
+    doc.setLineWidth(0.5)
+    doc.roundedRect(ANCHO - MARGEN - 20, y0 + 11, 20, 20, 2, 2, 'S')
+    doc.setLineWidth(0.2)
+  }
   doc.setTextColor(0)
-  c.y += 6
-  escribir(c, lineas(doc, respuestas ? `Respuestas: ${d.tema}` : d.tema, 19, W, 'bold'), 19, MARGEN, 'bold')
+  if (d.colegio.trim()) {
+    escribir(c, lineas(doc, d.colegio, 12.5, ancho, 'bold'), 12.5, MARGEN, 'bold')
+  }
+  doc.setTextColor(70)
+  escribir(c, lineas(doc, [d.curso, d.grado, d.docente.trim() && `Docente: ${d.docente.trim()}`].filter(Boolean).join(' · '), 10.5, ancho), 10.5)
+  doc.setTextColor(0)
   c.y += 2
-  if (respuestas) {
-    escribir(c, lineas(doc, 'Solo para el docente.', PT, W), PT)
-    c.y += 3
+  escribir(c, lineas(doc, clave ? `Clave: ${d.titulo}` : d.titulo, 18, ancho, 'bold'), 18, MARGEN, 'bold')
+  c.y += 2
+  if (clave) {
+    escribir(c, ['Solo para el docente.'], PT)
+    c.y += 4
     return
   }
-  escribir(c, [`Nombre: ${'_'.repeat(44)}     Fecha: ${'_'.repeat(14)}`], PT)
-  c.y += 3
+  c.y = Math.max(c.y + 5, conNota ? y0 + 37 : 0)
+  const fecha = d.clase === 'balotario' ? 'Para el examen del:' : 'Fecha:'
+  const largoFecha = d.clase === 'balotario' ? 24 : 30
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(PT)
+  const largoNombre = W - doc.getTextWidth('Apellidos y nombres:') - doc.getTextWidth(fecha) - 3 - 8 - largoFecha
+  const fin = campo(doc, 'Apellidos y nombres:', MARGEN, c.y, largoNombre)
+  campo(doc, fecha, fin + 8, c.y, largoFecha)
+  c.y += 6
+  if (d.clase !== 'examen') {
+    c.y += 2
+    return
+  }
   // Los retos: una estrella por cada uno, para que el alumno las pinte al revisar.
   const n = v.items.length
   const texto = lineas(doc, `Resuelve los ${n} retos. Por cada reto que logres, pinta una estrella.`, PT, W - 10)
@@ -167,57 +220,86 @@ function encabezado(c: Ctx, d: DatosPdf, v: Version, respuestas: boolean) {
   c.y += 5
 }
 
-/** Alto de un renglón de alternativas en fila, o null si no caben en una sola fila. */
-function enFila(doc: JsPDF, alts: string[]) {
+/** Ancho de cada alternativa si caben todas en una fila, o null. */
+function enFila(doc: JsPDF, alts: string[], ancho: number) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(PT)
   const anchos = alts.map((a, i) => doc.getTextWidth(limpiar(`${letra(i)}) ${a}`)) + 8)
-  const col = (W - 8) / alts.length
+  const col = (ancho - 4) / alts.length
   return anchos.every((a) => a <= col - 2) ? col : null
 }
 
+/** «Respuesta: ____» */
+function lineaRespuesta(c: Ctx, X: number, medir: boolean) {
+  c.y += 4
+  if (!medir) campo(c.doc, 'Respuesta:', X, c.y + 3, 70)
+  c.y += 6
+}
+
 /** Dibuja una pregunta (o la mide, si `medir`). Devuelve el alto que ocupa. */
-function pregunta(c: Ctx, it: Item, i: number, medir: boolean): number {
+function pregunta(c: Ctx, it: Item, n: number, clase: Clase, medir: boolean): number {
   const { doc } = c
   const y0 = c.y
   const X = MARGEN + 2
   const ancho = W - 4
-  // "Reto 1": una etiqueta oscura, y al lado lo que hay que hacer.
+  const compacta = clase === 'balotario'
+  // Como en el libro: el enunciado a la izquierda y el recuadro del procedimiento a la derecha.
+  const conRecuadro = !compacta && it.forma === 'abierta' && it.espacio === 'procedimiento'
+  const izq = conRecuadro ? ancho * 0.55 : ancho
+
+  // "Reto 1" en una etiqueta oscura (en el balotario, solo "1.") y al lado lo que hay que hacer.
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(10.5)
-  const etiqueta = `Reto ${i + 1}`
-  const we = doc.getTextWidth(etiqueta) + 5
-  const enunciado = lineas(doc, it.enunciado, PT, ancho - we - 3, 'bold')
+  doc.setFontSize(compacta ? PT : 10.5)
+  const etiqueta = compacta ? `${n}.` : `Reto ${n}`
+  const we = doc.getTextWidth(etiqueta) + (compacta ? 1.5 : 5)
+  const estilo = compacta ? 'normal' : 'bold'
+  const enunciado = lineas(doc, it.enunciado, PT, izq - we - 3, estilo)
   if (!medir) {
-    doc.setFillColor(35, 35, 35)
-    doc.roundedRect(X, c.y - 0.8, we, 6, 1.6, 1.6, 'F')
-    doc.setTextColor(255)
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10.5)
-    doc.text(etiqueta, X + 2.5, c.y + 2.2, { baseline: 'middle' })
-    doc.setTextColor(0)
+    if (compacta) {
+      doc.text(etiqueta, X, c.y, { baseline: 'top' })
+    } else {
+      doc.setFillColor(35, 35, 35)
+      doc.roundedRect(X, c.y - 0.8, we, 6, 1.6, 1.6, 'F')
+      doc.setTextColor(255)
+      doc.text(etiqueta, X + 2.5, c.y + 2.2, { baseline: 'middle' })
+      doc.setTextColor(0)
+    }
   }
   const yTexto = c.y
   if (medir) c.y += enunciado.length * alto(PT)
-  else escribir(c, enunciado, PT, X + we + 3, 'bold')
-  c.y = Math.max(c.y, yTexto + 6)
+  else escribir(c, enunciado, PT, X + we + 3, estilo)
+  c.y = Math.max(c.y, yTexto + (compacta ? 0 : 6))
 
   if (it.dibujo) {
-    const m = medidas(it.dibujo)
+    const m = medidas(it.dibujo, izq - 8, compacta ? 55 : 75)
     c.y += 2.5
     if (!medir) doc.addImage(c.imagenes.get(it.dibujo.svg)!, 'PNG', X + 4, c.y, m.w, m.h, undefined, 'FAST')
     c.y += m.h + 2
   }
   if (it.pregunta) {
-    const ls = lineas(doc, it.pregunta, PT, ancho)
+    const ls = lineas(doc, it.pregunta, PT, izq)
     c.y += 1.5
     if (medir) c.y += ls.length * alto(PT)
     else escribir(c, ls, PT, X)
   }
 
-  if (it.forma === 'opciones') {
-    c.y += 2.5
-    const col = enFila(doc, it.alternativas)
+  if (conRecuadro) {
+    const abajo = Math.max(c.y + 2, y0 + 40)
+    if (!medir) {
+      const x = X + izq + 4
+      doc.setDrawColor(140)
+      doc.roundedRect(x, y0 - 1, ancho - izq - 4, abajo - y0 + 1, 2, 2, 'S')
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9.5)
+      doc.setTextColor(110)
+      doc.text('Procedimiento', x + 2.5, y0 + 1, { baseline: 'top' })
+      doc.setTextColor(0)
+    }
+    c.y = abajo
+    lineaRespuesta(c, X, medir)
+  } else if (it.forma === 'opciones') {
+    c.y += compacta ? 1.5 : 2.5
+    const col = enFila(doc, it.alternativas, ancho)
     if (col) {
       if (!medir) {
         doc.setDrawColor(40)
@@ -242,16 +324,11 @@ function pregunta(c: Ctx, it: Item, i: number, medir: boolean): number {
       }
     }
   } else if (it.forma === 'abierta') {
-    if (it.espacio === 'linea') {
-      c.y += 4
-      if (!medir) {
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(PT)
-        doc.text('Respuesta:', X, c.y + 3, { baseline: 'bottom' })
-        doc.setDrawColor(120)
-        doc.line(X + 22, c.y + 3, X + 110, c.y + 3)
-      }
-      c.y += 6
+    // En el balotario se resuelve en el cuaderno: sin espacio.
+    if (compacta) {
+      // nada
+    } else if (it.espacio === 'linea' || it.espacio === 'procedimiento') {
+      lineaRespuesta(c, X, medir)
     } else if (it.espacio === 'renglones') {
       for (let r = 0; r < 3; r++) {
         c.y += 8
@@ -311,9 +388,35 @@ function pregunta(c: Ctx, it: Item, i: number, medir: boolean): number {
       c.y = y + ls.length * alto(PT) + 2.5
     }
   }
-  c.y += 5
+  c.y += compacta ? 3.5 : 5
   const h = c.y - y0
   if (medir) c.y = y0
+  return h
+}
+
+/** «Recuerda»: la idea del tema y un ejemplo resuelto, en un recuadro gris (o lo mide). */
+function recuerda(c: Ctx, t: Teoria, medir: boolean): number {
+  const { doc } = c
+  const y0 = c.y
+  const w = W - 10
+  const bloques: [string[], number, 'normal' | 'bold'][] = [
+    [lineas(doc, 'Recuerda', 12.5, w, 'bold'), 12.5, 'bold'],
+    [lineas(doc, t.idea, PT, w), PT, 'normal'],
+    [lineas(doc, `Ejemplo: ${t.ejemplo.enunciado}`, PT, w), PT, 'normal'],
+    ...t.ejemplo.pasos.map((p): [string[], number, 'normal'] => [lineas(doc, p, PT, w - 4), PT, 'normal']),
+    [lineas(doc, `Respuesta: ${t.ejemplo.respuesta}`, PT, w - 4, 'bold'), PT, 'bold'],
+  ]
+  const h = 8 + bloques.reduce((s, [ls, pt]) => s + ls.length * alto(pt) + 1, 0)
+  if (medir) return h
+  doc.setFillColor(243, 243, 243)
+  doc.setDrawColor(190)
+  doc.roundedRect(MARGEN, c.y, W, h, 2.5, 2.5, 'FD')
+  c.y += 4
+  bloques.forEach(([ls, pt, estilo], k) => {
+    escribir(c, ls, pt, MARGEN + 5 + (k > 2 ? 4 : 0), estilo)
+    c.y += 1
+  })
+  c.y = y0 + h + 4
   return h
 }
 
@@ -343,80 +446,139 @@ function autoevaluacion(c: Ctx) {
   c.y += h - 4
 }
 
-/** Lo que va en la hoja de respuestas para cada pregunta. */
+/** Lo que va en la clave para cada pregunta. */
 export function respuestaDe(it: Item): string {
-  const nota = it.nota ? ` ${it.nota}` : ''
-  if (it.forma === 'opciones') return `${letra(it.correcta)}) ${it.alternativas[it.correcta]}${nota}`
-  if (it.forma === 'abierta') return `${it.respuesta}${nota}`
+  if (it.forma === 'opciones') return `${letra(it.correcta)}) ${it.alternativas[it.correcta]}`
+  if (it.forma === 'abierta') return it.respuesta
   if (it.forma === 'unir') return it.izquierda.map((a, k) => `${a} -> ${it.derecha[it.solucion[k]]}`).join(' · ')
   return it.respuestas.map((r, k) => `${k + 1}. ${r}`).join(' · ')
 }
 
-function hojaRespuestas(c: Ctx, d: DatosPdf, v: Version) {
+/** La respuesta en pocas letras, para la tabla de arriba de la clave: la letra, o el valor si es corto. */
+function respuestaCorta(doc: JsPDF, it: Item, ancho: number) {
+  if (it.forma === 'opciones') return letra(it.correcta)
+  if (it.forma !== 'abierta') return 'abajo'
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(PT)
+  const r = limpiar(it.respuesta)
+  return doc.getTextWidth(r) <= ancho ? r : 'abajo'
+}
+
+function clave(c: Ctx, d: DatosPdf, v: Version) {
   const { doc } = c
   encabezado(c, d, v, true)
-  for (const [i, it] of v.items.entries()) {
-    const s = d.sustento(it.tipo)
-    const t = lineas(doc, `Reto ${i + 1} · ${s.nombre}`, 10.5, W, 'bold')
-    const r = lineas(doc, respuestaDe(it), PT, W - 6)
-    const h = t.length * alto(10.5) + r.length * alto(PT) + 4
-    if (c.y + h > LIMITE) nuevaPagina(c)
-    doc.setTextColor(80)
-    escribir(c, t, 10.5, MARGEN, 'bold')
+  const grupos = porTema(v, d.temas.map((t) => t.tema))
+  const numerados = grupos.flatMap((g) => g.items)
+
+  // 1. La tabla de respuestas: para corregir mirando solo esto.
+  const porFila = 5
+  const col = W / porFila
+  const filas = Math.ceil(numerados.length / porFila)
+  const hFila = 8
+  doc.setDrawColor(190)
+  doc.roundedRect(MARGEN, c.y, W, filas * hFila + 4, 2, 2, 'S')
+  numerados.forEach((it, i) => {
+    const x = MARGEN + 4 + (i % porFila) * col
+    const y = c.y + 2 + Math.floor(i / porFila) * hFila + hFila / 2
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10.5)
+    doc.setTextColor(90)
+    doc.text(`${i + 1}.`, x, y, { baseline: 'middle' })
     doc.setTextColor(0)
-    escribir(c, r, PT, MARGEN + 4)
-    c.y += 2.5
-  }
-  // Qué evalúa: el desempeño de cada tipo, citado tal cual. Sirve para el registro y para el director.
-  const vistos = new Map<string, number[]>()
-  v.items.forEach((it, i) => {
-    const s = d.sustento(it.tipo)
-    if (s.cita) vistos.set(s.cita, [...(vistos.get(s.cita) ?? []), i + 1])
+    const corta = respuestaCorta(doc, it, col - 11)
+    doc.setFont('helvetica', corta === 'abajo' ? 'normal' : 'bold')
+    doc.setFontSize(corta === 'abajo' ? 9.5 : PT)
+    if (corta === 'abajo') doc.setTextColor(110)
+    doc.text(corta === 'abajo' ? 'ver abajo' : corta, x + 7, y, { baseline: 'middle' })
+    doc.setTextColor(0)
+  })
+  c.y += filas * hFila + 10
+
+  // 2. Por pregunta: la respuesta y, debajo, los pasos como se escribirían en la pizarra.
+  let n = 0
+  grupos.forEach((g, k) => {
+    if (d.subtitulos) {
+      if (c.y + 20 > LIMITE) nuevaPagina(c)
+      escribir(c, lineas(doc, `${ROMANOS[k] ?? k + 1}. ${g.tema}`, 13, W, 'bold'), 13, MARGEN, 'bold')
+      c.y += 1.5
+    }
+    for (const it of g.items) {
+      n++
+      const r = lineas(doc, `${n}. ${respuestaDe(it)}`, 12, W - 4, 'bold')
+      const pasos = [...(it.pasos ?? []), ...(it.nota ? [it.nota] : [])].map((p) => lineas(doc, p, PT, W - 12))
+      const h = r.length * alto(12) + pasos.reduce((s, ls) => s + ls.length * alto(PT), 0) + 5
+      if (c.y + h > LIMITE) nuevaPagina(c)
+      escribir(c, r, 12, MARGEN, 'bold')
+      for (const ls of pasos) escribir(c, ls, PT, MARGEN + 7)
+      c.y += 3.5
+    }
+  })
+
+  // 3. Qué evalúa: el desempeño de cada tipo, citado tal cual. Sirve para el registro y para el director.
+  const vistos = new Map<string, { numeros: number[]; competencia?: string }>()
+  numerados.forEach((it, i) => {
+    const s = d.sustento(it.tema, it.tipo)
+    if (!s.cita) return
+    const antes = vistos.get(s.cita)
+    vistos.set(s.cita, { numeros: [...(antes?.numeros ?? []), i + 1], competencia: s.competencia })
   })
   if (!vistos.size) return
   c.y += 4
-  const titulo = lineas(doc, 'Qué evalúa cada reto (Currículo Nacional, texto oficial del MINEDU)', PT, W, 'bold')
   if (c.y + 20 > LIMITE) nuevaPagina(c)
-  escribir(c, titulo, PT, MARGEN, 'bold')
+  escribir(c, lineas(doc, 'Qué evalúa cada pregunta (Currículo Nacional, texto oficial del MINEDU)', PT, W, 'bold'), PT, MARGEN, 'bold')
   c.y += 1
-  for (const [cita, retos] of vistos) {
-    const s = d.sustento(v.items[retos[0] - 1].tipo)
-    const ls = lineas(doc, `Retos ${retos.join(', ')}${s.competencia ? ` · Competencia «${s.competencia}»` : ''}: «${cita}»`, 10.5, W - 4)
+  for (const [cita, { numeros, competencia }] of vistos) {
+    const ls = lineas(doc, `${numeros.length > 1 ? 'Preguntas' : 'Pregunta'} ${numeros.join(', ')}${competencia ? ` · Competencia «${competencia}»` : ''}: «${cita}»`, 10.5, W - 4)
     if (c.y + ls.length * alto(10.5) > LIMITE) nuevaPagina(c)
     escribir(c, ls, 10.5, MARGEN + 2)
     c.y += 2
   }
 }
 
-/** El examen (una o dos versiones) o sus respuestas, en un solo PDF. */
-export async function pdfExamenListo(d: DatosPdf, { respuestas = false } = {}): Promise<Blob> {
+/** La hoja del alumno (una o dos versiones) o su clave, en un solo PDF. */
+export async function pdfHoja(d: DatosPdf, { clave: conClave = false } = {}): Promise<Blob> {
   const { jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const imagenes = new Map<string, string>()
-  if (!respuestas) {
+  if (!conClave) {
     const dibujos = [...new Map(d.versiones.flatMap((v) => v.items.flatMap((it) => (it.dibujo ? [[it.dibujo.svg, it.dibujo] as const] : [])))).values()]
     await Promise.all(dibujos.map(async (x) => imagenes.set(x.svg, await aPng(x))))
   }
   const c: Ctx = { doc, y: ARRIBA, imagenes, pie: '' }
-  d.versiones.forEach((v, n) => {
-    if (n > 0) {
+  d.versiones.forEach((v, nv) => {
+    if (nv > 0) {
       pie(c)
       doc.addPage()
       c.y = ARRIBA
     }
     c.pie = limpiar(`Hecho con Supermentes · supermentes.app · ${[v.fila, `Versión ${v.codigo}`].filter(Boolean).join(' · ')}`)
-    if (respuestas) return hojaRespuestas(c, d, v)
+    if (conClave) return clave(c, d, v)
     encabezado(c, d, v, false)
-    v.items.forEach((it, i) => {
-      const h = pregunta(c, it, i, true)
-      if (c.y + h > LIMITE && c.y > ARRIBA + 10) nuevaPagina(c)
-      pregunta(c, it, i, false)
-      if (i < v.items.length - 1) {
-        doc.setDrawColor(225)
-        doc.line(MARGEN, c.y - 2.5, ANCHO - MARGEN, c.y - 2.5)
+    let n = 0
+    porTema(v, d.temas.map((t) => t.tema)).forEach((g, k) => {
+      const teoria = d.clase === 'practica' ? d.temas.find((t) => t.tema === g.tema)?.teoria : null
+      const titulo = d.subtitulos ? lineas(doc, `${ROMANOS[k] ?? k + 1}. ${g.tema}`, 13.5, W, 'bold') : []
+      // El subtítulo y el «Recuerda» van en la misma página que la primera pregunta del tema.
+      const antes = titulo.length * alto(13.5) + (titulo.length ? 2 : 0) + (teoria ? recuerda(c, teoria, true) + 4 : 0)
+      if (c.y + antes + pregunta(c, g.items[0], n + 1, d.clase, true) > LIMITE && c.y > ARRIBA + 10) nuevaPagina(c)
+      if (titulo.length) {
+        escribir(c, titulo, 13.5, MARGEN, 'bold')
+        c.y += 2
       }
+      if (teoria) recuerda(c, teoria, false)
+      g.items.forEach((it, i) => {
+        n++
+        const h = pregunta(c, it, n, d.clase, true)
+        if (c.y + h > LIMITE && c.y > ARRIBA + 10) nuevaPagina(c)
+        pregunta(c, it, n, d.clase, false)
+        if (i < g.items.length - 1) {
+          doc.setDrawColor(225)
+          doc.line(MARGEN, c.y - 2.5, ANCHO - MARGEN, c.y - 2.5)
+        }
+      })
+      c.y += 3
     })
-    autoevaluacion(c)
+    if (d.clase !== 'balotario') autoevaluacion(c)
   })
   pie(c)
   return doc.output('blob')

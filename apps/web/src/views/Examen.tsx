@@ -1,15 +1,14 @@
-import { ArrowLeft, Check, CircleCheck, Columns2, Download, Eye, FileText, Printer, RefreshCw, Sparkles, Upload, X } from 'lucide-react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { Check, CircleCheck, Columns2, Download, Eye, FileText, Printer, RefreshCw, Sparkles, Upload, X } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { api, COSTOS, MODO_EJEMPLO, type Necesidad, type OpcionesExamen } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { BarraHoja, Boton, Chip, Generando, Hoja, NotaCreditos, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
-import { useBanco } from '../banco/banco'
-import { tiposDelTema } from '../examenes/catalogo'
+import { fuenteDe, useAreas } from '../examenes/usar'
 import { nombreArchivo, pdfExamen } from '../lib/pdfExamen'
-import { ExamenListo } from './ExamenListo'
+import { Hojas } from './Hojas'
 
 const COLOR = 'var(--examen)'
 
@@ -162,7 +161,7 @@ const resumen = (e: Eleccion) =>
     .join(' · ')
 
 /** Adaptar el examen del docente: lo sube en PDF, Word o foto y recibe un PDF adaptado (con IA, gasta créditos). */
-function AdaptarExamen({ accion }: { accion?: ReactNode }) {
+function AdaptarExamen() {
   const { ficha, resultados, guardar, avisar, creditos } = useStore()
   const { ocupado, generar } = useGeneracion()
   const examen = resultados.examen
@@ -207,7 +206,7 @@ function AdaptarExamen({ accion }: { accion?: ReactNode }) {
   if (!examen) {
     return (
       <>
-        <EncabezadoHerramienta id="examen" accion={accion} />
+        <EncabezadoHerramienta id="examen" />
         <Pregunta titulo="1. Sube tu examen">
           <p className="-mt-1 text-ink-soft">El de siempre. Mantenemos tus mismas preguntas y lo que evalúan.</p>
           <SubirExamen archivo={archivo} cambiar={setArchivo} />
@@ -235,7 +234,7 @@ function AdaptarExamen({ accion }: { accion?: ReactNode }) {
 
   return (
     <>
-      <EncabezadoHerramienta id="examen" accion={accion} />
+      <EncabezadoHerramienta id="examen" />
       <p className="-mt-3 text-ink-soft print:hidden">
         Tu examen «{examen.archivo}», adaptado {resumen(examen.opciones)}.
       </p>
@@ -333,8 +332,8 @@ function AdaptarExamen({ accion }: { accion?: ReactNode }) {
 }
 
 /**
- * El examen del tema. Si el tema tiene examen listo (hoy, 4.º de primaria), se ve armado apenas se abre: gratis, con
- * otra versión cuando se quiera. Arriba a la derecha queda "Adaptar mi examen" para quien prefiere subir el suyo.
+ * El examen del tema. Si el tema tiene hojas listas (hoy, 4.º de primaria), se ven armadas apenas se abre: examen,
+ * práctica y balotario, gratis y con otra versión cuando se quiera. Si no, el docente sube su examen y lo adapta.
  */
 export function Examen() {
   const { ficha } = useStore()
@@ -343,32 +342,16 @@ export function Examen() {
 }
 
 function ExamenDelTema({ ficha }: { ficha: NonNullable<ReturnType<typeof useStore>['ficha']> }) {
-  const { resultados } = useStore()
-  const banco = useBanco(ficha)
-  const tipos = useMemo(() => (banco === undefined ? null : tiposDelTema(ficha.gradoId, ficha.areaId, ficha.titulo, banco)), [banco, ficha.gradoId, ficha.areaId, ficha.titulo])
-  // Si ya adaptó su examen en este tema, vuelve a ver ese.
-  const [adaptar, setAdaptar] = useState(!!resultados.examen && !resultados.examenListo)
+  const area = useAreas(ficha.gradoId, [ficha.areaId])?.get(ficha.areaId)
+  const hay = useMemo(() => (area ? fuenteDe(ficha.gradoId, ficha.titulo, area).tipos.length > 0 : null), [area, ficha.gradoId, ficha.titulo])
 
-  if (tipos === null) return <EncabezadoHerramienta id="examen" />
-  if (!tipos.length || adaptar) {
-    const volver = tipos.length ? (
-      <Boton variante="contorno" onClick={() => setAdaptar(false)}>
-        <ArrowLeft className="size-5" aria-hidden /> Examen listo del tema
-      </Boton>
-    ) : undefined
-    return <AdaptarExamen accion={volver} />
-  }
+  if (!area || hay === null) return <EncabezadoHerramienta id="examen" />
+  // Mientras su grado no tenga hojas listas, el docente puede subir su examen y adaptarlo.
+  if (!hay) return <AdaptarExamen />
   return (
     <>
-      <EncabezadoHerramienta
-        id="examen"
-        accion={
-          <Boton variante="contorno" onClick={() => setAdaptar(true)}>
-            <Upload className="size-5" aria-hidden /> Adaptar mi examen
-          </Boton>
-        }
-      />
-      <ExamenListo ficha={ficha} banco={banco ?? null} tipos={tipos} />
+      <EncabezadoHerramienta id="examen" />
+      <Hojas key={ficha.id} ficha={ficha} area={area} />
     </>
   )
 }

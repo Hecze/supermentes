@@ -27,8 +27,11 @@ export type Item =
   | (Base & {
       forma: 'abierta'
       respuesta: string
-      /** Dónde responde: en una línea, en renglones o sobre el mismo dibujo (un ábaco vacío, una cuadrícula). */
-      espacio: 'linea' | 'renglones' | 'dibujo'
+      /**
+       * Dónde responde: en una línea, en renglones, sobre el mismo dibujo (un ábaco vacío, una cuadrícula) o en un
+       * recuadro de procedimiento al costado, como en el libro.
+       */
+      espacio: 'linea' | 'renglones' | 'dibujo' | 'procedimiento'
     })
   | (Base & { forma: 'unir'; izquierda: string[]; derecha: string[]; /** solucion[i]: el índice en `derecha` que va con izquierda[i]. */ solucion: number[] })
   | (Base & { forma: 'completar'; /** Las palabras del recuadro, ya barajadas. */ palabras: string[]; /** Cada frase con "____" donde va la palabra. */ frases: string[]; respuestas: string[] })
@@ -36,7 +39,17 @@ export type Item =
 export type Generado = Item & {
   /** Lo que hace distinta a esta pregunta (el dato o la pregunta del banco): no se repite en un mismo examen. */
   clave: string
+  /** 1 directa, 2 de dos pasos, 3 de más pensamiento. La práctica va de menos a más. */
+  nivel?: 1 | 2 | 3
 }
+
+/** Un problema del banco de problemas del tema (examenes/problemas): con sus pasos y su nivel. */
+export type Problema = { enunciado: string; alternativas: string[]; respuesta: string; pasos: string[]; nivel: 1 | 2 | 3 }
+
+/** Lo esencial del tema y un ejemplo resuelto: el «Recuerda» de la práctica. */
+export type Teoria = { idea: string; ejemplo: { enunciado: string; pasos: string[]; respuesta: string } }
+
+export type TemaProblemas = { tema: string; paginas?: number[]; teoria: Teoria | null; problemas: Problema[] }
 
 export type Azar = () => number
 
@@ -44,6 +57,8 @@ export type Contexto = {
   azar: Azar
   /** El tema en el banco (palabras, preguntas y parejas con su cita), si existe. */
   banco: TemaBanco | null
+  /** Los problemas del tema con sus pasos, si existen. */
+  problemas?: TemaProblemas | null
 }
 
 export type TipoPregunta = {
@@ -66,12 +81,34 @@ export type TipoPregunta = {
   generar: (ctx: Contexto) => Generado | null
 }
 
-/** Lo que se guarda de un examen: qué tipo va en cada lugar y con qué semilla. Con esto se vuelve a armar igual. */
-export type ConfigExamen = {
+/** Para qué es la hoja. Las tres son la misma hoja de preguntas con otro largo y otra forma de imprimirse. */
+export type Clase = 'examen' | 'practica' | 'balotario'
+
+/** Una pregunta de la hoja: de qué tema y tipo, con qué semilla y si está fijada (ya no cambia). */
+export type ItemHoja = { tipo: string; tema: string; semilla: number; fija?: boolean }
+
+/** Lo que se guarda de una hoja. Con esto se vuelve a armar igual (la misma versión que se imprimió). */
+export type ConfigHoja = {
+  clase: Clase
+  /** Los temas de la hoja; el primero es el tema abierto. Con varios, es una miscelánea. */
+  temas: string[]
+  /** El curso (areaId) de cada tema: el del tema abierto, salvo en una miscelánea de varios cursos. */
+  areas: Record<string, string>
   semilla: number
-  items: { tipo: string; semilla: number }[]
-  /** Dos versiones (Fila A y Fila B) con los mismos tipos y otros números. */
+  items: ItemHoja[]
+  /** Solo en el examen: dos versiones (Fila A y Fila B) con los mismos tipos y otros números. */
   filas: boolean
+}
+
+/** Con qué se arman las preguntas de un tema. */
+export type Fuente = {
+  tema: string
+  /** El curso del tema: su id y su nombre. */
+  areaId: string
+  area: string
+  banco: TemaBanco | null
+  problemas: TemaProblemas | null
+  tipos: TipoPregunta[]
 }
 
 /** Una versión ya armada, lista para mostrarse o imprimirse. */
@@ -80,8 +117,8 @@ export type Version = {
   fila: string
   /** Código corto de la versión, impreso en la hoja y en las respuestas para que el docente las junte. */
   codigo: string
-  /** `indice`: el lugar de la pregunta en `ConfigExamen.items` (si una no se pudo armar, las demás no se corren). */
-  items: (Generado & { tipo: string; indice: number })[]
+  /** `indice`: el lugar de la pregunta en `ConfigHoja.items` (si una no se pudo armar, las demás no se corren). */
+  items: (Generado & { tipo: string; tema: string; indice: number; fija: boolean })[]
 }
 
 /** Un grupo de tipos de pregunta y los temas (tal cual en el currículo) donde va cada uno, en orden. */

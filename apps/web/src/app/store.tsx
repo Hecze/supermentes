@@ -1,14 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego, type Sesion } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
-import type { ConfigExamen } from '../examenes/tipos'
+import type { Clase, ConfigHoja } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
 export const VISTAS = ['inicio', 'ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
-export type PestanaBiblioteca = 'curriculo' | 'examenes' | 'materiales'
+export type PestanaBiblioteca = 'curriculo' | 'materiales'
 export type Aviso = { id: number; texto: string; tono: Tono }
 type Tema = 'light' | 'dark'
 
@@ -21,8 +21,10 @@ export type Resultados = {
   cancion?: Cancion
   audio?: AudioCancion
   examen?: Examen
-  /** El examen listo del tema (examenes/): qué preguntas lleva y con qué números, para volver a la misma versión. */
-  examenListo?: ConfigExamen
+  /** Las hojas listas del tema (examenes/): examen, práctica y balotario, para volver a la misma versión. */
+  hojas?: Partial<Record<Clase, ConfigHoja>>
+  /** La hoja que el docente vio por última vez en este tema. */
+  hojaAbierta?: Clase
   juego?: Juego
   /** Con qué se juega este tema: sus palabras y preguntas, o una habilidad de cálculo (src/juegos). */
   juegos?: { fuente: 'tema' } | { fuente: 'calculo'; habilidad: string; nivel: number }
