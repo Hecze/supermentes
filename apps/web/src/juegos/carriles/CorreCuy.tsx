@@ -5,7 +5,7 @@ import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTeclas, useTemporizadores } from '../motor/bucle'
 import { Cuy } from '../motor/Cuy'
-import { Enunciado, Flotante, TextoMat, Vidas, elogio } from '../motor/piezas'
+import { Enunciado, Flotante, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -14,11 +14,6 @@ const CARRILES = 3
 const Y_CUY = 0.82
 
 type Fila = { id: number; reto: Reto; opciones: string[] }
-
-function tamTexto(t: string) {
-  const n = [...t].length
-  return n <= 3 ? 1 : n <= 6 ? 0.8 : n <= 10 ? 0.62 : 0.5
-}
 
 export default function CorreCuy({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
@@ -193,7 +188,7 @@ export default function CorreCuy({ contenido, ritmo, semilla, terminar }: PropsJ
                   background: r ? (esta ? '#2fc46f' : r.carril === i ? '#ff6b6b' : '#e9d7b8') : '#f6d6a3',
                   borderColor: r ? (esta ? '#1f9d55' : '#b7804a') : '#b7804a',
                   color: r && (esta || r.carril === i) ? '#fff' : '#4a2c00',
-                  fontSize: `calc(clamp(18px, 5.6cqmin, 48px) * ${tamTexto(o)})`,
+                  fontSize: letraOpciones(fila.opciones, '25cqw', 'clamp(24px, 6cqmin, 48px)'),
                 }}
               >
                 <TextoMat texto={o} />
@@ -232,8 +227,8 @@ export default function CorreCuy({ contenido, ritmo, semilla, terminar }: PropsJ
       </div>
 
       {pasadas === 0 && (
-        <p className="pointer-events-none absolute inset-x-0 bottom-[2%] z-10 text-center font-semibold text-white [text-shadow:0_1px_2px_rgb(0_0_0/0.4)]" style={{ fontSize: 'clamp(13px, 3cqmin, 24px)' }}>
-          Toca un carril o desliza para cambiarte
+        <p className="pointer-events-none absolute inset-x-0 bottom-[2%] z-10 text-center" style={{ fontSize: 'clamp(15px, 3.4cqmin, 26px)' }}>
+          <span className="rounded-full bg-[#2b2d5c]/80 px-[1em] py-[0.35em] font-semibold text-white">Toca un carril o desliza para cambiarte</span>
         </p>
       )}
 
