@@ -331,7 +331,7 @@ export function TareasPorSalon({ tareas, abrir }: { tareas: TareaRevisada[]; abr
   if (!tareas.length) return null
   return (
     <>
-      <h2 className="font-display text-4xl font-bold">Tareas por salón</h2>
+      <h2 className="text-2xl font-semibold">Tareas por salón</h2>
       {salones.map((lista) => (
         <section key={lista[0].salon} className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface">
           <header className="flex items-center gap-2 px-4 py-3">
@@ -360,6 +360,9 @@ export function TareasPorSalon({ tareas, abrir }: { tareas: TareaRevisada[]; abr
     </>
   )
 }
+
+/** Los 5 mejores con al menos un acierto, y nunca el último: el podio celebra, no expone. */
+const podioDe = (filas: TareaRevisada['intentos']) => filas.filter((i) => i.aciertos > 0).slice(0, Math.min(5, Math.max(1, filas.length - 1)))
 
 const fechaHora = (iso: string) => new Date(iso).toLocaleString('es-PE', { weekday: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '')
 
@@ -413,7 +416,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="mr-auto font-display text-4xl font-bold">{tarea.tema}</h1>
           <div className="flex flex-wrap gap-2 print:hidden">
-            <Boton variante="contorno" onClick={() => setPodio(true)} disabled={!filas.length}>
+            <Boton variante="contorno" onClick={() => setPodio(true)} disabled={!podioDe(filas).length}>
               <Trophy className="size-5" aria-hidden /> Mostrar podio en la pizarra
             </Boton>
             <Boton variante="contorno" onClick={() => imprimir(avisar)}>
@@ -483,9 +486,14 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
                 <tr key={i.alumno} className="border-b border-line">
                   <td className="py-2.5 pr-2">
                     <span className="inline-block w-7" aria-hidden>
-                      {MEDALLAS[n] ?? ''}
+                      {i.aciertos > 0 ? (MEDALLAS[n] ?? '') : ''}
                     </span>
                     {nombreDe(i.alumno)}
+                    {i.salidas > 0 && (
+                      <span className="ml-2 text-sm text-warn" title="Salió a otra pestaña o aplicación mientras hacía la tarea">
+                        · salió del juego {i.salidas === 1 ? '1 vez' : `${i.salidas} veces`}
+                      </span>
+                    )}
                   </td>
                   <td className={cx('py-2.5 pr-2 font-semibold', bajo && 'text-danger')}>
                     {bajo && <CircleAlert className="mr-1 inline size-4 align-[-2px]" aria-label="No llegó a la mitad" />}
@@ -504,7 +512,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
                 <td className="py-2.5 pr-2">—</td>
                 <td className="py-2.5 pr-2">—</td>
                 <td className="py-2.5">
-                  <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(recordatorio)}`} target="_blank" rel="noreferrer" className="font-semibold print:hidden" style={{ color: '#0f7f55' }}>
+                  <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(recordatorio)}`} target="_blank" rel="noreferrer" className="font-semibold print:hidden" style={{ color: VERDE }}>
                     Recordar por WhatsApp
                   </a>
                 </td>
@@ -519,14 +527,13 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
       </p>
 
       {podio && (
-        // Los 5 mejores y nunca el último: el podio celebra, no expone.
         <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center gap-6 bg-white p-6 text-center text-[#111]" role="dialog" aria-modal aria-label="Podio">
           <button type="button" onClick={() => setPodio(false)} className="absolute right-4 top-4 grid size-12 place-items-center rounded-full bg-[#f1f2f6]" aria-label="Cerrar">
             <X className="size-6" />
           </button>
           <p className="font-display text-[clamp(28px,5vw,60px)] font-bold">¡Los mejores de {salon}!</p>
           <ol className="flex flex-col gap-3">
-            {filas.slice(0, Math.min(5, Math.max(1, filas.length - 1))).map((i, n) => (
+            {podioDe(filas).map((i, n) => (
               <li key={i.alumno} className="text-[clamp(22px,3.5vw,44px)] font-semibold">
                 {MEDALLAS[n] ?? `${n + 1}.`} {nombreDe(i.alumno)}
               </li>

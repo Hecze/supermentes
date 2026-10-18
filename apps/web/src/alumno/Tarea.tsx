@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from '
 import { juegoPorId } from '../juegos/catalogo'
 import { contenidoDe } from '../juegos/compartir/publicado'
 import { dia, nombreSalon, type TareaAlumno } from '../juegos/compartir/tareas'
+import { useSalidas } from '../juegos/motor/bucle'
 import { activarAudio } from '../juegos/motor/sonido'
 import type { Resultado } from '../juegos/tipos'
 import '../juegos/juegos.css'
@@ -52,6 +53,8 @@ export function Tarea() {
   const [buscar, setBuscar] = useState('')
   const [partida, setPartida] = useState(1)
   const enviado = useRef(false)
+  // Cuántas veces salió del juego (a otra pestaña o a ChatGPT): el docente lo ve al revisar.
+  const salidas = useSalidas(fase.fase === 'jugando')
 
   useEffect(() => {
     fetch(`/api/tareas?codigo=${codigo}`)
@@ -98,7 +101,7 @@ export function Tarea() {
       const res = await fetch('/api/intentos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigo, alumno, segundos, respuestas: r.respuestas }),
+        body: JSON.stringify({ codigo, alumno, segundos, salidas: salidas.current, respuestas: r.respuestas }),
       })
       if (!res.ok) throw new Error()
       const { primero } = (await res.json()) as { primero: boolean }
@@ -177,6 +180,7 @@ export function Tarea() {
           type="button"
           onClick={() => {
             activarAudio()
+            salidas.current = 0
             setFase({ fase: 'jugando', desde: Date.now() })
           }}
           className={botonVerde}

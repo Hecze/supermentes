@@ -54,14 +54,11 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
   const [respuestas, setRespuestas] = useState<Respuesta[]>([])
   const [quedan, setQuedan] = useState(segundos)
   const reloj = useRef(0)
-  const antes = useRef(performance.now())
   const barra = useRef<HTMLDivElement>(null)
 
-  useBucle((dt) => {
-    // En una tarea el reloj no se pausa si sale de la app: cuenta el tiempo real, no solo los cuadros dibujados.
-    const ahora = performance.now()
-    reloj.current += tarea ? (ahora - antes.current) / 1000 : dt
-    antes.current = ahora
+  // El reloj cuenta el tiempo real: si sale del juego, al volver ya corrió y, si venció, la pregunta cuenta como fallada.
+  useBucle((_dt, real) => {
+    reloj.current += real
     if (fase === 'lee') {
       if (barra.current) barra.current.style.transform = `scaleX(${Math.max(0, 1 - reloj.current / lectura)})`
       if (reloj.current >= lectura) {
@@ -127,7 +124,6 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
       return
     }
     reloj.current = 0
-    antes.current = performance.now()
     setN(n + 1)
     setPregunta(nueva())
     setElegida(null)

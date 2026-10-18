@@ -34,12 +34,14 @@ CREATE INDEX tareas_por_docente ON tareas (docente, creado DESC);
 
 -- Cuenta el primer intento: la clave (tarea, alumno) deja guardar solo ese; practicar otra vez no escribe.
 -- respuestas: JSON [{ pregunta, elegida, correcta }], de ahí sale "lo que más costó".
+-- salidas: cuántas veces salió del juego (otra pestaña, ChatGPT) mientras lo hacía.
 CREATE TABLE intentos (
   tarea TEXT NOT NULL REFERENCES tareas (codigo) ON DELETE CASCADE,
   alumno INTEGER NOT NULL REFERENCES alumnos (id) ON DELETE CASCADE,
   aciertos INTEGER NOT NULL,
   total INTEGER NOT NULL,
   segundos INTEGER NOT NULL,
+  salidas INTEGER NOT NULL DEFAULT 0,
   respuestas TEXT NOT NULL,
   fecha TEXT NOT NULL,
   PRIMARY KEY (tarea, alumno)

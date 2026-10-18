@@ -22,7 +22,7 @@ function segundosDe(grado: string | undefined) {
 
 type Fila = { codigo: string; salon: string; grado: string; seccion: string; tema: string; area: string; desempeno: string; juego: string; segundos: number; vence: string; creado: string }
 type Alumno = { id: number; salon: string; nombre: string }
-type Intento = { tarea: string; alumno: number; aciertos: number; total: number; segundos: number; respuestas: string; fecha: string }
+type Intento = { tarea: string; alumno: number; aciertos: number; total: number; segundos: number; salidas: number; respuestas: string; fecha: string }
 
 export async function POST(request: Request) {
   const id = await docente(request)
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       .all<Omit<Fila, 'juego'>>(),
     db().prepare('SELECT a.id, a.salon, a.nombre FROM alumnos a JOIN salones s ON s.id = a.salon WHERE s.docente = ? ORDER BY a.orden').bind(id).all<Alumno>(),
     db()
-      .prepare('SELECT i.tarea, i.alumno, i.aciertos, i.total, i.segundos, i.respuestas, i.fecha FROM intentos i JOIN tareas t ON t.codigo = i.tarea WHERE t.docente = ?')
+      .prepare('SELECT i.tarea, i.alumno, i.aciertos, i.total, i.segundos, i.salidas, i.respuestas, i.fecha FROM intentos i JOIN tareas t ON t.codigo = i.tarea WHERE t.docente = ?')
       .bind(id)
       .all<Intento>(),
   ])

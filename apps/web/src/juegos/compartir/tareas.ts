@@ -20,7 +20,7 @@ export type TareaAlumno = {
   alumnos: { id: number; nombre: string; hizo: boolean }[]
 }
 
-export type Intento = { alumno: number; aciertos: number; total: number; segundos: number; respuestas: Respuesta[]; fecha: string }
+export type Intento = { alumno: number; aciertos: number; total: number; segundos: number; salidas: number; respuestas: Respuesta[]; fecha: string }
 
 /** Lo que revisa el docente. */
 export type TareaRevisada = Omit<TareaAlumno, 'profe' | 'publicado' | 'alumnos'> & {
