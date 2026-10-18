@@ -161,7 +161,19 @@ export function Shell({ children }: { children: ReactNode }) {
       )}
 
       <main className="gutter pb-16 pt-6 lg:pt-10 print:p-0">
-        <div className="mx-auto flex max-w-7xl flex-col gap-7">{children}</div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-7">
+          {/* Publicada sin VITE_API=real, la app solo muestra ejemplos: se avisa a la vista, nunca en silencio. */}
+          {MODO_EJEMPLO && import.meta.env.PROD && (
+            <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
+              <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
+              <span>
+                <strong>Versión de prueba:</strong> la IA y la música no están conectadas, así que ves ejemplos
+                {import.meta.env.MODE !== 'artifact' && ' (falta VITE_API=real al publicar)'}.
+              </span>
+            </p>
+          )}
+          {children}
+        </div>
       </main>
 
       <NuevoTema />

@@ -77,7 +77,7 @@ const audios = new Map<string, AudioCancion>()
 const clave = (c: CancionBanco) => `${c.titulo}|${c.ritmo}`
 
 export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Ficha }) {
-  const { guardar } = useStore()
+  const { guardar, avisar } = useStore()
   const { generar } = useGeneracion()
   const [sonando, setSonando] = useState<number | null>(null)
   const [cargando, setCargando] = useState<number | null>(null)
@@ -107,8 +107,16 @@ export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Fich
     if (a.url) {
       const r = new Audio(a.url)
       r.onended = () => setSonando(null)
+      r.onerror = () => {
+        setSonando(null)
+        avisar('No se pudo reproducir el audio. Vuelve a intentarlo.', 'error')
+      }
       reproductor.current = r
-      r.play().catch(() => setSonando(null))
+      // Tras esperar la música, el iPhone a veces no deja sonar sin otro toque: se avisa en vez de quedar callado.
+      r.play().catch(() => {
+        setSonando(null)
+        avisar('La canción está lista: toca ▶ otra vez para escucharla.')
+      })
     } else {
       // Datos de ejemplo: no hay sonido, solo se ve que "suena" un rato.
       reloj.current = window.setTimeout(() => setSonando(null), 8000)

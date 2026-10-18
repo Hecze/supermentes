@@ -38,7 +38,10 @@ export async function GET(request: Request) {
   const area = texto(p.get('area'), 60)
   if (!tema || !grado) return json({ error: 'Falta el tema o el grado.' }, 400)
   // Sin clave la sección no aparece (la app la oculta si no hay recursos) en vez de mostrar un error.
-  if (!process.env.EXA_API_KEY) return json([])
+  if (!process.env.EXA_API_KEY) {
+    console.warn('api/recursos: falta EXA_API_KEY; la sección de videos y fichas no aparece')
+    return json([])
+  }
 
   try {
     const [videos, fichas] = await Promise.all([
