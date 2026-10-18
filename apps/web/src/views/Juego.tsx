@@ -1,4 +1,4 @@
-import { ArrowLeft, BadgeCheck, Calculator, Check, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, TriangleAlert, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Check, ChevronDown, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
@@ -525,39 +525,20 @@ export function Juego() {
 
   return (
     <>
-      <EncabezadoHerramienta id="juego" />
+      <EncabezadoHerramienta
+        id="juego"
+        accion={
+          <Boton variante="contorno" onClick={() => setEligiendo(true)} title="Cambiar qué practican" className="max-w-[min(22rem,calc(100vw-2rem))]">
+            {fuente.fuente === 'calculo' ? <Calculator className="size-5 shrink-0" style={{ color: COLOR }} aria-hidden /> : <Sparkles className="size-5 shrink-0" style={{ color: COLOR }} aria-hidden />}
+            <span className="truncate">{fuente.fuente === 'calculo' ? <TextoMat texto={nombrePractica(fuente)} /> : 'Palabras del tema'}</span>
+            <ChevronDown className="size-4 shrink-0 text-ink-soft" aria-hidden />
+          </Boton>
+        }
+      />
 
       <AtajoResultados tema={ficha.titulo} />
 
       <section className="flex flex-col gap-4">
-        <h2 className="font-display text-2xl font-bold sm:text-3xl">¿A qué jugamos?</h2>
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface p-3 sm:p-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl" style={{ background: tinte(COLOR, 14), color: COLOR }}>
-            {fuente.fuente === 'calculo' ? <Calculator className="size-5" aria-hidden /> : <Sparkles className="size-5" aria-hidden />}
-          </span>
-          <div className="min-w-0 flex-1 basis-56">
-            <p className="text-sm text-ink-soft">Practican</p>
-            <p className="font-semibold">
-              <TextoMat texto={nombreFuente(fuente, ficha)} />
-            </p>
-            {sustento && fuente.fuente === 'calculo' && (
-              <p className={cx('mt-0.5 flex items-center gap-1.5 text-sm font-medium', sustento.desempeno ? 'text-ok' : 'text-warn')}>
-                {sustento.desempeno ? <BadgeCheck className="size-4" aria-hidden /> : <TriangleAlert className="size-4" aria-hidden />}
-                {sustento.desempeno ? `Lo pide el currículo de ${ficha.grado}` : `No figura en el currículo de ${ficha.grado}`}
-              </p>
-            )}
-            {sustento && fuente.fuente === 'tema' && sustento.tema.desempeno && (
-              <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-ok">
-                <BadgeCheck className="size-4" aria-hidden /> Parte de un desempeño del currículo de {ficha.grado}
-              </p>
-            )}
-          </div>
-          <InfoCurricular sustento={sustento} chip />
-          <Boton variante="contorno" tam="sm" onClick={() => setEligiendo(true)}>
-            Cambiar
-          </Boton>
-        </div>
-
         {compatibles.length > 0 ? (
           <>
             <div className="flex flex-col gap-0.5">
@@ -593,7 +574,7 @@ export function Juego() {
           </>
         ) : (
           <p className="rounded-2xl border-2 border-dashed border-line bg-surface p-6 text-ink-soft">
-            Con esto todavía no hay juegos. Crea preguntas del tema o elige algo de cálculo en «Cambiar».
+            Con esto todavía no hay juegos. Crea preguntas del tema o elige algo de cálculo con el botón de arriba a la derecha.
           </p>
         )}
       </section>

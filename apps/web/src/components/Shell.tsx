@@ -194,13 +194,14 @@ function Avisos() {
 }
 
 /** Encabezado común de cada herramienta: qué herramienta es y de qué tema y currículo parte. */
-export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
+/** Título de la herramienta; `accion` va arriba a la derecha (en el celular, debajo). */
+export function EncabezadoHerramienta({ id, accion }: { id: HerramientaId; accion?: ReactNode }) {
   const { ficha, verCurriculo } = useStore()
   const h = HERRAMIENTAS[id]
   return (
-    <header className="flex items-center gap-4 print:hidden">
+    <header className="flex flex-wrap items-center gap-x-4 gap-y-3 print:hidden">
       <IconoHerramienta id={id} tam="lg" />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1 basis-64">
         <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
         {ficha && (
           <p className="text-ink-soft">
@@ -211,6 +212,7 @@ export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
           </p>
         )}
       </div>
+      {accion && <div className="flex shrink-0 flex-wrap items-center gap-2">{accion}</div>}
     </header>
   )
 }

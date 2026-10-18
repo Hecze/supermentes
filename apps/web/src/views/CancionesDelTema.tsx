@@ -1,10 +1,12 @@
 // Las dos canciones del banco para el tema (banco/banco.ts): con ritmos del Perú, la letra lista y su "i" con la
-// parte exacta del desempeño oficial que trabajan. Al abrir una se ve la letra y se puede escuchar (api/audio.ts).
-import { BadgeCheck, Music } from 'lucide-react'
-import type { Ficha } from '../api'
+// parte exacta del desempeño oficial que trabajan. Como en una app de música: ▶ la hace sonar ahí mismo
+// (api/audio.ts) y tocar la tarjeta abre la letra.
+import { BadgeCheck, LoaderCircle, Pause, Play } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { api, COSTOS, textoCosto, type AudioCancion, type Ficha } from '../api'
 import { useStore } from '../app/store'
-import { cancionDelBanco, type TemaBanco } from '../banco/banco'
-import { Boton, tinte } from '../components/ui'
+import { useGeneracion } from '../app/useGeneracion'
+import { cancionDelBanco, type CancionBanco, type TemaBanco } from '../banco/banco'
 import { ubicarCita } from '../curriculo/citas'
 import { useCurriculo } from '../curriculo/cargar'
 import { nivelDe } from '../curriculo/catalogo'
@@ -59,43 +61,101 @@ function coroDe(letra: string[]) {
   return letra.slice(i + 1).filter((l) => !l.startsWith('[')).slice(0, 2)
 }
 
+/** Las barras que suben y bajan mientras suena, como en cualquier app de música. */
+function Sonando() {
+  return (
+    <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
+      {[0, 0.25, 0.1, 0.35].map((d, i) => (
+        <span key={i} className="h-full w-[3px] origin-bottom rounded-full" style={{ background: COLOR, animation: `onda 0.8s ease-in-out ${d}s infinite` }} />
+      ))}
+    </span>
+  )
+}
+
+// El audio ya creado de cada canción: volver a tocarla no lo pide (ni lo cobra) otra vez.
+const audios = new Map<string, AudioCancion>()
+const clave = (c: CancionBanco) => `${c.titulo}|${c.ritmo}`
+
 export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Ficha }) {
   const { guardar } = useStore()
+  const { generar } = useGeneracion()
+  const [sonando, setSonando] = useState<number | null>(null)
+  const [cargando, setCargando] = useState<number | null>(null)
+  const reproductor = useRef<HTMLAudioElement | null>(null)
+  const reloj = useRef<number>(0)
+
+  function parar() {
+    reproductor.current?.pause()
+    reproductor.current = null
+    window.clearTimeout(reloj.current)
+    setSonando(null)
+  }
+  useEffect(() => parar, [])
+
+  async function alternar(i: number) {
+    if (sonando === i) return parar()
+    parar()
+    const c = tema.canciones[i]
+    let a = audios.get(clave(c))
+    if (!a) {
+      setCargando(i)
+      a = (await generar(COSTOS.audio, 'Audio', () => api.generarAudio(cancionDelBanco(c)))) ?? undefined
+      setCargando(null)
+      if (!a) return
+      audios.set(clave(c), a)
+    }
+    if (a.url) {
+      const r = new Audio(a.url)
+      r.onended = () => setSonando(null)
+      reproductor.current = r
+      r.play().catch(() => setSonando(null))
+    } else {
+      // Datos de ejemplo: no hay sonido, solo se ve que "suena" un rato.
+      reloj.current = window.setTimeout(() => setSonando(null), 8000)
+    }
+    setSonando(i)
+  }
+
   function abrir(i: number) {
-    guardar('cancion', cancionDelBanco(tema.canciones[i]))
-    guardar('audio', undefined)
+    parar()
+    const c = tema.canciones[i]
+    guardar('cancion', cancionDelBanco(c))
+    guardar('audio', audios.get(clave(c)))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+
   return (
     <section className="flex flex-col gap-3">
       <div>
         <h2 className="font-display text-2xl font-bold">Canciones de tu tema</h2>
-        <p className="text-ink-soft">Listas para cantar en clase, con ritmos del Perú. Ábrela para ver la letra y escucharla.</p>
+        <p className="text-ink-soft">Listas para cantar en clase, con ritmos del Perú.</p>
       </div>
       <ul className="grid gap-4 sm:grid-cols-2">
         {tema.canciones.map((c, i) => (
-          <li key={c.titulo} className="relative flex flex-col rounded-2xl border border-line bg-surface">
-            <button type="button" onClick={() => abrir(i)} className="flex flex-1 flex-col gap-2 rounded-t-2xl p-4 text-left transition hover:bg-surface-2" aria-label={`Abrir «${c.titulo}»`}>
-              <span className="flex items-center gap-2 pr-9">
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl" style={{ background: tinte(COLOR, 14), color: COLOR }}>
-                  <Music className="size-5" aria-hidden />
-                </span>
-                <span className="rounded-full px-2.5 py-0.5 text-sm font-semibold capitalize" style={{ background: tinte(COLOR, 10), color: COLOR }}>
-                  {c.ritmo}
-                </span>
-              </span>
+          <li key={c.titulo} className="relative rounded-2xl border border-line bg-surface transition hover:bg-surface-2">
+            <button type="button" onClick={() => abrir(i)} className="flex w-full flex-col gap-1 rounded-2xl py-4 pl-[4.75rem] pr-12 text-left" aria-label={`Ver la letra de «${c.titulo}»`}>
               <span className="font-display text-xl font-bold leading-tight">{c.titulo}</span>
-              <span className="flex flex-col font-display italic text-ink-soft">
+              <span className="flex items-center gap-2 text-sm font-semibold capitalize" style={{ color: COLOR }}>
+                {sonando === i && <Sonando />}
+                {c.ritmo}
+              </span>
+              <span className="mt-1 flex flex-col font-display italic text-ink-soft">
                 {coroDe(c.letra).map((l) => (
                   <span key={l}>{l}</span>
                 ))}
               </span>
             </button>
-            <div className="border-t border-line p-3">
-              <Boton tam="sm" variante="herramienta" herramienta="cancion" onClick={() => abrir(i)}>
-                Ver la letra y escuchar
-              </Boton>
-            </div>
+            <button
+              type="button"
+              onClick={() => void alternar(i)}
+              disabled={cargando !== null}
+              className="absolute left-4 top-4 grid size-12 place-items-center rounded-full text-on-tool shadow-md transition hover:scale-105 disabled:opacity-80"
+              style={{ background: COLOR }}
+              aria-label={sonando === i ? `Pausar «${c.titulo}»` : `Escuchar «${c.titulo}»`}
+              title={sonando === i || audios.has(clave(c)) ? undefined : `Escuchar (la primera vez usa ${textoCosto(COSTOS.audio)})`}
+            >
+              {cargando === i ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : sonando === i ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
+            </button>
             <BotonInfo etiqueta={`Por qué «${c.titulo}» cumple el Currículo Nacional`} className="absolute right-2.5 top-2.5 z-10">
               <SustentoBanco tema={tema} ficha={ficha} />
             </BotonInfo>

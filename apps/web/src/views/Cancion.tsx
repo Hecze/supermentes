@@ -1,12 +1,13 @@
-import { ArrowLeft, Pause, Play, Printer, Share2 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { api, COSTOS, type OpcionesCancion } from '../api'
+import { ArrowLeft, Pause, PenLine, Play, Plus, Printer, Share2, Sparkles, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { api, COSTOS, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { useBanco } from '../banco/banco'
+import { partesDeLetra } from '../canciones/letra'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Desplegable, Editable, Generando, Hoja, NotaCreditos, Pregunta, cx, imprimir, tinte } from '../components/ui'
+import { Acciones, Boton, Chip, Editable, Generando, Hoja, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
 import { CancionesDelTema } from './CancionesDelTema'
 import { CancionesExistentes } from './CancionesExistentes'
 
@@ -105,6 +106,145 @@ function Reproductor({ duracion, url }: { duracion: number; url: string | null }
   )
 }
 
+const EJEMPLO_LETRA = `[Estrofa 1]
+Escribe aquí la primera estrofa…
+
+[Coro]
+Y aquí el coro, que se repite…`
+
+/**
+ * Crear una canción nueva, como en Suno: la letra la escribe Supermentes con las palabras del tema o la escribe el
+ * docente. Luego se elige el ritmo. Se abre desde el botón de arriba a la derecha.
+ */
+function CrearCancion({
+  abierta,
+  cerrar,
+  opciones,
+  cambiar,
+  crearAuto,
+  crearPropia,
+  tituloTema,
+}: {
+  abierta: boolean
+  cerrar: () => void
+  opciones: OpcionesCancion
+  cambiar: (o: OpcionesCancion) => void
+  crearAuto: () => void
+  crearPropia: (titulo: string, partes: CancionTipo['partes']) => void
+  tituloTema: string
+}) {
+  const { creditos } = useStore()
+  const dialogo = useRef<HTMLDialogElement>(null)
+  const [modo, setModo] = useState<'auto' | 'propia'>('auto')
+  const [titulo, setTitulo] = useState('')
+  const [letra, setLetra] = useState('')
+  const partes = useMemo(() => partesDeLetra(letra), [letra])
+
+  useEffect(() => {
+    const d = dialogo.current
+    if (!d) return
+    if (abierta && !d.open) d.showModal()
+    if (!abierta && d.open) d.close()
+  }, [abierta])
+
+  const pestana = (m: 'auto' | 'propia', icono: ReactNode, texto: string) => (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={modo === m}
+      onClick={() => setModo(m)}
+      className={cx('flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-2 py-2.5 text-[15px] font-medium transition sm:text-base', modo === m ? 'bg-surface text-ink shadow-sm' : 'text-ink-soft hover:text-ink')}
+    >
+      {icono}
+      {texto}
+    </button>
+  )
+
+  return (
+    <dialog
+      ref={dialogo}
+      onClose={cerrar}
+      onClick={(e) => e.target === dialogo.current && cerrar()}
+      aria-labelledby="crear-cancion-titulo"
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(38rem,calc(100vw-2rem))] overflow-y-auto rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45"
+    >
+      <div className="flex flex-col gap-5 p-5 sm:p-7">
+        <header className="flex items-start justify-between gap-3">
+          <h2 id="crear-cancion-titulo" className="font-display text-2xl font-bold">
+            Crear una canción
+          </h2>
+          <button type="button" onClick={cerrar} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface-2" aria-label="Cerrar">
+            <X className="size-5" />
+          </button>
+        </header>
+
+        <div role="tablist" aria-label="¿Quién escribe la letra?" className="grid grid-cols-2 gap-1 rounded-2xl bg-surface-2 p-1">
+          {pestana('auto', <Sparkles className="size-4 shrink-0" aria-hidden />, 'La escribimos')}
+          {pestana('propia', <PenLine className="size-4 shrink-0" aria-hidden />, 'Yo la escribo')}
+        </div>
+
+        {modo === 'auto' ? (
+          <p className="-mt-1 text-ink-soft">Escribimos la letra con las palabras de «{tituloTema}». Después la puedes corregir.</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col gap-1.5">
+              <span className="font-semibold">Título</span>
+              <input
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                placeholder={tituloTema}
+                maxLength={80}
+                className="h-12 rounded-xl border-2 border-line bg-surface px-3 focus:border-ink focus:outline-none"
+              />
+            </label>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="crear-cancion-letra" className="font-semibold">
+                Letra
+              </label>
+              <textarea
+                id="crear-cancion-letra"
+                aria-describedby="crear-cancion-ayuda"
+                value={letra}
+                onChange={(e) => setLetra(e.target.value)}
+                placeholder={EJEMPLO_LETRA}
+                rows={9}
+                maxLength={3000}
+                className="resize-y rounded-xl border-2 border-line bg-surface px-3 py-2.5 font-display text-lg leading-relaxed focus:border-ink focus:outline-none"
+              />
+              <p id="crear-cancion-ayuda" className="text-sm text-ink-soft">
+                Marca las partes con [Coro] o [Estrofa 1] en su propia línea. Si no, cada párrafo es una estrofa.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          <p className="font-semibold">Ritmo</p>
+          <ElegirRitmo opciones={opciones} cambiar={cambiar} />
+        </div>
+
+        <div className="flex flex-col items-start gap-2">
+          {modo === 'auto' ? (
+            <>
+              <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearAuto}>
+                Crear la canción
+              </Boton>
+              <NotaCreditos n={COSTOS.letra} quedan={creditos} />
+            </>
+          ) : (
+            <>
+              <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={() => crearPropia(titulo.trim() || tituloTema, partes)} disabled={!partes.length}>
+                Crear la canción
+              </Boton>
+              <p className="text-sm text-ink-soft">Tu letra no gasta créditos. Escucharla con música usa {COSTOS.audio}.</p>
+            </>
+          )}
+        </div>
+      </div>
+    </dialog>
+  )
+}
+
 export function Cancion() {
   const { ficha, resultados, guardar, creditos, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
@@ -112,17 +252,25 @@ export function Cancion() {
   const audio = resultados.audio
   const [opciones, setOpciones] = useState<OpcionesCancion>(cancion?.opciones ?? POR_DEFECTO)
   const [grabando, setGrabando] = useState(false)
+  const [creando, setCreando] = useState(false)
   const banco = useBanco(ficha)
 
   if (!ficha) return <SinTema />
   const delBanco = !!cancion && !!banco?.canciones.some((c) => c.titulo === cancion.titulo)
 
   async function crearLetra() {
+    setCreando(false)
     const nueva = await generar(COSTOS.letra, 'Canción', () => api.generarCancion(ficha!, opciones))
     if (nueva) {
       guardar('cancion', nueva)
       guardar('audio', undefined)
     }
+  }
+
+  function crearPropia(titulo: string, partes: CancionTipo['partes']) {
+    setCreando(false)
+    guardar('cancion', { titulo, opciones, partes })
+    guardar('audio', undefined)
   }
 
   async function crearAudio() {
@@ -133,33 +281,42 @@ export function Cancion() {
     setGrabando(false)
   }
 
+  const encabezado = (
+    <>
+      <EncabezadoHerramienta
+        id="cancion"
+        accion={
+          <Boton variante="herramienta" herramienta="cancion" onClick={() => setCreando(true)} cargando={ocupado && !grabando}>
+            {!(ocupado && !grabando) && <Plus className="size-5" aria-hidden />} Crear canción
+          </Boton>
+        }
+      />
+      <CrearCancion
+        abierta={creando}
+        cerrar={() => setCreando(false)}
+        opciones={opciones}
+        cambiar={setOpciones}
+        crearAuto={crearLetra}
+        crearPropia={crearPropia}
+        tituloTema={ficha.titulo}
+      />
+    </>
+  )
+
   if (!cancion) {
     return (
       <>
-        <EncabezadoHerramienta id="cancion" />
+        {encabezado}
+        {ocupado && <Generando texto="Escribiendo la letra con las palabras de tu tema…" />}
         {banco && <CancionesDelTema tema={banco} ficha={ficha} />}
         <CancionesExistentes ficha={ficha} plegado={!!banco} />
-        <div className="flex flex-col gap-1 border-t border-line pt-6">
-          <h2 className="font-display text-2xl font-bold">O crea una canción nueva</h2>
-          <p className="text-ink-soft">Con las palabras de tu tema y el ritmo que le guste a tu clase.</p>
-        </div>
-        <Pregunta titulo="¿Con qué ritmo?">
-          <ElegirRitmo opciones={opciones} cambiar={setOpciones} />
-        </Pregunta>
-        <div className="flex flex-col items-start gap-2">
-          <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearLetra} cargando={ocupado}>
-            Crear la canción
-          </Boton>
-          <NotaCreditos n={COSTOS.letra} quedan={creditos} />
-        </div>
-        {ocupado && <Generando texto="Escribiendo la letra con las palabras de tu tema…" />}
       </>
     )
   }
 
   return (
     <>
-      <EncabezadoHerramienta id="cancion" />
+      {encabezado}
       {delBanco && (
         <Boton
           variante="suave"
@@ -223,16 +380,6 @@ export function Cancion() {
         </Boton>
       </Acciones>
       {cancion.opciones.modo === 'ritmo' && !audio && <NotaCreditos n={COSTOS.audio} quedan={creditos} />}
-
-      <Desplegable titulo="Cambiar el ritmo o crear otra versión">
-        <ElegirRitmo opciones={opciones} cambiar={setOpciones} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Boton onClick={crearLetra} cargando={ocupado && !grabando}>
-            Crear otra versión
-          </Boton>
-          <NotaCreditos n={COSTOS.letra} quedan={creditos} />
-        </div>
-      </Desplegable>
 
       <CancionesExistentes ficha={ficha} plegado />
     </>
