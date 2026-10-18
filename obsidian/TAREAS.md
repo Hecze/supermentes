@@ -7,7 +7,7 @@ estado: propuesta, falta que Harold apruebe el flujo y el prototipo
 
 > Sesión de producto, sin código. Sale de la entrevista con Lucho y Yessly ([[entrevistas/2026-10-18-lucho-y-yessly]],
 > [[MATERIALES]] §7). Reusa los juegos (`apps/web/src/juegos`) y los resultados (`api/resultados.ts`).
-> Prototipo: capturas en `demos/tareas/` (1 dejar tarea, 2 el alumno la abre, 3 pregunta con reloj, 4 entregada, 5 tarea revisada) y las pantallas de pen.dev en `demos/tareas/pantallas.json`, para pegarlas en `demos/demo-pitch.pen`.
+> Prototipo: capturas en `demos/tareas/` (1 mandar como tarea, 2 el alumno la abre, 3 pregunta con reloj, 4 entregada, 5 tarea revisada) y las pantallas de pen.dev en `demos/tareas/pantallas.json`, para pegarlas en `demos/demo-pitch.pen`.
 
 ## 1. El problema
 
@@ -23,6 +23,17 @@ estado: propuesta, falta que Harold apruebe el flujo y el prototipo
 
 **La apuesta:** una tarea corta en el celular, con reloj por pregunta. No da tiempo de copiarla a ChatGPT, se corrige
 sola y el docente recibe la lista revisada y qué reforzar.
+
+## Dónde vive en el producto
+
+No es una herramienta nueva ni está en [[VISION]] ni en [[MAPA]]. Es **una forma de mandar el juego que ya existe**,
+para no sumar pantallas ni palabras nuevas:
+
+- **Se manda desde Juego web (pantalla 09):** en la ventana "Manda el juego a las familias" hay dos opciones,
+  **"Para practicar"** (lo de hoy) y **"Como tarea"**. No hay un botón "Dejar tarea" aparte ni un menú "Tareas".
+- **Se revisa en Resultados de juegos (pantalla 12):** las tareas salen primero, con la etiqueta "Tarea" y "18 de 30
+  entregaron". Al abrir una, se ve ya revisada.
+- **El alumno ve lo mismo que hoy** (`/j/CODIGO`, su nombre una vez), con portada de tarea y sin poder volver atrás.
 
 ## 2. Para quién
 
@@ -49,7 +60,8 @@ proyectado con el mismo tema, para ver si el aula responde como en la casa.
 ## 4. Qué NO se hace
 
 - **No detectamos IA ni vigilamos al niño:** nada de cámara, micrófono ni "modo examen" que bloquee el celular.
-- **No hay cuenta para el alumno** ni datos de él: solo su nombre, escrito una vez (como hoy en los juegos).
+- **No hay cuenta para el alumno:** solo su nombre, escrito una vez (como hoy en los juegos). Ver "Los datos del
+  alumno".
 - **No hay tareas abiertas** (redacción, procedimiento, foto del cuaderno): no se corrigen solas. Solo preguntas con
   respuesta correcta (`Reto`) que tengan cita del desempeño del grado.
 - **No elige juego el docente en la tarea:** la tarea es siempre el Concurso (reloj, una respuesta por pregunta). Los
@@ -63,9 +75,9 @@ proyectado con el mismo tema, para ver si el aula responde como en la casa.
 
 ### Docente (laptop): dejar la tarea, 2 clics
 
-1. **En el tema** (por ejemplo, "Fracciones" de 4.º), arriba a la derecha: **"Dejar tarea"**. Está junto a lo que
-   cambia, como pide la regla de "nada de sube y baja".
-2. **Se abre una ventana ya armada**, sin preguntas que contestar:
+1. **En Juego web toca "Mandar a las familias"**, como hoy.
+2. **En la ventana elige "Como tarea"** (al lado de "Para practicar"). Aparece todo ya armado, sin preguntas que
+   contestar:
    - "10 preguntas · 20 segundos cada una · cuenta la primera vez".
    - **Entregan hasta:** pasado mañana (default; se cambia con un toque en la fecha).
    - El desempeño que trabaja, con la "i".
@@ -89,8 +101,8 @@ proyectado con el mismo tema, para ver si el aula responde como en la casa.
 
 ### Docente (laptop): revisar, 0 clics para lo importante
 
-1. **En el menú, "Tareas"** (reemplaza a "Resultados de juegos"; los juegos sueltos quedan dentro). Cada tarea dice
-   "18 de 30 entregaron" y la fecha.
+1. **En el menú, "Resultados de juegos"**, como hoy. Las tareas salen primero, con la etiqueta "Tarea", "18 de 30
+   entregaron" y la fecha.
 2. **Abre una tarea y ya está revisada:**
    - Arriba, **"Reforzar"**: las 2 preguntas que más fallaron, con su desempeño ("i"). Botón "Repasar en clase":
      abre el Concurso en el proyector con esas preguntas.
@@ -99,9 +111,27 @@ proyectado con el mismo tema, para ver si el aula responde como en la casa.
    - "Mostrar podio": los 5 mejores, para la pizarra (nunca muestra al último).
    - Un toque en un alumno: qué pregunta falló y qué respondió.
 
+## Los datos del alumno (la tensión con la visión)
+
+[[VISION]] dice: "No pide cuenta ni datos a los alumnos". Hoy Resultados de juegos ya guarda el nombre que escribe
+el niño y su puntaje, y la tarea suma **qué respondió en cada pregunta**. Propuesta para cumplir el espíritu de esa
+regla:
+
+- **Sin cuenta, sin correo, sin DNI, sin teléfono, sin foto.** Solo el nombre que el niño escribe (puede ser solo el
+  nombre de pila) y sus respuestas a esa tarea.
+- **Solo lo ve su docente**, dentro de su cuenta. Nunca otro docente, nunca la biblioteca, nunca la IA.
+- **Se borra solo** al cerrar el año escolar, y el docente puede borrar una tarea con sus entregas.
+- **Los papás saben qué se guarda:** la portada de la tarea lo dice en una línea ("Tu profe verá tu nombre y tus
+  respuestas").
+- Pendiente de revisar: la ley peruana de datos personales (Ley 29733) pide reglas especiales para datos de menores.
+  No está verificado si el nombre y las respuestas de la tarea necesitan el consentimiento de los papás.
+
+Cambio propuesto en [[VISION]] (decide Harold): "No pide cuenta a los alumnos. Solo su nombre, que ve únicamente su
+docente."
+
 ## 6. Qué cambia por debajo (para cuando se apruebe)
 
-- **Clerk** para el docente: las tareas viven en su cuenta, no en el navegador (hoy la clave de resultados se pierde
+- **Clerk** para el docente (después del evento: [[MVP]] deja fuera las cuentas hasta entonces): las tareas viven en su cuenta, no en el navegador (hoy la clave de resultados se pierde
   si borra el navegador o cambia de laptop).
 - **Neon (Postgres)** en lugar de Blob para tareas y entregas: sin el tope de 2.000 escrituras al mes, y cada
   entrega guarda cada respuesta. Tres tablas: `docentes` (id de Clerk), `tareas` (código, tema, grado, desempeños
@@ -116,3 +146,4 @@ proyectado con el mismo tema, para ver si el aula responde como en la casa.
    cortes una vez ("de 9 a 10 es AD").
 2. **¿Cuántas preguntas?** Propuesta: 10 (≈ 5 minutos). Un papá presta el celular poco rato.
 3. **¿Y el hermano mayor?** Propuesta: decirlo claro y sumar "Comprobar en clase" después.
+4. **¿Cambiamos la frase de [[VISION]]** sobre los datos del alumno, como se propone arriba?
