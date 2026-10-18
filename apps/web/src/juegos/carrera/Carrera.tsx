@@ -22,7 +22,7 @@ function Corredora({ pasos, meta, colores, carril, corriendo }: { pasos: number;
       {carril === 0 && (
         <span className="absolute -top-[1.6cqmin] left-[66%] block h-[2.4cqmin] w-[3cqmin] -translate-x-1/2 bg-[#ff4d6d]" style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} aria-hidden />
       )}
-      <Llama colores={colores} tam={carril === 0 ? 'clamp(60px, min(20cqmin, 15cqh), 150px)' : 'clamp(50px, min(17cqmin, 12.5cqh), 125px)'} corriendo={corriendo} />
+      <Llama colores={colores} tam={carril === 0 ? 'clamp(60px, min(20cqmin, 19cqh), 170px)' : 'clamp(50px, min(17cqmin, 16cqh), 145px)'} corriendo={corriendo} />
     </div>
   )
 }
@@ -101,8 +101,8 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
 
   return (
     <div className="absolute inset-0 flex flex-col overflow-hidden bg-[#fff6ea]">
-      {/* Pista */}
-      <div className="relative h-[40%] shrink-0 overflow-hidden" style={{ background: 'linear-gradient(#ffc98a, #ffeedb)' }}>
+      {/* Pista; en la laptop o el proyector, más alta, para que las llamas se vean y no sobre espacio abajo */}
+      <div className="relative h-[40%] shrink-0 overflow-hidden [@container(orientation:landscape)]:h-[52%]" style={{ background: 'linear-gradient(#ffc98a, #ffeedb)' }}>
         <div className="absolute right-[24%] top-[12%] size-[12cqmin] rounded-full bg-[#ff9d5c] opacity-80" aria-hidden />
         <svg viewBox="0 0 400 100" preserveAspectRatio="none" className="absolute inset-x-0 bottom-[38%] h-[60%] w-full" aria-hidden>
           <path d="M0 80 L40 40 L80 66 L130 18 L180 62 L220 38 L270 74 L320 26 L370 58 L400 44 V100 H0 Z" fill="#a08bdc" />
@@ -144,7 +144,7 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
                 onClick={() => elegir(o)}
                 disabled={elegida !== null}
                 className={`b3d sombra-texto min-h-[clamp(54px,10cqh,110px)] px-[2cqmin] py-[1.4cqmin] ${largas ? 'text-left' : ''} ${correcta ? 'bien' : ''} ${mal ? 'mal' : ''} ${elegida && !correcta && !mal ? 'apagado' : ''}`}
-                style={{ ...colorBoton(i), fontSize: largas ? 'clamp(17px, 3.4cqmin, 30px)' : 'clamp(24px, 4.6cqmin, 42px)' }}
+                style={{ ...colorBoton(i), fontSize: largas ? 'clamp(20px, 3.6cqmin, 32px)' : 'clamp(24px, 4.6cqmin, 42px)' }}
               >
                 <TextoMat texto={o} />
               </button>
