@@ -15,6 +15,11 @@ type Base = {
   pregunta?: string
   /** Lo que ve el docente en la hoja de respuestas cuando la respuesta sola no basta: "No. Es 2000." */
   nota?: string
+  /**
+   * Cómo se resuelve, en pasos cortos como se escribirían en la pizarra ("6 × 200 = 1200", "Total: S/ 1473"). Va en la
+   * clave del docente. El último paso dice la respuesta.
+   */
+  pasos?: string[]
 }
 
 export type Item =
