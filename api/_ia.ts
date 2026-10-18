@@ -41,7 +41,7 @@ export function json(datos: unknown, estado = 200) {
 
 /** Respuesta de error para el docente: el mensaje se muestra tal cual, el detalle va al log. */
 /** Sin la clave, cada función lo dice claro (al docente y en los logs de Vercel) en vez de fallar callada. */
-export const SIN_CLAVE = 'La IA no está configurada en el servidor: falta OPENROUTER_API_KEY en Vercel. Avísale al equipo de Supermentes.'
+export const SIN_CLAVE = 'La IA no está configurada en el servidor: falta OPENROUTER_API_KEY en el servidor. Avísale al equipo de Supermentes.'
 
 export function fallo(e: unknown) {
   console.error(e)

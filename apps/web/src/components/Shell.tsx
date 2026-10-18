@@ -168,7 +168,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
               <span>
                 <strong>Versión de prueba:</strong> la IA y la música no están conectadas, así que ves ejemplos
-                {import.meta.env.MODE !== 'artifact' && ' (falta VITE_API=real en Vercel)'}.
+                {import.meta.env.MODE !== 'artifact' && ' (falta VITE_API=real al publicar)'}.
               </span>
             </p>
           )}
