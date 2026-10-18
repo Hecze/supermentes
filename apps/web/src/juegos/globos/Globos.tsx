@@ -113,7 +113,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
   function lanzar(r: Reto, aciertosAhora: number) {
     let opciones = opcionesDe(r, opcionesPorReto, azar)
     // En un celular, cuatro globos con palabras largas no dejan letra legible: salen tres, más anchos.
-    if (opciones.length > 3 && ancho < 560 && Math.max(...opciones.map(largo)) > 7) opciones = opcionesDe(r, 3, azar)
+    if (opciones.length > 3 && (escena.current?.clientWidth ?? ancho) < 560 && Math.max(...opciones.map(largo)) > 7) opciones = opcionesDe(r, 3, azar)
     const carriles = barajar(azar, opciones.map((_, i) => i))
     const vel = velocidadBase * (1 + aciertosAhora * 0.04)
     const colores = barajar(azar, PALETA.map((_, i) => i))
