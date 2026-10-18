@@ -49,7 +49,7 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
   const total = sopa.ubicadas.length
   const terminado = halladas.length === total
 
-  useBucle((dt) => (tiempo.current += dt), !terminado)
+  useBucle((_dt, real) => (tiempo.current += real), !terminado)
 
   function celdaDe(e: PointerEvent): Celda | null {
     const r = grilla.current?.getBoundingClientRect()

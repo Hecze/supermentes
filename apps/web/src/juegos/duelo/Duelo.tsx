@@ -223,8 +223,9 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
   }
 
   // Contra la máquina: su golpe se carga mientras piensas.
-  useBucle((dt) => {
-    cargado.current = Math.min(1, cargado.current + dt / carga)
+  // Tiempo real: la carga del robot sigue si el jugador sale del juego.
+  useBucle((_dt, real) => {
+    cargado.current = Math.min(1, cargado.current + real / carga)
     if (barraCpu.current) barraCpu.current.style.transform = `scaleX(${cargado.current})`
     if (cargado.current >= 1) {
       cargado.current = 0

@@ -48,8 +48,9 @@ export default function BotonesRapidos({ contenido, ritmo, semilla, terminar }: 
 
   const empezar = useCallback(() => setFase('juega'), [])
 
-  useBucle((dt) => {
-    restante.current = Math.max(0, restante.current - dt)
+  // Tiempo real: el reloj sigue corriendo si sale del juego (ver motor/bucle).
+  useBucle((_dt, real) => {
+    restante.current = Math.max(0, restante.current - real)
     const s = Math.ceil(restante.current)
     if (s !== segundos) {
       setSegundos(s)
