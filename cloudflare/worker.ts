@@ -48,8 +48,8 @@ export default {
     const url = new URL(request.url)
     const nombre = /^\/api\/([\w-]+)\/?$/.exec(url.pathname)?.[1]
     if (nombre) return api(request, nombre, ctx)
-    if (url.pathname === '/app') url.pathname = '/app/index.html'
-    else if (/^\/j\/[^/]+\/?$/.test(url.pathname)) url.pathname = '/j/index.html'
+    if (url.pathname === '/app') url.pathname = '/app/'
+    else if (/^\/j\/[^/]+\/?$/.test(url.pathname)) url.pathname = '/j/'
     else return env.ASSETS.fetch(request)
     return env.ASSETS.fetch(new Request(url, request))
   },
