@@ -1,15 +1,17 @@
 // Cuenta de la docente con Clerk, solo con Google. Se pide al mandar un juego (mockup z2hti en pen): con la cuenta,
 // sus envíos se guardan en el servidor y ve los resultados desde cualquier computadora.
 // Sin VITE_CLERK_PUBLISHABLE_KEY la app funciona igual que antes, sin cuentas.
-import { AuthenticateWithRedirectCallback, ClerkProvider, getToken, useAuth, useClerk, useUser } from '@clerk/react'
+import { esES } from '@clerk/localizations'
+import { ClerkProvider, SignIn, getToken, useAuth, useClerk, useUser } from '@clerk/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { sincronizarEnviados } from '../juegos/compartir/resultados'
 import { Entrar } from '../views/Entrar'
 
 const CLAVE_CLERK = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
-const CALLBACK = 'sso-callback'
 const CLAVE_SIN_CUENTA = 'supermentes-sin-cuenta'
-const callbackUrl = () => `${location.origin}/app/?${CALLBACK}`
+// Los pasos de Clerk (vuelta de Google, código del correo…) viven bajo /app/…; cloudflare/worker.ts sirve la app ahí.
+const callbackUrl = () => `${location.origin}/app/sso-callback`
+const enPasoDeClerk = () => /^\/app\/[\w-]+/.test(location.pathname)
 
 export type Cuenta = { lista: boolean; entro: boolean; nombre?: string; entrar: () => Promise<void>; salir: () => void }
 
@@ -50,16 +52,11 @@ function sinCuentaGuardado() {
 /** Sin cuenta se ve la pantalla de entrar, salvo que haya elegido "Probar sin cuenta" en este navegador. */
 function Puerta({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth()
-  const clerk = useClerk()
   const [sinCuenta, setSinCuenta] = useState(sinCuentaGuardado)
   if (!isLoaded) return null
-  if (isSignedIn || sinCuenta) return children
+  if ((isSignedIn || sinCuenta) && !enPasoDeClerk()) return children
   return (
     <Entrar
-      // Aquí no hay nada abierto que perder: se entra con redirección, que es lo más confiable.
-      entrar={async () => {
-        await clerk.client?.signIn.authenticateWithRedirect({ strategy: 'oauth_google', redirectUrl: callbackUrl(), redirectUrlComplete: `${location.origin}/app/` })
-      }}
       sinCuenta={() => {
         try {
           localStorage.setItem(CLAVE_SIN_CUENTA, '1')
@@ -68,7 +65,9 @@ function Puerta({ children }: { children: ReactNode }) {
         }
         setSinCuenta(true)
       }}
-    />
+    >
+      <SignIn routing="path" path="/app" withSignUp forceRedirectUrl="/app/" signUpForceRedirectUrl="/app/" />
+    </Entrar>
   )
 }
 
@@ -82,18 +81,17 @@ function Sincronizar() {
 
 export function ConCuenta({ children }: { children: ReactNode }) {
   if (!CLAVE_CLERK) return children
-  // La ventana de Google vuelve a /app/?sso-callback: ahí Clerk termina de entrar y la cierra.
-  const callback = new URLSearchParams(location.search).has(CALLBACK)
   return (
-    <ClerkProvider publishableKey={CLAVE_CLERK}>
-      {callback ? (
-        <AuthenticateWithRedirectCallback />
-      ) : (
-        <>
-          <Sincronizar />
-          <Puerta>{children}</Puerta>
-        </>
-      )}
+    <ClerkProvider
+      publishableKey={CLAVE_CLERK}
+      localization={esES}
+      signInUrl="/app"
+      signUpUrl="/app"
+      afterSignOutUrl="/app/"
+      appearance={{ variables: { colorPrimary: '#172031', fontFamily: 'Lexend, sans-serif', borderRadius: '0.75rem' } }}
+    >
+      <Sincronizar />
+      <Puerta>{children}</Puerta>
     </ClerkProvider>
   )
 }

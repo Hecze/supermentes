@@ -1,7 +1,8 @@
 // Pantalla de entrar (mockup "Entrar · pantalla propia" en pen): lo primero que ve quien abre la app sin cuenta.
-// "Probar sin cuenta" deja usarla igual; la cuenta se vuelve a ofrecer al mandar el primer juego.
-import { CircleCheck, FileCheck, Gamepad2, LoaderCircle, Music } from 'lucide-react'
-import { useState } from 'react'
+// El formulario es el de Clerk (Google o correo y contraseña). "Probar sin cuenta" deja usarla igual; la cuenta se
+// vuelve a ofrecer al mandar el primer juego.
+import { CircleCheck, FileCheck, Gamepad2, Music } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Logo } from '../components/Logo'
 
 const LO_QUE_TRAE = [
@@ -10,8 +11,7 @@ const LO_QUE_TRAE = [
   { icono: FileCheck, color: 'text-examen', texto: 'Exámenes listos para imprimir, con Fila A y B' },
 ]
 
-export function Entrar({ entrar, sinCuenta }: { entrar: () => Promise<void>; sinCuenta: () => void }) {
-  const [entrando, setEntrando] = useState(false)
+export function Entrar({ children, sinCuenta }: { children: ReactNode; sinCuenta: () => void }) {
   return (
     <main className="grid min-h-dvh bg-bg text-ink lg:grid-cols-[1fr_38rem]">
       <section className="flex flex-col gap-10 border-line bg-surface px-6 py-10 sm:px-12 lg:border-r lg:px-20 lg:py-16">
@@ -40,31 +40,10 @@ export function Entrar({ entrar, sinCuenta }: { entrar: () => Promise<void>; sin
       </section>
 
       <section className="flex flex-col items-center justify-center gap-5 px-6 py-12">
-        <div className="flex w-full max-w-md flex-col items-center gap-5 rounded-[1.75rem] border border-line bg-surface p-8 text-center sm:p-10">
-          <h2 className="font-display text-3xl font-bold">Entra a Supermentes</h2>
-          <p className="text-ink-soft">Con tu cuenta de Google. Sin contraseñas que recordar.</p>
-          <button
-            type="button"
-            disabled={entrando}
-            onClick={() => {
-              setEntrando(true)
-              entrar().catch(() => setEntrando(false))
-            }}
-            className="inline-flex h-15 w-full items-center justify-center gap-3 rounded-2xl bg-ink px-5 text-lg font-semibold text-surface hover:opacity-90 disabled:opacity-60"
-          >
-            {entrando ? (
-              <LoaderCircle className="size-5 animate-spin" aria-hidden />
-            ) : (
-              <span className="grid size-7 place-items-center rounded-full bg-white font-bold text-[#4285F4]">G</span>
-            )}
-            Entrar con Google
-          </button>
-          <p className="text-sm text-ink-soft">Guardamos tus temas y ves cómo les va a tus alumnos desde cualquier computadora.</p>
-          <hr className="w-full border-line" />
-          <button type="button" onClick={sinCuenta} className="font-semibold underline underline-offset-4">
-            Probar sin cuenta
-          </button>
-        </div>
+        {children}
+        <button type="button" onClick={sinCuenta} className="font-semibold underline underline-offset-4">
+          Probar sin cuenta
+        </button>
         <p className="text-sm text-ink-soft">No publicamos nada en tu nombre. Es gratis.</p>
       </section>
     </main>
