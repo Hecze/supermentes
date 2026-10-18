@@ -485,7 +485,7 @@ function clave(c: Ctx, d: DatosPdf, v: Version) {
     doc.setTextColor(90)
     doc.text(`${i + 1}.`, x, y, { baseline: 'middle' })
     doc.setTextColor(0)
-    const corta = respuestaCorta(doc, it, col - 11)
+    const corta = respuestaCorta(doc, it, col - 13)
     doc.setFont('helvetica', corta === 'abajo' ? 'normal' : 'bold')
     doc.setFontSize(corta === 'abajo' ? 9.5 : PT)
     if (corta === 'abajo') doc.setTextColor(110)
