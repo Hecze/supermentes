@@ -4,7 +4,8 @@ const tienda = new Map()
 
 export async function put(ruta, cuerpo, opciones = {}) {
   if (tienda.has(ruta) && opciones.allowOverwrite === false) throw new Error(`Ya existe ${ruta}`)
-  tienda.set(ruta, { cuerpo: String(cuerpo), subido: new Date() })
+  // Texto como texto y binario (el mp3 de una canción) tal cual: String() lo rompería.
+  tienda.set(ruta, { cuerpo: typeof cuerpo === 'string' ? cuerpo : Buffer.from(cuerpo), subido: new Date() })
   return { pathname: ruta, url: `memoria://${ruta}` }
 }
 
