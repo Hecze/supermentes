@@ -42,7 +42,7 @@ Un director o un jurado puede preguntar "¿por qué esto cumple el currículo?".
 - **4.º de primaria completo sin esperar a la IA**: los 384 temas del currículo traen juegos, 2 canciones y sus hojas (examen, práctica y balotario) listos al instante.
 - **Juegos compartidos de verdad**: link `/j/CODIGO` y QR, sin cuenta para el alumno, y resultados para el docente.
 - **Tareas por salón, revisadas solas**: el docente pega la lista de su salón una vez y manda el juego "como tarea". Cada alumno elige su nombre, responde 10 preguntas con reloj que no se pausa (si sale a otra app, la pregunta vence y el docente ve cuántas veces salió) y cuenta el primer intento. El docente recibe la tarea corregida: quién entregó, qué desempeño falló más de la mitad y la respuesta equivocada más elegida, con un botón para reforzarlo.
-- **El docente organiza su semana en 3 momentos**, cada uno con su submenú: preparar (canción, juego, examen y crucigrama), dar la clase (sesión de aprendizaje MINEDU, lista al instante y ajustable) y revisar (tareas y resultados).
+- **El docente prepara todo en un solo lugar**: sesión de aprendizaje MINEDU, canción, juego web, examen y crucigrama. Los resultados y las tareas de sus alumnos están en la pestaña **Resultados y tareas** de Juego web.
 - **Cuentas** con Google o correo, y un onboarding de 3 pasos (cómo te llaman, tu grado, el tema de mañana) que termina en su primera clase lista.
 - **Landing con lista de espera** real, con enlace para invitar y registro de dónde llega cada docente.
 

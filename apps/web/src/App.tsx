@@ -10,7 +10,6 @@ import { Ficha } from './views/Ficha'
 import { Inicio } from './views/Inicio'
 import { Juego } from './views/Juego'
 import { Onboarding } from './views/Onboarding'
-import { ResultadosJuegos } from './views/ResultadosJuegos'
 import { Sesion } from './views/Sesion'
 
 const VISTAS = {
@@ -22,7 +21,7 @@ const VISTAS = {
   juego: Juego,
   crucigrama: Crucigrama,
   biblioteca: Biblioteca,
-  resultados: ResultadosJuegos,
+  resultados: Juego,
 }
 
 function Pantalla() {

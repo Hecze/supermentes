@@ -67,15 +67,14 @@ function Docente() {
 type Submenu = { vista: Vista; titulo: string; icono: ReactNode }
 type Momento = { vista: Vista; titulo: string; detalle: string; incluye: Vista[]; submenu: Submenu[] }
 
-const PREPARAR = ORDEN_HERRAMIENTAS.filter((h) => h !== 'sesion')
-const IconoSesion = HERRAMIENTAS.sesion.icono
+const PREPARAR = ORDEN_HERRAMIENTAS
 
 const MOMENTOS: Momento[] = [
   {
     vista: 'ficha',
     titulo: 'Preparar',
-    detalle: 'Canciones, juegos y materiales',
-    incluye: ['ficha', ...PREPARAR],
+    detalle: 'Sesión, canciones, juegos y materiales',
+    incluye: ['ficha', 'resultados', ...PREPARAR],
     submenu: PREPARAR.map((h) => {
       const Icono = HERRAMIENTAS[h].icono
       return {
@@ -85,23 +84,9 @@ const MOMENTOS: Momento[] = [
       }
     }),
   },
-  {
-    vista: 'sesion',
-    titulo: 'Dar la clase',
-    detalle: 'Sesión de aprendizaje MINEDU',
-    incluye: ['sesion'],
-    submenu: [{ vista: 'sesion', titulo: 'Sesión de aprendizaje', icono: <IconoSesion className="size-4" style={{ color: HERRAMIENTAS.sesion.color }} aria-hidden /> }],
-  },
-  {
-    vista: 'resultados',
-    titulo: 'Revisar',
-    detalle: 'Quién jugó y qué reforzar',
-    incluye: ['resultados'],
-    submenu: [{ vista: 'resultados', titulo: 'Resultados y tareas', icono: <CircleCheck className="size-4 text-ok" aria-hidden /> }],
-  },
 ]
 
-function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[number] & { n: number }) {
+function ItemMomento({ vista, titulo, detalle, incluye }: Momento) {
   const { ir, vista: actual } = useStore()
   const activo = incluye.includes(actual)
   return (
@@ -111,7 +96,6 @@ function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[n
       aria-current={activo ? 'page' : undefined}
       className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition', activo ? 'bg-surface-2' : 'hover:bg-surface-2')}
     >
-      <span className={cx('grid size-8 shrink-0 place-items-center rounded-full text-sm font-bold', activo ? 'bg-primary text-primary-ink' : 'bg-surface-2 text-ink')}>{n}</span>
       <span className="flex min-w-0 flex-col">
         <span className={cx(activo ? 'font-bold' : 'font-medium')}>{titulo}</span>
         <span className="truncate text-xs text-ink-soft">{detalle}</span>
@@ -122,7 +106,7 @@ function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[n
 
 function ItemSub({ vista, titulo, icono }: Submenu) {
   const { ir, vista: actual } = useStore()
-  const activo = actual === vista
+  const activo = actual === vista || (vista === 'juego' && actual === 'resultados')
   return (
     <button
       type="button"
@@ -160,7 +144,7 @@ function ItemNav({ vista, icono, children }: { vista: Vista; icono: ReactNode; c
 
 /** Lo que va en la barra lateral: en escritorio siempre visible, en el celular dentro del menú. */
 function ContenidoLateral() {
-  const { ir } = useStore()
+  const { ir, vista } = useStore()
   return (
     <>
       <button type="button" onClick={() => ir('inicio')} className="self-start rounded-lg">
@@ -173,16 +157,18 @@ function ContenidoLateral() {
 
       <SelectorTema />
 
-      {/* Los 3 momentos de la semana de la docente: preparar, dar la clase y revisar. */}
-      <nav className="flex flex-col gap-1" aria-label="Tu semana">
-        <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">TU SEMANA</p>
-        {MOMENTOS.map((m, i) => (
+      {/* Preparar la clase: la sesión y los materiales del tema. */}
+      <nav className="flex flex-col gap-1" aria-label="Tu clase">
+        <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">TU CLASE</p>
+        {MOMENTOS.map((m) => (
           <div key={m.vista} className="flex flex-col gap-0.5">
-            <ItemMomento n={i + 1} {...m} />
+            <ItemMomento {...m} />
             <div role="group" className="ml-11 flex flex-col gap-0.5 border-l border-line pl-3" aria-label={`${m.titulo}: opciones`}>
-              {m.submenu.map((s) => (
-                <ItemSub key={s.vista} {...s} />
-              ))}
+              {m.submenu
+                .filter((s) => s.vista !== 'crucigrama' || vista === 'ficha')
+                .map((s) => (
+                  <ItemSub key={s.vista} {...s} />
+                ))}
             </div>
           </div>
         ))}

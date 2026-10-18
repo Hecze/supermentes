@@ -1,4 +1,4 @@
-import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Circle, CircleCheck, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Circle, CircleCheck, Copy, Gamepad2, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { tokenDeCuenta, useCuenta } from '../app/cuenta'
@@ -17,7 +17,7 @@ import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara, type Habilida
 import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
-import { AtajoResultados } from './ResultadosJuegos'
+import { ResultadosJuegos } from './ResultadosJuegos'
 import { AsignarTarea } from './Tareas'
 import { InfoCurricular, textoGrados, useSustento, type Sustento } from './SustentoJuego'
 import { muestraDe } from '../juegos/miniaturas'
@@ -509,8 +509,48 @@ function Compartir({ publicado, nombreJuego, grado, practica, tarea }: { publica
   )
 }
 
+type PestanaJuego = 'juegos' | 'resultados'
+
+/** Las dos pestañas de Juego web: los juegos del tema y cómo les fue a los alumnos. */
+function PestanasJuego({ activa }: { activa: PestanaJuego }) {
+  const { ir } = useStore()
+  const pestanas = [
+    { id: 'juegos', nombre: 'Juegos', icono: Gamepad2 },
+    { id: 'resultados', nombre: 'Resultados y tareas', icono: Trophy },
+  ] as const
+  return (
+    <div className="flex gap-1 overflow-x-auto rounded-xl border border-line bg-surface p-1 print:hidden" role="tablist" aria-label="Juego web">
+      {pestanas.map(({ id, nombre, icono: Icono }) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={activa === id}
+          onClick={() => ir(id === 'juegos' ? 'juego' : 'resultados')}
+          className={cx(
+            'inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition',
+            activa === id ? 'bg-primary text-primary-ink' : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
+          )}
+        >
+          <Icono className="size-4" aria-hidden /> {nombre}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function ResultadosDelJuego() {
+  return (
+    <>
+      <EncabezadoHerramienta id="juego" />
+      <PestanasJuego activa="resultados" />
+      <ResultadosJuegos enTab />
+    </>
+  )
+}
+
 export function Juego() {
-  const { ficha, resultados, guardar, creditos, avisar } = useStore()
+  const { ficha, vista, resultados, guardar, creditos, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
   const [elegido, setElegido] = useState<JuegoId | null>(null)
   const [eligiendo, setEligiendo] = useState(false)
@@ -538,6 +578,7 @@ export function Juego() {
   const fuenteEstable = useMemo(() => fuente, [claveFuente]) // eslint-disable-line react-hooks/exhaustive-deps
   const sustento = useSustento(ficha, fuenteEstable, banco)
 
+  if (vista === 'resultados') return <ResultadosDelJuego />
   if (!ficha) return <SinTema />
 
   const enJuego = compatibles.find((j) => j.def.id === elegido)
@@ -637,7 +678,7 @@ export function Juego() {
         }
       />
 
-      <AtajoResultados tema={ficha.titulo} />
+      <PestanasJuego activa="juegos" />
 
       <section className="flex flex-col gap-4">
         {compatibles.length > 0 ? (

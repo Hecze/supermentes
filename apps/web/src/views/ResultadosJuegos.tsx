@@ -146,7 +146,7 @@ function FilaEnvio({ envio, abierto, alternar }: { envio: Enviado; abierto: bool
   )
 }
 
-export function ResultadosJuegos() {
+export function ResultadosJuegos({ enTab = false }: { enTab?: boolean }) {
   const { ficha, ir } = useStore()
   const lista = useEnviados()
   const tareas = useTareas()
@@ -169,10 +169,12 @@ export function ResultadosJuegos() {
 
   return (
     <>
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-4xl font-bold">Revisar</h1>
-        <p className="max-w-2xl text-lg text-ink-soft">Las tareas de tus salones, ya revisadas, y quién jugó cada juego que mandaste a las familias.</p>
-      </header>
+      {!enTab && (
+        <header className="flex flex-col gap-1">
+          <h1 className="font-display text-4xl font-bold">Revisar</h1>
+          <p className="max-w-2xl text-lg text-ink-soft">Las tareas de tus salones, ya revisadas, y quién jugó cada juego que mandaste a las familias.</p>
+        </header>
+      )}
       {tareas && <TareasPorSalon tareas={tareas} abrir={setTarea} />}
       <h2 className="text-2xl font-semibold">Juegos para practicar</h2>
 
@@ -183,10 +185,10 @@ export function ResultadosJuegos() {
           </span>
           <h2 className="text-xl font-semibold">Todavía no mandaste juegos {donde}</h2>
           <p className="max-w-xl text-ink-soft">
-            Abre un tema, entra a <strong className="text-ink">Juego web</strong> y toca <strong className="text-ink">Enviar a las familias</strong>. Cuando tus alumnos jueguen,
+            En la pestaña <strong className="text-ink">Juegos</strong>, elige uno y toca <strong className="text-ink">Enviar a las familias</strong>. Cuando tus alumnos jueguen,
             aquí verás quién jugó y su puntaje más alto.
           </p>
-          {ficha && <Boton onClick={() => ir('juego')}>Ir a Juego web</Boton>}
+          {ficha && !enTab && <Boton onClick={() => ir('juego')}>Ir a Juego web</Boton>}
         </section>
       ) : (
         <>
@@ -205,24 +207,5 @@ export function ResultadosJuegos() {
         </>
       )}
     </>
-  )
-}
-
-/** Una línea en Juego web: cuántos juegos de este tema mandó y un atajo a sus resultados. No empuja la lista de juegos. */
-export function AtajoResultados({ tema }: { tema: string }) {
-  const { ir } = useStore()
-  const n = useEnviados().filter((e) => e.tema === tema).length
-  if (!n) return null
-  return (
-    <button
-      type="button"
-      onClick={() => ir('resultados')}
-      className="flex items-center gap-2.5 self-start rounded-xl border border-line bg-surface px-3 py-2 text-left hover:bg-surface-2 print:hidden"
-    >
-      <Trophy className="size-5 shrink-0 text-warn" aria-hidden />
-      <span>
-        Mandaste {n === 1 ? 'un juego' : `${n} juegos`} de este tema a las familias. <span className="font-semibold underline underline-offset-4">Ver resultados</span>
-      </span>
-    </button>
   )
 }

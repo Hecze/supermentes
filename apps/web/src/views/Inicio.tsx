@@ -1,6 +1,6 @@
 // Inicio: la semana de la docente en 3 momentos (preparar, dar la clase, revisar), el buscador de temas, temas de su
 // grado listos con un clic y sus temas recientes. Nada de pantallas vacías.
-import { ArrowRight, ChevronRight, FileCheck, Gamepad2, Music, Search } from 'lucide-react'
+import { ArrowRight, ChevronRight, ClipboardList, FileCheck, Gamepad2, Music, Search } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useCuenta } from '../app/cuenta'
 import { usePerfil } from '../app/perfil'
@@ -146,6 +146,7 @@ function Momentos({ gradoId }: { gradoId: string }) {
       >
         {ficha ? (
           [
+            [ClipboardList, 'text-sesion', 'Sesión de aprendizaje'],
             [Gamepad2, 'text-juego', 'Juego para el celular'],
             [Music, 'text-cancion', 'Canción del tema'],
             [FileCheck, 'text-examen', 'Examen, práctica y balotario'],
