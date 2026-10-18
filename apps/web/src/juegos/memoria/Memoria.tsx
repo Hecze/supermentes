@@ -10,15 +10,19 @@ import type { Lado, PropsJuego } from '../tipos'
 
 type Carta = { id: number; par: number; lado: Lado }
 
-/** Columnas que dan las cartas más grandes (proporción 3:4) en el espacio disponible. */
+/**
+ * Columnas que dan las cartas más grandes (proporción 3:4) en el espacio disponible. Una última fila a medias
+ * (6, 6 y 4) se ve desordenada: solo gana si sus cartas son bastante más grandes que las de una grilla pareja.
+ */
 function mejorGrilla(n: number, ancho: number, alto: number, hueco: number) {
-  let mejor = { cols: 4, lado: 0 }
+  let mejor = { cols: 4, lado: 0, puntos: 0 }
   for (let cols = 2; cols <= 8; cols++) {
     const filas = Math.ceil(n / cols)
     const w = (ancho - hueco * (cols - 1)) / cols
     const h = (alto - hueco * (filas - 1)) / filas
     const lado = Math.min(w, h * 0.75)
-    if (lado > mejor.lado) mejor = { cols, lado }
+    const puntos = n % cols === 0 ? lado : lado * 0.8
+    if (puntos > mejor.puntos) mejor = { cols, lado, puntos }
   }
   return mejor
 }
@@ -27,6 +31,8 @@ function tamTexto(t: string) {
   const n = [...t].length
   return n <= 3 ? 1 : n <= 6 ? 0.74 : n <= 10 ? 0.56 : 0.46
 }
+
+const masLargo = (textos: string[]) => textos.reduce((a, t) => ([...t].length > [...a].length ? t : a), '')
 
 export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
@@ -53,6 +59,8 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
 
   const hueco = Math.max(6, Math.min(ancho, alto) * 0.02)
   const { cols, lado } = mejorGrilla(cartas.length, ancho, alto, hueco)
+  // Todas las cartas con la misma letra, la que le cabe al texto más largo, y nunca menos de 18 px.
+  const letra = `max(18px, calc(30cqi * ${tamTexto(masLargo(cartas.map((c) => c.lado.texto)))}))`
 
   function tocar(c: Carta) {
     if (abiertas.length === 2 || abiertas.includes(c.id) || encontradas.has(c.par)) return
@@ -141,7 +149,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
                     >
                       {c.lado.visual && <VisualDe visual={c.lado.visual} tam="66cqi" />}
                       {c.lado.texto && (
-                        <span style={{ fontSize: `calc(30cqi * ${tamTexto(c.lado.texto)})` }}>
+                        <span style={{ fontSize: letra }}>
                           <TextoMat texto={c.lado.texto} />
                         </span>
                       )}
