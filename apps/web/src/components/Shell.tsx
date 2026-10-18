@@ -64,10 +64,41 @@ function Docente() {
   )
 }
 
-const MOMENTOS: { vista: Vista; titulo: string; detalle: string; incluye: Vista[] }[] = [
-  { vista: 'ficha', titulo: 'Preparar', detalle: 'Juego, canción, examen', incluye: ['ficha', ...ORDEN_HERRAMIENTAS.filter((h) => h !== 'sesion')] },
-  { vista: 'clase', titulo: 'Dar la clase', detalle: 'Sesión y guía minuto a minuto', incluye: ['clase', 'sesion'] },
-  { vista: 'resultados', titulo: 'Revisar', detalle: 'Quién jugó y qué reforzar', incluye: ['resultados'] },
+type Submenu = { vista: Vista; titulo: string; icono: ReactNode }
+type Momento = { vista: Vista; titulo: string; detalle: string; incluye: Vista[]; submenu: Submenu[] }
+
+const PREPARAR = ORDEN_HERRAMIENTAS.filter((h) => h !== 'sesion')
+const IconoSesion = HERRAMIENTAS.sesion.icono
+
+const MOMENTOS: Momento[] = [
+  {
+    vista: 'ficha',
+    titulo: 'Preparar',
+    detalle: 'Canciones, juegos y materiales',
+    incluye: ['ficha', ...PREPARAR],
+    submenu: PREPARAR.map((h) => {
+      const Icono = HERRAMIENTAS[h].icono
+      return {
+        vista: h,
+        titulo: HERRAMIENTAS[h].nombre,
+        icono: <Icono className="size-4" style={{ color: HERRAMIENTAS[h].color }} aria-hidden />,
+      }
+    }),
+  },
+  {
+    vista: 'sesion',
+    titulo: 'Dar la clase',
+    detalle: 'Sesión de aprendizaje MINEDU',
+    incluye: ['sesion'],
+    submenu: [{ vista: 'sesion', titulo: 'Sesión de aprendizaje', icono: <IconoSesion className="size-4" style={{ color: HERRAMIENTAS.sesion.color }} aria-hidden /> }],
+  },
+  {
+    vista: 'resultados',
+    titulo: 'Revisar',
+    detalle: 'Quién jugó y qué reforzar',
+    incluye: ['resultados'],
+    submenu: [{ vista: 'resultados', titulo: 'Resultados y tareas', icono: <CircleCheck className="size-4 text-ok" aria-hidden /> }],
+  },
 ]
 
 function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[number] & { n: number }) {
@@ -85,6 +116,25 @@ function ItemMomento({ n, vista, titulo, detalle, incluye }: (typeof MOMENTOS)[n
         <span className={cx(activo ? 'font-bold' : 'font-medium')}>{titulo}</span>
         <span className="truncate text-xs text-ink-soft">{detalle}</span>
       </span>
+    </button>
+  )
+}
+
+function ItemSub({ vista, titulo, icono }: Submenu) {
+  const { ir, vista: actual } = useStore()
+  const activo = actual === vista
+  return (
+    <button
+      type="button"
+      onClick={() => ir(vista)}
+      aria-current={activo ? 'page' : undefined}
+      className={cx(
+        'flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-sm transition',
+        activo ? 'bg-surface-2 font-semibold text-ink' : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
+      )}
+    >
+      {icono}
+      <span className="truncate">{titulo}</span>
     </button>
   )
 }
@@ -127,7 +177,14 @@ function ContenidoLateral() {
       <nav className="flex flex-col gap-1" aria-label="Tu semana">
         <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">TU SEMANA</p>
         {MOMENTOS.map((m, i) => (
-          <ItemMomento key={m.vista} n={i + 1} {...m} />
+          <div key={m.vista} className="flex flex-col gap-0.5">
+            <ItemMomento n={i + 1} {...m} />
+            <div role="group" className="ml-11 flex flex-col gap-0.5 border-l border-line pl-3" aria-label={`${m.titulo}: opciones`}>
+              {m.submenu.map((s) => (
+                <ItemSub key={s.vista} {...s} />
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 

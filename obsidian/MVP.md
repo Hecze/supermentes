@@ -16,7 +16,7 @@ punta, con IA real, desde el link y en una ventana privada.
 1. El docente busca su tema en el Currículo Nacional (grado, curso, tema). **Listo.**
 2. Supermentes arma la **ficha** con Claude. **Listo** (`api/ficha.ts`).
 3. Elige qué necesita:
-   - **Sesión de aprendizaje** lista para presentar, en el formato del MINEDU, con cada criterio citado del currículo; se imprime o se descarga en Word. **Lista** (`api/sesion.ts`).
+   - **Sesión de aprendizaje** lista para presentar, en el formato del MINEDU, con cada criterio citado del currículo; se arma al instante con el tema, se ajusta y se imprime o descarga en Word. **Lista** (plantilla instantánea, `views/Sesion.tsx`).
    - **Examen, práctica y balotario** del tema, generados desde cero y listos para imprimir con su clave. **Listo** en 4.º (`apps/web/src/examenes`, sin IA al usarlo).
    - **Canción**: letra con ritmo peruano **lista** (`api/cancion.ts`); audio con ElevenLabs **pendiente**
      (falta la key).

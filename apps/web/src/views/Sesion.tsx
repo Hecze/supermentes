@@ -1,13 +1,13 @@
 // Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
 // Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Check, Download, FileText, Gamepad2, Music, Printer, RefreshCw, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
+import { BadgeCheck, Download, FileText, Gamepad2, Music, Printer, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { api, COSTOS, type OpcionesSesion, type Sesion as TipoSesion } from '../api'
+import { type OpcionesSesion, type Sesion as TipoSesion } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
-import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { BarraHoja, Boton, Chip, Desplegable, Editable, Hoja, NotaCreditos, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
+import { BarraHoja, Boton, Chip, Desplegable, Editable, Hoja, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
+import { sesionPlantilla } from '../sesion/plantilla'
 import { useCurriculo, type AreaCurriculo } from '../curriculo/cargar'
 import type { Nivel } from '../curriculo/catalogo'
 import { ubicarCita } from '../curriculo/citas'
@@ -17,7 +17,7 @@ const COLOR = 'var(--sesion)'
 const ALUMNOS = 30
 const NIVELES_LOGRO = ['Siempre', 'A veces', 'No lo hace']
 
-// ---------- Antes de crear ----------
+// ---------- Opciones ----------
 
 function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambiar: (o: OpcionesSesion) => void }) {
   return (
@@ -51,46 +51,6 @@ function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambi
           </div>
         </div>
       </Desplegable>
-    </div>
-  )
-}
-
-const PASOS_AVANCE = ['Leyendo el currículo de tu grado…', 'Eligiendo los criterios y su desempeño…', 'Armando los momentos de la clase…', 'Preparando la ficha y la escala de valoración…']
-
-/** Lo que se ve mientras la IA escribe: cada paso se marca a medida que avanza el tiempo. */
-function Avance() {
-  const [paso, setPaso] = useState(0)
-  useEffect(() => {
-    const id = window.setInterval(() => setPaso((p) => Math.min(p + 1, PASOS_AVANCE.length - 1)), 9000)
-    return () => window.clearInterval(id)
-  }, [])
-  return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-line bg-surface px-5 py-5 print:hidden" role="status">
-      {PASOS_AVANCE.map((t, i) => (
-        <p key={t} className={cx('flex items-center gap-2', i > paso ? 'text-ink-soft/50' : i < paso ? 'text-ink-soft' : 'font-medium')}>
-          {i < paso ? (
-            <Check className="size-4 text-ok" aria-hidden />
-          ) : i === paso ? (
-            <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
-          ) : (
-            <span className="size-4" aria-hidden />
-          )}
-          {t}
-        </p>
-      ))}
-      <p className="pt-1 text-sm text-ink-soft">Suele tardar menos de un minuto.</p>
-    </div>
-  )
-}
-
-function Fallo({ texto, reintentar }: { texto: string; reintentar: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-warn/40 bg-warn/10 px-5 py-4 print:hidden" role="alert">
-      <TriangleAlert className="size-5 shrink-0 text-warn" aria-hidden />
-      <p className="min-w-0 flex-1">{texto} No se descontaron créditos.</p>
-      <Boton variante="contorno" onClick={reintentar}>
-        <RotateCcw className="size-4" aria-hidden /> Reintentar
-      </Boton>
     </div>
   )
 }
@@ -427,52 +387,34 @@ const ATAJOS: { vista: Vista; texto: string; icono: typeof Music }[] = [
 ]
 
 export function Sesion() {
-  const { ficha, resultados, guardar, creditos, avisar, ir } = useStore()
-  const { ocupado, generar } = useGeneracion()
+  const { ficha, resultados, guardar, avisar, ir } = useStore()
   const sesion = resultados.sesion
   const [opciones, setOpciones] = useState<OpcionesSesion>(sesion?.opciones ?? { duracion: ficha?.duracion?.startsWith('90') ? 90 : 45 })
-  const [error, setError] = useState<string | null>(null)
   const [otra, setOtra] = useState(false)
+  const [version, setVersion] = useState(0)
   const hoja = useRef<HTMLDivElement>(null)
   const gradoId = ficha?.gradoId ?? 'primaria-1'
   const cur = useCurriculo(gradoId.split('-')[0] as Nivel, gradoId, ficha?.areaId ?? 'matematica')
   const area = cur.estado === 'listo' ? cur.area : null
 
+  // La sesión se arma sola con el tema y sus desempeños: no hay que esperar a la IA.
+  useEffect(() => {
+    if (!ficha || sesion || cur.estado === 'cargando') return
+    guardar('sesion', sesionPlantilla(ficha, opciones, area))
+  }, [ficha, sesion, cur.estado, area, opciones, guardar])
+
   if (!ficha) return <SinTema />
 
-  async function crear() {
-    setError(null)
-    const fallo = { texto: '' }
-    const nueva = await generar(COSTOS.sesion, 'Sesión de aprendizaje', () =>
-      api.generarSesion(ficha!, opciones).catch((e: unknown) => {
-        fallo.texto = e instanceof Error ? e.message : 'No pudimos crear la sesión.'
-        throw e
-      }),
-    )
-    if (nueva) guardar('sesion', nueva)
-    else if (fallo.texto) setError(fallo.texto)
+  const actual = sesion ?? sesionPlantilla(ficha, opciones, area)
+
+  function aplicar() {
+    guardar('sesion', sesionPlantilla(ficha!, opciones, area))
+    setVersion((v) => v + 1)
+    setOtra(false)
   }
 
   function bajarWord() {
-    if (hoja.current && sesion) void descargar(aWord(hoja.current, sesion.titulo), archivo(sesion.titulo), avisar)
-  }
-
-  if (!sesion) {
-    return (
-      <>
-        <EncabezadoHerramienta id="sesion" />
-        <ElegirOpciones opciones={opciones} cambiar={setOpciones} />
-        <div className="flex flex-col items-start gap-2">
-          <Boton tam="lg" variante="herramienta" herramienta="sesion" onClick={crear} cargando={ocupado}>
-            <Sparkles className="size-5" aria-hidden /> Crear mi sesión
-          </Boton>
-          <p className="text-sm text-ink-soft">Con competencia, criterios, momentos, ficha para el alumno y escala de valoración. La descargas en Word.</p>
-          <NotaCreditos n={COSTOS.sesion} quedan={creditos} />
-        </div>
-        {ocupado && <Avance />}
-        {error && !ocupado && <Fallo texto={error} reintentar={crear} />}
-      </>
-    )
+    if (hoja.current) void descargar(aWord(hoja.current, actual.titulo), archivo(actual.titulo), avisar)
   }
 
   return (
@@ -480,29 +422,25 @@ export function Sesion() {
       <EncabezadoHerramienta id="sesion" />
 
       <BarraHoja>
-        <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord} disabled={ocupado}>
+        <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord}>
           <Download className="size-5" aria-hidden /> Descargar en Word
         </Boton>
-        <Boton variante="contorno" onClick={() => imprimir(avisar)} disabled={ocupado} aria-label="Imprimir">
+        <Boton variante="contorno" onClick={() => imprimir(avisar)} aria-label="Imprimir">
           <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
         </Boton>
-        <Boton variante="contorno" onClick={() => setOtra(true)} cargando={ocupado}>
-          {!ocupado && <RefreshCw className="size-5" aria-hidden />} Otra versión
+        <Boton variante="contorno" onClick={() => setOtra(true)}>
+          <SlidersHorizontal className="size-5" aria-hidden /> Ajustar
         </Boton>
       </BarraHoja>
-      <p className="-mt-3 text-sm text-ink-soft print:hidden">Si algo no te convence, haz clic sobre el texto y corrígelo. Lo que cambies sale en el Word y al imprimir.</p>
+      <p className="-mt-3 text-sm text-ink-soft print:hidden">
+        Ya está armada con tu tema. Corrige cualquier texto con un clic; si cambias la duración, se rearma al instante.
+      </p>
 
-      {/* Si la otra versión falla, el aviso sale arriba de la hoja, donde se está mirando. */}
-      {error && !ocupado && <Fallo texto={error} reintentar={crear} />}
-      {ocupado ? (
-        <Avance />
-      ) : (
-        <Hoja>
-          <div ref={hoja} key={`${sesion.titulo}-${sesion.opciones.duracion}`}>
-            <HojaSesion s={sesion} area={area} />
-          </div>
-        </Hoja>
-      )}
+      <Hoja>
+        <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.interes ?? ''}-${version}`}>
+          <HojaSesion s={actual} area={area} />
+        </div>
+      </Hoja>
 
       <section className="flex flex-col gap-3 print:hidden">
         <h2 className="font-display text-2xl font-bold">Completa tu sesión</h2>
@@ -521,22 +459,13 @@ export function Sesion() {
         </div>
       </section>
 
-      <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Otra versión de tu sesión">
+      <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Ajusta tu sesión">
         <ElegirOpciones opciones={opciones} cambiar={setOpciones} />
         <div className="flex flex-col items-start gap-2">
-          <Boton
-            tam="lg"
-            variante="herramienta"
-            herramienta="sesion"
-            onClick={() => {
-              setOtra(false)
-              window.scrollTo({ top: 0, behavior: 'smooth' })
-              void crear()
-            }}
-          >
-            Crear otra versión
+          <Boton tam="lg" variante="herramienta" herramienta="sesion" onClick={aplicar}>
+            Aplicar cambios
           </Boton>
-          <NotaCreditos n={COSTOS.sesion} quedan={creditos} />
+          <p className="text-sm text-ink-soft">Se arma al instante. Lo que hayas corregido a mano en la hoja se reemplaza.</p>
         </div>
       </Ventana>
     </>

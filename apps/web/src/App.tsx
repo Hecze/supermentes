@@ -4,7 +4,6 @@ import { StoreProvider, useStore } from './app/store'
 import { Shell } from './components/Shell'
 import { Biblioteca } from './views/Biblioteca'
 import { Cancion } from './views/Cancion'
-import { Clase } from './views/Clase'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
@@ -17,7 +16,6 @@ import { Sesion } from './views/Sesion'
 const VISTAS = {
   inicio: Inicio,
   ficha: Ficha,
-  clase: Clase,
   sesion: Sesion,
   cancion: Cancion,
   examen: Examen,

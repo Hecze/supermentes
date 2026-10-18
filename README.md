@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama, o las hojas del tema listas para imprimir: examen, práctica y balotario, con su clave (en 4.º; ver `apps/web/src/examenes`).
+Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una sesión de aprendizaje en formato MINEDU, una canción, un juego web, un crucigrama, o las hojas del tema listas para imprimir: examen, práctica y balotario, con su clave (en 4.º; ver `apps/web/src/examenes`).
 
 Proyecto para Hack the Andes 2026.
 
@@ -101,7 +101,7 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 ## Costos
 
-La ficha, las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
+La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 

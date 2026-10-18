@@ -12,7 +12,6 @@ import { cx } from '../components/ui'
 import { GRADOS_CURRICULO, nivelDe } from '../curriculo/catalogo'
 import { useCurriculo } from '../curriculo/cargar'
 import { cargarResultados, type FilaResultado } from '../juegos/compartir/resultados'
-import { tramos } from './GuiaClase'
 import { useTareas } from './Tareas'
 import { nombreSalon } from '../juegos/compartir/tareas'
 import { useEnviados } from './ResultadosJuegos'
@@ -130,11 +129,11 @@ function Tarjeta({ n, color, etiqueta, titulo, children, accion, onClick }: { n:
 
 /** Los 3 momentos de la semana: preparar, dar la clase y revisar (mockup «Dashboard · los 3 momentos» en pen). */
 function Momentos({ gradoId }: { gradoId: string }) {
-  const { ficha, ir, abrirNuevoTema } = useStore()
+  const { ficha, ir, abrirNuevoTema, resultados } = useStore()
   const alumnos = useResumenAlumnos()
   // La tarea más reciente manda en «Revisar»: es lo que la docente quiere saber primero.
   const tarea = useTareas()?.[0]
-  const [inicio, desarrollo, cierre] = tramos(0, 45, [20, 65, 15])
+  const minutos = resultados.sesion?.minutos ?? { inicio: 10, desarrollo: 25, cierre: 10 }
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <Tarjeta
@@ -160,26 +159,26 @@ function Momentos({ gradoId }: { gradoId: string }) {
         )}
       </Tarjeta>
 
-      <Tarjeta n={2} color="var(--sesion)" etiqueta="DAR LA CLASE" titulo="Guía de 45 minutos" accion="Ver la guía" onClick={() => (ficha ? ir('clase') : abrirNuevoTema({ gradoId }))}>
+      <Tarjeta n={2} color="var(--sesion)" etiqueta="DAR LA CLASE" titulo="Sesión de aprendizaje" accion={ficha ? 'Ver mi sesión' : 'Buscar mi tema'} onClick={() => (ficha ? ir('sesion') : abrirNuevoTema({ gradoId }))}>
         <div className="flex h-3.5 gap-1" aria-hidden>
-          <span className="rounded bg-cancion" style={{ flex: inicio[1] - inicio[0] }} />
-          <span className="rounded bg-juego" style={{ flex: desarrollo[1] - desarrollo[0] }} />
-          <span className="rounded bg-examen" style={{ flex: cierre[1] - cierre[0] }} />
+          <span className="rounded bg-cancion" style={{ flex: minutos.inicio }} />
+          <span className="rounded bg-juego" style={{ flex: minutos.desarrollo }} />
+          <span className="rounded bg-examen" style={{ flex: minutos.cierre }} />
         </div>
         {ficha ? (
           <>
             <p>
-              {inicio[0]}–{inicio[1]} · Canta la canción del tema
+              {minutos.inicio} min · Inicio: motivación y saberes previos
             </p>
             <p>
-              {desarrollo[0]}–{desarrollo[1]} · Explica y jueguen en el proyector
+              {minutos.desarrollo} min · Desarrollo: explica y practica
             </p>
             <p>
-              {cierre[0]}–{cierre[1]} · Repaso y tarea al WhatsApp
+              {minutos.cierre} min · Cierre: repaso y tarea
             </p>
           </>
         ) : (
-          <p>Cuando elijas tu tema, aquí verás qué hacer en cada minuto de la clase.</p>
+          <p>Cuando elijas tu tema, aquí estará tu sesión lista al instante, sin esperar.</p>
         )}
       </Tarjeta>
 

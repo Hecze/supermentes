@@ -2,7 +2,7 @@
 // Lo que sale sin llamar a la IA (las hojas del examen, el crucigrama, la biblioteca) es gratis.
 export const COSTOS = {
   ficha: 0,
-  sesion: 1,
+  sesion: 0,
   letra: 1,
   audio: 3,
   examen: 0,
