@@ -8,7 +8,7 @@ import { useBucle, useTeclas, useTemporizadores } from '../motor/bucle'
 import { Enunciado, TextoMat } from '../motor/piezas'
 import { num } from '../matematica/formato'
 import { sonar } from '../motor/sonido'
-import type { PropsJuego, Reto } from '../tipos'
+import type { PropsJuego, Respuesta, Reto } from '../tipos'
 
 /** Rojo con triángulo, azul con rombo, amarillo con círculo, verde con cuadrado: se distinguen sin leer. */
 const FICHAS = [
@@ -28,12 +28,12 @@ function Forma({ i, className }: { i: number; className?: string }) {
 
 type Fase = 'lee' | 'responde' | 'resultado'
 
-export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJuego) {
+export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
   const siguienteReto = useMemo(() => fuenteDeRetos(contenido, azar), [contenido, azar])
-  const total = ritmo === 1 ? 8 : 10
-  // Más tiempo para los chicos y para las preguntas del tema, que hay que leer.
-  const segundos = contenido.generar ? [0, 25, 20, 15][ritmo] : 30
+  const total = tarea || ritmo !== 1 ? 10 : 8
+  // Más tiempo para los chicos y para las preguntas del tema, que hay que leer. La tarea trae el suyo (por grado).
+  const segundos = tarea?.segundos ?? (contenido.generar ? [0, 25, 20, 15][ritmo] : 30)
   const lectura = contenido.generar ? 1.6 : 3
   const despues = useTemporizadores()
 
@@ -51,12 +51,17 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
   const [aciertos, setAciertos] = useState(0)
   const [racha, setRacha] = useState(0)
   const [mejorRacha, setMejorRacha] = useState(0)
+  const [respuestas, setRespuestas] = useState<Respuesta[]>([])
   const [quedan, setQuedan] = useState(segundos)
   const reloj = useRef(0)
+  const antes = useRef(performance.now())
   const barra = useRef<HTMLDivElement>(null)
 
   useBucle((dt) => {
-    reloj.current += dt
+    // En una tarea el reloj no se pausa si sale de la app: cuenta el tiempo real, no solo los cuadros dibujados.
+    const ahora = performance.now()
+    reloj.current += tarea ? (ahora - antes.current) / 1000 : dt
+    antes.current = ahora
     if (fase === 'lee') {
       if (barra.current) barra.current.style.transform = `scaleX(${Math.max(0, 1 - reloj.current / lectura)})`
       if (reloj.current >= lectura) {
@@ -78,6 +83,11 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
     const bien = i !== null && pregunta.opciones[i] === pregunta.reto.respuesta
     setElegida(i)
     setFase('resultado')
+    if (tarea) {
+      const { consigna, pregunta: texto, respuesta } = pregunta.reto
+      const enunciado = (consigna ? `${consigna}${/[?:.!]$/.test(consigna) ? ' ' : ': '}${texto}` : texto).trim() || `La del dibujo (era ${respuesta})`
+      setRespuestas((r) => [...r, { pregunta: enunciado, elegida: i === null ? '' : pregunta.opciones[i], correcta: respuesta }])
+    }
     seguirLuego(n)
     if (bien) {
       // Hasta 1000 puntos: la mitad se gana por acertar y la otra mitad por rapidez; la racha suma un poco más.
@@ -112,10 +122,12 @@ export default function Concurso({ contenido, ritmo, semilla, terminar }: PropsJ
         titulo: `¡${num(puntos)} puntos!`,
         detalle: `Acertaste ${aciertos} de ${total}.${mejorRacha >= 3 ? ` Tu mejor racha: ${mejorRacha} seguidas.` : ''}`,
         puntaje: puntos,
+        respuestas: tarea ? respuestas : undefined,
       })
       return
     }
     reloj.current = 0
+    antes.current = performance.now()
     setN(n + 1)
     setPregunta(nueva())
     setElegida(null)

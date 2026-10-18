@@ -3,6 +3,7 @@
 import * as audio from '../api/audio.js'
 import * as cancion from '../api/cancion.js'
 import * as ficha from '../api/ficha.js'
+import * as intentos from '../api/intentos.js'
 import * as juego from '../api/juego.js'
 import * as juegosCompartidos from '../api/juegos-compartidos.js'
 import * as listaEspera from '../api/lista-espera.js'
@@ -10,13 +11,16 @@ import * as misEnvios from '../api/mis-envios.js'
 import * as perfil from '../api/perfil.js'
 import * as recursos from '../api/recursos.js'
 import * as resultados from '../api/resultados.js'
+import * as salones from '../api/salones.js'
 import * as sesion from '../api/sesion.js'
+import * as tareas from '../api/tareas.js'
 
 type Handler = (request: Request) => Promise<Response>
 const API: Record<string, Record<string, Handler>> = {
   audio,
   cancion,
   ficha,
+  intentos,
   juego,
   'juegos-compartidos': juegosCompartidos,
   'lista-espera': listaEspera,
@@ -24,7 +28,9 @@ const API: Record<string, Record<string, Handler>> = {
   perfil,
   recursos,
   resultados,
+  salones,
   sesion,
+  tareas,
 }
 
 async function api(request: Request, nombre: string, ctx: ExecutionContext) {
@@ -52,7 +58,8 @@ export default {
     if (nombre) return api(request, nombre, ctx)
     // /app/sso-callback, /app/factor-one…: los pasos de entrar de Clerk viven bajo /app.
     if (/^\/app(\/[\w-]+)*\/?$/.test(url.pathname)) url.pathname = '/app/'
-    else if (/^\/j\/[^/]+\/?$/.test(url.pathname)) url.pathname = '/j/'
+    // /t/CODIGO es una tarea: la abre la misma página del alumno.
+    else if (/^\/[jt]\/[^/]+\/?$/.test(url.pathname)) url.pathname = '/j/'
     else return env.ASSETS.fetch(request)
     return env.ASSETS.fetch(new Request(url, request))
   },

@@ -1,4 +1,4 @@
-import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Circle, CircleCheck, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { tokenDeCuenta, useCuenta } from '../app/cuenta'
@@ -18,6 +18,7 @@ import { TextoMat } from '../juegos/motor/piezas'
 import { Partida, usePantallaCompleta } from '../juegos/motor/Partida'
 import { HojaPupiletras } from '../juegos/pupiletras/HojaPupiletras'
 import { AtajoResultados } from './ResultadosJuegos'
+import { AsignarTarea } from './Tareas'
 import { InfoCurricular, textoGrados, useSustento, type Sustento } from './SustentoJuego'
 import { muestraDe } from '../juegos/miniaturas'
 import type { DefinicionJuego, JuegoId, Muestra } from '../juegos/tipos'
@@ -305,7 +306,17 @@ function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
 let sinCuentaEstaVisita = false
 
 /** Mockup z2hti: la cuenta se ofrece al mandar el juego, que es cuando sirve (ver resultados en cualquier computadora). */
-function PedirCuenta({ seguir }: { seguir: () => void }) {
+function PedirCuenta({
+  seguir,
+  titulo = 'Guarda tu juego para ver cómo les va a tus alumnos',
+  detalle = 'Verás quién jugó y cuántas estrellas sacó, desde cualquier computadora. Es gratis.',
+  textoSeguir = 'Ahora no, solo mandar el juego',
+}: {
+  seguir: () => void
+  titulo?: string
+  detalle?: string
+  textoSeguir?: string
+}) {
   const { entrar } = useCuenta()
   const [entrando, setEntrando] = useState(false)
   return (
@@ -313,8 +324,8 @@ function PedirCuenta({ seguir }: { seguir: () => void }) {
       <span className="grid size-16 place-items-center rounded-2xl bg-juego/10">
         <Trophy className="size-8 text-juego" aria-hidden />
       </span>
-      <h3 className="font-display text-2xl font-bold sm:text-3xl">Guarda tu juego para ver cómo les va a tus alumnos</h3>
-      <p className="text-ink-soft">Verás quién jugó y cuántas estrellas sacó, desde cualquier computadora. Es gratis.</p>
+      <h3 className="font-display text-2xl font-bold sm:text-3xl">{titulo}</h3>
+      <p className="text-ink-soft">{detalle}</p>
       <button
         type="button"
         disabled={entrando}
@@ -328,17 +339,21 @@ function PedirCuenta({ seguir }: { seguir: () => void }) {
         Entrar con Google
       </button>
       <button type="button" onClick={seguir} className="font-medium text-ink-soft underline-offset-4 hover:underline">
-        Ahora no, solo mandar el juego
+        {textoSeguir}
       </button>
       <p className="text-sm text-ink-soft">No publicamos nada en tu nombre.</p>
     </div>
   )
 }
 
-function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Publicado; nombreJuego: string; grado: string; practica: string }) {
+/** "Como tarea" (pantalla 1 de demos/tareas): siempre el Concurso, para un salón. */
+type ComoTarea = { ficha: Ficha; publicado: Publicado; desempeno: string }
+
+function Compartir({ publicado, nombreJuego, grado, practica, tarea }: { publicado: Publicado; nombreJuego: string; grado: string; practica: string; tarea: ComoTarea | null }) {
   const { avisar } = useStore()
   const cuenta = useCuenta()
   const [sinCuenta, setSinCuenta] = useState(sinCuentaEstaVisita)
+  const [modo, setModo] = useState<'practicar' | 'tarea'>('practicar')
   const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
   const [grande, setGrande] = useState(false)
   const clave = JSON.stringify(publicado)
@@ -371,11 +386,58 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
     )
   }
 
+  const modos = tarea && cuenta.lista && (
+    <div className="-mt-3 grid gap-3 sm:grid-cols-2">
+      <p className="text-ink-soft sm:col-span-2">Los niños lo hacen en el celular de sus papás. No necesitan cuenta.</p>
+      {(
+        [
+          ['practicar', 'Para practicar', 'Juegan las veces que quieran. Ves su mejor puntaje.'],
+          ['tarea', 'Como tarea', 'Cuenta la primera vez y te llega revisada.'],
+        ] as const
+      ).map(([id, nombre, detalle]) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => setModo(id)}
+          aria-pressed={modo === id}
+          className={cx('flex flex-col gap-1 rounded-2xl border-2 p-4 text-left transition', modo === id ? 'border-[var(--juego)]' : 'border-line hover:bg-surface-2')}
+          style={modo === id ? { background: tinte(COLOR, 8) } : undefined}
+        >
+          <span className="flex items-center gap-2 text-lg font-semibold">
+            {modo === id ? <CircleCheck className="size-5" style={{ color: COLOR }} aria-hidden /> : <Circle className="size-5 text-ink-soft" aria-hidden />} {nombre}
+          </span>
+          <span className="text-sm text-ink-soft">{detalle}</span>
+        </button>
+      ))}
+    </div>
+  )
+
+  if (tarea && modo === 'tarea') {
+    return (
+      <>
+        {modos}
+        {cuenta.entro ? (
+          <AsignarTarea {...tarea} />
+        ) : (
+          <PedirCuenta
+            titulo="Para guardar las tareas de tus alumnos"
+            detalle="Con tu cuenta guardas tu salón y ves cada tarea revisada, desde cualquier computadora. Es gratis."
+            textoSeguir="Ahora no, mandarlo para practicar"
+            seguir={() => setModo('practicar')}
+          />
+        )}
+      </>
+    )
+  }
+
   if (!enlace) {
     return (
-      <section className="flex items-center gap-3 py-6 text-ink-soft" role="status">
-        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
-      </section>
+      <>
+        {modos}
+        <section className="flex items-center gap-3 py-6 text-ink-soft" role="status">
+          <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
+        </section>
+      </>
     )
   }
 
@@ -394,8 +456,9 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
 
   return (
     <section className="flex flex-col gap-4">
+      {modos}
       <a
-        href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
+        href={`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`}
         target="_blank"
         rel="noreferrer"
         className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl px-5 text-lg font-semibold text-on-tool hover:opacity-90"
@@ -492,6 +555,19 @@ export function Juego() {
 
   if (enJuego && contenido) {
     const deCelular = enJuego.def.donde.includes('celular')
+    const publicadoDe = (juego: JuegoId, c: typeof contenido): Publicado => ({
+      v: 1,
+      juego,
+      ritmo: ritmoDe(ficha.gradoId),
+      tema: ficha.titulo,
+      grado: ficha.gradoId,
+      fuente:
+        fuente.fuente === 'calculo'
+          ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
+          : { tipo: 'tema', contenido: { titulo: c.titulo, retos: c.retos, pares: c.pares, palabras: c.palabras } },
+    })
+    // La tarea es siempre el Concurso, con sus preguntas ya preparadas.
+    const concurso = compatibles.find((j) => j.def.id === 'concurso')
     return (
       <>
         <EncabezadoHerramienta id="juego" />
@@ -525,23 +601,22 @@ export function Juego() {
           className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
         {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
-        <Ventana abierta={compartir && deCelular} cerrar={() => setCompartir(false)} titulo="Enviar a las familias">
+        <Ventana abierta={compartir && deCelular} cerrar={() => setCompartir(false)} titulo="Manda el juego a las familias">
           {compartir && deCelular && (
             <Compartir
               nombreJuego={enJuego.def.nombre}
               grado={ficha.grado}
               practica={nombreFuente(fuente, ficha)}
-              publicado={{
-                v: 1,
-                juego: enJuego.def.id,
-                ritmo: ritmoDe(ficha.gradoId),
-                tema: ficha.titulo,
-                grado: ficha.gradoId,
-                fuente:
-                  fuente.fuente === 'calculo'
-                    ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
-                    : { tipo: 'tema', contenido: { titulo: contenido.titulo, retos: contenido.retos, pares: contenido.pares, palabras: contenido.palabras } },
-              }}
+              publicado={publicadoDe(enJuego.def.id, contenido)}
+              tarea={
+                concurso
+                  ? {
+                      ficha,
+                      publicado: publicadoDe('concurso', concurso.contenido),
+                      desempeno: sustento?.desempeno?.cita ?? sustento?.tema.desempeno?.desempeno ?? ficha.curriculo.desempenos?.[0] ?? '',
+                    }
+                  : null
+              }
             />
           )}
         </Ventana>

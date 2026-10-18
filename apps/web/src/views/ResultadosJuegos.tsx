@@ -9,6 +9,8 @@ import { juegoPorId } from '../juegos/catalogo'
 import { cargarResultados, enviados, type Enviado, type FilaResultado } from '../juegos/compartir/resultados'
 import { TextoMat } from '../juegos/motor/piezas'
 import { num } from '../juegos/matematica/formato'
+import type { TareaRevisada } from '../juegos/compartir/tareas'
+import { RevisarTarea, TareasPorSalon, useTareas } from './Tareas'
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
 
@@ -146,6 +148,8 @@ function FilaEnvio({ envio, abierto, alternar }: { envio: Enviado; abierto: bool
 export function ResultadosJuegos() {
   const { ficha, ir } = useStore()
   const lista = useEnviados()
+  const tareas = useTareas()
+  const [tarea, setTarea] = useState<TareaRevisada | null>(null)
 
   // Agrupados por tema: primero el tema abierto (si mandó juegos de él) y luego por el envío más reciente.
   const temas = useMemo(() => {
@@ -158,8 +162,11 @@ export function ResultadosJuegos() {
   // Se abre solo el envío más reciente del primer tema: el que el docente probablemente viene a ver.
   const [abierto, setAbierto] = useState<string | null>(() => temas[0]?.[0]?.codigo ?? null)
 
+  if (tarea) return <RevisarTarea tarea={tarea} volver={() => setTarea(null)} />
+
   return (
     <>
+      {tareas && <TareasPorSalon tareas={tareas} abrir={setTarea} />}
       <header className="flex flex-col gap-1">
         <h1 className="font-display text-4xl font-bold">Resultados de juegos</h1>
         <p className="max-w-2xl text-lg text-ink-soft">Quién jugó cada juego que mandaste a las familias y su puntaje más alto.</p>
