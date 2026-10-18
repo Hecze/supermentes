@@ -76,7 +76,7 @@ function BotonEsquina({ onClick, etiqueta, children }: { onClick: () => void; et
       onClick={onClick}
       aria-label={etiqueta}
       title={etiqueta}
-      className="grid size-[clamp(36px,7cqmin,52px)] place-items-center rounded-full bg-white/85 text-[var(--j-tinta)] shadow-md backdrop-blur-sm transition hover:bg-white"
+      className="grid size-[clamp(36px,7cqmin,52px)] place-items-center rounded-full bg-white/85 text-[#2b2d5c] shadow-md backdrop-blur-sm transition hover:bg-white"
     >
       {children}
     </button>
