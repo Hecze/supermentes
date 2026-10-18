@@ -13,7 +13,7 @@ import type { Nivel } from '../curriculo/catalogo'
 import { ubicarCita } from '../curriculo/citas'
 import { BotonInfo, Cita } from './SustentoJuego'
 
-const COLOR = 'var(--adaptar)'
+const COLOR = 'var(--sesion)'
 const ALUMNOS = 30
 const NIVELES_LOGRO = ['Siempre', 'A veces', 'No lo hace']
 

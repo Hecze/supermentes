@@ -9,6 +9,45 @@ actualizado: 2026-10-18
 > entrevista del 18-oct ([[entrevistas/2026-10-18-lucho-y-yessly]]); también Yessly (familia de docentes de colegios
 > públicos). Los minutos son de la grabación. El producto está en [[MAPA]], la visión en [[VISION]].
 
+## Diseño: una sola hoja, tres usos
+Examen, práctica y balotario no son tres herramientas: son **la misma hoja de preguntas**, con otro largo y otra forma
+de imprimirse. Como en Excel, el poder sale de pocas piezas que se combinan, no de muchas opciones.
+
+**Arriba de la hoja, una sola elección de tres palabras: Examen · Práctica · Balotario.**
+
+| | Examen | Práctica | Balotario |
+| --- | --- | --- | --- |
+| Para qué | Evaluar | Material extra, clase práctica, reforzamiento | Estudiar para el bimestral |
+| Preguntas | ~10 | ~12, de menos a más difícil | ~30, agrupadas por tema |
+| Arriba | Encabezado del colegio y nota | Encabezado y «Recuerda» (la idea y un ejemplo resuelto) | Encabezado y «Para el examen del ___» |
+| Espacio para resolver | Sí | Sí | No (se resuelve en el cuaderno) |
+| Propio | Fila A y B | — | Armar el examen con este balotario |
+
+**Lo mismo en las tres:**
+- **Temas.** Empieza con el tema abierto; «+ Tema» suma otros del mismo curso y grado. Con varios temas es una
+  miscelánea (el bimestral), sin una función aparte.
+- **Tres gestos por pregunta:** Cambiar (otros números u otra pregunta), Fijar (ya no cambia: ni con «Otra versión» ni
+  en la Fila B) y Quitar. En el balotario, las fijas pasan igualitas al examen; las demás, parecidas (mismo tipo,
+  otros números).
+- **El encabezado del colegio** se escribe una vez sobre la misma hoja (clic y escribir: colegio, docente, grado y
+  sección) y queda para todas las hojas.
+- **Dos PDF:** la hoja para los alumnos y la clave para el docente, siempre con los pasos de cada respuesta y una
+  tabla de una línea (1-b, 2-c…).
+
+**Lo que no hacemos, a propósito:**
+- **Editar números a mano:** el número cambiado ya no cuadraría con la clave. En su lugar: Cambiar hasta que guste y
+  Fijar.
+- **Un selector de nivel:** la práctica ordena sola de menos a más y el balotario mezcla niveles. El nivel «de
+  admisión» queda para cuando haya secundaria.
+- **Textos que expliquen la pantalla:** los nombres de los botones dicen lo que hacen; la «i» es solo para el
+  currículo.
+
+**Contenido:** los tipos de pregunta con dibujos (Matemática) más un **banco de problemas por tema** con teoría corta,
+un ejemplo resuelto, problemas de 3 niveles y sus pasos. Lo escribe Gemini con el tema, los desempeños oficiales, lo
+que ya trae el banco y páginas del Cuadernillo de Matemática 4 del MINEDU (2023) como referencia, sin copiarlas. Cada
+problema pasa controles automáticos (formato, la respuesta se recalcula, números de 4.º, sin repetidos) y otro modelo
+lo resuelve a ciegas: si no llega a la misma respuesta, se descarta.
+
 ## Lo que vale para todos los materiales
 - **Se imprime en la secretaría.** El profe arma el archivo y lo manda a secretaría para que lo impriman; lo que él
   necesita a la mano (la clave) va aparte: "lo envía a que lo impriman… pero su solución lo va a tener a la mano, lo

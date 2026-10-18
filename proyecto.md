@@ -21,8 +21,7 @@ Docentes de primaria del Perú, sobre todo de colegios públicos. Tienen poca ex
    - **Juego para el celular**: 17 juegos (concurso tipo Kahoot, Vuela cóndor, Corre cuy, ¿Verdad o mentira?, memoria, pupiletras…). Lo manda al grupo de WhatsApp de las familias con un link o un QR y los niños juegan sin cuenta.
    - **Resultados de los alumnos**: el docente ve quién jugó, su mejor puntaje y sus estrellas.
    - **Canción**: 206 canciones que ya existen en YouTube para 1.º a 6.º, o una nueva con ritmo peruano (festejo, huayno, cumbia).
-   - **Examen listo para imprimir**, con "otra versión" y Fila A y B para que no se copien.
-   - **Adaptar mi examen**: sube su examen de siempre (PDF, Word o foto) y lo recibe ambientado en lo que le gusta a la clase o adaptado para quien aprende distinto (TDAH, dislexia, TEA, lectura fácil).
+   - **Examen, práctica y balotario** listos para imprimir, como los pidieron los profes: con su clave (respuesta y pasos de cada pregunta), "otra versión", Fila A y B para que no se copien y misceláneas de varios temas.
    - **Sesión de aprendizaje** en el formato del MINEDU, lista para entregar al director.
    - **Crucigrama** con las palabras del tema.
    - **Videos y fichas de su tema** encontrados en internet.
@@ -37,8 +36,8 @@ Un director o un jurado puede preguntar "¿por qué esto cumple el currículo?".
 ## Qué funciona hoy
 
 - **Currículo Nacional completo** como base de datos: Inicial, Primaria 1.º–6.º y Secundaria 1.º–5.º (secundaria extraída con OCR del PDF escaneado del MINEDU).
-- **IA real en producción** (Claude): ficha del tema, juego, canción, adaptación de examen y sesión de aprendizaje, con respuestas validadas contra un esquema, tiempo límite y "Reintentar".
-- **4.º de primaria completo sin esperar a la IA**: los 384 temas del currículo traen juegos, 2 canciones y examen listos al instante.
+- **IA real en producción** (Claude): ficha del tema, juego, canción y sesión de aprendizaje, con respuestas validadas contra un esquema, tiempo límite y "Reintentar".
+- **4.º de primaria completo sin esperar a la IA**: los 384 temas del currículo traen juegos, 2 canciones y sus hojas (examen, práctica y balotario) listos al instante.
 - **Juegos compartidos de verdad**: link `/j/CODIGO` y QR, sin cuenta para el alumno, y resultados para el docente.
 - **Landing con lista de espera** real, con enlace para invitar y registro de dónde llega cada docente.
 

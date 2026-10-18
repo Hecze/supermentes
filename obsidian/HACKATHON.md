@@ -72,6 +72,6 @@ Los **códigos** no van en el repo: pídelos a Hector (están en su Notion, pág
 ### Para qué nos pueden servir (sin probar)
 - **ElevenLabs:** audio de las canciones y lectura en voz alta de la versión accesible.
 - **Exa / Tavily:** buscar recursos educativos y estrategias DUA con fuentes.
-- **AtomicMemory:** guardar el perfil de cada clase (intereses, adaptaciones).
+- **AtomicMemory:** guardar el perfil de cada clase (intereses).
 - **Grok:** quizá imágenes para ilustrar exámenes (verificar si incluye API).
 - Qatom, Zavu y Maritime: revisar qué ofrecen antes de planear con ellos.

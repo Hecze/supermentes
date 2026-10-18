@@ -116,6 +116,11 @@ export const rectaNumerica: TipoPregunta = {
     const v = (i: number) => inicio + i * paso
     const etiquetas = [0, 5, n]
     const libres = rango(1, n - 1).filter((i) => i !== 5)
+    const p = num(paso)
+    // Pasos de la clave: cuánto vale cada salto (entre dos números escritos) y contar de salto en salto.
+    const cadaSalto = (j: number) =>
+      `De ${num(v(0))} a ${num(v(j))} hay ${j} saltos: ${inicio === 0 ? '' : `${num(v(j))} − ${num(v(0))} = ${num(j * paso)} y `}${num(j * paso)} ÷ ${j} = ${p}`
+    const contar = (desde: number, marcas: number[]) => `Desde ${num(v(desde))}, ${desde > marcas[0] ? 'hacia atrás ' : ''}de ${p} en ${p}: ${marcas.map((i) => num(v(i))).join(', ')}`
     const modo = azar()
     if (modo < 0.45) {
       const k = elegir(azar, libres)
@@ -124,6 +129,7 @@ export const rectaNumerica: TipoPregunta = {
       const malas = distractores(v(k), frecuentes, { min: 0, paso }).filter((t) => Number(t.replace(/\s/g, '')) <= 9999)
       const alt = alternativas(azar, num(v(k)), malas, 4)
       if (!alt) return null
+      const base = k < 5 ? 0 : 5
       return {
         forma: 'opciones',
         clave: `recta:${inicio}:${paso}:${k}`,
@@ -131,6 +137,7 @@ export const rectaNumerica: TipoPregunta = {
         dibujo: dibujoRecta({ inicio, paso, n, etiquetas, flecha: k }),
         pregunta: '¿Qué número señala la flecha?',
         nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
+        pasos: [cadaSalto(5), contar(base, rango(base + 1, k)), `La flecha señala el ${num(v(k))}`],
         ...alt,
       }
     }
@@ -138,14 +145,16 @@ export const rectaNumerica: TipoPregunta = {
       const cas = barajar(azar, libres)
         .slice(0, 3)
         .sort((a, b) => a - b)
+      const respuesta = cas.map((i) => num(v(i))).join(', ')
       return {
         forma: 'abierta',
         clave: `recta:${inicio}:${paso}:${cas.join('-')}`,
         enunciado: 'Escribe en los recuadros los números que faltan en la recta numérica.',
         dibujo: dibujoRecta({ inicio, paso, n, etiquetas, casillas: cas }),
-        respuesta: cas.map((i) => num(v(i))).join(', '),
+        respuesta,
         espacio: 'dibujo',
         nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
+        pasos: [cadaSalto(5), contar(0, rango(1, cas[cas.length - 1])), `En los recuadros: ${respuesta}`],
       }
     }
     // ¿Qué letra señala el número? Las otras letras van en las marcas vecinas, que es donde más se confunden.
@@ -153,6 +162,8 @@ export const rectaNumerica: TipoPregunta = {
     const vecinas = barajar(azar, [k - 1, k + 1].filter((i) => i >= 1 && i <= n - 1))
     const otras = barajar(azar, rango(1, n - 1).filter((i) => i !== k && !vecinas.includes(i)))
     const letras = [k, ...[...vecinas, ...otras].slice(0, 3)].sort((a, b) => a - b)
+    // Se cuenta desde el extremo más cercano: desde el último número, hacia atrás.
+    const desdeFin = k > n - k
     return {
       forma: 'opciones',
       clave: `recta-letra:${inicio}:${paso}:${letras.join('-')}:${k}`,
@@ -160,6 +171,7 @@ export const rectaNumerica: TipoPregunta = {
       dibujo: dibujoRecta({ inicio, paso, n, etiquetas: [0, n], letras }),
       pregunta: `¿Qué letra señala el número ${num(v(k))}?`,
       nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
+      pasos: [cadaSalto(n), desdeFin ? contar(n, rango(k, n - 1).reverse()) : contar(0, rango(1, k)), `El ${num(v(k))} está en la letra ${'ABCD'[letras.indexOf(k)]}`],
       alternativas: ['A', 'B', 'C', 'D'],
       correcta: letras.indexOf(k),
     }
@@ -314,6 +326,14 @@ function paraOrdenar(azar: Azar, [lo, hi]: [number, number]): number[] {
 }
 
 const cadena = (xs: number[]) => xs.map(num).join(' < ')
+
+const LUGARES = ['UM', 'C', 'D', 'U']
+/** Por qué un número va antes que otro: la primera cifra, desde la izquierda, que cambia. "3058 < 3085 (en D: 5 < 8)" */
+function porQue(a: number, b: number, signo: '<' | '>' = '<') {
+  const [ca, cb] = [a, b].map((x) => String(x).padStart(4, '0'))
+  const i = [...ca].findIndex((c, j) => c !== cb[j])
+  return `${num(a)} ${signo} ${num(b)} (en ${LUGARES[i]}: ${ca[i]} ${signo} ${cb[i]})`
+}
 /** Errores al ordenar: mirar las cifras desde la derecha, olvidar el millar, invertir los dos más parecidos. */
 function ordenesMalos(asc: number[]): number[][] {
   const porUnidades = [...asc].sort((a, b) => Number(String(a).split('').reverse().join('')) - Number(String(b).split('').reverse().join('')))
@@ -346,6 +366,9 @@ export const ordenarNumeros: TipoPregunta = {
     if (!vista) return null
     const etiquetas = ctx.etiquetas(azar)
     const clave = `ordenar:${ctx.icono}:${asc.join('-')}`
+    const leidas = `En las tarjetas: ${vista.map(num).join(', ')}`
+    // Se compara cada número con el que le sigue, cifra por cifra desde la UM.
+    const pasos = [leidas, `${porQue(asc[0], asc[1])}; ${porQue(asc[1], asc[2])}`, porQue(asc[2], asc[3]), `De menor a mayor: ${cadena(asc)}`]
     const modo = azar()
     if (modo < 0.45) {
       const alt = alternativas(azar, cadena(asc), ordenesMalos(asc).map(cadena), 3)
@@ -356,6 +379,7 @@ export const ordenarNumeros: TipoPregunta = {
         enunciado: ctx.enunciado,
         dibujo: dibujoTarjetas(ctx.icono, etiquetas, vista, ctx.unidad, false),
         pregunta: '¿En qué alternativa están las cantidades ordenadas de menor a mayor?',
+        pasos,
         ...alt,
       }
     }
@@ -367,6 +391,7 @@ export const ordenarNumeros: TipoPregunta = {
         dibujo: dibujoTarjetas(ctx.icono, etiquetas, vista, ctx.unidad, true),
         respuesta: cadena(asc),
         espacio: 'dibujo',
+        pasos,
       }
     }
     const mayor = azar() < 0.6
@@ -385,6 +410,12 @@ export const ordenarNumeros: TipoPregunta = {
       dibujo: dibujoTarjetas(ctx.icono, etiquetas, vista, ctx.unidad, false),
       pregunta: mayor ? ctx.mas : ctx.menos,
       nota: `De menor a mayor: ${cadena(asc)}.`,
+      pasos: [
+        leidas,
+        `De menor a mayor: ${cadena(asc)}`,
+        mayor ? porQue(asc[3], asc[2], '>') : porQue(asc[0], asc[1]),
+        `${mayor ? 'La mayor' : 'La menor'} es ${num(objetivo)} ${ctx.unidad}: ${etiquetaDe(objetivo)}`,
+      ],
       ...alt,
     }
   },
@@ -455,6 +486,7 @@ export const redondeoRecta: TipoPregunta = {
     const quien = nombre(azar)
     const fmt = (x: number) => (ctx.dinero ? soles(x) : num(x))
     const etiqueta = fmt(n)
+    const distancias = `De ${num(n)} a ${num(R)} hay ${Math.abs(n - R)}; de ${num(n)} a ${num(otra)} hay ${Math.abs(n - otra)}`
     if (azar() < 0.6) {
       // Quedarse con la decena de abajo, redondear a la centena, irse una decena más allá.
       const malas = distractores(R, [otra, aLaCentena(n), R + (R - otra)], { min: 0, paso: 10 })
@@ -467,6 +499,7 @@ export const redondeoRecta: TipoPregunta = {
         dibujo: dibujoRedondeo(D, { n, etiqueta }, false),
         pregunta: `Si redondeas ${ctx.que} a la decena, ¿qué número obtienes?`,
         nota: `${num(n)} está más cerca de ${num(R)} que de ${num(otra)}.`,
+        pasos: [`En la recta, ${num(n)} está entre ${num(D)} y ${num(D + 10)}`, distancias, `Está más cerca de ${num(R)}: se redondea a ${fmt(R)}`],
         ...alt,
       }
     }
@@ -477,6 +510,7 @@ export const redondeoRecta: TipoPregunta = {
       dibujo: dibujoRedondeo(D, null, true),
       respuesta: `${num(n)} va entre ${num(D)} y ${num(D + 10)}, más cerca de ${num(R)}: se redondea a ${num(R)}.`,
       espacio: 'dibujo',
+      pasos: [`Se marca ${num(n)} en la recta, entre ${num(D)} y ${num(D + 10)}`, distancias, `Está más cerca de ${num(R)}: se redondea a ${num(R)}`],
     }
   },
 }
@@ -575,6 +609,11 @@ export const estimarCompra: TipoPregunta = {
         dibujo: dibujoEtiquetas(elegidos.map((p, i) => ({ nombre: p.nombre, precio: r.precios[i] }))),
         pregunta: `${quien} compra ${lista(r.compra.map((i) => elegidos[i].el))}. Redondea cada precio a la decena: ¿cuánto gastará, más o menos?`,
         nota: `${r.ps.map((p) => num(aLaDecena(p))).join(' + ')} = ${num(r.aprox)} (la cuenta exacta es ${num(r.exacto)}).`,
+        pasos: [
+          `Precios: ${r.compra.map((i) => `${elegidos[i].nombre} ${soles(r.precios[i])}`).join(', ')}`,
+          `A la decena: ${r.ps.map((p) => `${num(p)} → ${num(aLaDecena(p))}`).join(', ')}`,
+          `Más o menos: ${r.ps.map((p) => num(aLaDecena(p))).join(' + ')} = ${soles(r.aprox)}`,
+        ],
         ...alt,
       }
     }
@@ -595,6 +634,11 @@ export const estimarCompra: TipoPregunta = {
       dibujo: dibujoEtiquetas(elegidos.map((p, i) => ({ nombre: p.nombre, precio: precios[i] }))),
       pregunta: `¿Qué producto tiene un precio que, redondeado a la decena, es ${soles(T)}?`,
       nota: `${soles(correcto)} se redondea a ${soles(T)}.`,
+      pasos: [
+        `Precios: ${precios.map((p, i) => `${elegidos[i].nombre} ${soles(p)}`).join(', ')}`,
+        `A la decena: ${precios.map((p) => `${num(p)} → ${num(aLaDecena(p))}`).join(', ')}`,
+        `${nombreDe(correcto)}: ${soles(correcto)} se redondea a ${soles(T)}`,
+      ],
       ...alt,
     }
   },
@@ -677,6 +721,8 @@ export const bodega: TipoPregunta = {
     const base = `bodega:${precios.join('-')}:${saco.nombre}${precioSaco}`
     const quien = nombre(azar)
     const enunciado = 'Observa la lista de precios de la bodega.'
+    /** Lo que se lee en la lista: "Arroz (1 kg) S/ 5". */
+    const fila = (x: number) => `${productos[x].nombre} (${productos[x].unidad}) ${soles(precios[x])}`
     const modo = azar()
     if (modo < 0.3) {
       // Cuánto paga por dos productos, varios de cada uno.
@@ -701,6 +747,7 @@ export const bodega: TipoPregunta = {
         dibujo,
         pregunta: `${quien} compra ${de(productos[i], a)} y ${de(productos[j], b)}. ¿Cuánto paga?`,
         nota: `${a} × ${pa} + ${b} × ${pb} = ${a * pa} + ${b * pb} = ${total}`,
+        pasos: [`En la lista: ${fila(i)} y ${fila(j)}`, `${a} × ${num(pa)} = ${num(a * pa)}; ${b} × ${num(pb)} = ${num(b * pb)}`, `Paga: ${num(a * pa)} + ${num(b * pb)} = ${soles(total)}`],
         ...alt,
       }
     }
@@ -730,6 +777,11 @@ export const bodega: TipoPregunta = {
         dibujo,
         pregunta: `${quien} compra ${compra}. Paga con un billete de ${soles(billete)}. ¿Cuánto recibe de vuelto?`,
         nota: `${dos ? `${a} × ${precios[i]} + ${precios[j]}` : `${a} × ${precios[i]}`} = ${costo}; ${billete} − ${costo} = ${vuelto}`,
+        pasos: [
+          `En la lista: ${fila(i)}${dos ? ` y ${fila(j)}` : ''}`,
+          dos ? `Gasta: ${a} × ${num(precios[i])} = ${num(a * precios[i])}; ${num(a * precios[i])} + ${num(precios[j])} = ${num(costo)}` : `Gasta: ${a} × ${num(precios[i])} = ${num(costo)}`,
+          `Vuelto: ${num(billete)} − ${num(costo)} = ${soles(vuelto)}`,
+        ],
         ...alt,
       }
     }
@@ -756,6 +808,11 @@ export const bodega: TipoPregunta = {
         dibujo,
         pregunta: `${quien} tiene ${soles(dinero)} y lo gasta todo en ${productos[i].en}, sin que le sobre nada. ${productos[i].cuantos} compra?`,
         nota: `${dinero} ÷ ${precios[i]} = ${k}`,
+        pasos: [
+          `En la lista: ${productos[i].uno} cuesta ${soles(precios[i])}`,
+          `Se busca cuántas veces entra ${num(precios[i])} en ${num(dinero)}: ${k} × ${num(precios[i])} = ${num(dinero)}`,
+          `${num(dinero)} ÷ ${num(precios[i])} = ${num(k)}: compra ${de(productos[i], k)}`,
+        ],
         ...alt,
       }
     }
@@ -770,6 +827,12 @@ export const bodega: TipoPregunta = {
       4,
     )
     if (!alt) return null
+    // Como en la pizarra: se multiplica por las centenas, las decenas y las unidades del precio, y se suma.
+    const partes = String(precioSaco)
+      .split('')
+      .map((d, i, cs) => Number(d) * 10 ** (cs.length - 1 - i))
+      .filter((x) => x > 0)
+    const leido = `En la lista: 1 ${saco.nombre.toLowerCase()} (${saco.unidad}) cuesta ${soles(precioSaco)}`
     return {
       forma: 'opciones',
       clave: `${base}:mayor:${n}`,
@@ -777,6 +840,14 @@ export const bodega: TipoPregunta = {
       dibujo,
       pregunta: `${saco.para} compran ${de(saco, n)} en esta bodega. ¿Cuánto pagan?`,
       nota: `${n} × ${precioSaco} = ${total}`,
+      pasos:
+        partes.length > 1
+          ? [
+              leido,
+              `${n} × ${num(precioSaco)}: ${partes.map((x) => `${n} × ${num(x)} = ${num(n * x)}`).join('; ')}`,
+              `Pagan: ${partes.map((x) => num(n * x)).join(' + ')} = ${soles(total)}`,
+            ]
+          : [leido, `Pagan: ${n} × ${num(precioSaco)} = ${soles(total)}`],
       ...alt,
     }
   },
@@ -921,6 +992,11 @@ export const arreglos: TipoPregunta = {
         dibujo: dibujoCajas(k, filas, columnas, huevos ? 'huevo' : 'alfajor'),
         pregunta: huevos ? '¿Cuántos huevos hay en total?' : '¿Cuántos alfajores hay en total?',
         nota: `Cada ${huevos ? 'maple' : 'caja'}: ${filas} × ${columnas} = ${una}. En total: ${k} × ${una} = ${total}`,
+        pasos: [
+          `Hay ${k} ${huevos ? 'maples; cada uno' : 'cajas; cada una'} con ${filas} filas de ${columnas} ${huevos ? 'huevos' : 'alfajores'}`,
+          `${huevos ? 'Un maple' : 'Una caja'}: ${filas} × ${columnas} = ${una}`,
+          `En total: ${k} × ${una} = ${num(total)} ${huevos ? 'huevos' : 'alfajores'}`,
+        ],
         ...alt,
       }
     }
@@ -942,6 +1018,11 @@ export const arreglos: TipoPregunta = {
         dibujo: dibujoAula(filas, columnas),
         pregunta: '¿Qué operación sirve para saber cuántas carpetas hay?',
         nota: `${filas} filas de ${columnas} carpetas: ${filas} × ${columnas} = ${filas * columnas}`,
+        pasos: [
+          `En el aula hay ${filas} filas de ${columnas} carpetas`,
+          `${Array<number>(filas).fill(columnas).join(' + ')} = ${filas * columnas}: ${filas} veces ${columnas}`,
+          `La operación es ${filas} × ${columnas} = ${filas * columnas}`,
+        ],
         ...alt,
       }
     }
@@ -967,6 +1048,13 @@ export const arreglos: TipoPregunta = {
         dibujo: svg(520, s.alto + 8, s.cuerpo, `${N} ${ctx.muchos} sueltos`),
         pregunta: `¿Cuántas ${ctx.en} llena?`,
         nota: `${N} ÷ ${r.g} = ${r.k}`,
+        pasos: [
+          `Hay ${N} ${ctx.muchos}; en cada ${ctx.en.replace(/s$/, '')} van ${r.g}`,
+          `Se cuenta de ${r.g} en ${r.g}: ${rango(1, r.k)
+            .map((i) => num(i * r.g))
+            .join(', ')}`,
+          `${N} ÷ ${r.g} = ${num(r.k)}: llena ${r.k} ${ctx.en}`,
+        ],
         ...alt,
       }
     }
@@ -981,6 +1069,13 @@ export const arreglos: TipoPregunta = {
       dibujo: dibujoReparto(panes, bolsas),
       respuesta: `${panes} ÷ ${bolsas} = ${cada}: van ${cada} panes en cada bolsa.`,
       espacio: 'dibujo',
+      pasos: [
+        `Hay ${panes} panes para ${bolsas} bolsas`,
+        `Cada vuelta, 1 pan en cada bolsa: van ${rango(1, cada)
+          .map((i) => num(i * bolsas))
+          .join(', ')} panes (${cada} vueltas)`,
+        `${panes} ÷ ${bolsas} = ${cada}: van ${cada} panes en cada bolsa`,
+      ],
     }
   },
 }
@@ -1059,6 +1154,8 @@ export const conmutativa: TipoPregunta = {
     const cosas = bombones ? 'bombones' : 'lechugas'
     const enunciado = bombones ? `Estas son las cajas de bombones de ${n1} y de ${n2}.` : 'Las dos secciones de 4.º sembraron lechugas en su biohuerto.'
     const iguales = bombones ? 'Las dos cajas tienen la misma cantidad de bombones.' : 'Los dos biohuertos tienen la misma cantidad de lechugas.'
+    const leido = `${etiquetas[0]}: ${a} filas de ${b}; ${etiquetas[1]}: ${b} filas de ${a}`
+    const cuentas = `${a} × ${b} = ${a * b} y ${b} × ${a} = ${a * b}`
     const modo = azar()
     if (modo < 0.45) {
       const alt = alternativas(azar, `${a} × ${b} = ${b} × ${a}`, [`${a} × ${b} = ${a} + ${b}`, `${a} × ${a} = ${b} × ${b}`, `${a} × ${b} = ${b} × ${b}`], 4)
@@ -1070,6 +1167,7 @@ export const conmutativa: TipoPregunta = {
         dibujo: dibujoGirado(a, b, etiquetas, cosa, false),
         pregunta: `${iguales} ¿Qué igualdad lo muestra?`,
         nota: `${a} filas de ${b} y ${b} filas de ${a}: ${a} × ${b} = ${b} × ${a} = ${a * b}`,
+        pasos: [leido, cuentas, `Cambia el orden, no el total: ${a} × ${b} = ${b} × ${a}`],
         ...alt,
       }
     }
@@ -1084,6 +1182,7 @@ export const conmutativa: TipoPregunta = {
         dibujo: dibujoGirado(a, b, etiquetas, cosa, false, [`${a} × ${b} = ${b} ×`, null]),
         pregunta: '¿Qué número va en el recuadro?',
         nota: `${a} × ${b} = ${b} × ${a}`,
+        pasos: [leido, cuentas, `En el recuadro va el ${num(a)}: ${a} × ${b} = ${b} × ${a}`],
         ...alt,
       }
     }
@@ -1094,6 +1193,7 @@ export const conmutativa: TipoPregunta = {
       dibujo: dibujoGirado(a, b, etiquetas, cosa, true, [null, '×', null, '=', null, '×', null]),
       respuesta: `${a} × ${b} = ${b} × ${a} (${a * b} ${cosas} en cada uno)`,
       espacio: 'dibujo',
+      pasos: [`${etiquetas[1]}: se dibujan ${b} filas de ${a} ${cosas}`, cuentas, `${a} × ${b} = ${b} × ${a}: ${a * b} ${cosas} en cada uno`],
     }
   },
 }
@@ -1174,6 +1274,9 @@ export const asociativa: TipoPregunta = {
       const [k, f, c] = r
       const P = k * f * c
       const enunciado = `En la panadería hay ${k} bandejas. En cada bandeja hay ${f} filas de ${c} panes.`
+      const leido = `Hay ${k} bandejas; en cada una, ${f} filas de ${c} panes`
+      const izquierda = `(${k} × ${f}) × ${c} = ${k * f} × ${c} = ${P}`
+      const derecha = `${k} × (${f} × ${c}) = ${k} × ${f * c} = ${P}`
       if (modo < 0.35) {
         const [n1, n2] = dosNombres(azar)
         const alt = alternativas(azar, `${n1} y ${n2} obtienen ${P}.`, [`A ${n1} le sale más que a ${n2}.`, `A ${n2} le sale más que a ${n1}.`, `${n1} y ${n2} obtienen ${k + f + c}.`], 4)
@@ -1185,6 +1288,7 @@ export const asociativa: TipoPregunta = {
           dibujo: dibujoBandejas(k, f, c, { carteles: [`${n1}: (${k} × ${f}) × ${c}`, `${n2}: ${k} × (${f} × ${c})`] }),
           pregunta: '¿Qué pasa con sus resultados?',
           nota: `(${k} × ${f}) × ${c} = ${k * f} × ${c} = ${P}; ${k} × (${f} × ${c}) = ${k} × ${f * c} = ${P}`,
+          pasos: [leido, `${n1}: ${izquierda}`, `${n2}: ${derecha}`, `Agrupar distinto no cambia el resultado: ${n1} y ${n2} obtienen ${P}.`],
           ...alt,
         }
       }
@@ -1197,6 +1301,7 @@ export const asociativa: TipoPregunta = {
         dibujo: dibujoBandejas(k, f, c, { fila: [`(${k} × ${f}) × ${c} = ${k} × (`, null, `× ${c})`] }),
         pregunta: '¿Qué número va en el recuadro?',
         nota: `(${k} × ${f}) × ${c} = ${k} × (${f} × ${c}) = ${P}`,
+        pasos: [leido, izquierda, `${derecha}: los mismos números, agrupados distinto`, `En el recuadro va el ${num(f)}`],
         ...alt,
       }
     }
@@ -1225,6 +1330,7 @@ export const asociativa: TipoPregunta = {
       dibujo: dibujoFactores(a, b, c),
       pregunta: `¿Cuánto es ${a} × ${b} × ${c}?`,
       nota: `(${a} × ${c}) × ${b} = ${a * c} × ${b} = ${P}`,
+      pasos: [`El arco junta el ${a} y el ${c}: primero ${a} × ${c} = ${a * c}`, `${a} × ${b} × ${c} = ${a * c} × ${b} = ${num(P)}`],
       ...alt,
     }
   },
@@ -1288,6 +1394,11 @@ export const doblar: TipoPregunta = {
         dibujo: dibujoMaquinas([n0, null, null, '?'], '× 2'),
         pregunta: '¿Qué número sale al final?',
         nota: `${n0} → ${n0 * 2} → ${n0 * 4} → ${fin}`,
+        pasos: [
+          `Entra el ${num(n0)} y pasa por 3 máquinas que hacen × 2`,
+          `${num(n0)} × 2 = ${num(n0 * 2)}; ${num(n0 * 2)} × 2 = ${num(n0 * 4)}; ${num(n0 * 4)} × 2 = ${num(fin)}`,
+          `Sale el ${num(fin)}, igual que ${num(n0)} × 8`,
+        ],
         ...alt,
       }
     }
@@ -1295,13 +1406,22 @@ export const doblar: TipoPregunta = {
       const q = entero(azar, 13, 450)
       const n0 = q * 8
       const cadena = [n0, n0 / 2, n0 / 4, q]
+      const respuesta = cadena.slice(1).map(num).join(', ')
       return {
         forma: 'abierta',
         clave: `partir:${n0}`,
         enunciado: 'Cada máquina parte por la mitad el número que entra. Escribe en los recuadros los números que salen.',
         dibujo: dibujoMaquinas([n0, null, null, null], '÷ 2'),
-        respuesta: cadena.slice(1).map(num).join(', '),
+        respuesta,
         espacio: 'dibujo',
+        pasos: [
+          `Entra el ${num(n0)} y cada máquina hace ÷ 2`,
+          cadena
+            .slice(0, 3)
+            .map((x, i) => `${num(x)} ÷ 2 = ${num(cadena[i + 1])}`)
+            .join('; '),
+          `En los recuadros: ${respuesta}`,
+        ],
       }
     }
     // Qué hacen las máquinas juntas: doblar 3 veces es ×8; partir 2 veces es ÷4.
@@ -1321,6 +1441,11 @@ export const doblar: TipoPregunta = {
       dibujo: dibujoMaquinas(valores, dobla ? '× 2' : '÷ 2'),
       pregunta: `Las ${m === 2 ? 'dos' : 'tres'} máquinas juntas hacen lo mismo que:`,
       nota: `${num(n0)} ${dobla ? '×' : '÷'} ${f} = ${num(valores[m])}`,
+      pasos: [
+        `Entra el ${num(n0)} y sale el ${num(valores[m])}`,
+        `${dobla ? `Doblar ${m} veces es multiplicar por` : `Partir ${m} veces por la mitad es dividir entre`} ${Array<number>(m).fill(2).join(' × ')} = ${f}`,
+        `${op} ${f}: ${num(n0)} ${dobla ? '×' : '÷'} ${f} = ${num(valores[m])}`,
+      ],
       ...alt,
     }
   },

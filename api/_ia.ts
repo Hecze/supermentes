@@ -1,6 +1,5 @@
 // Lo común de las funciones que llaman a Claude. El "_" hace que Vercel no lo publique como endpoint.
 import Anthropic from '@anthropic-ai/sdk'
-import mammoth from 'mammoth'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import type { z } from 'zod'
 
@@ -46,23 +45,4 @@ export function fallo(e: unknown) {
   if (e instanceof ErrorIA) return json({ error: e.message }, 502)
   if (e instanceof Anthropic.RateLimitError) return json({ error: 'Hay muchos docentes generando a la vez. Espera un momento y vuelve a intentarlo.' }, 429)
   return json({ error: 'No pudimos generar el material. Vuelve a intentarlo.' }, 500)
-}
-
-const TIPOS_IMAGEN = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-export const MAXIMO_ARCHIVO = 15_000_000
-
-/** Convierte la foto, el PDF o el Word que sube el docente en un bloque que Claude puede leer. */
-export async function bloqueArchivo(archivo: File): Promise<Anthropic.ContentBlockParam> {
-  if (archivo.size > MAXIMO_ARCHIVO) throw new ErrorIA('El archivo pesa demasiado (máximo 15 MB).')
-  const data = Buffer.from(await archivo.arrayBuffer()).toString('base64')
-  if (archivo.type === 'application/pdf') return { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data } }
-  // Word: Claude no lo lee directo, así que va el texto. ponytail: los dibujos del .docx se pierden; si hacen falta, convertir a PDF.
-  if (/\.docx$/i.test(archivo.name)) {
-    const { value } = await mammoth.extractRawText({ buffer: Buffer.from(await archivo.arrayBuffer()) })
-    if (!value.trim()) throw new ErrorIA('No encontramos texto en tu archivo de Word. Prueba subiéndolo en PDF.')
-    return { type: 'text', text: `Examen del docente (de su archivo de Word):\n\n${value.trim().slice(0, 60_000)}` }
-  }
-  if (TIPOS_IMAGEN.has(archivo.type))
-    return { type: 'image', source: { type: 'base64', media_type: archivo.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif', data } }
-  throw new ErrorIA('Sube una foto (JPG, PNG o WebP), un PDF o un Word (.docx).')
 }

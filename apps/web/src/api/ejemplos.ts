@@ -1,14 +1,11 @@
 // Datos de ejemplo para el prototipo. Tienen la misma forma que devolverá el backend real.
 import type {
   Cancion,
-  Examen,
   Ficha,
   Juego,
   Material,
   OpcionesCancion,
-  OpcionesExamen,
   OpcionesSesion,
-  PreguntaExamen,
   Sesion,
 } from './types'
 
@@ -208,106 +205,6 @@ export function cancionEjemplo(opciones: OpcionesCancion): Cancion {
         ],
       },
     ],
-  }
-}
-
-// ---------- Examen ----------
-
-// El examen "de siempre" de la docente, como lo leería la IA del PDF.
-const ORIGINALES: { original: string; respuesta: string; alternativas?: string[] }[] = [
-  { original: 'Escribe la fracción que representa 3 partes de 4.', respuesta: '3/4' },
-  { original: '¿Cuál es el denominador en 5/8? ¿Qué indica?', respuesta: '8: el entero se dividió en 8 partes iguales.' },
-  { original: '¿Qué fracción es mayor: 1/2 o 1/4?', alternativas: ['1/2', '1/4', 'Son iguales'], respuesta: '1/2' },
-  { original: 'Completa: 1/2 = __/4', respuesta: '2' },
-]
-
-// Las mismas preguntas en frases cortas y literales (lectura fácil, TEA, TDAH).
-const SIMPLES = [
-  'Un entero tiene 4 partes iguales. Tomas 3 partes. Escribe la fracción.',
-  'Mira la fracción 5/8. El número de abajo es el denominador. ¿Qué número es? ¿Qué te dice?',
-  '¿Qué fracción es más grande: 1/2 o 1/4? Marca una respuesta.',
-  'Escribe el número que falta: 1/2 = __/4',
-]
-
-const APOYOS = [
-  'Arriba va lo que tomas (3). Abajo va en cuántas partes está dividido (4).',
-  'El denominador es el número de abajo.',
-  'Piensa en una pizza: ¿qué pedazo es más grande, la mitad o un cuarto?',
-  'Si partes en 4, ¿cuántos cuartos hacen la mitad?',
-]
-
-const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso: string; textos: string[]; alternativas: string[] }> = {
-  Fútbol: {
-    titulo: 'La final del campeonato',
-    intro: 'Tu equipo llegó a la final. Resuelve cada jugada para levantar la copa.',
-    etiquetaPaso: 'Jugada',
-    textos: [
-      'Tu equipo patea 4 penales y mete 3. ¿Qué fracción de los penales terminó en gol?',
-      'La pelota está cosida con 8 parches y 5 son blancos: 5/8. ¿Cuál es el denominador y qué indica?',
-      'En la tribuna, Sofía toma 1/2 jarra de chicha morada y Luis toma 1/4. ¿Quién tomó más?',
-      'El entrenador divide la práctica en 4 partes iguales y la mitad es calentamiento. ¿Cuántos cuartos son de calentamiento?',
-    ],
-    alternativas: ['Sofía (1/2)', 'Luis (1/4)', 'Tomaron lo mismo'],
-  },
-  Animales: {
-    titulo: 'Rescate en la Amazonía',
-    intro: 'Los animales del bosque necesitan tu ayuda. Cada respuesta correcta libera a uno.',
-    etiquetaPaso: 'Rescate',
-    textos: [
-      'Un grupo de 4 delfines rosados nada en el río y 3 saltan fuera del agua. ¿Qué fracción del grupo saltó?',
-      'Un guacamayo tiene 8 plumas en la cola y 5 son rojas: 5/8. ¿Cuál es el denominador y qué indica?',
-      'Un perezoso come 1/2 hoja y un mono come 1/4 de otra hoja igual. ¿Quién comió más?',
-      'El río tiene 4 tramos iguales y la mitad tiene pirañas. ¿Cuántos cuartos del río tienen pirañas?',
-    ],
-    alternativas: ['El perezoso (1/2)', 'El mono (1/4)', 'Comieron lo mismo'],
-  },
-  Cocina: {
-    titulo: 'Chef por un día',
-    intro: 'Hoy cocinas para todo el salón. Cada receta resuelta suma una estrella.',
-    etiquetaPaso: 'Receta',
-    textos: [
-      'Horneaste 4 panes y ya se vendieron 3. ¿Qué fracción de los panes se vendió?',
-      'Cortaste una pizza en 8 tajadas y 5 tienen aceitunas: 5/8. ¿Cuál es el denominador y qué indica?',
-      'Para el queque, Ana usa 1/2 taza de azúcar y Pedro 1/4 de taza. ¿Quién usó más azúcar?',
-      'La receta tiene 4 pasos iguales y ya hiciste la mitad. ¿Cuántos cuartos de la receta terminaste?',
-    ],
-    alternativas: ['Ana (1/2)', 'Pedro (1/4)', 'Usaron lo mismo'],
-  },
-}
-
-/** El examen de la docente adaptado según lo que pidió (sin backend, siempre es el de fracciones). */
-export function examenEjemplo(opciones: Omit<OpcionesExamen, 'examen'>, archivo = 'Examen de fracciones.pdf'): Examen {
-  const { interes, necesidades } = opciones
-  const tema = interes ? (TEMAS_EXAMEN[interes] ?? TEMAS_EXAMEN.Fútbol) : null
-  const simple = necesidades.some((n) => n === 'facil' || n === 'tea' || n === 'tdah')
-  const conApoyo = necesidades.some((n) => n === 'tdah' || n === 'tea')
-
-  const instrucciones = [
-    tema?.intro,
-    necesidades.includes('tea')
-      ? `Este examen tiene ${ORIGINALES.length} preguntas. Responde en orden, de la 1 a la ${ORIGINALES.length}. Escribe cada respuesta en las líneas.`
-      : 'Lee cada pregunta y escribe tu respuesta en las líneas.',
-    necesidades.includes('tdah') && 'Resuelve una pregunta a la vez y marca el cuadrito cuando termines.',
-  ]
-    .filter(Boolean)
-    .join(' ')
-
-  const preguntas: PreguntaExamen[] = ORIGINALES.map((o, i) => ({
-    original: o.original,
-    texto: tema ? tema.textos[i] : simple ? SIMPLES[i] : o.original,
-    // En la versión ambientada, las alternativas son los personajes de la historia.
-    alternativas: o.alternativas && tema ? tema.alternativas : o.alternativas,
-    apoyo: conApoyo ? APOYOS[i] : undefined,
-    respuesta: o.alternativas && tema ? tema.alternativas[0] : o.respuesta,
-  }))
-
-  return {
-    opciones: { interes, necesidades },
-    archivo,
-    titulo: tema ? tema.titulo : 'Evaluación de fracciones',
-    instrucciones,
-    etiquetaPaso: tema ? tema.etiquetaPaso : 'Pregunta',
-    preguntas,
   }
 }
 

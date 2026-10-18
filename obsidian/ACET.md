@@ -127,7 +127,7 @@ es igual para todos y la IA ya produce lo mismo por S/ 5–20.
 
 **Dónde nos complementamos.** ACET vende el **documento oficial** (sesión, unidad, registro) que el docente necesita
 para la UGEL. Supermentes no hace eso: toma la sesión y crea lo que **engancha al alumno** (canción, juego,
-examen adaptado). Ya probado: `api/ficha.ts` lee el PDF de ACET y saca tema, propósito, competencia y vocabulario
+examen, práctica y balotario). Ya probado: `api/ficha.ts` lee el PDF de ACET y saca tema, propósito, competencia y vocabulario
 (~17 s). Como la muestra es imagen sin texto, la lectura tiene que ser por visión, no por extracción de texto.
 
 **Dónde podríamos competir.** Si Supermentes generara la sesión completa en Word desde el CNEB, chocaría de frente

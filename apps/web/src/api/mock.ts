@@ -9,7 +9,6 @@ import {
   JUEGO_EJEMPLO,
   JUEGO_SUSTANTIVOS,
   cancionEjemplo,
-  examenEjemplo,
   juegoDesdeVocabulario,
   sesionEjemplo,
 } from './ejemplos'
@@ -50,10 +49,6 @@ export const mockApi: Api = {
   async generarAudio() {
     await esperar(2200)
     return { url: null, duracionSeg: 102 }
-  },
-  async adaptarExamen(_ficha, { examen, ...opciones }) {
-    await esperar(1500)
-    return examenEjemplo(opciones, examen.name)
   },
   async generarJuego(ficha) {
     await esperar(1200)

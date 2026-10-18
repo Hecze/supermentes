@@ -7,6 +7,8 @@ actualizado: 2026-10-17
 > Cómo conseguir docentes y quién paga. El producto está en [[MAPA]], el evento en [[HACKATHON]].
 
 ## Para el jurado (tracción, pesa ×6)
+**Primera venta (18-oct):** Lucho (profesor de Matemática, dos colegios privados) paga **S/ 15 al mes** y lo usará en sus dos colegios el próximo mes. Es el precio que él y Yessly dieron en la entrevista (S/ 10–15). La rúbrica da hasta +0.5 por "lista de espera real o un pago", mostrado desde el producto (capturas solas no cuentan).
+
 Al 2026-10-17 la lista de espera tiene **4 inscritos**; hay 2 entrevistas con docentes (abajo). La meta de la noche son docentes reales, no 5.
 1. **Grupos de WhatsApp y Facebook de docentes** (por UGEL, por nivel): un video de 20 s con un material hecho y el link debajo, no el link solo.
 2. **Docentes conocidos** (empezando por el entrevistado), cada uno reenvía con su `?ref=`.

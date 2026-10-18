@@ -68,6 +68,10 @@ function sinPrestar(a: number, b: number) {
 }
 
 const plural = (n: number, uno: string, varios: string) => `${num(n)} ${n === 1 ? uno : varios}`
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
+
+/** Las pesas sumadas, para los pasos: "10 + 5 + 2 = 17 kg", o solo "17 kg" si es una pesa. */
+const sumaPesas = (ps: number[], u: string) => `${ps.length > 1 ? `${ps.map(num).join(' + ')} = ` : ''}${num(ps.reduce((s, p) => s + p, 0))} ${u}`
 
 // ---------- Figuras de las cenefas y fajas ----------
 
@@ -196,6 +200,11 @@ export const cenefa: TipoPregunta = {
       pregunta: sigue ? '¿Qué figura sigue?' : '¿Qué figura falta en el recuadro con «?»?',
       ...letras(3, correcta),
       nota: `Va ${nombreFig(ok)}, igual a la figura que está ${u} lugares antes: el grupo de ${u} figuras se repite.`,
+      pasos: [
+        `Se repite un grupo de ${u} figuras.`,
+        `El «?» está en el lugar ${h + 1}; ${u} lugares antes, en el ${h + 1 - u}, está ${nombreFig(ok)}.`,
+        `Va la figura ${letra(correcta)}: igual a la del lugar ${h + 1 - u}, con su color y su posición.`,
+      ],
     }
   },
 }
@@ -240,6 +249,11 @@ export const faja: TipoPregunta = {
         pregunta: '¿Qué número tiene la figura equivocada?',
         ...alt,
         nota: `Es la figura ${pos + 1}: ${reflejo ? 'no está reflejada' : 'tiene otro color'}. Debía ser igual a la figura ${pos - 1}.`,
+        pasos: [
+          'Se repiten 2 figuras: cada figura es igual a la que está 2 lugares antes.',
+          `La figura ${pos + 1} no es igual a la ${pos - 1}: ${reflejo ? 'no está reflejada' : 'tiene otro color'}.`,
+          `La figura equivocada es la ${pos + 1}.`,
+        ],
       }
     }
     // ¿Qué grupo de figuras se repite? Las opciones son grupos dibujados.
@@ -267,6 +281,11 @@ export const faja: TipoPregunta = {
       pregunta: '¿Qué grupo de figuras, repetido una y otra vez, forma toda la faja?',
       ...letras(3, correcta),
       nota: `El grupo ${letra(correcta)} (${u} figuras) se repite desde el inicio de la faja.`,
+      pasos: [
+        `Desde el inicio, la faja repite sus ${u} primeras figuras.`,
+        `El grupo ${letra(grupos.indexOf(sinReflejo))} no se refleja; el ${letra(grupos.indexOf(otra))} ${u === 4 ? 'tiene solo 2 figuras' : 'no cambia de color'}.`,
+        `Es el grupo ${letra(correcta)}: las ${u} primeras figuras, con su color y su reflejo.`,
+      ],
     }
   },
 }
@@ -329,8 +348,13 @@ export const rana: TipoPregunta = {
     if (t.some((x) => x < 1 || x > 9999)) return null
     const enunciado = 'La rana salta de piedra en piedra. Los números de las piedras siguen un patrón.'
     const nota = `El patrón ${baja ? 'resta' : 'suma'} ${num(s)} en cada salto.`
+    // Pasos: el salto se lee en dos piedras vecinas que se ven; luego, piedra por piedra.
+    const leer = (i: number) =>
+      baja ? `${num(t[i])} − ${num(t[i + 1])} = ${num(s)}: cada salto resta ${num(s)}.` : `${num(t[i + 1])} − ${num(t[i])} = ${num(s)}: cada salto suma ${num(s)}.`
+    const salta = (i: number) => `${num(t[i - 1])} ${baja ? '−' : '+'} ${num(s)} = ${num(t[i])}`
     if (azar() < 0.3) {
       const [h1, h2] = elegir(azar, [[2, 4], [3, 5], [1, 4], [4, 5], [2, 5]])
+      const vecinas = [0, 1, 2, 3, 4].find((i) => ![h1, h2].includes(i) && ![h1, h2].includes(i + 1)) ?? 0
       return {
         forma: 'abierta',
         clave: `rana:${t0}:${d}:${h1}-${h2}`,
@@ -340,6 +364,7 @@ export const rana: TipoPregunta = {
         respuesta: `${num(t[h1])} y ${num(t[h2])}`,
         espacio: 'dibujo',
         nota,
+        pasos: [leer(vecinas), `Piedra ${h1 + 1}: ${salta(h1)}`, `Piedra ${h2 + 1}: ${salta(h2)}`, `En las piedras van ${num(t[h1])} y ${num(t[h2])}.`],
       }
     }
     const h = azar() < 0.55 ? entero(azar, 2, 4) : 5
@@ -356,6 +381,7 @@ export const rana: TipoPregunta = {
       pregunta: h === 5 ? '¿En qué número cae la rana en el siguiente salto?' : '¿Qué número va en la piedra con «?»?',
       ...alt,
       nota,
+      pasos: [leer(0), `${h === 5 ? 'Siguiente salto' : `Piedra ${h + 1}`}: ${salta(h)}`],
     }
   },
 }
@@ -424,6 +450,11 @@ export const multiplica: TipoPregunta = {
         pregunta: `Si dobla la hoja ${N} veces, ¿en cuántas partes quedará dividida?`,
         ...alt,
         nota: 'Cada doblez duplica las partes: 2, 4, 8, 16, 32, 64…',
+        pasos: [
+          'Hojas: 1 doblez → 2 partes; 2 dobleces → 4; 3 dobleces → 8.',
+          `Cada doblez más, el doble: ${Array.from({ length: N - 3 }, (_, i) => `${num(2 ** (i + 3))} × 2 = ${num(2 ** (i + 4))}`).join('; ')}`,
+          `Con ${N} dobleces quedan ${num(x)} partes.`,
+        ],
       }
     }
     const f = elegir(azar, [2, 2, 3, 5, 10, 0])
@@ -449,6 +480,10 @@ export const multiplica: TipoPregunta = {
       pregunta: '¿Qué número va en la tarjeta con «?»?',
       ...alt,
       nota: f === 0 ? 'Cada número es la mitad del anterior.' : `Cada número es el anterior multiplicado por ${f}.`,
+      pasos:
+        f === 0
+          ? [`${num(t[0])} ÷ 2 = ${num(t[1])}: cada tarjeta es la mitad de la anterior.`, `Tarjeta ${h + 1}: ${num(prev)} ÷ 2 = ${num(x)}`]
+          : [`${num(t[0])} × ${f} = ${num(t[1])}: cada tarjeta es la anterior multiplicada por ${f}.`, `Tarjeta ${h + 1}: ${num(prev)} × ${f} = ${num(x)}`],
     }
   },
 }
@@ -544,6 +579,11 @@ export const regla: TipoPregunta = {
     const { r, t0, n } = reglaAlAzar(azar)
     const s = serie(r, t0, n)
     const anchoTren = 94 + n * 98
+    // Pasos: cómo se pasa de un vagón al siguiente, con las cuentas de los dos primeros saltos.
+    const cuenta = (i: number) =>
+      r.op === '+' ? `${num(s[i + 1])} − ${num(s[i])} = ${num(r.k)}` : r.op === '−' ? `${num(s[i])} − ${num(s[i + 1])} = ${num(r.k)}` : `${num(s[i])} ${r.op} ${num(r.k)} = ${num(s[i + 1])}`
+    const cada = r.op === '+' ? `siempre ${num(r.k)} más` : r.op === '−' ? `siempre ${num(r.k)} menos` : r.op === '×' ? `cada vez se multiplica por ${num(r.k)}` : 'cada vez la mitad'
+    const leerTren = [`Vagones: ${textoSerie(s)}`, `${cuenta(0)}; ${cuenta(1)}: ${cada}.`]
     const modo = azar()
     if (modo < 0.3) {
       // La regla escrita en un cartel: ¿qué números van en los vagones?
@@ -569,6 +609,11 @@ export const regla: TipoPregunta = {
         dibujo: svg(600, 180, cartel + el('g', { transform: 'translate(0 76)' }, dibujoTren([null, null, null, null])), `Cartel con la regla: empieza en ${num(t0)}, ${textoRegla(r).toLowerCase()}; debajo, un tren con 4 vagones vacíos`),
         pregunta: '¿Qué números van en los vagones?',
         ...alt,
+        pasos: [
+          `El primer vagón es ${num(t0)}; luego, ${textoRegla(r).toLowerCase()} cada vez.`,
+          [0, 1, 2].map((i) => `${num(buena[i])} ${r.op} ${num(r.k)} = ${num(buena[i + 1])}`).join('; '),
+          `En los vagones van ${textoSerie(buena)}.`,
+        ],
       }
     }
     const dibujo = svg(Math.max(anchoTren, 300), 100, dibujoTren(s), `Tren con ${n} vagones numerados: ${textoSerie(s)}`)
@@ -581,6 +626,7 @@ export const regla: TipoPregunta = {
         pregunta: '¿Cuál es la regla de la secuencia? Escríbela.',
         respuesta: `${textoRegla(r)} (empieza en ${num(t0)}).`,
         espacio: 'linea',
+        pasos: [...leerTren, `Regla: ${textoRegla(r)} (empieza en ${num(t0)}).`],
       }
     }
     const alt = opcionesTexto(azar, textoRegla(r), reglasErradas(r, s).map(textoRegla))
@@ -593,6 +639,7 @@ export const regla: TipoPregunta = {
       pregunta: '¿Cuál es la regla de la secuencia?',
       ...alt,
       nota: `${textoRegla(r)}: ${textoSerie(s)}.`,
+      pasos: [...leerTren, `Regla: ${textoRegla(r)}`],
     }
   },
 }
@@ -710,17 +757,40 @@ export const mesas: TipoPregunta = {
       .join('')
     const dibujo = svg(ancho, altoF + 42, cuerpo, `Figuras 1, 2 y 3 de un patrón de ${a === 'mesas' ? 'mesas con sillas' : `${a} hechos con palitos`}: ${[1, 2, 3].map(A.f).join(', ')}`)
     const enunciado = A.frase(nombre(azar))
+    // Pasos: cuánto suma cada figura (d) y lo que hay desde el inicio (b), leídos de las figuras 1, 2 y 3.
+    const [nFigs, cosas] = a === 'mesas' ? ['mesas', 'sillas'] : a === 'triangulos' ? ['triángulos', 'palitos'] : ['cuadrados', 'palitos']
+    const d = A.f(2) - A.f(1)
+    const b = A.f(0)
+    const leer = [`Figuras 1, 2 y 3: ${A.f(1)}, ${A.f(2)} y ${A.f(3)} ${cosas}; cada vez ${d} más.`, `${mayuscula(cosas)} = ${d} × ${nFigs} + ${b}`]
     if (azar() < 0.65) {
       const n = entero(azar, 5, 12)
       const alt = opcionesNum(azar, A.f(n), A.frecuentes(n))
       if (!alt) return null
-      return { forma: 'opciones', clave: `figuras:${a}:n${n}`, enunciado, dibujo, pregunta: A.cuantos(n), ...alt, nota: A.nota }
+      return {
+        forma: 'opciones',
+        clave: `figuras:${a}:n${n}`,
+        enunciado,
+        dibujo,
+        pregunta: A.cuantos(n),
+        ...alt,
+        nota: A.nota,
+        pasos: [...leer, `Para ${n} ${nFigs}: ${d} × ${n} + ${b} = ${num(A.f(n))} ${cosas}`],
+      }
     }
     const n = entero(azar, 6, 15)
     const m = A.f(n)
     const alt = opcionesNum(azar, n, [Math.round(m / 4), Math.floor(m / 2), Math.floor(m / 3), n + 1, n - 1, n + 2])
     if (!alt) return null
-    return { forma: 'opciones', clave: `figuras:${a}:m${m}`, enunciado, dibujo, pregunta: A.con(m), ...alt, nota: A.nota }
+    return {
+      forma: 'opciones',
+      clave: `figuras:${a}:m${m}`,
+      enunciado,
+      dibujo,
+      pregunta: A.con(m),
+      ...alt,
+      nota: A.nota,
+      pasos: [...leer, `Sin ${a === 'mesas' ? `las ${b} sillas de las puntas` : 'el primer palito'}: ${m} − ${b} = ${m - b}`, `${m - b} ÷ ${d} = ${num(n)} ${nFigs}`],
+    }
   },
 }
 
@@ -949,6 +1019,7 @@ export const balanzaCaja: TipoPregunta = {
         pregunta: `Las ${k} cajas pesan lo mismo. ¿Cuánto pesa cada caja?`,
         ...alt,
         nota: `${num(T)} kg repartidos en ${k} cajas: ${num(T)} ÷ ${k} = ${c} kg.`,
+        pasos: [`En el otro platillo: ${sumaPesas(der, 'kg')}`, `Las ${k} cajas pesan ${num(T)} kg en total.`, `Cada caja: ${num(T)} ÷ ${k} = ${num(c)} kg`],
       }
     }
     const u: 'kg' | 'g' = azar() < 0.65 ? 'kg' : 'g'
@@ -962,6 +1033,12 @@ export const balanzaCaja: TipoPregunta = {
     const izq: Cosa[] = [{ k: 'caja', r: '?' }, ...pesas(izqP, u)]
     const dibujo = dibujoBalanza(izq, pesas(derP, u))
     const enunciado = `${quien} ayuda en un puesto del mercado. Puso una caja y unas pesas en la balanza, y quedó en equilibrio.`
+    const pasos = [
+      `Junto a la caja: ${sumaPesas(izqP, u)}`,
+      `En el otro platillo: ${sumaPesas(derP, u)}`,
+      `Igualdad: ▢ + ${num(a)} = ${num(c + a)}`,
+      `La caja pesa ${num(c + a)} − ${num(a)} = ${num(c)} ${u}`,
+    ]
     if (modo < 0.55) {
       return {
         forma: 'abierta',
@@ -971,6 +1048,7 @@ export const balanzaCaja: TipoPregunta = {
         pregunta: 'Escribe una igualdad para la balanza, usando ▢ para el peso de la caja. Luego, escribe cuánto pesa la caja.',
         respuesta: `▢ + ${num(a)} = ${num(c + a)}; la caja pesa ${num(c)} ${u}.`,
         espacio: 'renglones',
+        pasos,
       }
     }
     const paso = u === 'kg' ? 1 : 50
@@ -984,6 +1062,7 @@ export const balanzaCaja: TipoPregunta = {
       pregunta: '¿Cuánto pesa la caja?',
       ...alt,
       nota: `▢ + ${num(a)} = ${num(c + a)}, entonces la caja pesa ${num(c + a)} − ${num(a)} = ${num(c)} ${u}.`,
+      pasos,
     }
   },
 }
@@ -992,6 +1071,7 @@ export const balanzaCaja: TipoPregunta = {
 
 type Icono = 'estrella' | 'corazon' | 'triangulo' | 'rombo'
 const ICONOS: Record<Icono, string> = { estrella: 'la estrella', corazon: 'el corazón', triangulo: 'el triángulo', rombo: 'el rombo' }
+const ICONOS_VARIOS: Record<Icono, string> = { estrella: 'estrellas', corazon: 'corazones', triangulo: 'triángulos', rombo: 'rombos' }
 
 function dibujarIcono(i: Icono, cx: number, cy: number) {
   const t = { relleno: '#d0d0d0', grosor: 2 }
@@ -1081,6 +1161,8 @@ export const icono: TipoPregunta = {
       let malas: string[]
       let b: Pieza
       let clave: string
+      // Primer paso: qué dice la barra, en palabras; el segundo es la igualdad.
+      let lectura: string
       if (caso === 'regalan' || caso === 'gasto') {
         const a = entero(azar, 12, 60)
         const x = entero(azar, 15, 90)
@@ -1092,6 +1174,7 @@ export const icono: TipoPregunta = {
           const [w1, w2] = anchos([x, a])
           b = barras([{ txt: '?', w: w1, nota: 'tenía' }, { txt: String(a), w: w2, nota: 'le regalaron' }], `${t} ahora`, false)
           clave = `icono-situacion:regalan:${a}:${t}`
+          lectura = `Lo que tenía (▢) más las ${a} que le regalaron es lo que tiene ahora: ${t}.`
         } else {
           enunciado = `${quien} tenía algunos soles. Gastó S/ ${a} en el quiosco y le quedaron S/ ${x}.`
           correcta = `▢ − ${a} = ${x}`
@@ -1099,6 +1182,7 @@ export const icono: TipoPregunta = {
           const [w1, w2] = anchos([a, x])
           b = barras([{ txt: `S/ ${a}`, w: w1, nota: 'gastó' }, { txt: `S/ ${x}`, w: w2, nota: 'le quedó' }], '? tenía', true)
           clave = `icono-situacion:gasto:${a}:${x}`
+          lectura = `Lo que tenía (▢) menos lo que gastó, S/ ${a}, es lo que le quedó: S/ ${x}.`
         }
         if (a === x) return null
       } else {
@@ -1110,11 +1194,13 @@ export const icono: TipoPregunta = {
           correcta = `▢ ÷ ${k} = ${p}`
           malas = [`▢ × ${k} = ${p}`, `${p} ÷ ${k} = ▢`, `▢ − ${k} = ${p}`]
           b = barras(partes, '? caramelos', true)
+          lectura = `Todos los caramelos (▢) repartidos en ${k} bolsitas dan ${p} en cada una.`
         } else {
           enunciado = `${quien} compró ${k} cuadernos iguales y pagó S/ ${k * p} en total.`
           correcta = `${k} × ▢ = ${k * p}`
           malas = [`▢ ÷ ${k} = ${k * p}`, `${k * p} × ${k} = ▢`, `▢ + ${k} = ${k * p}`]
           b = barras(partes, `S/ ${k * p}`, false)
+          lectura = `${k} veces el precio de un cuaderno (▢) es lo que pagó: S/ ${k * p}.`
         }
         clave = `icono-situacion:${caso}:${k}:${p}`
       }
@@ -1127,6 +1213,7 @@ export const icono: TipoPregunta = {
         dibujo: svg(b.ancho, b.alto, b.cuerpo, `Modelo de barras de la situación: ${enunciado}`),
         pregunta: '¿Qué igualdad representa la situación? (▢ es el número que no sabemos).',
         ...alt,
+        pasos: [lectura, `Igualdad: ${correcta}`],
       }
     }
     const ic = elegir(azar, Object.keys(ICONOS) as Icono[])
@@ -1149,6 +1236,11 @@ export const icono: TipoPregunta = {
         pregunta: `¿Qué número esconde ${nombreIc}?`,
         ...alt,
         nota: `${num(T)} ÷ ${k} = ${x}.`,
+        pasos: [
+          `En la pizarra, ${k} ${ICONOS_VARIOS[ic]} iguales suman ${num(T)}.`,
+          `${num(T)} ÷ ${k} = ${num(x)}; comprueba: ${Array.from({ length: k }, () => num(x)).join(' + ')} = ${num(T)}`,
+          `${mayuscula(nombreIc)} esconde ${num(x)}.`,
+        ],
       }
     }
     // ★ + 25 = 80, ★ − 18 = 30, 25 + ★ = 80
@@ -1169,6 +1261,11 @@ export const icono: TipoPregunta = {
       pregunta: `¿Qué número esconde ${nombreIc}?`,
       ...alt,
       nota: op === '−' ? `${num(t)} + ${num(a)} = ${num(x)}.` : `${num(t)} − ${num(a)} = ${num(x)}.`,
+      pasos: [
+        `En la pizarra: ${op === '+izq' ? `${num(a)} + ${nombreIc}` : `${nombreIc} ${op === '−' ? '−' : '+'} ${num(a)}`} = ${num(t)}`,
+        `Para hallar el número: ${op === '−' ? `${num(t)} + ${num(a)}` : `${num(t)} − ${num(a)}`} = ${num(x)}`,
+        `${mayuscula(nombreIc)} esconde ${num(x)}: ${op === '+izq' ? `${num(a)} + ${num(x)}` : `${num(x)} ${op === '−' ? '−' : '+'} ${num(a)}`} = ${num(t)}`,
+      ],
     }
   },
 }
@@ -1249,6 +1346,7 @@ export const signoIgual: TipoPregunta = {
           pregunta: '¿Cuál es la igualdad verdadera?',
           ...alt,
           nota: `${izq} = ${s} y ${c} ${op} ${d} = ${s}: los dos lados valen lo mismo.`,
+          pasos: [`Lado izquierdo: ${izq} = ${s}`, `Solo en una el lado derecho también da ${s}: ${c} ${op} ${d} = ${s}`, `Es verdadera: ${izq} = ${c} ${op} ${d}`],
         }
         return g
       })
@@ -1260,7 +1358,8 @@ export const signoIgual: TipoPregunta = {
       const opDer = '+'
       const malo2 = ig.resultado + ig.c
       const izq = ig.texto.split(' = ')[0]
-      const alt = opcionesTexto(azar, `No. Va ${num(ig.x)}, porque ${num(ig.x)} ${opDer} ${num(ig.c)} también es ${num(ig.resultado)}.`, [
+      const correcta = `No. Va ${num(ig.x)}, porque ${num(ig.x)} ${opDer} ${num(ig.c)} también es ${num(ig.resultado)}.`
+      const alt = opcionesTexto(azar, correcta, [
         `Sí, porque ${izq} = ${num(ig.resultado)}.`,
         `No. Va ${num(malo2)}, porque ${num(ig.resultado)} ${opDer} ${num(ig.c)} = ${num(malo2)}.`,
       ], 3)
@@ -1273,6 +1372,11 @@ export const signoIgual: TipoPregunta = {
         pregunta: `¿Tiene razón ${quien}?`,
         ...alt,
         nota: `El signo igual no anuncia el resultado: dice que los dos lados valen lo mismo.`,
+        pasos: [
+          `Lado izquierdo: ${izq} = ${num(ig.resultado)}`,
+          `El otro lado también debe dar ${num(ig.resultado)}: ${num(ig.resultado)} − ${num(ig.c)} = ${num(ig.x)}`,
+          correcta,
+        ],
       }
     }
     const frecuentes = [ig.resultado, lado(ig.resultado, ig.op === '−' ? '−' : '+', ig.c), ig.op === '×' ? ig.resultado - ig.c : ig.x + 10, ig.op === '×' ? ig.x + 1 : ig.x - 10, ig.op === '×' ? ig.x - 1 : ig.x + 1, ig.c]
@@ -1286,6 +1390,11 @@ export const signoIgual: TipoPregunta = {
       pregunta: '¿Qué número va en la casilla para que la igualdad sea verdadera?',
       ...alt,
       nota: `Los dos lados deben valer ${num(ig.resultado)}. ${num(ig.resultado)} es el resultado del lado izquierdo, no lo que va en la casilla.`,
+      pasos: [
+        `Lado izquierdo: ${ig.texto.split(' = ')[0]} = ${num(ig.resultado)}`,
+        `El lado derecho también debe valer ${num(ig.resultado)}: ${ig.texto.split(' = ')[1]} = ${num(ig.resultado)}`,
+        `En la casilla va ${num(ig.resultado)} ${ig.op === '−' ? '+' : ig.op === '×' ? '÷' : '−'} ${num(ig.c)} = ${num(ig.x)}`,
+      ],
     }
   },
 }
@@ -1357,6 +1466,7 @@ export const tarjetas: TipoPregunta = {
         dibujo: svg(W, 3 * 62 + 4, partes.join(''), `Tres tarjetas a la izquierda (${parejas.map((p) => p[0]).join('; ')}) y tres a la derecha (${der.map((k) => parejas[k][1]).join('; ')})`),
         respuesta: parejas.map(([a, b]) => `${a} = ${b}`).join(' · '),
         espacio: 'dibujo',
+        pasos: [...parejas.map(([a, b], i) => `${a} = ${num(vs[i])} y ${b} = ${num(vs[i])}`), `Se unen: ${parejas.map(([a, b]) => `${a} = ${b}`).join(' · ')}`],
       }
     }
     if (modo < 0.7) {
@@ -1384,6 +1494,7 @@ export const tarjetas: TipoPregunta = {
           pregunta: '¿Qué tarjeta debe ir en el otro platillo para que la balanza quede en equilibrio?',
           ...alt,
           nota: `${e1.t} = ${e2.t}: las dos valen ${v}.`,
+          pasos: [`En un platillo: ${e1.t} = ${num(v)}`, `El otro platillo también debe valer ${num(v)}.`, `Va la tarjeta ${e2.t}, porque ${e2.t} = ${num(v)}`],
         }
         return g
       })
@@ -1414,6 +1525,11 @@ export const tarjetas: TipoPregunta = {
         pregunta: '¿Qué tarjeta vale diferente?',
         ...letras(4, correcta),
         nota: `Las otras tres valen ${v}; la tarjeta ${letra(correcta)} vale ${valorExpr(otraE.t)}.`,
+        pasos: [
+          cards.slice(0, 2).map((t, i) => `${letra(i)}) ${t} = ${num(valorExpr(t))}`).join('; '),
+          cards.slice(2).map((t, i) => `${letra(i + 2)}) ${t} = ${num(valorExpr(t))}`).join('; '),
+          `Vale diferente la tarjeta ${letra(correcta)}: ${otraE.t} = ${num(valorExpr(otraE.t))}; las otras valen ${num(v)}.`,
+        ],
       }
       return g
     })
@@ -1471,6 +1587,11 @@ export const equivalencias: TipoPregunta = {
         pregunta: `${cuantosDe(C)} ${FC.varios} pesan lo mismo que 1 ${FA.uno}?`,
         ...alt,
         nota: `Cada ${FB.uno} pesa como ${k2} ${FC.varios}, y ${laDe(A)} pesa como ${k1} ${FB.varios}: ${k1} × ${k2} = ${x}.`,
+        pasos: [
+          `Balanza 1: 1 ${FA.uno} = ${plural(k1, FB.uno, FB.varios)}`,
+          `Balanza 2: 1 ${FB.uno} = ${plural(k2, FC.uno, FC.varios)}`,
+          `Cada ${FB.uno} vale ${k2} ${FC.varios}: 1 ${FA.uno} = ${k1} × ${k2} = ${plural(x, FC.uno, FC.varios)}`,
+        ],
       }
     }
     if (modo < 0.75) {
@@ -1493,6 +1614,11 @@ export const equivalencias: TipoPregunta = {
         pregunta: `¿Cuánto pesa ${unaDe(A)}?`,
         ...alt,
         nota: `${k} ${FB.varios} de ${q} ${u}: ${k} × ${q} = ${x} ${u}.`,
+        pasos: [
+          `Balanza 1: 1 ${FA.uno} = ${plural(k, FB.uno, FB.varios)}`,
+          `Balanza 2: 1 ${FB.uno} = ${num(q)} ${u}`,
+          `${mayuscula(unaDe(A))} pesa ${k} × ${num(q)} = ${num(x)} ${u}`,
+        ],
       }
     }
     // 1 A = 1 B + p kg y 1 B = q kg.
@@ -1512,6 +1638,7 @@ export const equivalencias: TipoPregunta = {
       pregunta: `¿Cuánto pesa ${unaDe(A)}?`,
       ...alt,
       nota: `${q} kg + ${p} kg = ${x} kg.`,
+      pasos: [`Balanza 2: 1 ${FB.uno} = ${q} kg`, `Balanza 1: 1 ${FA.uno} = 1 ${FB.uno} y ${p} kg`, `${mayuscula(unaDe(A))} pesa ${q} + ${p} = ${num(x)} kg`],
     }
   },
 }
@@ -1557,6 +1684,11 @@ export const propiedades: TipoPregunta = {
           : `Si agrega una pesa de ${p} kg en el platillo de la caja, ¿qué debe hacer en el otro platillo para que siga en equilibrio?`,
         ...alt,
         nota: 'Si se agrega o se quita lo mismo en los dos lados, la igualdad se mantiene.',
+        pasos: [
+          `${quitar ? `Quita ${p} kg del` : `Agrega ${p} kg en el`} platillo de la caja: ese lado pesa ${p} kg ${quitar ? 'menos' : 'más'}.`,
+          `Para seguir en equilibrio, el otro platillo también debe pesar ${p} kg ${quitar ? 'menos' : 'más'}.`,
+          correcta,
+        ],
       }
     }
     if (modo < 0.65) {
@@ -1577,6 +1709,11 @@ export const propiedades: TipoPregunta = {
         pregunta: `Si quita la pesa de ${p} kg de los dos platillos, la balanza sigue en equilibrio. ¿Cuánto pesa la bolsa?`,
         ...alt,
         nota: `Bolsa + ${p} = ${p} + ${q}. Quitando ${p} kg de cada lado queda bolsa = ${q} kg.`,
+        pasos: [
+          `Derecha: la pesa de ${p} kg y ${qP.length > 1 ? `otras que suman ${sumaPesas(qP, 'kg')}` : `otra de ${q} kg`}.`,
+          `Bolsa + ${p} kg = ${p} kg + ${q} kg`,
+          `Se quita ${p} kg de cada lado: la bolsa pesa ${q} kg.`,
+        ],
       }
     }
     // Con números: 25 + 15 = 40, y se suma o se resta lo mismo a los dos lados.
@@ -1599,6 +1736,11 @@ export const propiedades: TipoPregunta = {
       pregunta: '¿Qué igualdad es verdadera ahora?',
       ...alt,
       nota: `Si se ${mas ? 'suma' : 'resta'} ${k} a los dos lados, la igualdad se mantiene.`,
+      pasos: [
+        `Antes: ${a} + ${b} = ${s}`,
+        `Si se ${mas ? 'suma' : 'resta'} ${k} a un lado, se ${mas ? 'suma' : 'resta'} ${k} al otro.`,
+        `${correcta}: los dos lados valen ${num(mas ? s + k : s - k)}`,
+      ],
     }
   },
 }
@@ -1634,6 +1776,7 @@ export const duplicar: TipoPregunta = {
         pregunta: `Si pone ${m} ${FA.varios} en un platillo, ${cuantosDe(B).toLowerCase()} ${FB.varios} debe poner en el otro para que siga en equilibrio?`,
         ...alt,
         nota: `${m === 2 ? 'El doble' : 'El triple'} en cada lado: ${m} × ${k} = ${x}.`,
+        pasos: [`En la balanza: 1 ${FA.uno} = ${plural(k, FB.uno, FB.varios)}`, `${m} ${FA.varios} son ${m === 2 ? 'el doble' : 'el triple'}: ${m} × ${k} = ${plural(x, FB.uno, FB.varios)}`],
       }
     }
     if (modo < 0.7) {
@@ -1653,6 +1796,7 @@ export const duplicar: TipoPregunta = {
         pregunta: `Si pone ${m} cajas iguales en un platillo, ¿cuántos kilos debe poner en el otro para que siga en equilibrio?`,
         ...alt,
         nota: `${m === 2 ? 'El doble' : 'El triple'} en cada lado: ${m} × ${c} = ${x} kg.`,
+        pasos: [`En la balanza: 1 caja pesa ${c} kg.`, `${m} cajas son ${m === 2 ? 'el doble' : 'el triple'}: ${m} × ${c} = ${num(x)} kg`],
       }
     }
     // n latas = T kg. ¿Y la mitad de las latas?
@@ -1677,6 +1821,7 @@ export const duplicar: TipoPregunta = {
       pregunta: `Si deja solo la mitad de las latas, ¿cuántos kilos debe dejar en el otro platillo para que siga en equilibrio?`,
       ...alt,
       nota: `La mitad en cada lado: ${T} ÷ 2 = ${x} kg.`,
+      pasos: [`En la balanza: ${n} latas pesan ${T} kg.`, `La mitad de las latas: ${n} ÷ 2 = ${plural(n / 2, 'lata', 'latas')}`, `La mitad del peso: ${T} ÷ 2 = ${num(x)} kg`],
     }
   },
 }
@@ -1792,32 +1937,64 @@ export const tablaCambio: TipoPregunta = {
     const f = (x: number) => i0 + k * x
     const enunciado = c.intro(nombre(azar), k, i0)
     const unidad = c.soles ? { antes: 'S/ ' } : {}
+    const sol = c.soles ? 'S/ ' : ''
+    // "cuadernos", "bolsas", "jarras", "kilos": lo que va en la primera fila.
+    const cosas = c.x.split(' ')[0].toLowerCase()
+    const resta = (x: number) => `${num(f(x + 1))} − ${num(f(x))} = ${num(k)}`
     const modo = azar()
     if (modo < 0.3) {
       const xs = [1, 2, 3, 4, 5, 6]
       const ocultos = barajar(azar, [2, 3, 4, 5]).slice(0, 3).sort()
+      const respuesta = ocultos.map((i) => `${xs[i]} → ${sol}${num(f(xs[i]))}`).join(' · ')
       return {
         forma: 'abierta',
         clave: `tabla-completa:${c.id}:${k}:${i0}:${ocultos.join('')}`,
         enunciado: `${enunciado} Completa la tabla.`,
         dibujo: dibujoTabla(c, xs, xs.map((x, i) => (ocultos.includes(i) ? null : f(x))), true),
-        respuesta: ocultos.map((i) => `${xs[i]} → ${c.soles ? 'S/ ' : ''}${num(f(xs[i]))}`).join(' · '),
+        respuesta,
         espacio: 'dibujo',
+        pasos: [
+          `En la tabla: ${resta(xs[0])}; cada vez aumenta ${num(k)}.`,
+          ocultos.map((i) => `${num(f(xs[i - 1]))} + ${num(k)} = ${num(f(xs[i]))}`).join('; '),
+          `En la tabla van: ${respuesta}`,
+        ],
       }
     }
     const xs = [1, 2, 3, 4]
     const dibujo = dibujoTabla(c, xs, xs.map(f), false)
+    const leer = `En la tabla: ${xs.map((x) => num(f(x))).join(', ')}; cada vez aumenta ${num(k)}.`
     if (modo < 0.55) {
       const alt = opcionesTexto(azar, c.aumenta(k), [c.aumenta(1), 'Se duplica.', c.aumenta(2 * k), c.aumenta(k + 1)])
       if (!alt) return null
-      return { forma: 'opciones', clave: `tabla-cambia:${c.id}:${k}:${i0}`, enunciado, dibujo, pregunta: c.cambia, ...alt }
+      return {
+        forma: 'opciones',
+        clave: `tabla-cambia:${c.id}:${k}:${i0}`,
+        enunciado,
+        dibujo,
+        pregunta: c.cambia,
+        ...alt,
+        pasos: [`En la tabla: ${[1, 2, 3].map(resta).join('; ')}`, `Siempre la misma diferencia: ${c.aumenta(k)}`],
+      }
     }
     if (modo < 0.75 && c.cuantosX) {
       const n = entero(azar, 6, 12)
       const T = f(n)
       const alt = opcionesNum(azar, n, [T - k, n + 1, n - 1, Math.floor(T / 2), k + n, n + 2])
       if (!alt) return null
-      return { forma: 'opciones', clave: `tabla-inversa:${c.id}:${k}:${n}`, enunciado, dibujo, pregunta: c.cuantosX(T), ...alt, nota: `${num(T)} ÷ ${k} = ${n}.` }
+      return {
+        forma: 'opciones',
+        clave: `tabla-inversa:${c.id}:${k}:${n}`,
+        enunciado,
+        dibujo,
+        pregunta: c.cuantosX(T),
+        ...alt,
+        nota: `${num(T)} ÷ ${k} = ${n}.`,
+        pasos: [
+          leer,
+          ...(i0 ? [`Sin lo del inicio: ${num(T)} − ${num(i0)} = ${num(T - i0)}`] : []),
+          `Se busca el número que por ${num(k)} da ${num(T - i0)}: ${num(T - i0)} ÷ ${num(k)} = ${num(n)} ${cosas}`,
+        ],
+      }
     }
     const n = entero(azar, 6, 12)
     const x = f(n)
@@ -1831,6 +2008,9 @@ export const tablaCambio: TipoPregunta = {
       pregunta: c.cuanto(n),
       ...alt,
       nota: i0 ? `Aumenta S/ ${k} por semana: ${i0} + ${k} × ${n} = ${num(x)}.` : `Aumenta ${k} cada vez: ${k} × ${n} = ${num(x)}.`,
+      pasos: i0
+        ? [leer, `Tenía S/ ${num(i0)} al inicio y ahorra S/ ${num(k)} por semana.`, `Semana ${n}: ${num(i0)} + ${num(k)} × ${n} = ${sol}${num(x)}`]
+        : [leer, `${n} ${cosas}: ${num(k)} × ${n} = ${sol}${num(x)}`],
     }
   },
 }
@@ -1902,16 +2082,39 @@ export const crece: TipoPregunta = {
       const h = (w: number) => h1 + r * (w - 1)
       const dibujo = dibujoEtapas('planta', [1, 2, 3].map((w) => ({ rotulo: `Semana ${w}`, valor: h(w) })), 'cm')
       const enunciado = `${quien} mide su planta de frejol cada semana. Crece lo mismo cada semana.`
+      const leer = `Semana 1: ${h1} cm; semana 2: ${h(2)} cm; semana 3: ${h(3)} cm`
       if (pregCambio) {
         const alt = opcionesNum(azar, r, [h1, 2 * r, r + 1, r - 1, h(2)], { despues: ' cm' })
         if (!alt) return null
-        return { forma: 'opciones', clave: `crece:planta:${h1}:${r}:c`, enunciado, dibujo, pregunta: '¿Cuántos centímetros crece cada semana?', ...alt }
+        return {
+          forma: 'opciones',
+          clave: `crece:planta:${h1}:${r}:c`,
+          enunciado,
+          dibujo,
+          pregunta: '¿Cuántos centímetros crece cada semana?',
+          ...alt,
+          pasos: [leer, `${h(2)} − ${h1} = ${r}: crece ${r} cm cada semana`],
+        }
       }
       const N = entero(azar, 5, 8)
       const x = h(N)
       const alt = opcionesNum(azar, x, [h(3) + r, r * N, x + r, x - r, h(3) + (N - 3)], { despues: ' cm' })
       if (!alt) return null
-      return { forma: 'opciones', clave: `crece:planta:${h1}:${r}:${N}`, enunciado, dibujo, pregunta: `Si sigue creciendo igual, ¿cuánto medirá en la semana ${N}?`, ...alt, nota: `Crece ${r} cm por semana: ${h1} + ${r} × ${N - 1} = ${x} cm.` }
+      return {
+        forma: 'opciones',
+        clave: `crece:planta:${h1}:${r}:${N}`,
+        enunciado,
+        dibujo,
+        pregunta: `Si sigue creciendo igual, ¿cuánto medirá en la semana ${N}?`,
+        ...alt,
+        nota: `Crece ${r} cm por semana: ${h1} + ${r} × ${N - 1} = ${x} cm.`,
+        pasos: [
+          leer,
+          `Crece ${h(2)} − ${h1} = ${r} cm cada semana.`,
+          `Semanas 4 ${N === 5 ? 'y' : 'a'} ${N}, sumando ${r} cada vez: ${Array.from({ length: N - 3 }, (_, i) => `${h(i + 4)} cm`).join(', ')}`,
+          `En la semana ${N} medirá ${num(x)} cm.`,
+        ],
+      }
     }
     if (que === 'vela') {
       const L0 = entero(azar, 20, 30)
@@ -1919,31 +2122,72 @@ export const crece: TipoPregunta = {
       const L = (t: number) => L0 - r * t
       const dibujo = dibujoEtapas('vela', [0, 1, 2].map((t) => ({ rotulo: t === 0 ? 'Al encenderla' : t === 1 ? 'A la 1 hora' : 'A las 2 horas', valor: L(t) })), 'cm')
       const enunciado = `En un apagón, ${quien} prendió una vela. Cada hora se gasta lo mismo.`
+      const leer = `Al encenderla: ${L0} cm; a la 1 hora: ${L(1)} cm; a las 2 horas: ${L(2)} cm`
       if (pregCambio) {
         const alt = opcionesNum(azar, r, [L(1), 2 * r, r + 1, r - 1], { despues: ' cm' })
         if (!alt) return null
-        return { forma: 'opciones', clave: `crece:vela:${L0}:${r}:c`, enunciado, dibujo, pregunta: '¿Cuántos centímetros se gasta cada hora?', ...alt }
+        return {
+          forma: 'opciones',
+          clave: `crece:vela:${L0}:${r}:c`,
+          enunciado,
+          dibujo,
+          pregunta: '¿Cuántos centímetros se gasta cada hora?',
+          ...alt,
+          pasos: [leer, `${L0} − ${L(1)} = ${r}: se gasta ${r} cm cada hora`],
+        }
       }
       const N = entero(azar, 4, 6)
       const x = L(N)
       if (x < 2) return null
       const alt = opcionesNum(azar, x, [L(2) - r, L0 - N, x + r, x - r, r * N], { despues: ' cm' })
       if (!alt) return null
-      return { forma: 'opciones', clave: `crece:vela:${L0}:${r}:${N}`, enunciado, dibujo, pregunta: `Si se sigue gastando igual, ¿cuánto medirá a las ${N} horas?`, ...alt, nota: `Se gasta ${r} cm por hora: ${L0} − ${r} × ${N} = ${x} cm.` }
+      return {
+        forma: 'opciones',
+        clave: `crece:vela:${L0}:${r}:${N}`,
+        enunciado,
+        dibujo,
+        pregunta: `Si se sigue gastando igual, ¿cuánto medirá a las ${N} horas?`,
+        ...alt,
+        nota: `Se gasta ${r} cm por hora: ${L0} − ${r} × ${N} = ${x} cm.`,
+        pasos: [
+          leer,
+          `Se gasta ${L0} − ${L(1)} = ${r} cm cada hora.`,
+          `Horas 3 ${N === 4 ? 'y' : 'a'} ${N}, restando ${r} cada vez: ${Array.from({ length: N - 2 }, (_, i) => `${L(i + 3)} cm`).join(', ')}`,
+          `A las ${N} horas medirá ${num(x)} cm.`,
+        ],
+      }
     }
     const r = entero(azar, 2, 6)
     const dibujo = dibujoEtapas('balde', [1, 2, 3].map((m) => ({ rotulo: m === 1 ? 'Al minuto 1' : `Al minuto ${m}`, valor: r * m })), 'L')
     const enunciado = `${quien} llena un cilindro de agua con el caño. Cada minuto entra la misma cantidad.`
+    const leer = `Minuto 1: ${r} L; minuto 2: ${2 * r} L; minuto 3: ${3 * r} L`
     if (pregCambio) {
       const alt = opcionesNum(azar, r, [3 * r, 2 * r, r + 1, r - 1], { despues: ' L' })
       if (!alt) return null
-      return { forma: 'opciones', clave: `crece:balde:${r}:c`, enunciado, dibujo, pregunta: '¿Cuántos litros entran cada minuto?', ...alt }
+      return {
+        forma: 'opciones',
+        clave: `crece:balde:${r}:c`,
+        enunciado,
+        dibujo,
+        pregunta: '¿Cuántos litros entran cada minuto?',
+        ...alt,
+        pasos: [leer, `${2 * r} − ${r} = ${r}: entran ${r} L cada minuto`],
+      }
     }
     const N = entero(azar, 5, 10)
     const x = r * N
     const alt = opcionesNum(azar, x, [3 * r + (N - 3), 3 * r + r, r + N, x + r, x - r], { despues: ' L' })
     if (!alt) return null
-    return { forma: 'opciones', clave: `crece:balde:${r}:${N}`, enunciado, dibujo, pregunta: `Si sigue igual, ¿cuántos litros habrá a los ${N} minutos?`, ...alt, nota: `Entran ${r} L por minuto: ${r} × ${N} = ${x} L.` }
+    return {
+      forma: 'opciones',
+      clave: `crece:balde:${r}:${N}`,
+      enunciado,
+      dibujo,
+      pregunta: `Si sigue igual, ¿cuántos litros habrá a los ${N} minutos?`,
+      ...alt,
+      nota: `Entran ${r} L por minuto: ${r} × ${N} = ${x} L.`,
+      pasos: [leer, `Entran ${2 * r} − ${r} = ${r} L cada minuto.`, `A los ${N} minutos: ${r} × ${N} = ${num(x)} L`],
+    }
   },
 }
 
