@@ -138,7 +138,7 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
 
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center gap-[3cqmin] overflow-hidden p-[3cqmin] pt-[11cqmin] [@container(orientation:portrait)]:flex-col [@container(orientation:portrait)]:justify-start"
+      className="absolute inset-0 flex items-center justify-center gap-[3cqmin] overflow-hidden p-[3cqmin] pt-[calc(4cqmin+clamp(36px,7cqmin,52px))] [@container(orientation:portrait)]:flex-col [@container(orientation:portrait)]:justify-start"
       style={{ background: 'radial-gradient(circle at 50% 0%, #6fe3cf, #17998f 85%)' }}
     >
       <div className="absolute left-[3cqmin] top-[2.2cqmin] flex gap-[1.5cqmin]" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
@@ -208,7 +208,7 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
               <li
                 key={u.palabra}
                 className={`flex items-center gap-1 rounded-full px-[1.4cqmin] py-[0.4cqmin] font-bold tracking-wide ${h ? 'bg-white/60 text-[#2b2d5c]/60 line-through' : 'bg-white text-[#2b2d5c]'}`}
-                style={{ fontSize: 'clamp(13px, 2.9cqmin, 24px)', boxShadow: h ? undefined : '0 0.4cqmin 0 rgb(0 60 50 / 0.3)' }}
+                style={{ fontSize: 'clamp(16px, 3.6cqmin, 26px)', boxShadow: h ? undefined : '0 0.4cqmin 0 rgb(0 60 50 / 0.3)' }}
               >
                 {h && <Check className="size-[1em]" style={{ color: h.color }} strokeWidth={3.5} aria-hidden />}
                 {u.palabra}
@@ -221,7 +221,7 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
             <p className="font-bold capitalize" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
               ¡{ultima.palabra}!
             </p>
-            <p className="text-[var(--j-tinta-suave)]" style={{ fontSize: 'clamp(13px, 2.8cqmin, 22px)' }}>
+            <p className="text-[var(--j-tinta-suave)]" style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}>
               {ultima.pista}
             </p>
           </div>
