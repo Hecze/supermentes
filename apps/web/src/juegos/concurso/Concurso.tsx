@@ -1,6 +1,6 @@
 // Concurso: preguntas con reloj, cuatro colores con figuras y puntos por rapidez, como en Kahoot.
 // Se juega en el celular o proyectado (la clase elige en voz alta y el docente toca).
-import { Check, X } from 'lucide-react'
+import { Check, Timer, X } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
@@ -140,18 +140,43 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
   })
 
   const acerto = fase === 'resultado' && elegida !== null && pregunta.opciones[elegida] === pregunta.reto.respuesta
+  // En la tarea, el diseño claro (demos/tareas/3-pregunta-con-reloj.png), sin puntos y sin mostrar la respuesta
+  // correcta: así no se la pasa a quien la haga después.
+  const claro = !!tarea
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden" style={{ background: '#46178f', fontFamily: '"Fredoka", system-ui, sans-serif' }}>
+    <div
+      className="absolute inset-0 flex flex-col overflow-hidden"
+      style={{ background: claro ? '#f4f7fb' : '#46178f', fontFamily: claro ? 'Lexend, system-ui, sans-serif' : '"Fredoka", system-ui, sans-serif' }}
+    >
+      {claro && (
+        <div className="relative z-10 flex flex-col gap-[2cqmin] px-[4cqmin] pr-[min(30cqw,140px)] pt-[3cqmin] text-[#172031]">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-semibold text-[#536075]" style={{ fontSize: 'clamp(15px, 3.6cqmin, 22px)' }}>
+              Pregunta {n} de {total}
+            </span>
+            <span
+              className="flex items-center gap-1.5 rounded-full bg-[#172031] px-3.5 py-1.5 font-bold text-white tabular-nums"
+              style={{ fontSize: 'clamp(16px, 4cqmin, 24px)' }}
+              aria-label={`Quedan ${quedan} segundos`}
+            >
+              <Timer className="size-[1em]" aria-hidden /> {fase === 'lee' ? '…' : quedan}
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-[#e3e8f0]">
+            <div className="h-full rounded-full bg-[#e8a600] transition-[width]" style={{ width: `${((n - (fase === 'resultado' ? 0 : 1)) / total) * 100}%` }} />
+          </div>
+        </div>
+      )}
       {/* Figuras de fondo */}
-      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]" aria-hidden>
+      <svg className={`pointer-events-none absolute inset-0 h-full w-full opacity-[0.07] ${claro ? 'hidden' : ''}`} aria-hidden>
         <circle cx="12%" cy="78%" r="14%" fill="#fff" />
         <rect x="78%" y="8%" width="20%" height="20%" fill="#fff" transform="rotate(18)" />
         <circle cx="90%" cy="85%" r="8%" fill="#fff" />
       </svg>
 
       {/* Reloj y puntos, a la izquierda: a la derecha están el sonido y la pantalla completa */}
-      <div className="relative z-10 flex items-center gap-[1.6cqmin] px-[2cqmin] pt-[2cqmin]">
+      <div className={`relative z-10 flex items-center gap-[1.6cqmin] px-[2cqmin] pt-[2cqmin] ${claro ? 'hidden' : ''}`}>
         <div
           className="grid size-[clamp(48px,11cqmin,100px)] shrink-0 place-items-center rounded-full bg-[#864cbf] font-bold text-white shadow-lg tabular-nums"
           style={{ fontSize: 'clamp(20px, 5cqmin, 46px)' }}
@@ -171,11 +196,14 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
       </div>
 
       {/* Pregunta, grande y al centro */}
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-[2cqmin] px-[3cqmin] py-[2cqmin]">
-        <div key={n} className="entrar w-full max-w-[min(92cqw,860px)] rounded-[1.6cqmin] bg-white px-[3cqmin] py-[2.4cqmin] text-[#2b2d5c] shadow-xl">
+      <div className={`relative z-10 flex min-h-0 flex-1 flex-col gap-[2cqmin] px-[3cqmin] py-[2cqmin] ${claro ? 'items-start justify-start px-[4cqmin] [&_*]:text-left' : 'items-center justify-center'}`}>
+        <div
+          key={n}
+          className={`entrar w-full max-w-[min(92cqw,860px)] ${claro ? "text-[#172031] [font-family:'Shantell_Sans',cursive] [&_*]:font-bold" : 'rounded-[1.6cqmin] bg-white px-[3cqmin] py-[2.4cqmin] text-[#2b2d5c] shadow-xl'}`}
+        >
           <Enunciado reto={pregunta.reto} tam="clamp(26px, 7cqmin, 64px)" />
         </div>
-        {fase === 'lee' && (
+        {fase === 'lee' && !claro && (
           <div className="flex w-[min(70cqw,520px)] flex-col items-center gap-[1.4cqmin] text-white">
             <p className="font-bold" style={{ fontSize: 'clamp(15px, 3.6cqmin, 32px)' }}>
               Pregunta {n} de {total}
@@ -188,10 +216,14 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
       </div>
 
       {/* Respuestas */}
-      <div className="relative z-10 grid grid-cols-2 gap-[1.4cqmin] p-[2cqmin] pt-0" style={{ height: '42%' }}>
+      <div
+        className={`relative z-10 grid gap-[1.4cqmin] p-[2cqmin] pt-0 ${claro ? 'grid-cols-1 px-[4cqmin] pb-[4cqmin] gap-[2cqmin]' : 'grid-cols-2'}`}
+        style={{ height: claro ? undefined : '42%' }}
+      >
         {pregunta.opciones.map((o, i) => {
-          const correcta = o === pregunta.reto.respuesta
-          const apagada = fase === 'resultado' && !correcta
+          // En la tarea solo se marca la que eligió: la correcta no se revela.
+          const correcta = o === pregunta.reto.respuesta && (!claro || elegida === i)
+          const apagada = fase === 'resultado' && (claro ? elegida !== i : !correcta)
           return (
             <button
               key={`${n}-${o}`}
@@ -200,8 +232,8 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
               onClick={(e) => e.detail === 0 && responder(i)}
               disabled={fase !== 'responde'}
               aria-keyshortcuts={String(i + 1)}
-              className={`relative flex items-center gap-[2cqmin] rounded-[1cqmin] px-[2.4cqmin] text-left font-bold text-white shadow-[0_0.6cqmin_0_rgb(0_0_0/0.25)] transition ${fase === 'lee' ? 'opacity-0' : ''} ${apagada ? 'opacity-35' : ''} ${elegida === i && fase === 'resultado' ? 'ring-[0.6cqmin] ring-white' : ''}`}
-              style={{ background: FICHAS[i].color, fontSize: `max(16px, calc(clamp(24px, 7cqmin, 48px) * ${[...o].length > 18 ? 0.6 : [...o].length > 9 ? 0.75 : 1}))` } as CSSProperties}
+              className={`relative flex items-center gap-[2cqmin] text-left font-bold text-white ${claro ? 'min-h-[clamp(56px,11cqh,96px)] rounded-2xl px-5 py-3' : 'rounded-[1cqmin] px-[2.4cqmin]'} shadow-[0_0.6cqmin_0_rgb(0_0_0/0.25)] transition ${fase === 'lee' ? 'opacity-0' : ''} ${apagada ? 'opacity-35' : ''} ${elegida === i && fase === 'resultado' ? 'ring-[0.6cqmin] ring-white' : ''}`}
+              style={{ background: FICHAS[i].color, fontSize: claro ? 'clamp(17px, 4.4cqmin, 26px)' : `max(16px, calc(clamp(24px, 7cqmin, 48px) * ${[...o].length > 18 ? 0.6 : [...o].length > 9 ? 0.75 : 1}))` } as CSSProperties}
             >
               <Forma i={i} className="size-[clamp(24px,6cqmin,56px)] shrink-0" />
               <span className="min-w-0 flex-1 leading-tight [text-shadow:0_0.1em_0_rgb(0_0_0/0.25)]">
@@ -225,7 +257,7 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
           <span className="font-bold" style={{ fontSize: 'clamp(24px, 7cqmin, 64px)' }}>
             {acerto ? '¡Correcto!' : elegida === null ? '¡Se acabó el tiempo!' : 'Incorrecto'}
           </span>
-          <span className="rounded-full bg-black/25 px-[2cqmin] py-[0.4cqmin] font-semibold" style={{ fontSize: 'clamp(15px, 3.6cqmin, 32px)' }}>
+          <span className={`rounded-full bg-black/25 px-[2cqmin] py-[0.4cqmin] font-semibold ${claro ? 'hidden' : ''}`} style={{ fontSize: 'clamp(15px, 3.6cqmin, 32px)' }}>
             {acerto ? `+ ${num(ganados)}` : (
               <>
                 Era: <TextoMat texto={pregunta.reto.respuesta} />
