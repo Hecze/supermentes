@@ -163,6 +163,8 @@ export function CancionesExistentes({ ficha, plegado }: { ficha: Ficha; plegado?
   if (!todas) return null
   const { delTema, otras } = cancionesDelTema(todas, ficha)
   if (!delTema.length && !otras.length) {
+    // Plegado va debajo de otras canciones (las del banco o la recién creada): ahí el aviso confunde.
+    if (plegado) return null
     return (
       <p className="rounded-2xl border border-dashed border-line px-5 py-4 text-ink-soft">
         Todavía no tenemos canciones ya hechas de {ficha.area} para {ficha.grado}. Crea una nueva aquí abajo.
