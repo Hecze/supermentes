@@ -34,7 +34,7 @@ Se puede entregar temprano y corregir después; cualquier integrante la actualiz
 2. **URL de la presentación:** https://claude.ai/artifact/Vbx4ZRLX8eDRKFCyLz6UiV (copia en `presentacion/`; compartirla por link antes de entregar).
 3. **URL del repo:** https://github.com/Hecze/supermentes
 4. **Descripción en Markdown:** problema, para quién, cómo funciona y **limitaciones**
-   (`--file ./proyecto.md`).
+   (`sh submit/enviar.sh --enviar`, lee `submit/`).
 
 Probar app y presentación en una **ventana privada**, sin sesión iniciada ni archivos locales.
 La descripción y los avances se hacen públicos: nada de claves, tokens ni datos de usuarios.
