@@ -5,7 +5,7 @@ import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useBucle, useTeclas, useTemporizadores } from '../motor/bucle'
 import { CuentaRegresiva } from '../motor/CuentaRegresiva'
-import { Enunciado, Flotante, TextoMat, colorBoton, elogio } from '../motor/piezas'
+import { Enunciado, Flotante, TextoMat, colorBoton, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -13,11 +13,6 @@ const SEGUNDOS = 60
 
 function columnas(n: number) {
   return n <= 4 ? 2 : n <= 9 ? 3 : 4
-}
-
-function tamTexto(t: string) {
-  const n = [...t].length
-  return n <= 3 ? 1 : n <= 6 ? 0.78 : n <= 10 ? 0.6 : 0.5
 }
 
 export default function BotonesRapidos({ contenido, ritmo, semilla, terminar }: PropsJuego) {
@@ -155,7 +150,7 @@ export default function BotonesRapidos({ contenido, ritmo, semilla, terminar }: 
               onPointerDown={() => elegir(o, i)}
               onClick={(e) => e.detail === 0 && elegir(o, i)}
               className={`b3d sombra-texto flex min-h-[clamp(52px,12cqh,120px)] items-center justify-center px-[1cqmin] py-[1.4cqmin] ${bien === o ? 'bien' : ''} ${ronda.apagadas.has(o) ? 'mal apagado' : ''}`}
-              style={{ ...colorBoton(i), fontSize: `max(16px, calc(clamp(22px, 6.4cqmin, 56px) * ${tamTexto(o)}))` }}
+              style={{ ...colorBoton(i), fontSize: letraOpciones(ronda.opciones, `${88 / col}cqw`, 'clamp(24px, 6.4cqmin, 56px)') }}
             >
               <TextoMat texto={o} />
             </button>
