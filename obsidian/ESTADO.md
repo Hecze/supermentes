@@ -42,6 +42,7 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - `obsidian/DATOS.md`: cifras con fuente (horas extra del docente, aprendizajes, cuánto pagan, costos de IA).
 - `presentacion/`: el deck del pitch (link en su README).
 - `obsidian/GTM.md`: tracción para el jurado, quién paga y guiones de TikTok.
+- `obsidian/entrevistas/`: entrevistas con docentes (la del 18-oct con Lucho y Yessly: exámenes, balotarios, material extra, precio S/ 10–15).
 - `obsidian/MVP.md`: qué tiene que funcionar para la entrega y qué no hacer.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/VISION.md`: visión y principios del producto.
