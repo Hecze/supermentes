@@ -10,6 +10,8 @@
 
 Preparar material que enganche a los alumnos toma horas, y sin él los alumnos se distraen. Hoy los docentes compran paquetes de sesiones y fichas por Facebook y WhatsApp. Las herramientas con IA que existen (MagicSchool, SchoolHub) están pensadas para otros países y ninguna trabaja con el Currículo Nacional de Educación Básica (CNEB), que es con lo que el director revisa al docente.
 
+Y las tareas para la casa ya no sirven para saber si el alumno aprendió: muchas se resuelven copiando la pregunta en ChatGPT.
+
 ## Para quién
 
 Docentes de primaria del Perú, sobre todo de colegios públicos. Tienen poca experiencia digital y preparan la clase en laptop. Sus alumnos practican en casa en el celular de sus papás.
@@ -18,7 +20,7 @@ Docentes de primaria del Perú, sobre todo de colegios públicos. Tienen poca ex
 
 1. **Busca tu tema** como en YouTube: mientras escribe salen los temas del Currículo Nacional de su grado. Un clic y el tema queda creado con su competencia y sus desempeños oficiales.
 2. **Elige lo que necesita** para su clase:
-   - **Juego para el celular**: 17 juegos (concurso tipo Kahoot, Vuela cóndor, Corre cuy, ¿Verdad o mentira?, memoria, pupiletras…). Lo manda al grupo de WhatsApp de las familias con un link o un QR y los niños juegan sin cuenta.
+   - **Juego para el celular**: 17 juegos (concurso tipo Kahoot, Vuela cóndor, Corre cuy, ¿Verdad o mentira?, memoria, pupiletras…). Lo manda al grupo de WhatsApp de las familias con un link o un QR y los niños juegan sin cuenta. Los juegos con contador, como el Concurso con su reloj por pregunta, no dan tiempo de copiar la pregunta en ChatGPT: el docente ve lo que el alumno sabe de verdad.
    - **Resultados de los alumnos**: el docente ve quién jugó, su mejor puntaje y sus estrellas.
    - **Canción**: 206 canciones que ya existen en YouTube para 1.º a 6.º, o una nueva con ritmo peruano (festejo, huayno, cumbia).
    - **Examen, práctica y balotario** listos para imprimir, como los pidieron los profes: con su clave (respuesta y pasos de cada pregunta), "otra versión", Fila A y B para que no se copien y misceláneas de varios temas.
@@ -41,7 +43,7 @@ Un director o un jurado puede preguntar "¿por qué esto cumple el currículo?".
 - **Juegos compartidos de verdad**: link `/j/CODIGO` y QR, sin cuenta para el alumno, y resultados para el docente.
 - **Landing con lista de espera** real, con enlace para invitar y registro de dónde llega cada docente.
 
-Stack: Vite + React, funciones en Vercel y Vercel Blob para los datos, monorepo con Turborepo. IA: Claude por OpenRouter; búsqueda de videos y fichas con Exa.
+Stack: Vite + React en Cloudflare Workers, con D1 (base de datos) y R2 (archivos), cuentas con Clerk, monorepo con Turborepo. IA: Claude por OpenRouter; búsqueda de videos y fichas con Exa.
 
 ## Tracción
 
