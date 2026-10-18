@@ -49,6 +49,52 @@ function sinCuentaGuardado() {
   }
 }
 
+const CORREO_DEMO = 'hectorzerrillo85@gmail.com'
+
+/** Entra con la cuenta de demostración sin esperar el código del correo (api/entrar-demo.ts). */
+function EntrarSinCodigo() {
+  const clerk = useClerk()
+  const [estado, setEstado] = useState<'listo' | 'entrando' | 'error'>('listo')
+
+  async function entrar() {
+    setEstado('entrando')
+    try {
+      const r = await fetch('/api/entrar-demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: CORREO_DEMO }),
+      })
+      const datos = (await r.json().catch(() => null)) as { token?: string; error?: string } | null
+      if (!r.ok || !datos?.token) throw new Error(datos?.error ?? 'No pudimos entrar.')
+      if (!clerk.client) throw new Error('Clerk todavía no está listo.')
+      const ingreso = await clerk.client.signIn.create({ strategy: 'ticket', ticket: datos.token })
+      if (ingreso.status !== 'complete' || !ingreso.createdSessionId) throw new Error('No se pudo completar el ingreso.')
+      await clerk.setActive({ session: ingreso.createdSessionId })
+      window.location.replace('/app/')
+    } catch {
+      setEstado('error')
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <button
+        type="button"
+        onClick={entrar}
+        disabled={estado === 'entrando'}
+        className="inline-flex h-11 items-center justify-center rounded-xl border-2 border-line bg-surface px-4 font-semibold transition hover:bg-surface-2 disabled:opacity-60"
+      >
+        {estado === 'entrando' ? 'Entrando…' : 'Entrar sin código'}
+      </button>
+      {estado === 'error' ? (
+        <p className="text-sm text-danger">No pudimos entrar con esa cuenta. Intenta otra vez.</p>
+      ) : (
+        <p className="text-xs text-ink-soft">Cuenta de Hector · no envía código al correo.</p>
+      )}
+    </div>
+  )
+}
+
 /** Sin cuenta se ve la pantalla de entrar, salvo que haya elegido "Probar sin cuenta" en este navegador. */
 function Puerta({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth()
@@ -67,6 +113,7 @@ function Puerta({ children }: { children: ReactNode }) {
       }}
     >
       <SignIn routing="path" path="/app" withSignUp forceRedirectUrl="/app/" signUpForceRedirectUrl="/app/" />
+      <EntrarSinCodigo />
     </Entrar>
   )
 }
