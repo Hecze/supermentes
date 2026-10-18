@@ -38,7 +38,7 @@ try {
     console.error(`✗ Exámenes listos: ${examenes.errores.length} problemas:\n- ${examenes.errores.slice(0, 40).join('\n- ')}${examenes.errores.length > 40 ? '\n…' : ''}`)
     process.exitCode = 1
   } else {
-    console.log(`✓ Exámenes listos (${examenes.grados.join(', ')}): ${examenes.tipos} tipos de pregunta, ${examenes.citas} citas tal cual; los ${examenes.temas} temas tienen examen y ninguna versión sale rota.`)
+    console.log(`✓ Exámenes listos (${examenes.grados.join(', ')}): ${examenes.tipos} tipos de pregunta, ${examenes.citas} citas tal cual; los ${examenes.temas} temas tienen examen, práctica y balotario y ninguna versión sale rota; cada pregunta con números trae sus pasos para la clave; ${examenes.problemas} problemas con sus pasos.`)
   }
 } finally {
   await vite.close()

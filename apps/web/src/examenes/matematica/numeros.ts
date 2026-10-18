@@ -9,9 +9,12 @@ import { alternativas, nombre, soles } from '../util'
 
 const P4 = 'primaria-4'
 
-/** Algunos generadores descartan casos feos y vuelven a intentar. */
+/**
+ * Algunos generadores descartan casos feos y vuelven a intentar. Con 60 intentos, ¿Cuánto le falta? se rendía en 1 de
+ * cada 400 semillas y el examen no se armaba; los intentos de más solo cambian esas semillas (las demás salen igual).
+ */
 export function hasta<T>(intento: () => T | null): T {
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 300; i++) {
     const r = intento()
     if (r !== null) return r
   }
@@ -27,6 +30,36 @@ function erroresDeLectura(n: number) {
   const sinCeros = Number(c.filter((d) => d !== 0).join('') || 0)
   const alReves = deCifras([...c].reverse())
   return [sinCeros, alReves, n + 100, n - 10, n + 10, n - 100, n + 1000, deCifras([c[0], c[2], c[1], c[3]])]
+}
+
+// ---------- Pasos de resolución (clave del docente) ----------
+
+/** "a", "a y b", "a, b y c". */
+const y = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}` : xs[0])
+
+const POSICIONES = ['UM', 'C', 'D', 'U']
+const VALOR_POS = [1000, 100, 10, 1]
+
+/** "3000 + 0 + 40 + 5 = 3045": el número armado con lo que vale cada cifra, ceros incluidos. */
+const sumaDeValores = (c: number[]) => `${c.map((d, i) => num(d * VALOR_POS[i])).join(' + ')} = ${num(deCifras(c))}`
+
+/** "3 en UM, 0 en C, 4 en D, 5 en U". */
+const porPosicion = (c: number[]) => c.map((d, i) => `${d} en ${POSICIONES[i]}`).join(', ')
+
+const UNIDADES: [string, string][] = [
+  ['unidad de millar', 'unidades de millar'],
+  ['centena', 'centenas'],
+  ['decena', 'decenas'],
+  ['unidad', 'unidades'],
+]
+
+/** "3045 tiene 3 unidades de millar, 0 centenas, 4 decenas y 5 unidades". */
+const desglose = (c: number[]) => `${num(deCifras(c))} tiene ${y(c.map((d, i) => `${d} ${UNIDADES[i][d === 1 ? 0 : 1]}`))}`
+
+/** El cero del medio es donde más se equivocan: "En C no hay cuentas: se escribe 0". */
+function ceroEn(c: number[], texto: (lugares: string) => string): string[] {
+  const vacias = POSICIONES.filter((_, i) => i > 0 && c[i] === 0)
+  return vacias.length ? [texto(y(vacias))] : []
 }
 
 // ---------- El dinero del Perú ----------
@@ -105,6 +138,20 @@ function bolsillo(azar: Azar, min = 1000, max = 2999): Bolsillo {
   })
 }
 
+/**
+ * Cómo se cuenta el dinero: "Billetes: 6 × 200 = 1200; 2 × 100 = 200", "Monedas: 5 + 5 + 2 + 1 = 13" y la suma de
+ * esos subtotales ("1200 + 200 + 13", sin el resultado) para cerrar con el total.
+ */
+function contarDinero(b: Bolsillo): { pasos: string[]; suma: string } {
+  const valores = [...new Set(b.billetes)]
+  const subtotales = valores.map((v) => b.billetes.filter((x) => x === v).length * v)
+  const billetes = valores.map((v, i) => `${num(subtotales[i] / v)} × ${num(v)} = ${num(subtotales[i])}`).join('; ')
+  return {
+    pasos: [`Billetes: ${billetes}`, `Monedas: ${b.monedas.map(num).join(' + ')} = ${num(b.enMonedas)}`],
+    suma: [...subtotales, b.enMonedas].map(num).join(' + '),
+  }
+}
+
 export const dineroContar: TipoPregunta = {
   id: 'dinero-contar',
   nombre: 'Cuenta el dinero',
@@ -122,6 +169,7 @@ export const dineroContar: TipoPregunta = {
     const malas = distractores(b.total, [b.total - b.enMonedas, b.total + 200, b.total - 30, b.total + 10, b.total - 200, b.total + 100], { min: 1 })
     const alt = alternativas(azar, num(b.total), malas, 3)
     if (!alt) return null
+    const cuenta = contarDinero(b)
     return {
       forma: 'opciones',
       clave: `dinero:${b.billetes.join('-')}|${b.monedas.join('-')}`,
@@ -130,6 +178,7 @@ export const dineroContar: TipoPregunta = {
       pregunta: `Ahora responde: ¿Cuánto dinero tiene ${quien}?`,
       ...alt,
       alternativas: alt.alternativas.map((a) => `S/ ${a}`),
+      pasos: [...cuenta.pasos, `Total: ${cuenta.suma} = ${soles(b.total)}`],
     }
   },
 }
@@ -154,6 +203,7 @@ export const dineroFalta: TipoPregunta = {
     const malas = distractores(falta, [falta + b.enMonedas, falta + 10, falta - 10, falta + 100, falta - 100, b.total], { min: 1 })
     const alt = alternativas(azar, num(falta), malas, 4)
     if (!alt) return null
+    const cuenta = contarDinero(b)
     return {
       forma: 'opciones',
       clave: `falta:${b.billetes.join('-')}|${b.monedas.join('-')}`,
@@ -162,13 +212,12 @@ export const dineroFalta: TipoPregunta = {
       pregunta: `¿Cuánto le falta para tener ${soles(meta)}?`,
       ...alt,
       alternativas: alt.alternativas.map((a) => `S/ ${a}`),
+      pasos: [...cuenta.pasos, `Juntó: ${cuenta.suma} = ${soles(b.total)}`, `Le falta: ${num(meta)} − ${num(b.total)} = ${soles(falta)}`],
     }
   },
 }
 
 // ---------- El ábaco ----------
-
-const POSICIONES = ['UM', 'C', 'D', 'U']
 
 export function dibujoAbaco(cifras: number[] | null): Dibujo {
   const W = 340
@@ -211,8 +260,9 @@ export const abaco: TipoPregunta = {
         clave: `abaco:${n}`,
         enunciado: `Dibuja las cuentas en el ábaco para representar el número ${num(n)}.`,
         dibujo: dibujoAbaco(null),
-        respuesta: POSICIONES.map((p, i) => `${c[i]} en ${p}`).join(', '),
+        respuesta: porPosicion(c),
         espacio: 'dibujo',
+        pasos: [desglose(c), ...ceroEn(c, (l) => `En ${l} no se dibuja ninguna cuenta`), `En el ábaco: ${porPosicion(c)}`],
       }
     }
     const alt = alternativas(azar, num(n), distractores(n, erroresDeLectura(n), { min: 1 }).filter((x) => x.length >= 3), 4)
@@ -224,6 +274,7 @@ export const abaco: TipoPregunta = {
       dibujo: dibujoAbaco(c),
       pregunta: '¿Qué número representa?',
       ...alt,
+      pasos: [`En el ábaco: ${porPosicion(c)}`, ...ceroEn(c, (l) => `En ${l} no hay cuentas: se escribe 0`), sumaDeValores(c)],
     }
   },
 }
@@ -275,6 +326,13 @@ export function dibujoBaseDiez(c: number[]): Dibujo {
   return svg(x + 4, piso + 4, partes.join(''), c.map((d, i) => `${d} ${nombres[i]}`).join(', '))
 }
 
+const PIEZAS: [string, string][] = [
+  ['cubo', 'cubos'],
+  ['placa', 'placas'],
+  ['barra', 'barras'],
+  ['cubito', 'cubitos'],
+]
+
 export const baseDiez: TipoPregunta = {
   id: 'base-diez',
   nombre: 'Material Base Diez',
@@ -297,6 +355,10 @@ export const baseDiez: TipoPregunta = {
         dibujo: dibujoBaseDiez([cubos, 0, 0, 0]),
         pregunta: `¿Cuántas ${que.cosa} necesitas para formar la misma cantidad?`,
         ...alt,
+        pasos: [
+          `${num(1000)} = ${que.vale} × ${num(1000 / que.vale)}: cada cubo equivale a ${que.vale} ${que.cosa}`,
+          `${cubos} cubos: ${cubos} × ${que.vale} = ${num(r)} ${que.cosa}`,
+        ],
       }
     }
     const c = [entero(azar, 1, 3), entero(azar, 0, 6), entero(azar, 0, 9), entero(azar, 0, 9)]
@@ -311,6 +373,7 @@ export const baseDiez: TipoPregunta = {
       dibujo: dibujoBaseDiez(c),
       pregunta: '¿Qué número se formó?',
       ...alt,
+      pasos: [c.map((d, i) => `${d} ${PIEZAS[i][d === 1 ? 0 : 1]} = ${num(d * VALOR_POS[i])}`).join('; '), sumaDeValores(c)],
     }
   },
 }
@@ -367,6 +430,7 @@ export const tablero: TipoPregunta = {
         dibujo: dibujoTablero(c),
         pregunta: `¿Cuánto vale la cifra ${d}?`,
         ...alt,
+        pasos: [`En ${num(deCifras(c))}, el ${d} está en las ${UNIDADES[p][1]} (${POSICIONES[p]})`, `Vale ${d} × ${num(VALOR_POS[p])} = ${num(v)}`],
       }
     }
     if (modo < 0.7) {
@@ -381,17 +445,20 @@ export const tablero: TipoPregunta = {
         dibujo: dibujoTablero(c, true),
         pregunta: '¿Qué número se formó?',
         ...alt,
+        pasos: [`Fichas: ${porPosicion(c)}`, ...ceroEn(c, (l) => `En ${l} no hay fichas: se escribe 0`), sumaDeValores(c)],
       }
     }
     const c = numeroConCero(azar)
     const n = deCifras(c)
+    const respuesta = POSICIONES.map((p, i) => `${p}: ${c[i]}`).join(' · ')
     return {
       forma: 'abierta',
       clave: `escribe:${n}`,
       enunciado: `Escribe cada cifra del número ${num(n)} en su lugar del tablero.`,
       dibujo: dibujoTablero(['', '', '', '']),
-      respuesta: POSICIONES.map((p, i) => `${p}: ${c[i]}`).join(' · '),
+      respuesta,
       espacio: 'dibujo',
+      pasos: [desglose(c), `En el tablero va ${respuesta}`],
     }
   },
 }

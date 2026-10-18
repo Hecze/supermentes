@@ -11,7 +11,8 @@ import { GRUPO_FORMA } from './matematica/forma'
 import { GRUPO_FRACCIONES_MEDIDAS } from './matematica/fracciones-medidas'
 import { GRUPO_OPERACIONES } from './matematica/operaciones'
 import { GRUPO_REGULARIDAD } from './matematica/regularidad'
-import type { Grupo, TipoPregunta } from './tipos'
+import { problemasDelTema } from './problemas'
+import type { Grupo, TemaProblemas, TipoPregunta } from './tipos'
 
 const BASE: Grupo = {
   tipos: [...TIPOS_NUMEROS, ...TIPOS_CALCULO],
@@ -50,7 +51,9 @@ const GRUPOS: Record<string, Grupo[]> = {
   'primaria-4': [BASE, GRUPO_OPERACIONES, GRUPO_FRACCIONES_MEDIDAS, GRUPO_REGULARIDAD, GRUPO_FORMA, GRUPO_DATOS],
 }
 
-export const TIPOS = new Map<string, TipoPregunta>([...Object.values(GRUPOS).flatMap((gs) => gs.flatMap((g) => g.tipos)), ...TIPOS_DEL_BANCO].map((t) => [t.id, t]))
+export const TIPOS = new Map<string, TipoPregunta>(
+  [...Object.values(GRUPOS).flatMap((gs) => gs.flatMap((g) => g.tipos)), problemasDelTema, ...TIPOS_DEL_BANCO].map((t) => [t.id, t]),
+)
 
 /** Los tipos con dibujos y números del tema, en el orden en que se eligieron. */
 export function tiposMatematica(gradoId: string, tema: string): TipoPregunta[] {
@@ -62,16 +65,20 @@ export function tiposMatematica(gradoId: string, tema: string): TipoPregunta[] {
   return [...new Set(ids)].map((id) => TIPOS.get(id)!).filter((x) => x?.citas?.[gradoId])
 }
 
-/** Todos los tipos de pregunta que puede llevar el examen del tema. Vacío si el tema no tiene banco ni tipos propios. */
-export function tiposDelTema(gradoId: string, areaId: string, tema: string, banco: TemaBanco | null): TipoPregunta[] {
+/**
+ * Todos los tipos de pregunta que puede llevar una hoja del tema: los de dibujos y números (Matemática), los problemas
+ * del tema con sus pasos y los del banco. Vacío si el tema no tiene banco ni tipos propios.
+ */
+export function tiposDelTema(gradoId: string, areaId: string, tema: string, banco: TemaBanco | null, problemas: TemaProblemas | null = null): TipoPregunta[] {
   const propios = areaId === 'matematica' ? tiposMatematica(gradoId, tema) : []
-  if (!banco) return propios
+  const conProblemas = (problemas?.problemas.length ?? 0) >= 3 ? [problemasDelTema] : []
+  if (!banco) return [...propios, ...conProblemas]
   const delBanco = TIPOS_DEL_BANCO.filter((t) => {
     // Solo los que el banco del tema puede armar (por ejemplo, hace falta tener parejas para unir).
     for (let s = 1; s <= 3; s++) if (t.generar({ azar: () => (s * 0.31) % 1, banco })) return true
     return false
   })
-  return [...propios, ...delBanco]
+  return [...propios, ...conProblemas, ...delBanco]
 }
 
 /** De dónde sale la cita de un tipo: la suya para ese grado, o la del tema en el banco. */

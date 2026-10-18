@@ -18,7 +18,7 @@
   --examen: #2453cc;
   --juego: #0f7f55;
   --crucigrama: #b05a06;
-  --adaptar: #7547cc;
+  --sesion: #7547cc;
   --ok: #0f7f55;
   --warn: #9a6210;
   --danger: #c2362f;
@@ -43,7 +43,7 @@
     --examen: #8aabff;
     --juego: #5bd69b;
     --crucigrama: #ffb45e;
-    --adaptar: #bfa2ff;
+    --sesion: #bfa2ff;
     --ok: #5bd69b;
     --warn: #f2c24e;
     --danger: #ff8a80;
@@ -67,7 +67,7 @@
   --examen: #8aabff;
   --juego: #5bd69b;
   --crucigrama: #ffb45e;
-  --adaptar: #bfa2ff;
+  --sesion: #bfa2ff;
   --ok: #5bd69b;
   --warn: #f2c24e;
   --danger: #ff8a80;
@@ -90,7 +90,7 @@
   --color-examen: var(--examen);
   --color-juego: var(--juego);
   --color-crucigrama: var(--crucigrama);
-  --color-adaptar: var(--adaptar);
+  --color-sesion: var(--sesion);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
@@ -240,7 +240,7 @@ h3 {
     --examen: #2453cc;
     --juego: #0f7f55;
     --crucigrama: #b05a06;
-    --adaptar: #7547cc;
+    --sesion: #7547cc;
     --ok: #0f7f55;
     color-scheme: light;
   }

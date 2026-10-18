@@ -9,7 +9,6 @@ import {
   JUEGO_EJEMPLO,
   JUEGO_SUSTANTIVOS,
   cancionEjemplo,
-  examenEjemplo,
   juegoDesdeVocabulario,
   sesionEjemplo,
 } from './ejemplos'
@@ -51,10 +50,6 @@ export const mockApi: Api = {
     // Sin backend no hay música: se dice claro en vez de mostrar un reproductor que no suena.
     await esperar(600)
     throw new Error('Esta es la versión de prueba: aquí no se crea música de verdad.')
-  },
-  async adaptarExamen(_ficha, { examen, ...opciones }) {
-    await esperar(1500)
-    return examenEjemplo(opciones, examen.name)
   },
   async generarJuego(ficha) {
     await esperar(1200)

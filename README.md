@@ -1,6 +1,6 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama, un examen listo para imprimir (en 4.º, con otra versión y Fila A y B cuando quiera; ver `apps/web/src/examenes`) o su propio examen adaptado (sube el PDF y recibe un PDF ambientado en lo que le gusta a la clase o adaptado para estudiantes con TDAH, dislexia, TEA o que necesitan lectura fácil).
+Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una canción, un juego web, un crucigrama, o las hojas del tema listas para imprimir: examen, práctica y balotario, con su clave (en 4.º; ver `apps/web/src/examenes`).
 
 Proyecto para Hack the Andes 2026.
 
@@ -40,7 +40,7 @@ Pensado para docentes con poca experiencia digital: simple a primera vista y pot
 - **No es un chat.** Los temas se eligen desde un solo selector, y "Buscar otro tema" abre un buscador del currículo en una ventana.
 - **El resultado se ve como una hoja.** Lo que ves es lo que se imprime, y cualquier texto se corrige con un clic.
 - **Lo avanzado queda plegado** en "Más opciones" o "Cambiar…", nunca en la primera vista.
-- **Palabras del aula, no técnicas.** "Le cuesta concentrarse" antes que "TDAH"; los créditos solo aparecen bajo el botón que los gasta.
+- **Palabras del aula, no técnicas.** "Balotario" y "clave", como dicen los profes; los créditos solo aparecen bajo el botón que los gasta.
 
 ## Estado
 
@@ -54,7 +54,7 @@ Ya funciona sin backend:
 - **Resultados de los alumnos:** la primera vez, el niño escribe su nombre en un popup (sin cuenta; el código ya viene en el link). Cuando supera su puntaje, se guarda, y el docente ve en **Resultados de juegos** (en el menú, sin importar el tema abierto) una tabla simple: quién jugó, su puntaje más alto y sus estrellas. Los ejercicios de cálculo cambian en cada intento, así que reintentar no es memorizar.
 - **Sustento curricular en cada juego:** el icono "i" muestra, con texto oficial del MINEDU, qué competencia y desempeño abarca el tema y qué parte exacta del desempeño practica el juego. Cada nivel de cálculo cita su desempeño grado por grado y `npm run verificar:curriculo` comprueba que la cita exista tal cual. Las miniaturas de los juegos muestran el contenido del tema.
 - **Enviar por WhatsApp:** abre WhatsApp con el mensaje para la clase.
-- **Imprimir:** imprime solo la hoja (examen, crucigrama o letra), siempre en blanco. El examen adaptado además se descarga como PDF (`apps/web/src/lib/pdfExamen.ts`, con jsPDF en el navegador), y aparte el PDF de respuestas.
+- **Imprimir:** imprime solo la hoja (examen, crucigrama o letra), siempre en blanco. Las hojas del examen además se descargan como PDF, con su clave aparte (`apps/web/src/examenes/pdf.ts`, con jsPDF en el navegador).
 
 ## Correr el proyecto
 
@@ -96,17 +96,15 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | `POST /api/ficha` | JSON `EntradaTema`: `texto` (tema del currículo), `gradoId`, `areaId`, `grado`, `area`, `competencia`, `capacidad`, `desempenos`, `duracion` | `Ficha` (la app la usa para completar la ficha en segundo plano) |
 | `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
 | `POST /api/audio` | `{ cancion }` (con `opciones.estilo` opcional) | `AudioCancion` (Lyria vía OpenRouter; se guarda en Blob y la misma canción vuelve a sonar sin pagar) |
-| `POST /api/examen` | multipart: `ficha`, `opciones` (`{ interes, necesidades }`), `examen` (PDF o foto) | `Examen` adaptado |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
 | `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
 
-La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
+La ficha, las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 
-1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo), letra, examen adaptado y juego.
+1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo), letra y juego.
 2. Audio de canciones con ElevenLabs.
 3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
-4. Pictogramas de ARASAAC en el examen adaptado para TEA.

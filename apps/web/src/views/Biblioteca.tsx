@@ -1,10 +1,9 @@
-import { BookMarked, FileText, Library, Search, Users } from 'lucide-react'
+import { BookMarked, Library, Search, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, type HerramientaId, type Material } from '../api'
 import { GRADOS, HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { Boton, Chip, IconoHerramienta, Tarjeta, cx } from '../components/ui'
-import { BibliotecaExamenes } from './BibliotecaExamenes'
 import { VisorCurriculo } from './Curriculo'
 
 function MaterialesComunidad() {
@@ -122,7 +121,6 @@ function MaterialesComunidad() {
 
 const PESTANAS = [
   { id: 'curriculo', nombre: 'Currículo nacional', icono: BookMarked },
-  { id: 'examenes', nombre: 'Exámenes listos', icono: FileText },
   { id: 'materiales', nombre: 'Materiales de la comunidad', icono: Users },
 ] as const
 
@@ -152,7 +150,7 @@ export function Biblioteca() {
           ))}
         </div>
       </header>
-      {pestanaBiblioteca === 'curriculo' ? <VisorCurriculo /> : pestanaBiblioteca === 'examenes' ? <BibliotecaExamenes /> : <MaterialesComunidad />}
+      {pestanaBiblioteca === 'curriculo' ? <VisorCurriculo /> : <MaterialesComunidad />}
     </>
   )
 }

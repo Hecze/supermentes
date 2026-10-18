@@ -2,10 +2,10 @@ import {
   ArrowRight,
   BookMarked,
   Camera,
+  CircleCheck,
   FileText,
   Gamepad2,
   Grid3x3,
-  HeartHandshake,
   Laptop,
   Music,
   PenLine,
@@ -33,12 +33,12 @@ function Titulo({ children, className }: { children: ReactNode; className?: stri
 const PASOS = [
   {
     titulo: 'Crea tu tema',
-    texto: 'Escribe qué vas a enseñar y el grado. Si quieres, súmale una foto de la página del libro.',
+    texto: 'Búscalo en el Currículo Nacional: el grado y el curso vienen con él.',
     color: 'var(--examen)',
   },
   {
     titulo: 'Elige lo que necesitas',
-    texto: 'Una canción, un juego, un crucigrama o tu examen adaptado. Solo lo que vas a usar.',
+    texto: 'Un examen, una práctica, un balotario, una canción, un juego o un crucigrama. Solo lo que vas a usar.',
     color: 'var(--cancion)',
   },
   {
@@ -50,8 +50,8 @@ const PASOS = [
 
 const HERRAMIENTAS: { nombre: string; texto: string; color: string; icono: ComponentType<LucideProps>; ancho?: boolean }[] = [
   {
-    nombre: 'Adapta tu examen',
-    texto: 'Sube tu examen de siempre y recibe un PDF listo para imprimir: contado con lo que le gusta a tu clase o adaptado para quien le cuesta concentrarse o leer. Evalúa exactamente lo mismo.',
+    nombre: 'Examen, práctica y balotario',
+    texto: 'Listos para imprimir apenas abres tu tema, con su clave: la respuesta y los pasos de cada pregunta. Otra versión con otros números cuando quieras, y Fila A y B para que no se copien.',
     color: 'var(--examen)',
     icono: FileText,
     ancho: true,
@@ -80,7 +80,7 @@ const AULA: { titulo: string; texto: string; icono: ComponentType<LucideProps> }
   { titulo: 'Alineado al CNEB', texto: 'Cada tema se conecta con las competencias y capacidades del Currículo Nacional.', icono: BookMarked },
   { titulo: 'Sin un equipo por alumno', texto: 'Todo se imprime en blanco y negro. Los juegos se proyectan o se abren con un QR.', icono: Printer },
   { titulo: 'Tú decides el contenido', texto: 'La app sugiere; tú eliges las palabras, las preguntas y el tono.', icono: SlidersHorizontal },
-  { titulo: 'Inclusión sin diagnósticos', texto: 'Adaptaciones prácticas para el aula, para coordinar con el SAANEE y la familia.', icono: HeartHandshake },
+  { titulo: 'Con su clave', texto: 'Cada hoja trae su clave con la respuesta y los pasos de cada pregunta, para corregir rápido.', icono: CircleCheck },
   { titulo: 'Los alumnos entran sin cuenta', texto: 'Escanean el QR o abren el enlace que mandas por WhatsApp. Nada que instalar.', icono: QrCode },
   { titulo: 'Hecho para tu laptop', texto: 'Pensado para preparar la clase con calma en la computadora y llevarla impresa o proyectada.', icono: Laptop },
 ]
