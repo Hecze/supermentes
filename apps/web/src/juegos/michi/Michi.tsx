@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, type CSSProperties } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useTeclas, useTemporizadores } from '../motor/bucle'
-import { Enunciado, TextoMat, colorBoton } from '../motor/piezas'
+import { Enunciado, TextoMat, colorBoton, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -191,11 +191,11 @@ export default function Michi({ contenido, ritmo, semilla, terminar }: PropsJueg
         </div>
       </div>
 
-      {/* La pregunta para ganarse la casilla */}
+      {/* La pregunta para ganarse la casilla: tapa el tablero entero, que si no se mezcla con las opciones */}
       {pregunta && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-[2.4cqmin] bg-[#1b1340]/55 p-[4cqmin]">
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-[2.4cqmin] bg-[#2a1c6b]/90 p-[4cqmin] backdrop-blur-sm">
           <div className="tarjeta-juego entrar w-full max-w-[min(90cqw,720px)] px-[4cqmin] py-[2.4cqmin]">
-            <p className="mb-[1cqmin] text-center font-semibold text-[#8a8fb8]" style={{ fontSize: 'clamp(13px, 2.8cqmin, 22px)' }}>
+            <p className="mb-[1cqmin] text-center font-semibold text-[#8a8fb8]" style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}>
               Responde bien y la casilla es tuya
             </p>
             <Enunciado reto={pregunta.reto} tam="clamp(22px, 6cqmin, 52px)" />
@@ -212,7 +212,7 @@ export default function Michi({ contenido, ritmo, semilla, terminar }: PropsJueg
                   disabled={!!r}
                   aria-keyshortcuts={String(i + 1)}
                   className={`b3d sombra-texto min-h-[clamp(54px,11cqh,110px)] px-[2cqmin] font-bold ${clase}`}
-                  style={{ ...colorBoton(i), fontSize: `calc(clamp(20px, 5.6cqmin, 46px) * ${[...o].length > 12 ? 0.62 : [...o].length > 6 ? 0.8 : 1})` } as CSSProperties}
+                  style={{ ...colorBoton(i), fontSize: letraOpciones(pregunta.opciones, pregunta.opciones.length === 3 ? '80cqw' : '38cqw', 'clamp(22px, 5.6cqmin, 46px)') } as CSSProperties}
                 >
                   <TextoMat texto={o} />
                 </button>
