@@ -1,14 +1,14 @@
 // Tira y afloja: dos equipos en la misma pantalla. Cada respuesta correcta jala la soga hacia su lado.
 // Inspirado en "Tug of War" (Arcademic Skill Builders). Pensado para la pizarra digital o la laptop con proyector:
 // cada equipo toca su mitad o usa sus teclas (A S D F y H J K L).
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useTeclas, useTemporizadores } from '../motor/bucle'
 import { Confeti } from '../motor/Confeti'
 import { CuentaRegresiva } from '../motor/CuentaRegresiva'
 import { Llama, LLAMAS } from '../motor/Llama'
-import { Enunciado, TextoMat, colorBoton } from '../motor/piezas'
+import { Enunciado, TextoMat, colorBoton, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -69,7 +69,7 @@ function Panel({
             onClick={(ev) => ev.detail === 0 && elegir(i)}
             aria-keyshortcuts={e.teclas[i].toUpperCase()}
             className="b3d sombra-texto relative flex min-h-[clamp(40px,8.5cqh,90px)] items-center justify-center px-[1cqmin] py-[0.8cqmin]"
-            style={{ ...colorBoton(i + (equipo === 'azul' ? 4 : 0)), fontSize: `max(14px, calc(clamp(16px, 4.4cqmin, 40px) * ${[...o].length > 8 ? 0.62 : [...o].length > 4 ? 0.8 : 1}))` }}
+            style={{ ...colorBoton(i + (equipo === 'azul' ? 4 : 0)), fontSize: letraOpciones(ronda.opciones, '19cqw', 'clamp(20px, 4.4cqmin, 40px)', 18) }}
           >
             <span aria-hidden className="absolute left-[0.5cqmin] top-[0.4cqmin] hidden rounded-[0.4em] bg-white/30 px-[0.5em] text-[clamp(10px,1.8cqmin,16px)] uppercase leading-normal [@media(pointer:fine)]:block">
               {e.teclas[i]}
@@ -89,9 +89,25 @@ export default function Soga({ contenido, ritmo, semilla, terminar }: PropsJuego
   const limite = ritmo === 1 ? 4 : 5
   const despues = useTemporizadores()
 
+  // Los retos salen de a pares parecidos (el k-ésimo de cada equipo): si a uno le toca «4 UM + 6 U», al otro no
+  // le toca «2 UM + 9 C + 7 D + 9 U». Se comparan por lo largo de la pregunta y de la respuesta.
+  const pares = useRef<Record<Equipo, Reto>[]>([])
+  const vistos = useRef<Record<Equipo, number>>({ rojo: 0, azul: 0 })
   const nueva = useCallback(
     (eq: Equipo): Ronda => {
-      const reto = fuentes[eq]()
+      const k = vistos.current[eq]++
+      if (!pares.current[k]) {
+        const peso = (x: Reto) => x.pregunta.length + x.respuesta.length * 2
+        const rojo = fuentes.rojo()
+        let azul = fuentes.azul()
+        for (let i = 0; i < 8; i++) {
+          const otro = fuentes.azul()
+          const mejor = Math.abs(peso(otro) - peso(rojo)) < Math.abs(peso(azul) - peso(rojo))
+          if (otro.pregunta !== rojo.pregunta && (azul.pregunta === rojo.pregunta || mejor)) azul = otro
+        }
+        pares.current[k] = { rojo, azul }
+      }
+      const reto = pares.current[k][eq]
       return { reto, opciones: opcionesDe(reto, 4, azar), id: Math.random() }
     },
     [fuentes, azar],
