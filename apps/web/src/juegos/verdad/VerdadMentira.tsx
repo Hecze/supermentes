@@ -113,7 +113,9 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
     if (ocupado.current || aviso) return
     ocupado.current = true
     const bien = diceVerdad === carta.verdad
-    setSalida(diceVerdad ? 'der' : 'izq')
+    // Si se equivocó, la carta se queda a la vista mientras lee el aviso: así ve qué decía.
+    if (bien) setSalida(diceVerdad ? 'der' : 'izq')
+    else soltar()
     const nAciertos = aciertos + (bien ? 1 : 0)
     const nRacha = bien ? racha + 1 : 0
     const nMejor = Math.max(mejorRacha, nRacha)
@@ -202,7 +204,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
               onPointerMove={alMover}
               onPointerUp={alSubir}
               onPointerCancel={alSubir}
-              className="absolute inset-0 flex touch-none select-none flex-col items-center justify-center rounded-[3cqmin] bg-white px-[4cqmin] py-[3cqmin] text-center text-[#2b2d5c] shadow-2xl"
+              className={`absolute inset-0 flex touch-none select-none flex-col items-center justify-center rounded-[3cqmin] bg-white px-[4cqmin] py-[3cqmin] text-center text-[#2b2d5c] shadow-2xl ${aviso ? 'temblar' : ''}`}
               style={{
                 cursor: 'grab',
                 transition: salida ? 'transform 0.35s ease-in, opacity 0.35s ease-in' : undefined,
@@ -233,7 +235,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
             </div>
           </div>
         </div>
-        <p className="mt-[2.6cqmin] text-white/85" style={{ fontSize: 'clamp(13px, 2.8cqmin, 22px)' }}>
+        <p className="mt-[2.6cqmin] text-white/85" style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}>
           Desliza la carta o toca un botón
         </p>
       </div>
@@ -242,7 +244,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
         <button
           type="button"
           onClick={() => responder(false)}
-          disabled={!!salida}
+          disabled={!!salida || !!aviso}
           aria-keyshortcuts="ArrowLeft"
           className="b3d flex min-h-[clamp(56px,13cqh,120px)] items-center justify-center gap-[1.5cqmin] font-bold"
           style={{ '--c': '#ff5d73', fontSize: 'clamp(20px, 5.6cqmin, 46px)' } as CSSProperties}
@@ -252,7 +254,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
         <button
           type="button"
           onClick={() => responder(true)}
-          disabled={!!salida}
+          disabled={!!salida || !!aviso}
           aria-keyshortcuts="ArrowRight"
           className="b3d flex min-h-[clamp(56px,13cqh,120px)] items-center justify-center gap-[1.5cqmin] font-bold"
           style={{ '--c': '#2fc46f', fontSize: 'clamp(20px, 5.6cqmin, 46px)' } as CSSProperties}
@@ -265,7 +267,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
         <button
           type="button"
           onClick={() => siguiente()}
-          className="entrar absolute inset-x-[5cqmin] top-[34%] z-20 mx-auto flex max-w-[min(90cqw,620px)] flex-col items-center gap-[1cqmin] rounded-[2.4cqmin] bg-[#e5484d] px-[4cqmin] py-[3cqmin] text-center text-white shadow-2xl"
+          className="entrar absolute inset-x-[5cqmin] bottom-[calc(5cqmin+clamp(56px,13cqh,120px))] z-20 mx-auto flex max-w-[min(90cqw,620px)] flex-col items-center gap-[1cqmin] rounded-[2.4cqmin] bg-[#e5484d] px-[4cqmin] py-[3cqmin] text-center text-white shadow-2xl"
         >
           <span className="font-bold" style={{ fontSize: 'clamp(22px, 6cqmin, 52px)' }}>
             ¡Ups!
