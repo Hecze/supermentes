@@ -116,6 +116,24 @@ export function guardarEnviado(e: Enviado) {
   }
 }
 
+/** Con cuenta: une los envíos de este navegador con los de la cuenta, en los dos lados (/api/mis-envios). */
+export async function sincronizarEnviados(token: string) {
+  try {
+    const res = await fetch('/api/mis-envios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ envios: enviados() }),
+    })
+    if (!res.ok) return
+    const { envios } = (await res.json()) as { envios?: Enviado[] }
+    if (!Array.isArray(envios)) return
+    localStorage.setItem(CLAVE_ENVIADOS, JSON.stringify(envios.filter((e) => e.codigo && e.clave)))
+    window.dispatchEvent(new Event('supermentes-enviados'))
+  } catch {
+    // Sin conexión quedan los de este navegador; se sincroniza la próxima vez.
+  }
+}
+
 export type FilaResultado = {
   id: string
   nombre: string

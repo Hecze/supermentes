@@ -44,7 +44,7 @@ const escrituras = new Map<string, number[]>()
 const VENTANA = 10 * 60_000
 
 export function demasiadas(request: Request, tipo: string, maximo: number) {
-  const ip = (request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'sin-ip'
+  const ip = (request.headers.get('cf-connecting-ip') ?? request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'sin-ip'
   const clave = `${tipo}:${ip}`
   const ahora = Date.now()
   const recientes = (escrituras.get(clave) ?? []).filter((t) => ahora - t < VENTANA)

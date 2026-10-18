@@ -1,6 +1,7 @@
-import { ArrowLeft, Calculator, Check, ChevronDown, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
+import { tokenDeCuenta, useCuenta } from '../app/cuenta'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { juegoDelBanco, useBanco } from '../banco/banco'
@@ -10,7 +11,7 @@ import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
 import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
 import { Qr } from '../juegos/compartir/Qr'
-import { guardarEnviado } from '../juegos/compartir/resultados'
+import { guardarEnviado, sincronizarEnviados } from '../juegos/compartir/resultados'
 import { habilidadesDelTema, practicaDelGrado, type Practica } from '../juegos/matematica/deducir'
 import { GRUPOS_HABILIDAD, HABILIDADES, habilidadPorId, nivelPara, type Habilidad } from '../juegos/matematica/habilidades'
 import { TextoMat } from '../juegos/motor/piezas'
@@ -286,6 +287,7 @@ function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
         ({ codigo, clave }) => {
           // La laptop del docente guarda la clave: con ella verá quién jugó y su mejor puntaje.
           guardarEnviado({ codigo, clave, juego: p.juego, tema: p.tema, ...datos, fecha: new Date().toISOString() })
+          tokenDeCuenta().then((t) => void (t && sincronizarEnviados(t)))
           return { url: enlaceConCodigo(codigo), codigo }
         },
         // Sin servidor (por ejemplo, en desarrollo) el juego viaja dentro del link y funciona igual.
@@ -299,8 +301,44 @@ function enlaceDe(p: Publicado, datos: { grado: string; practica: string }) {
   return publicados.get(clave)!
 }
 
+// "Ahora no" vale por esta visita: no se vuelve a preguntar en cada juego.
+let sinCuentaEstaVisita = false
+
+/** Mockup z2hti: la cuenta se ofrece al mandar el juego, que es cuando sirve (ver resultados en cualquier computadora). */
+function PedirCuenta({ seguir }: { seguir: () => void }) {
+  const { entrar } = useCuenta()
+  const [entrando, setEntrando] = useState(false)
+  return (
+    <div className="flex flex-col items-center gap-4 py-2 text-center">
+      <span className="grid size-16 place-items-center rounded-2xl bg-juego/10">
+        <Trophy className="size-8 text-juego" aria-hidden />
+      </span>
+      <h3 className="font-display text-2xl font-bold sm:text-3xl">Guarda tu juego para ver cómo les va a tus alumnos</h3>
+      <p className="text-ink-soft">Verás quién jugó y cuántas estrellas sacó, desde cualquier computadora. Es gratis.</p>
+      <button
+        type="button"
+        disabled={entrando}
+        onClick={() => {
+          setEntrando(true)
+          entrar().finally(() => setEntrando(false))
+        }}
+        className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-ink px-5 text-lg font-semibold text-surface hover:opacity-90 disabled:opacity-60"
+      >
+        {entrando ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <span className="grid size-7 place-items-center rounded-full bg-white font-bold text-[#4285F4]">G</span>}
+        Entrar con Google
+      </button>
+      <button type="button" onClick={seguir} className="font-medium text-ink-soft underline-offset-4 hover:underline">
+        Ahora no, solo mandar el juego
+      </button>
+      <p className="text-sm text-ink-soft">No publicamos nada en tu nombre.</p>
+    </div>
+  )
+}
+
 function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Publicado; nombreJuego: string; grado: string; practica: string }) {
   const { avisar } = useStore()
+  const cuenta = useCuenta()
+  const [sinCuenta, setSinCuenta] = useState(sinCuentaEstaVisita)
   const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
   const [grande, setGrande] = useState(false)
   const clave = JSON.stringify(publicado)
@@ -321,6 +359,17 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
     window.addEventListener('keydown', salir)
     return () => window.removeEventListener('keydown', salir)
   }, [grande])
+
+  if (cuenta.lista && !cuenta.entro && !sinCuenta) {
+    return (
+      <PedirCuenta
+        seguir={() => {
+          sinCuentaEstaVisita = true
+          setSinCuenta(true)
+        }}
+      />
+    )
+  }
 
   if (!enlace) {
     return (

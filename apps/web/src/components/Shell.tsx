@@ -2,6 +2,7 @@ import { CircleAlert, CircleCheck, Coins, House, Info, Library, Menu, Moon, Sear
 import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
+import { useCuenta } from '../app/cuenta'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { Logo } from './Logo'
@@ -35,6 +36,26 @@ function BotonTema() {
     >
       {oscuro ? <Sun className="size-5" /> : <Moon className="size-5" />}
     </button>
+  )
+}
+
+function Docente() {
+  const { entro, nombre, salir } = useCuenta()
+  if (!entro) {
+    return (
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
+        <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <p className="truncate text-sm font-semibold">Prof. {nombre ?? ''}</p>
+      <button type="button" onClick={salir} className="text-xs text-ink-soft underline-offset-4 hover:underline">
+        Salir
+      </button>
+    </div>
   )
 }
 
@@ -95,10 +116,7 @@ function ContenidoLateral() {
           <Creditos />
           <BotonTema />
         </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
-          <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
-        </div>
+        <Docente />
         {MODO_EJEMPLO && (
           <p className="flex items-start gap-1.5 text-xs text-ink-soft">
             <Info className="mt-px size-3.5 shrink-0" aria-hidden />
