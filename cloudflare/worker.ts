@@ -2,7 +2,6 @@
 // Las mismas rutas que vercel.json.
 import * as audio from '../api/audio.js'
 import * as cancion from '../api/cancion.js'
-import * as examen from '../api/examen.js'
 import * as ficha from '../api/ficha.js'
 import * as juego from '../api/juego.js'
 import * as juegosCompartidos from '../api/juegos-compartidos.js'
@@ -15,7 +14,6 @@ type Handler = (request: Request) => Promise<Response>
 const API: Record<string, Record<string, Handler>> = {
   audio,
   cancion,
-  examen,
   ficha,
   juego,
   'juegos-compartidos': juegosCompartidos,
