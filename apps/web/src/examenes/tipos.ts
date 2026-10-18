@@ -77,3 +77,6 @@ export type Version = {
   codigo: string
   items: (Generado & { tipo: string })[]
 }
+
+/** Un grupo de tipos de pregunta y los temas (tal cual en el currículo) donde va cada uno, en orden. */
+export type Grupo = { tipos: TipoPregunta[]; temas: Record<string, string[]> }

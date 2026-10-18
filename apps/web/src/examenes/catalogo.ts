@@ -6,10 +6,12 @@ import { normalizar } from '../curriculo/buscar'
 import { TIPOS_DEL_BANCO } from './del-banco'
 import { TIPOS_CALCULO } from './matematica/calculo'
 import { TIPOS_NUMEROS } from './matematica/numeros'
-import type { TipoPregunta } from './tipos'
-
-/** Un grupo de tipos de pregunta y los temas (tal cual en el currículo) donde va cada uno, en orden. */
-export type Grupo = { tipos: TipoPregunta[]; temas: Record<string, string[]> }
+import { GRUPO_DATOS } from './matematica/datos'
+import { GRUPO_FORMA } from './matematica/forma'
+import { GRUPO_FRACCIONES_MEDIDAS } from './matematica/fracciones-medidas'
+import { GRUPO_OPERACIONES } from './matematica/operaciones'
+import { GRUPO_REGULARIDAD } from './matematica/regularidad'
+import type { Grupo, TipoPregunta } from './tipos'
 
 const BASE: Grupo = {
   tipos: [...TIPOS_NUMEROS, ...TIPOS_CALCULO],
@@ -45,7 +47,7 @@ const BASE: Grupo = {
 
 /** Los grupos de Matemática de 4.º; cada archivo de matematica/ suma el suyo. */
 const GRUPOS: Record<string, Grupo[]> = {
-  'primaria-4': [BASE],
+  'primaria-4': [BASE, GRUPO_OPERACIONES, GRUPO_FRACCIONES_MEDIDAS, GRUPO_REGULARIDAD, GRUPO_FORMA, GRUPO_DATOS],
 }
 
 export const TIPOS = new Map<string, TipoPregunta>([...Object.values(GRUPOS).flatMap((gs) => gs.flatMap((g) => g.tipos)), ...TIPOS_DEL_BANCO].map((t) => [t.id, t]))
