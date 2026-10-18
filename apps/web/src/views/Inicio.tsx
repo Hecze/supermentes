@@ -13,6 +13,8 @@ import { GRADOS_CURRICULO, nivelDe } from '../curriculo/catalogo'
 import { useCurriculo } from '../curriculo/cargar'
 import { cargarResultados, type FilaResultado } from '../juegos/compartir/resultados'
 import { tramos } from './GuiaClase'
+import { useTareas } from './Tareas'
+import { nombreSalon } from '../juegos/compartir/tareas'
 import { useEnviados } from './ResultadosJuegos'
 
 const CLAVE_GRADO = 'supermentes-grado'
@@ -129,6 +131,8 @@ function Tarjeta({ n, color, etiqueta, titulo, children, accion, onClick }: { n:
 function Momentos({ gradoId }: { gradoId: string }) {
   const { ficha, ir, abrirNuevoTema } = useStore()
   const alumnos = useResumenAlumnos()
+  // La tarea más reciente manda en «Revisar»: es lo que la docente quiere saber primero.
+  const tarea = useTareas()?.[0]
   const [inicio, desarrollo, cierre] = tramos(0, 45, [20, 65, 15])
   return (
     <div className="grid gap-4 lg:grid-cols-3">
@@ -178,8 +182,25 @@ function Momentos({ gradoId }: { gradoId: string }) {
         )}
       </Tarjeta>
 
-      <Tarjeta n={3} color="var(--ok)" etiqueta="REVISAR" titulo={alumnos.enviados ? 'Cómo les va a tus alumnos' : 'Tareas que no se copian'} accion="Revisar y reforzar" onClick={() => ir('resultados')}>
-        {alumnos.enviados && !alumnos.cargando && alumnos.alumnos === 0 ? (
+      <Tarjeta
+        n={3}
+        color="var(--ok)"
+        etiqueta="REVISAR"
+        titulo={tarea ? `Tarea: ${tarea.tema}` : alumnos.enviados ? 'Cómo les va a tus alumnos' : 'Tareas que no se copian'}
+        accion="Revisar y reforzar"
+        onClick={() => ir('resultados')}
+      >
+        {tarea ? (
+          <>
+            <p className="flex items-baseline gap-2">
+              <span className="font-display text-4xl font-bold text-ink">
+                {tarea.intentos.length} de {tarea.alumnos.length}
+              </span>
+              ya la hicieron
+            </p>
+            <p>{nombreSalon(tarea.grado, tarea.seccion)} · te llega revisada, con lo que conviene reforzar.</p>
+          </>
+        ) : alumnos.enviados && !alumnos.cargando && alumnos.alumnos === 0 ? (
           <p>Mandaste {alumnos.enviados === 1 ? 'un juego' : `${alumnos.enviados} juegos`}. Todavía nadie jugó: cuando jueguen, aquí verás quién y qué reforzar.</p>
         ) : alumnos.enviados ? (
           <>
