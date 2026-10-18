@@ -29,6 +29,9 @@ actualizado: 2026-10-18
    evaluador.
 
 ## Cómo trabajan hoy
+> El detalle de cada material (balotario, examen, clave, material extra, hoja tipo libro…) y cómo debe verse en
+> Supermentes está en [[MATERIALES]].
+
 ### Exámenes (Lucho, colegios privados)
 - Tiene un Word con el formato del colegio y libros de otros colegios que compró: "captura y al Word, captura y al
   Word". No usa IA para exámenes, por costumbre. Escribir fórmulas con el editor de ecuaciones de Word le toma más.
