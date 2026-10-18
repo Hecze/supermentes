@@ -41,6 +41,9 @@ Un director o un jurado puede preguntar "¿por qué esto cumple el currículo?".
 - **IA real en producción** (Claude): ficha del tema, juego, canción y sesión de aprendizaje, con respuestas validadas contra un esquema, tiempo límite y "Reintentar".
 - **4.º de primaria completo sin esperar a la IA**: los 384 temas del currículo traen juegos, 2 canciones y sus hojas (examen, práctica y balotario) listos al instante.
 - **Juegos compartidos de verdad**: link `/j/CODIGO` y QR, sin cuenta para el alumno, y resultados para el docente.
+- **Tareas por salón, revisadas solas**: el docente pega la lista de su salón una vez y manda el juego "como tarea". Cada alumno elige su nombre, responde 10 preguntas con reloj que no se pausa (si sale a otra app, la pregunta vence y el docente ve cuántas veces salió) y cuenta el primer intento. El docente recibe la tarea corregida: quién entregó, qué desempeño falló más de la mitad y la respuesta equivocada más elegida, con un botón para reforzarlo.
+- **El docente organiza su semana en 3 momentos**: preparar (materiales del tema), dar la clase (guía minuto a minuto y sesión MINEDU) y revisar (tareas y resultados).
+- **Cuentas** con Google o correo, y un onboarding de 3 pasos (cómo te llaman, tu grado, el tema de mañana) que termina en su primera clase lista.
 - **Landing con lista de espera** real, con enlace para invitar y registro de dónde llega cada docente.
 
 Stack: Vite + React en Cloudflare Workers, con D1 (base de datos) y R2 (archivos), cuentas con Clerk, monorepo con Turborepo. IA: Claude por OpenRouter; búsqueda de videos y fichas con Exa.
@@ -52,7 +55,8 @@ Stack: Vite + React en Cloudflare Workers, con D1 (base de datos) y R2 (archivos
 
 ## Limitaciones
 
-- **No hay cuentas**: los temas y la clave de resultados viven en el navegador del docente.
+- **Los temas del docente** se guardan en su navegador; sus envíos, salones y tareas sí van a su cuenta.
+- **El reloj no evita todo**: no impide que la tarea la haga un hermano mayor o un papá.
 - **El audio de la canción** generada está en pruebas; las canciones de YouTube sí se reproducen.
 - **Fuera de 4.º primaria**, el material depende de la IA (segundos de espera) en vez de estar listo al instante.
 - **No está probado en un aula real** con alumnos.
