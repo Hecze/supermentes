@@ -7,11 +7,14 @@ actualizado: 2026-10-17
 > Cómo conseguir docentes y quién paga. El producto está en [[MAPA]], el evento en [[HACKATHON]].
 
 ## Para el jurado (tracción, pesa ×6)
-Al 2026-10-17 la lista de espera tiene **1 inscrito**. La meta de la noche son docentes reales, no 5.
+Al 2026-10-17 la lista de espera tiene **4 inscritos** y hay 1 entrevista con docente (abajo). La meta de la noche son docentes reales, no 5.
 1. **Grupos de WhatsApp y Facebook de docentes** (por UGEL, por nivel): un video de 20 s con un material hecho y el link debajo, no el link solo.
 2. **Docentes conocidos** (empezando por el entrevistado), cada uno reenvía con su `?ref=`.
 3. **Gancho:** "Inscríbete y te mando el juego de tu tema gratis" (los juegos ya funcionan).
 4. **Medir la fuente** con `utm_source`: "50 docentes en 12 h, 70 % por WhatsApp" es evidencia para el pitch.
+
+### Entrevistas
+- **2026-10-17 · Isaac, colegio Seba Los Leones** (por Meet, con Harold). Vio la canción «Refranes con cajón» (Comunicación, 4.º primaria, ritmo festejo) y le gustó. Hay captura de la llamada. Falta su frase textual para el pitch.
 
 ## Video demo para la lista de espera
 Un solo video de la app funcionando sirve para todo: se manda a la lista de espera, se publica en TikTok y se muestra en el pitch.
