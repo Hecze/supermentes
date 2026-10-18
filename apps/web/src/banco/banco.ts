@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Cancion, Ficha, Juego } from '../api'
+import { partesDeLetra } from '../canciones/letra'
 import { normalizar } from '../curriculo/buscar'
 
 // Banco de contenido listo por tema del Currículo Nacional: palabras, preguntas, parejas y dos canciones.
@@ -82,14 +83,5 @@ const nombreRitmo = (r: string) => RITMOS[normalizar(r)] ?? r.charAt(0).toUpperC
 
 /** La canción del banco lista para mostrarse, imprimirse y sonar (api/audio.ts). */
 export function cancionDelBanco(c: CancionBanco): Cancion {
-  const partes: Cancion['partes'] = []
-  for (const l of c.letra) {
-    const marca = l.match(/^\[(.+)\]$/)
-    if (marca) partes.push({ etiqueta: marca[1], lineas: [] })
-    else if (l.trim()) {
-      if (!partes.length) partes.push({ etiqueta: 'Estrofa', lineas: [] })
-      partes[partes.length - 1].lineas.push(l)
-    }
-  }
-  return { titulo: c.titulo, opciones: { modo: 'ritmo', ritmo: nombreRitmo(c.ritmo), melodia: '', estilo: c.estilo }, partes: partes.filter((p) => p.lineas.length) }
+  return { titulo: c.titulo, opciones: { modo: 'ritmo', ritmo: nombreRitmo(c.ritmo), melodia: '', estilo: c.estilo }, partes: partesDeLetra(c.letra) }
 }
