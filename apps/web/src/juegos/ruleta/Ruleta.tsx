@@ -87,7 +87,7 @@ export default function Ruleta({ contenido, semilla, terminar }: PropsJuego) {
     const a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2
     const am = (a0 + a1) / 2
     const d = `M50 50 L${50 + r * Math.cos(a0)} ${50 + r * Math.sin(a0)} A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${50 + r * Math.cos(a1)} ${50 + r * Math.sin(a1)} Z`
-    return { d, tx: 50 + r * 0.68 * Math.cos(am), ty: 50 + r * 0.68 * Math.sin(am), rot: (am * 180) / Math.PI + 90 }
+    return { d, tx: 50 + r * 0.68 * Math.cos(am), ty: 50 + r * 0.68 * Math.sin(am) }
   })
   const casilla = actual !== null ? casillas[actual] : null
 
@@ -122,8 +122,9 @@ export default function Ruleta({ contenido, semilla, terminar }: PropsJuego) {
                     y={s.ty}
                     textAnchor="middle"
                     dominantBaseline="central"
-                    transform={`rotate(${s.rot} ${s.tx} ${s.ty})`}
-                    fontSize={n > 8 ? 7 : 8.5}
+                    // Gira al revés que la rueda: el número queda siempre derecho y se lee desde el fondo del aula.
+                    style={{ transform: `rotate(${-giro}deg)`, transformOrigin: `${s.tx}px ${s.ty}px`, transition: `transform ${VUELTA}s cubic-bezier(0.15, 0.65, 0.2, 1)` }}
+                    fontSize={n > 8 ? 9 : 11}
                     fontWeight={700}
                     fill={usadas.has(i) ? '#9a94ab' : PALETA[i % PALETA.length].t}
                     fontFamily="Fredoka, sans-serif"
@@ -163,7 +164,7 @@ export default function Ruleta({ contenido, semilla, terminar }: PropsJuego) {
           >
             {actual + 1}
           </span>
-          <Enunciado reto={casilla.reto} tam="clamp(20px, 5cqmin, 46px)" />
+          <Enunciado reto={casilla.reto} tam="clamp(24px, 5.6cqmin, 56px)" />
           <ul className="grid gap-[1.2cqmin]">
             {casilla.opciones.map((o, i) => {
               const bien = revelada && o === casilla.reto.respuesta
@@ -171,7 +172,7 @@ export default function Ruleta({ contenido, semilla, terminar }: PropsJuego) {
                 <li
                   key={o}
                   className={`flex items-center gap-[1.6cqmin] rounded-[1.6cqmin] border-[0.4cqmin] px-[1.6cqmin] py-[1cqmin] font-semibold transition ${bien ? 'border-[#1f9d55] bg-[#e3f8eb]' : revelada ? 'border-transparent bg-[#f3f3f8] opacity-50' : 'border-[#e5e7f5] bg-white'}`}
-                  style={{ fontSize: 'clamp(15px, 3.4cqmin, 30px)' }}
+                  style={{ fontSize: 'clamp(20px, 4.4cqmin, 40px)' }}
                 >
                   <span className="grid size-[1.6em] shrink-0 place-items-center rounded-full text-white" style={{ background: bien ? '#1f9d55' : PALETA[i].c }}>
                     {LETRAS[i]}
@@ -206,7 +207,7 @@ export default function Ruleta({ contenido, semilla, terminar }: PropsJuego) {
           type="button"
           onClick={() => terminarRepaso(usadas.size)}
           className="absolute bottom-[2.4cqmin] right-[3cqmin] rounded-full bg-white/85 px-[1.8cqmin] py-[0.6cqmin] font-semibold shadow-md"
-          style={{ fontSize: 'clamp(13px, 2.8cqmin, 22px)' }}
+          style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}
         >
           Terminar el repaso
         </button>
