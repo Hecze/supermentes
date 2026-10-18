@@ -2,10 +2,10 @@
 // Inspirado en los arcades de naves (Space Invaders, "Alien Addition") con la estética de los shooters que
 // juegan los chicos de secundaria, pero sin violencia: solo drones y chispas.
 import { useEffect, useMemo, useReducer, useRef, useState, type CSSProperties } from 'react'
-import { fuenteDeRetos, opcionesDe } from '../contenido'
+import { fuenteDeRetos, largo, opcionesDe } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTemporizadores } from '../motor/bucle'
-import { Enunciado, TextoMat } from '../motor/piezas'
+import { Enunciado, TextoMat, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -65,10 +65,25 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
   const escudosRef = useRef(escudos)
   escudosRef.current = escudos
 
+  /** Posición en pantalla de un dron: con margen a los lados, para que su cartel no quede cortado en el borde. */
+  const cabecera = useRef<HTMLDivElement>(null)
+  /** Los drones aparecen debajo de la pregunta: detrás de ella no se pueden tocar. */
+  const techo = () => {
+    const el = cabecera.current
+    const h = escena.current?.clientHeight || alto
+    return el && h ? Math.min(0.45, (el.offsetTop + el.offsetHeight) / h + 0.07) : 0.26
+  }
+  const xPx = (x: number) => {
+    const m = Math.min(ancho * 0.17, 110)
+    return m + x * (ancho - 2 * m)
+  }
+
   function lanzar(r: Reto, n: number) {
-    const opciones = opcionesDe(r, opcionesPorOleada, azar)
+    let opciones = opcionesDe(r, opcionesPorOleada, azar)
+    // En un celular, cuatro carteles con palabras largas se enciman: salen tres drones.
+    if (opciones.length > 3 && (escena.current?.clientWidth ?? ancho) < 560 && Math.max(...opciones.map(largo)) > 7) opciones = opcionesDe(r, 3, azar)
     const carriles = barajar(azar, opciones.map((_, i) => i))
-    const vel = ((BASE - 0.26) / viaje) * (1 + n * 0.04)
+    const vel = ((BASE - techo()) / viaje) * (1 + n * 0.04)
     drones.current = [
       ...drones.current.filter((d) => d.estado === 'explota'),
       ...opciones.map((texto, i) => ({
@@ -76,7 +91,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
         texto,
         correcto: texto === r.respuesta,
         x: (carriles[i] + 0.5) / opciones.length,
-        y: 0.26 - i * 0.05 - azar() * 0.04,
+        y: techo() + (opciones.length - 1 - i) * 0.05 + azar() * 0.04,
         vel: vel * (0.85 + azar() * 0.3),
         fase: azar() * 6.28,
         estado: 'baja' as const,
@@ -97,7 +112,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
 
   function explotar(d: Dron, color: string) {
     const id = ++contador.current
-    setExplosiones((e) => [...e, { id, x: d.x * ancho, y: d.y * alto, color }])
+    setExplosiones((e) => [...e, { id, x: xPx(d.x), y: d.y * alto, color }])
     despues(() => setExplosiones((e) => e.filter((x) => x.id !== id)), 700)
   }
 
@@ -125,7 +140,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
   function disparar(d: Dron) {
     if (terminado || bloqueado.current || d.estado !== 'baja') return
     const id = ++contador.current
-    setDisparos((x) => [...x, { id, x: d.x * ancho, y: d.y * alto, acierto: d.correcto }])
+    setDisparos((x) => [...x, { id, x: xPx(d.x), y: d.y * alto, acierto: d.correcto }])
     despues(() => setDisparos((x) => x.filter((z) => z.id !== id)), 160)
     sonar.laser()
     if (d.correcto) {
@@ -191,7 +206,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
             if (quedan > 0) despues(() => lanzar(siguienteReto(), oleada), 900)
             cambio = true
           } else if (!d.correcto) {
-            d.y = 0.22
+            d.y = techo()
             d.x = Math.min(0.9, Math.max(0.1, d.x + (azar() - 0.5) * 0.2))
           }
         }
@@ -205,7 +220,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
       const el = nodos.current.get(d.id)
       if (!el) continue
       const vaiven = Math.sin(tiempo.current * 1.6 + d.fase) * 0.01
-      el.style.transform = `translate3d(${(d.x + vaiven) * ancho}px, ${d.y * alto}px, 0) translate(-50%, -50%)`
+      el.style.transform = `translate3d(${xPx(d.x + vaiven)}px, ${d.y * alto}px, 0) translate(-50%, -50%)`
       // Aparecen debajo del marcador con un fundido, sin tapar los puntos ni la pregunta.
       const entrada = Math.max(0, Math.min(1, (d.y - 0.2) / 0.1))
       el.style.opacity = d.estado === 'fuera' ? '0.4' : d.estado === 'explota' ? '0' : String(entrada)
@@ -229,7 +244,8 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
       <div className="piso-neon pointer-events-none absolute inset-x-[-30%] top-[84%] h-[40%] opacity-70" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 top-[84%] h-[0.4cqmin] bg-[#ff3dc8] shadow-[0_0_2cqmin_#ff3dc8]" aria-hidden />
 
-      {drones.current.map((d) => {
+      {drones.current.map((d, _, todos) => {
+        const enOleada = todos.filter((o) => o.estado !== 'explota').map((o) => o.texto)
         const color = COLORES[d.id % COLORES.length]
         return (
           <button
@@ -247,8 +263,8 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
           >
             <DibujoDron color={color} blindado={d.estado === 'blindado'} />
             <span
-              className="mt-[0.4cqmin] rounded-[0.8cqmin] border-[0.3cqmin] bg-[#0b0d24]/90 px-[1.2cqmin] py-[0.3cqmin] leading-tight text-white"
-              style={{ borderColor: color, boxShadow: `0 0 1.4cqmin ${color}`, fontSize: `max(15px, calc(clamp(18px, 4.4cqmin, 40px) * ${[...d.texto].length > 7 ? 0.62 : [...d.texto].length > 4 ? 0.8 : 1}))` }}
+              className="mt-[0.4cqmin] whitespace-nowrap rounded-[0.8cqmin] border-[0.3cqmin] bg-[#0b0d24]/90 px-[1.2cqmin] py-[0.3cqmin] leading-tight text-white"
+              style={{ borderColor: color, boxShadow: `0 0 1.4cqmin ${color}`, fontSize: letraOpciones(enOleada, '26cqw', 'clamp(22px, 4.8cqmin, 40px)') }}
             >
               <TextoMat texto={d.texto} />
             </span>
@@ -297,7 +313,7 @@ export default function Invasion({ contenido, ritmo, semilla, terminar }: PropsJ
       </svg>
 
       {/* Marcador y pregunta */}
-      <div className="absolute inset-x-0 top-0 z-30 flex flex-col items-center gap-[1.4cqmin] px-[3cqmin] pt-[2.2cqmin]">
+      <div ref={cabecera} className="absolute inset-x-0 top-0 z-30 flex flex-col items-center gap-[1.4cqmin] px-[3cqmin] pt-[2.2cqmin]">
         <div className="flex w-full items-center gap-[2cqmin] pr-[17cqmin]" style={{ fontSize: 'clamp(13px, 3cqmin, 26px)' }}>
           <span className="flex gap-[0.8cqmin]" aria-label={`Quedan ${escudos} escudos`}>
             {Array.from({ length: ESCUDOS }, (_, i) => (
