@@ -34,9 +34,15 @@ const fracciones = (xs: Fr[]) => xs.filter(([a, b]) => a > 0 && b > 0 && Number.
 
 const USUALES = [2, 3, 4, 5, 6, 8, 10]
 const PARTES: Record<number, string> = { 2: 'medios', 3: 'tercios', 4: 'cuartos', 5: 'quintos', 6: 'sextos', 8: 'octavos', 10: 'décimos' }
+const PARTE: Record<number, string> = { 2: 'medio', 3: 'tercio', 4: 'cuarto', 5: 'quinto', 6: 'sexto', 8: 'octavo', 10: 'décimo' }
 
 /** Varios nombres distintos. */
 const nombres = (azar: Azar, n: number) => barajar(azar, NOMBRES).slice(0, n)
+
+/** «1 parte pintada», «3 partes pintadas». */
+const pl = (n: number, uno: string, varios: string) => `${num(n)} ${n === 1 ? uno : varios}`
+
+const mayus = (s: string) => s[0].toUpperCase() + s.slice(1)
 
 /** Las alternativas de una pregunta de este grupo. */
 function conError(azar: Azar, correcta: string, candidatas: string[], cuantas = 4) {
@@ -335,6 +341,10 @@ export const barra: TipoPregunta = {
         dibujo: chocolate ? dibujoChocolate(filas, cols, null) : dibujoChacra(filas, cols, new Set()),
         respuesta: `${k} de las ${n} partes pintadas (cualquiera de ellas).`,
         espacio: 'dibujo',
+        pasos: [
+          `${chocolate ? 'La barra tiene' : 'El terreno tiene'} ${n} partes iguales: el denominador es ${n}`,
+          `El numerador es ${k}: se ${k === 1 ? 'pinta' : 'pintan'} ${pl(k, 'parte', 'partes')} de ${n}, cualquiera de ellas`,
+        ],
       }
     }
     // Se come (o se siembra) desde una punta, columna por columna.
@@ -360,6 +370,13 @@ export const barra: TipoPregunta = {
           ? '¿Qué fracción del terreno falta sembrar?'
           : '¿Qué fracción del terreno sembró con papa?',
       ...alt,
+      pasos: [
+        `${chocolate ? 'Pedazos' : 'Parcelas'}: ${filas > 1 ? `${filas} × ${cols} = ` : ''}${n}; ${chocolate ? 'con línea punteada' : 'con plantitas'}: ${k}`,
+        ...(pideResto ? [`${chocolate ? (c === 1 ? 'Le queda' : 'Le quedan') : 'Falta sembrar'}: ${n} − ${k} = ${c}`] : []),
+        chocolate
+          ? `${pideResto ? (c === 1 ? 'Le queda' : 'Le quedan') : 'Se comió'} ${c} de ${n} pedazos: ${frac(c, n)}`
+          : `${pideResto ? 'Falta sembrar' : 'Sembró'} ${c} de ${n} parcelas: ${frac(c, n)}`,
+      ],
     }
   },
 }
@@ -383,6 +400,10 @@ export const coleccion: TipoPregunta = {
         dibujo: dibujoColeccion(Array(n).fill('canica-blanca'), porFila, [], `${n} canicas blancas`),
         respuesta: `${k} canicas pintadas de las ${n} (cualquiera de ellas).`,
         espacio: 'dibujo',
+        pasos: [
+          `Hay ${n} canicas en total: el denominador es ${n}`,
+          `El numerador es ${k}: se ${k === 1 ? 'pinta' : 'pintan'} ${pl(k, 'canica', 'canicas')} de ${n}, cualquiera de ellas`,
+        ],
       }
     }
     const frutas = azar() < 0.6
@@ -398,6 +419,7 @@ export const coleccion: TipoPregunta = {
       dibujo: dibujoColeccion(cosas, porFila, leyenda, `${cuantasCosas(k, a)} y ${cuantasCosas(n - k, b)}`),
       pregunta: frutas ? `¿Qué fracción de las frutas son ${NOMBRE_COSA[a][1]}?` : `¿Qué fracción de las canicas son ${NOMBRE_COSA[a][1]}?`,
       ...alt,
+      pasos: [`Se cuentan: ${n} ${frutas ? 'frutas' : 'canicas'} en total y ${cuantasCosas(k, a)}`, `${cuantasCosas(k, a)} de ${n}: ${frac(k, n)}`],
     }
   },
 }
@@ -426,21 +448,42 @@ function fraccionDe(azar: Azar, total: number, dens: number[]): Fr | null {
   return [azar() < 0.4 ? 1 : entero(azar, 1, d - 1), d]
 }
 
+/** Los pasos de «a/d de T»: T ÷ d (un grupo) y, si a > 1, × a; luego, si se pide, lo que queda. `hizo` y `queda` nombran cada parte. */
+function pasosFraccionDe(T: number, [a, d]: Fr, resto: boolean, hizo: string, queda: string, unidad: (n: number) => string): string[] {
+  const g = T / d
+  const parte = g * a
+  const pasos =
+    a === 1
+      ? [`${hizo} ${frac(1, d)}: ${num(T)} ÷ ${d} = ${unidad(parte)}`]
+      : [`${frac(1, d)} de ${num(T)}: ${num(T)} ÷ ${d} = ${num(g)}`, `${hizo} ${frac(a, d)}: ${num(g)} × ${a} = ${unidad(parte)}`]
+  if (resto) pasos.push(`${queda}: ${num(T)} − ${num(parte)} = ${unidad(T - parte)}`)
+  return pasos
+}
+
 const CONTEXTOS_CANTIDAD = {
   huevo: {
     enunciado: (q: string, t: number, f: string) => `${q} compró una bandeja de ${t} huevos. Usó ${f} de los huevos para hacer un queque.`,
     parte: '¿Cuántos huevos usó?',
     resto: '¿Cuántos huevos le quedan?',
+    donde: 'la bandeja',
+    hizo: 'Usó',
+    queda: 'Le quedan',
   },
   naranja: {
     enunciado: (q: string, t: number, f: string) => `En la caja hay ${t} naranjas. ${q} vendió ${f} de las naranjas en el mercado.`,
     parte: '¿Cuántas naranjas vendió?',
     resto: '¿Cuántas naranjas quedan en la caja?',
+    donde: 'la caja',
+    hizo: 'Vendió',
+    queda: 'Quedan',
   },
   pan: {
     enunciado: (q: string, t: number, f: string) => `En la canasta hay ${t} panes. En el desayuno, la familia de ${q} se comió ${f} de los panes.`,
     parte: '¿Cuántos panes se comieron?',
     resto: '¿Cuántos panes quedan en la canasta?',
+    donde: 'la canasta',
+    hizo: 'Se comieron',
+    queda: 'Quedan',
   },
 }
 
@@ -463,17 +506,26 @@ export const deCantidad: TipoPregunta = {
     const parte = (T / d) * a
     const quien = nombre(azar)
     const cosas = NOMBRE_COSA[c][1]
+    const ctx = CONTEXTOS_CANTIDAD[c]
+    const conteo = `En ${ctx.donde}: ${T / b.cols} × ${b.cols} = ${num(T)} ${cosas}`
     const modo = azar()
     if (modo < 0.25) {
       return {
         forma: 'abierta',
         clave: `de-cantidad:encierra:${c}:${T}:${a}/${d}`,
-        enunciado: `Encierra ${frac(a, d)} de los ${cosas}.`,
+        enunciado: `Encierra ${frac(a, d)} de ${c === 'naranja' ? 'las' : 'los'} ${cosas}.`,
         dibujo: dibujoBandeja(c, T, b.cols),
-        pregunta: `¿Cuántos ${cosas} encerraste?`,
-        respuesta: `${parte} ${cosas}${a > 1 ? ` (${a} grupos de ${T / d})` : ''}.`,
+        pregunta: `¿${c === 'naranja' ? 'Cuántas' : 'Cuántos'} ${cosas} encerraste?`,
+        respuesta: `${cuantasCosas(parte, c)}${a > 1 ? ` (${a} grupos de ${T / d})` : ''}.`,
         espacio: 'dibujo',
         nota: `${T} ÷ ${d} = ${T / d}${a > 1 ? ` y ${T / d} × ${a} = ${parte}` : ''}.`,
+        pasos: [
+          conteo,
+          `${num(T)} ÷ ${d} = ${num(T / d)}: se hacen ${d} grupos de ${num(T / d)}`,
+          a === 1
+            ? `${frac(1, d)} es 1 grupo: se ${parte === 1 ? 'encierra' : 'encierran'} ${cuantasCosas(parte, c)}`
+            : `${frac(a, d)} son ${a} grupos: ${num(T / d)} × ${a} = ${num(parte)}; se encierran ${cuantasCosas(parte, c)}`,
+        ],
       }
     }
     const pideResto = modo < 0.5
@@ -482,7 +534,6 @@ export const deCantidad: TipoPregunta = {
     const frecuentes = pideResto ? [parte, T - T / d, T / d, T, r + T / d, r - T / d] : [T / d, T - parte, T / a, d, parte + T / d, parte - T / d]
     const alt = conError(azar, num(r), distractores(r, frecuentes.filter((x) => x !== T), { min: 1 }), 4)
     if (!alt) return null
-    const ctx = CONTEXTOS_CANTIDAD[c]
     return {
       forma: 'opciones',
       clave: `de-cantidad:${c}:${T}:${a}/${d}:${pideResto ? 'resto' : 'parte'}`,
@@ -490,6 +541,7 @@ export const deCantidad: TipoPregunta = {
       dibujo: dibujoBandeja(c, T, b.cols),
       pregunta: pideResto ? ctx.resto : ctx.parte,
       ...alt,
+      pasos: [conteo, ...pasosFraccionDe(T, fr, pideResto, ctx.hizo, ctx.queda, (x) => cuantasCosas(x, c))],
     }
   },
 }
@@ -504,9 +556,9 @@ const BOLSAS_DINERO: { valor: number; billete: boolean; cuantos: number[] }[] = 
 ]
 
 const USOS_DINERO = [
-  { hizo: (f: string) => `Gastó ${f} de su dinero en el quiosco del colegio.`, parte: '¿Cuánto dinero gastó?', resto: '¿Cuánto dinero le queda?' },
-  { hizo: (f: string) => `Guardó ${f} de su dinero en su alcancía.`, parte: '¿Cuánto dinero guardó en la alcancía?', resto: '¿Cuánto dinero no guardó?' },
-  { hizo: (f: string) => `Pagó con ${f} de su dinero los pasajes de la combi.`, parte: '¿Cuánto pagó por los pasajes?', resto: '¿Cuánto dinero le queda?' },
+  { hizo: (f: string) => `Gastó ${f} de su dinero en el quiosco del colegio.`, parte: '¿Cuánto dinero gastó?', resto: '¿Cuánto dinero le queda?', usa: 'Gastó', queda: 'Le queda' },
+  { hizo: (f: string) => `Guardó ${f} de su dinero en su alcancía.`, parte: '¿Cuánto dinero guardó en la alcancía?', resto: '¿Cuánto dinero no guardó?', usa: 'Guardó', queda: 'No guardó' },
+  { hizo: (f: string) => `Pagó con ${f} de su dinero los pasajes de la combi.`, parte: '¿Cuánto pagó por los pasajes?', resto: '¿Cuánto dinero le queda?', usa: 'Pagó', queda: 'Le queda' },
 ]
 
 export const deDinero: TipoPregunta = {
@@ -543,6 +595,10 @@ export const deDinero: TipoPregunta = {
       pregunta: pideResto ? uso.resto : uso.parte,
       ...alt,
       alternativas: alt.alternativas.map((x) => `S/ ${x}`),
+      pasos: [
+        `${cuantos} ${bolsa.billete ? 'billetes' : 'monedas'} de ${soles(bolsa.valor)}: ${cuantos} × ${bolsa.valor} = ${soles(total)}`,
+        ...pasosFraccionDe(total, fr, pideResto, uso.usa, uso.queda, soles),
+      ],
     }
   },
 }
@@ -570,6 +626,20 @@ function parParaComparar(azar: Azar): Par {
 }
 
 const signo = (p: Fr, q: Fr) => (Math.abs(valorDe(p) - valorDe(q)) < 1e-9 ? '=' : valorDe(p) > valorDe(q) ? '>' : '<')
+
+/** Por qué una fracción es mayor que otra (o igual), terminando en la comparación: «… : 3/4 > 1/4». */
+function porQue(p: Fr, q: Fr) {
+  const s = signo(p, q)
+  if (s === '=') return `Las dos tiras tienen pintado lo mismo: ${ft(p)} = ${ft(q)}`
+  const [may, men] = s === '>' ? [p, q] : [q, p]
+  // Con el mismo denominador, la mayor tiene al menos 2 partes.
+  if (may[1] === men[1]) return `Mismo denominador: ${may[0]} partes son más que ${men[0]}: ${ft(may)} > ${ft(men)}`
+  if (may[0] === men[0]) return `Mismo numerador: los ${PARTES[may[1]]} son más grandes que los ${PARTES[men[1]]}: ${ft(may)} > ${ft(men)}`
+  return `En las tiras, ${ft(may)} tiene más pintado: ${ft(may)} > ${ft(men)}`
+}
+
+/** Lo que se ve en una tira: «8 partes, 3 pintadas». */
+const pintadas = ([a, b]: Fr) => `${b} partes, ${a} ${a === 1 ? 'pintada' : 'pintadas'}`
 
 export const comparar: TipoPregunta = {
   id: 'fr-comparar',
@@ -602,6 +672,11 @@ export const comparar: TipoPregunta = {
         dibujo: tirasDe([A, B], true),
         pregunta: mas ? '¿Quién comió más chocolate?' : '¿Quién comió menos chocolate?',
         ...alt,
+        pasos: [
+          `${A}: ${pintadas(p)}; ${B}: ${pintadas(q)}`,
+          porQue(p, q),
+          s === '=' ? `Comieron lo mismo: ${ft(p)} = ${ft(q)}` : `${mas ? 'Comió más' : 'Comió menos'}: ${correcta}`,
+        ],
       }
     }
     if (modo < 0.7) {
@@ -614,6 +689,7 @@ export const comparar: TipoPregunta = {
         dibujo: tirasDe([ft(p), ft(q)], false),
         pregunta: `¿Qué signo va en el recuadro?   ${ft(p)} □ ${ft(q)}`,
         ...alt,
+        pasos: [`${ft(p)}: ${pintadas(p)}; ${ft(q)}: ${pintadas(q)}`, porQue(p, q), `En el recuadro va ${signo(p, q)} (${ft(p)} ${signo(p, q)} ${ft(q)})`],
       }
     }
     // ¿Tiene razón? La afirmación de un compañero, con su razón (a veces el error típico).
@@ -664,6 +740,7 @@ export const comparar: TipoPregunta = {
       pregunta: `¿Tiene razón ${quien}?`,
       ...alt,
       nota,
+      pasos: [`${ft(mayor)}: ${pintadas(mayor)}; ${ft(menor)}: ${pintadas(menor)}`, porQue(mayor, menor), correcta],
     }
   },
 }
@@ -693,6 +770,7 @@ export const ordenar: TipoPregunta = {
   generar({ azar }) {
     const fs = tresFracciones(azar)
     const desc = [...fs].sort((x, y) => valorDe(y) - valorDe(x))
+    const regla = `${desc.every((f) => f[1] === desc[0][1]) ? 'Mismo denominador: es mayor la de más partes' : 'Mismo numerador: es mayor la de partes más grandes'}: ${desc.map(ft).join(' > ')}`
     if (azar() < 0.6) {
       const deMayor = azar() < 0.6
       const correcto = deMayor ? desc : [...desc].reverse()
@@ -716,6 +794,11 @@ export const ordenar: TipoPregunta = {
         ),
         pregunta: deMayor ? '¿Cuál es el orden de las fracciones, de mayor a menor?' : '¿Cuál es el orden de las fracciones, de menor a mayor?',
         ...alt,
+        pasos: [
+          `En las tiras, ${ft(desc[0])} tiene más pintado y ${ft(desc[2])}, menos`,
+          regla,
+          `${deMayor ? 'De mayor a menor' : 'De menor a mayor'}: ${texto3(correcto)}`,
+        ],
       }
     }
     const ns = nombres(azar, 3)
@@ -735,6 +818,11 @@ export const ordenar: TipoPregunta = {
       ),
       pregunta: mas ? '¿Quién comió más gelatina?' : '¿Quién comió menos gelatina?',
       ...alt,
+      pasos: [
+        `En las tiras, ${ns[fs.indexOf(desc[0])]} tiene más pintado y ${ns[fs.indexOf(desc[2])]}, menos`,
+        regla,
+        `${mas ? 'Comió más' : 'Comió menos'}: ${correcta} (${ft(elegido)})`,
+      ],
     }
   },
 }
@@ -792,6 +880,11 @@ export const sumar: TipoPregunta = {
         dibujo: svg(420, 124, t + ley, `Tira partida en ${n} partes: ${a} grises y ${b} con rayas`),
         pregunta: pared ? '¿Qué fracción de la pared pintó en total?' : '¿Qué fracción de la chacra sembró en total?',
         ...alt,
+        pasos: [
+          `En la tira: ${pl(a, 'parte gris', 'partes grises')} y ${b} con rayas, de ${n}`,
+          `Mismo denominador: se suman los numeradores: ${a} + ${b} = ${s}`,
+          `${frac(a, n)} + ${frac(b, n)} = ${frac(s, n)}`,
+        ],
       }
     }
     if (modo < 0.75) {
@@ -808,6 +901,11 @@ export const sumar: TipoPregunta = {
         dibujo: svg(420, 76, tira(10, 10, 400, 56, n, como), `Tira partida en ${n} partes: ${a} pintadas y ${b} de ellas tachadas`),
         pregunta: '¿Qué fracción del queque queda ahora?',
         ...alt,
+        pasos: [
+          `En la tira: ${pl(a, 'parte pintada', 'partes pintadas')} de ${n}; ${b} con X`,
+          `Mismo denominador: se restan los numeradores: ${a} − ${b} = ${r}`,
+          `${frac(a, n)} − ${frac(b, n)} = ${frac(r, n)}`,
+        ],
       }
     }
     const a = entero(azar, 1, n - 1)
@@ -821,6 +919,11 @@ export const sumar: TipoPregunta = {
       dibujo: dibujoJarra(n, a),
       pregunta: '¿Qué fracción de la jarra le falta llenar?',
       ...alt,
+      pasos: [
+        `En la jarra: ${pl(a, 'parte llena', 'partes llenas')} de ${n}`,
+        `Faltan: ${n} − ${a} = ${pl(f, 'parte', 'partes')}`,
+        `La jarra llena es ${frac(n, n)}: ${frac(n, n)} − ${frac(a, n)} = ${frac(f, n)}`,
+      ],
     }
   },
 }
@@ -892,6 +995,11 @@ export const sumarEquivalentes: TipoPregunta = {
       pregunta: op === '+' ? `¿Qué fracción del mural pintó en total?   ${ft(p)} + ${ft(q)} = ?` : `¿Qué fracción de la pizza le queda?   ${ft(p)} − ${ft(q)} = ?`,
       ...alt,
       nota: `${ft(chica)} = ${frac(chica[0] * k, comun)}; entonces ${frac(pa, comun)} ${op} ${frac(qc, comun)} = ${frac(r, comun)}.`,
+      pasos: [
+        `Las líneas punteadas parten cada ${PARTE[chica[1]]} en ${k}: ${ft(chica)} = ${frac(chica[0] * k, comun)}`,
+        `Ya en ${PARTES[comun]}, se ${op === '+' ? 'suman' : 'restan'} los numeradores: ${pa} ${op} ${qc} = ${r}`,
+        `${ft(p)} ${op} ${ft(q)} = ${frac(pa, comun)} ${op} ${frac(qc, comun)} = ${frac(r, comun)}`,
+      ],
     }
   },
 }
@@ -921,6 +1029,11 @@ export const equivalentes: TipoPregunta = {
         dibujo: dibujoTiras([primera, { izq: '?', n: kb, como: primeras(ka) }], `Tira de ${ft(base)} pintada y tira partida en ${kb} con ${ka} pintadas`),
         pregunta: `¿Qué fracción es equivalente a ${ft(base)}?`,
         ...alt,
+        pasos: [
+          `La segunda tira está partida en ${kb} partes y tiene ${ka} pintadas`,
+          `Numerador y denominador por ${k}: ${a} × ${k} = ${ka}; ${b} × ${k} = ${kb}`,
+          `${ft(base)} = ${frac(ka, kb)}`,
+        ],
       }
     }
     if (modo < 0.75) {
@@ -933,6 +1046,10 @@ export const equivalentes: TipoPregunta = {
         dibujo: dibujoTiras([primera, { izq: '?', n: kb, como: () => 'vacia' }], `Tira de ${ft(base)} pintada y tira vacía partida en ${kb}`),
         pregunta: `¿Cuántos ${PARTES[kb]} hay que pintar para tener lo mismo que ${ft(base)}?`,
         ...alt,
+        pasos: [
+          `Cada ${PARTE[b]} es igual a ${k} ${PARTES[kb]}: ${kb} ÷ ${b} = ${k}`,
+          `${a} × ${k} = ${ka}: hay que pintar ${ka} ${PARTES[kb]}`,
+        ],
       }
     }
     return {
@@ -942,6 +1059,11 @@ export const equivalentes: TipoPregunta = {
       dibujo: dibujoTiras([primera, { izq: '?', n: kb, como: () => 'vacia', plantilla: true }], `Tira de ${ft(base)} pintada y tira vacía partida en ${kb}, con recuadros para escribir la fracción`),
       respuesta: `${ka} partes pintadas: ${frac(ka, kb)}`,
       espacio: 'dibujo',
+      pasos: [
+        `La segunda tira está partida en ${kb}: cada ${PARTE[b]} es igual a ${k} ${PARTES[kb]} (${kb} ÷ ${b} = ${k})`,
+        `${a} × ${k} = ${ka}: se pintan ${ka} ${PARTES[kb]}`,
+        `${ft(base)} = ${frac(ka, kb)}`,
+      ],
     }
   },
 }
@@ -984,6 +1106,12 @@ export const equivalentesRazon: TipoPregunta = {
       pregunta: '¿Quién tiene razón?',
       ...alt,
       nota: `Son ${cuantasCosas(ka, cA)} de ${n}: ${frac(ka, n)}. En cada grupo hay ${a} de ${b}: ${ft([a, b])}. Las dos fracciones son equivalentes.`,
+      pasos: [
+        `En total: ${cuantasCosas(ka, cA)} de ${n}: ${frac(ka, n)}`,
+        `En cada grupo, ${a} de ${b}: ${ft(base)} = ${frac(ka, n)}`,
+        `${X}: ${ft(dichoX)} está ${bienX ? 'bien' : 'mal'}; ${Y}: ${ft(dichoY)} está ${bienY ? 'bien' : 'mal'}`,
+        `${correcta} ${bienX !== bienY ? 'tiene' : 'tienen'} razón`,
+      ],
     }
   },
 }
@@ -1046,6 +1174,7 @@ export const amplificar: TipoPregunta = {
         dibujo: svg(420, 76, tira(10, 10, 400, 56, b, primeras(a), { punteadas: k }), `Tira de ${ft(base)} pintada; cada parte partida en ${k} con líneas punteadas`),
         pregunta: 'Ahora, contando las partes chicas, ¿qué fracción de la tira está pintada?',
         ...alt,
+        pasos: [`Cada parte se partió en ${k}: ${b} × ${k} = ${kb} partes chicas`, `Pintadas: ${a} × ${k} = ${ka} partes chicas`, `${ft(base)} = ${frac(ka, kb)}`],
       }
     }
     if (modo < 0.75) {
@@ -1058,6 +1187,7 @@ export const amplificar: TipoPregunta = {
         dibujo: dibujoOperacion(base, `× ${k}`, [null, null]),
         pregunta: '¿Qué fracción obtienes?',
         ...alt,
+        pasos: [`Numerador: ${a} × ${k} = ${ka}`, `Denominador: ${b} × ${k} = ${kb}`, `${ft(base)} = ${frac(ka, kb)}`],
       }
     }
     // Completar el numerador: el error típico es sumar lo que creció el denominador.
@@ -1070,6 +1200,11 @@ export const amplificar: TipoPregunta = {
       dibujo: dibujoOperacion(base, `× ${k}`, [null, kb]),
       pregunta: `${ft(base)} = □/${kb}. ¿Qué número va en el recuadro?`,
       ...alt,
+      pasos: [
+        `El denominador pasó de ${b} a ${kb}: ${b} × ${k} = ${kb}`,
+        `El numerador también se multiplica por ${k}: ${a} × ${k} = ${ka}`,
+        `${ft(base)} = ${frac(ka, kb)}: en el recuadro va ${ka}`,
+      ],
     }
   },
 }
@@ -1105,6 +1240,11 @@ export const simplificar: TipoPregunta = {
         dibujo: svg(420, 84, tira(10, 14, 400, 56, kb, primeras(ka), { gruesas: k }), `Tira de ${ft(de)} pintada, con líneas gruesas cada ${k} partes`),
         pregunta: 'Si cuentas solo las partes grandes (entre líneas gruesas), ¿qué fracción de la tira está pintada?',
         ...alt,
+        pasos: [
+          `Las líneas gruesas juntan las partes de ${k} en ${k}: ${kb} ÷ ${k} = ${b} partes grandes`,
+          `Pintadas: ${ka} ÷ ${k} = ${pl(a, 'parte grande', 'partes grandes')}`,
+          `${ft(de)} = ${frac(a, b)}`,
+        ],
       }
     }
     if (modo < 0.75) {
@@ -1117,6 +1257,7 @@ export const simplificar: TipoPregunta = {
         dibujo: dibujoOperacion(de, `÷ ${k}`, [null, null]),
         pregunta: '¿Qué fracción obtienes?',
         ...alt,
+        pasos: [`Numerador: ${ka} ÷ ${k} = ${a}`, `Denominador: ${kb} ÷ ${k} = ${b}`, `${ft(de)} = ${frac(a, b)}`],
       }
     }
     const alt = conError(azar, num(a), distractores(a, [ka - (kb - b), ka, b, a + 1, a - 1], { min: 1 }), 4)
@@ -1128,6 +1269,11 @@ export const simplificar: TipoPregunta = {
       dibujo: dibujoOperacion(de, `÷ ${k}`, [null, b]),
       pregunta: `${ft(de)} = □/${b}. ¿Qué número va en el recuadro?`,
       ...alt,
+      pasos: [
+        `El denominador pasó de ${kb} a ${b}: ${kb} ÷ ${k} = ${b}`,
+        `El numerador también se divide entre ${k}: ${ka} ÷ ${k} = ${a}`,
+        `${ft(de)} = ${frac(a, b)}: en el recuadro va ${a}`,
+      ],
     }
   },
 }
@@ -1272,6 +1418,11 @@ export const balanza: TipoPregunta = {
         ...alt,
         alternativas: alt.alternativas.map((x) => `${x} g`),
         nota: `1 kg = 1000 g. ${gs.map((g) => num(g)).join(' + ')} = ${num(T)} g.`,
+        pasos: [
+          `Pesas: ${gs.map((g) => PESAS[g].t).join(', ')}`,
+          ...(cant[1000] ? [`1 kg = ${num(1000)} g`] : []),
+          `Total: ${gs.map((g) => num(g)).join(' + ')} = ${num(T)} g`,
+        ],
       }
     }
     // ¿Qué pesa falta? La bolsa dice cuánto pesa; en el otro platillo falta una pesa.
@@ -1298,6 +1449,11 @@ export const balanza: TipoPregunta = {
       ...alt,
       alternativas: alt.alternativas.map((x) => `${x} g`),
       nota: `${kilos(M)} = ${num(M)} g. ${num(M)} − ${num(S)} = ${num(falta)} g.`,
+      pasos: [
+        `La bolsa pesa ${kilos(M)} = ${num(M)} g`,
+        `Pesas puestas: ${gs.length > 1 ? `${gs.map((g) => num(g)).join(' + ')} = ` : ''}${num(S)} g`,
+        `Falta: ${num(M)} − ${num(S)} = ${num(falta)} g`,
+      ],
     }
   },
 }
@@ -1346,6 +1502,13 @@ export const masas: TipoPregunta = {
         pregunta: mas ? '¿Qué bolsa pesa más?' : '¿Qué bolsa pesa menos?',
         ...alt,
         nota: `${kilos(K)} = ${num(K)} g.`,
+        pasos: [
+          `En gramos: ${kilos(K)} = ${num(K)} g`,
+          sacos.map((s, i) => `${i ? deProducto(s.producto) : mayus(deProducto(s.producto))}: ${num(s.g)} g`).join('; '),
+          x.g === y.g
+            ? `Pesan lo mismo: ${num(x.g)} g = ${num(y.g)} g`
+            : `${correcta} pesa ${mas ? 'más' : 'menos'}: ${mas ? num(Math.max(x.g, y.g)) : num(Math.min(x.g, y.g))} g ${mas ? '>' : '<'} ${mas ? num(Math.min(x.g, y.g)) : num(Math.max(x.g, y.g))} g`,
+        ],
       }
     }
     if (modo < 0.72) {
@@ -1367,6 +1530,11 @@ export const masas: TipoPregunta = {
         pregunta: mas ? '¿Qué bolsa pesa más?' : '¿Qué bolsa pesa menos?',
         ...alt,
         nota: `${kilos(K)} = ${num(K)} g.`,
+        pasos: [
+          `En gramos: ${kilos(K)} = ${num(K)} g`,
+          sacos.map((s, i) => `${i ? deProducto(s.producto) : mayus(deProducto(s.producto))}: ${num(s.g)} g`).join('; '),
+          `${bolsaDe(elegido.producto)} pesa ${mas ? 'más' : 'menos'}: ${num(elegido.g)} g`,
+        ],
       }
     }
     // ¿Cuánto pesan juntas?
@@ -1391,6 +1559,7 @@ export const masas: TipoPregunta = {
       ...alt,
       alternativas: alt.alternativas.map((x) => `${x} g`),
       nota: `${kilos(K)} = ${num(K)} g. ${num(K)} + ${num(G)} = ${num(T)} g.`,
+      pasos: [`En gramos: ${kilos(K)} = ${num(K)} g`, `Juntas: ${num(K)} + ${num(G)} = ${num(T)} g`],
     }
   },
 }
@@ -1476,6 +1645,24 @@ function horaTexto(t: number) {
   return `${h === 1 ? 'La' : 'Las'} ${h} ${cola}`
 }
 
+/** La hora, de 1 a 12, a los `t` minutos. */
+const hora12 = (t: number) => ((((Math.floor(t / 60) - 1) % 12) + 12) % 12) + 1
+/** «3:15», como en un reloj digital. */
+const hhmm = (t: number) => `${hora12(t)}:${String(((t % 60) + 60) % 60).padStart(2, '0')}`
+/** «las 3:15», «la 1:45». */
+const alas = (t: number) => `${hora12(t) === 1 ? 'la' : 'las'} ${hhmm(t)}`
+
+/** Dónde están las agujas a la hora `t` (en un cuarto de hora exacto): primero la larga y luego la corta. */
+function agujas(t: number): [string, string] {
+  const m = ((t % 60) + 60) % 60
+  const h = hora12(t)
+  const sig = (h % 12) + 1
+  if (m === 0) return ['La aguja larga apunta al 12: en punto', `La aguja corta apunta al ${h}`]
+  if (m === 15) return ['La aguja larga apunta al 3: 15 minutos, y cuarto', `La aguja corta pasó un poco del ${h}`]
+  if (m === 30) return ['La aguja larga apunta al 6: 30 minutos, y media', `La aguja corta está entre el ${h} y el ${sig}`]
+  return ['La aguja larga apunta al 9: 45 minutos, faltan 15 (menos cuarto)', `La aguja corta está casi en el ${sig}`]
+}
+
 /** Una duración en minutos (múltiplo de 15) como se dice: «Media hora», «1 hora y cuarto», «2 horas y media». */
 function duracionTexto(min: number) {
   const h = Math.floor(min / 60)
@@ -1523,6 +1710,7 @@ export const reloj: TipoPregunta = {
         dibujo: dibujoReloj(null),
         respuesta,
         espacio: 'dibujo',
+        pasos: [`${horaTexto(t)}: ${hhmm(t)}`, ...agujas(t)],
       }
     }
     if (modo < 0.42) {
@@ -1536,6 +1724,13 @@ export const reloj: TipoPregunta = {
         dibujo: dibujoReloj(null),
         pregunta: `A ${horaTexto(t).toLowerCase()}, ¿a qué número apunta la aguja larga?`,
         ...alt,
+        pasos:
+          m === 0
+            ? ['En punto: la aguja larga apunta al 12']
+            : [
+                `${m === 15 ? 'Y cuarto' : m === 30 ? 'Y media' : 'Menos cuarto'}: ${m} minutos${m === 45 ? ' (faltan 15 para la hora)' : ''}`,
+                `Cada número son 5 minutos: ${m} ÷ 5 = ${larga}; la aguja larga apunta al ${larga}`,
+              ],
       }
     }
     // Confundir «y cuarto» con «menos cuarto», leer mal la hora por una, cambiar las agujas.
@@ -1552,6 +1747,7 @@ export const reloj: TipoPregunta = {
       dibujo: dibujoReloj(t),
       pregunta: l.pregunta,
       ...alt,
+      pasos: [...agujas(t), `${horaTexto(t)} (${hhmm(t)})`],
     }
   },
 }
@@ -1585,6 +1781,9 @@ export const duracion: TipoPregunta = {
       const alt = conError(azar, duracionTexto(d), malas.map(duracionTexto), 4)
       if (!alt) return null
       const e = elegir(azar, EVENTOS)
+      const horas = Math.floor(d / 60)
+      const minutos = d % 60
+      const conHoras = horas === 1 ? '1 hora' : `${horas} horas`
       return {
         forma: 'opciones',
         clave: `duracion:${t0}:${d}`,
@@ -1593,6 +1792,13 @@ export const duracion: TipoPregunta = {
         pregunta: e.pregunta,
         ...alt,
         nota: `De ${horaTexto(t0).toLowerCase()} a ${horaTexto(t1).toLowerCase()} pasan ${d} minutos.`,
+        pasos: [
+          `${e.etiquetas[0]} a ${alas(t0)} y ${e.etiquetas[1].toLowerCase()} a ${alas(t1)}`,
+          horas && minutos
+            ? `De ${hhmm(t0)} a ${hhmm(t0 + horas * 60)}: ${conHoras}; de ${hhmm(t0 + horas * 60)} a ${hhmm(t1)}: ${minutos} minutos`
+            : `De ${hhmm(t0)} a ${hhmm(t1)}: ${horas ? conHoras : `${minutos} minutos`}`,
+          `${duracionTexto(d)} (${d} minutos)`,
+        ],
       }
     }
     const d = elegir(azar, [15, 30, 45, 60, 90])
@@ -1615,6 +1821,11 @@ export const duracion: TipoPregunta = {
       dibujo: dibujoReloj(visto),
       pregunta: empieza ? '¿A qué hora termina?' : '¿A qué hora empezó?',
       ...alt,
+      pasos: [
+        `El reloj marca ${horaTexto(visto).toLowerCase()}: ${hhmm(visto)}`,
+        empieza ? `${duracionTexto(d)} después de ${alas(t0)}: ${hhmm(t1)}` : `${duracionTexto(d)} antes de ${alas(t1)}: ${hhmm(t0)}`,
+        `${horaTexto(t)} (${hhmm(t)})`,
+      ],
     }
   },
 }

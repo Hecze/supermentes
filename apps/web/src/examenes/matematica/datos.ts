@@ -78,6 +78,28 @@ function ordenar(r: Alt | null, orden: string[]): Alt | null {
   return { alternativas: alt, correcta: alt.indexOf(buena) }
 }
 
+// ---------- Ayudas para los pasos de la clave ----------
+
+/** "5 + 8 + 12" */
+const sumados = (xs: number[]) => xs.map(num).join(' + ')
+/** "1 vez", "3 veces" */
+const veces = (n: number) => `${num(n)} ${n === 1 ? 'vez' : 'veces'}`
+/** "Mango 5, Plátano 4 y Papaya 6" */
+const conValores = (cats: string[], vs: number[]) => yLista(cats.map((c, i) => `${c} ${num(vs[i])}`))
+/** "a, b y c" */
+const yLista = (xs: string[]) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`)
+/** "polo" de "un polo", "entrada" de "una entrada". */
+const singular = (uno: string) => uno.replace(/^una? /, '')
+
+/** Cómo se cuentan unos palotes: "Palotes de Mango: 3 grupos de 5 y 2 sueltos" y "3 × 5 = 15; 15 + 2 = 17". */
+function cuentaPalotes(et: string, v: number): [string, string] {
+  const g = Math.floor(v / 5)
+  const s = v % 5
+  const partes = [g ? `${num(g)} ${g === 1 ? 'grupo' : 'grupos'} de 5` : '', s ? `${num(s)} ${s === 1 ? 'suelto' : 'sueltos'}` : ''].filter(Boolean)
+  const cuenta = g === 0 ? `${num(s)} ${s === 1 ? 'palote' : 'palotes'}: ${num(v)}` : s === 0 ? `${num(g)} × 5 = ${num(v)}` : `${num(g)} × 5 = ${num(g * 5)}; ${num(g * 5)} + ${num(s)} = ${num(v)}`
+  return [`Palotes de ${et}: ${partes.join(' y ')}`, cuenta]
+}
+
 // ---------- Contextos del Perú ----------
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes']
@@ -400,6 +422,15 @@ function cuantosSimbolos(k: number, medio: boolean) {
   return `${k} ${k === 1 ? 'símbolo' : 'símbolos'}`
 }
 
+/** El valor de una fila del pictograma: "3 × 10 = 30; 30 + 5 = 35" (con medio símbolo) o "3 × 10 = 30". */
+function cuentaFila(r: FilaPicto, vale: number) {
+  const enteros = r.k * vale
+  if (!r.medio) return `${num(r.k)} × ${num(vale)} = ${num(enteros)}`
+  return `${num(r.k)} × ${num(vale)} = ${num(enteros)}; ${num(enteros)} + ${num(vale / 2)} = ${num(enteros + vale / 2)}`
+}
+
+const leyendaPaso = (vale: number, medio: boolean) => (medio ? `Cada símbolo vale ${num(vale)} y medio símbolo, ${num(vale / 2)}` : `Cada símbolo vale ${num(vale)}`)
+
 // ---------- Dibujo: gráfico de barras ----------
 
 type CtxBarras = {
@@ -506,6 +537,13 @@ function datosBarras(azar: Azar, n: number) {
   return { max, cada, valores }
 }
 
+/** Hasta dónde llega una barra: "La barra de Combi llega hasta el 40" o "… llega a la mitad entre 40 y 60: 50". */
+function leeBarra(cat: string, v: number, cada: number) {
+  if (v % cada === 0) return `La barra de ${cat} llega hasta el ${num(v)}`
+  const abajo = v - (v % cada)
+  return `La barra de ${cat} llega ${(v % cada) * 2 === cada ? 'a la mitad ' : ''}entre ${num(abajo)} y ${num(abajo + cada)}: ${num(v)}`
+}
+
 function ctxBarras(azar: Azar, n: number) {
   const ctx = elegir(azar, BARRAS)
   const k = Math.min(n, ctx.cats.length)
@@ -600,6 +638,7 @@ const encuesta = tipo(
         pregunta: '¿Qué pregunta debe escribir en la ficha?',
         ...alt,
         nota: 'La pregunta debe pedir el dato que se quiere saber y tener como respuestas las opciones de la ficha.',
+        pasos: [`Las respuestas de la ficha: ${yLista(e.opciones)}`, `Quiere saber ${e.saber.replace('{g}', 'sus compañeros')}`, `La pregunta que pide ese dato: ${e.pregunta}`],
       }
     }
     if (modo < 0.7) {
@@ -617,6 +656,7 @@ const encuesta = tipo(
         dibujo: fichaEncuesta(e.pregunta, e.opciones),
         pregunta: '¿A quiénes debe hacerles la encuesta?',
         ...alt,
+        pasos: [`La ficha pregunta: ${e.pregunta}`, `Quiere saber la respuesta de ${gr.g}`, `${gr.bien}: a ellos, no a unos pocos ni a otras personas`],
       }
     }
     // Los resultados de una encuesta: ¿qué pregunta hicieron?
@@ -634,6 +674,7 @@ const encuesta = tipo(
       dibujo: lamina('Resultados de la encuesta', [tablaFrecuencias('Respuesta', e.opciones, valores, 'sin-conteo')], `Tabla con las respuestas ${e.opciones.map((o, i) => `${o}: ${valores[i]}`).join(', ')}`),
       pregunta: '¿Qué pregunta hizo en la encuesta?',
       ...alt,
+      pasos: [`Las respuestas de la tabla: ${yLista(e.opciones)}`, `La pregunta que tiene esas respuestas: ${e.pregunta}`],
     }
   },
 )
@@ -672,6 +713,7 @@ const frecuencias = tipo(
         dibujo: lamina(titulo, [tablaFrecuencias(t.columna, cats, valores, 'vacia')], alt),
         pregunta: `¿Cuántos estudiantes votaron por ${ops[i].con}?`,
         ...r,
+        pasos: cuentaPalotes(cats[i], v),
       }
     }
     if (modo < 0.6) {
@@ -685,6 +727,7 @@ const frecuencias = tipo(
         dibujo: lamina(titulo, [tablaFrecuencias(t.columna, cats, valores, 'numeros')], alt),
         pregunta: '¿Cuántos estudiantes respondieron la encuesta?',
         ...r,
+        pasos: [`Frecuencias: ${conValores(cats, valores)}`, `Se suman todas: ${sumados(valores)} = ${num(tot)}`],
       }
     }
     if (modo < 0.8) {
@@ -699,8 +742,10 @@ const frecuencias = tipo(
         dibujo: lamina(titulo, [tablaFrecuencias(t.columna, cats, valores, 'vacia')], alt),
         pregunta: `¿Cuántos estudiantes más votaron por ${ops[a].con} que por ${ops[b].con}?`,
         ...r,
+        pasos: [`Se cuentan los palotes de 5 en 5: ${cats[a]} ${num(valores[a])} y ${cats[b]} ${num(valores[b])}`, `Diferencia: ${num(valores[a])} − ${num(valores[b])} = ${num(d)}`],
       }
     }
+    const ejemplo = valores.indexOf(Math.max(...valores))
     return {
       forma: 'abierta',
       clave: `frec-completa:${t.columna}:${valores.join('-')}`,
@@ -708,6 +753,7 @@ const frecuencias = tipo(
       dibujo: lamina(titulo, [tablaFrecuencias(t.columna, cats, valores, 'casillas')], alt),
       respuesta: cats.map((c, i) => `${c}: ${valores[i]}`).join(' · '),
       espacio: 'dibujo',
+      pasos: ['Se cuentan los palotes de 5 en 5 y luego los sueltos', `Por ejemplo, ${cats[ejemplo]}: ${cuentaPalotes(cats[ejemplo], valores[ejemplo])[1]}`, `Frecuencias: ${conValores(cats, valores)}`],
     }
   },
 )
@@ -768,6 +814,7 @@ const organiza = tipo(
         dibujo: lamina('', [tarjetas(lista, 6)], alt),
         pregunta: `¿Cuántos compañeros respondieron «${cats[i]}»?`,
         ...r,
+        pasos: [`Se cuentan las tarjetas de cada respuesta: ${conValores(cats, valores)}`, `Comprueba: ${sumados(valores)} = ${num(total)} tarjetas`, `Respondieron «${cats[i]}»: ${num(v)}`],
       }
     }
     if (modo < 0.6) {
@@ -782,6 +829,7 @@ const organiza = tipo(
         dibujo: lamina('', [tarjetas(lista, 6)], alt),
         pregunta: '¿Qué respuesta eligieron menos compañeros?',
         ...r,
+        pasos: [`Se cuentan las tarjetas de cada respuesta: ${conValores(cats, valores)}`, `La que tiene menos tarjetas (${num(valores[i])}): ${cats[i]}`],
       }
     }
     // En la tabla para completar, el conteo también va vacío: lo hacen ellos con palotes.
@@ -797,6 +845,7 @@ const organiza = tipo(
       dibujo: lamina('', [tarjetas(lista, 6), vacia], `${alt}; debajo, una tabla de frecuencias vacía`, 16),
       respuesta: cats.map((c, i) => `${c}: ${valores[i]}`).join(' · '),
       espacio: 'dibujo',
+      pasos: ['Por cada tarjeta se hace un palote en la fila de su respuesta', `Son ${num(total)} tarjetas: las frecuencias deben sumar ${num(total)}`, `Frecuencias: ${conValores(cats, valores)}`],
     }
   },
 )
@@ -855,24 +904,36 @@ const dobleEntrada = tipo(
     const i = entero(azar, 0, filas.length - 1)
     const j = entero(azar, 0, ops.length - 1)
     const col = filas.map((_, k) => m[k][j])
+    const leeFila = `Fila ${filas[i].et}: ${conValores(
+      ops.map((o) => o.et),
+      m[i],
+    )}`
     if (modo < 0.35) {
       const v = m[i][j]
       const otraFila = m[(i + 1) % filas.length][j]
       const r = opcionesNum(azar, v, [otraFila, suma(col), m[i][(j + 1) % ops.length], suma(m[i]), m[i][(j + ops.length - 1) % ops.length]], 1)
       if (!r) return null
-      return { forma: 'opciones', clave: `${clave}:celda${i}-${j}`, enunciado, dibujo, pregunta: `¿${filas[i].cuantos} eligieron ${ops[j].con}?`, ...r }
+      const pasos = [`Se busca la fila ${filas[i].et} y la columna ${ops[j].et}`, `Donde se cruzan: ${num(v)}`]
+      return { forma: 'opciones', clave: `${clave}:celda${i}-${j}`, enunciado, dibujo, pregunta: `¿${filas[i].cuantos} eligieron ${ops[j].con}?`, ...r, pasos }
     }
     if (modo < 0.6) {
       const v = suma(col)
       const r = opcionesNum(azar, v, [col[0], col[col.length - 1], suma(m[0]), v + 10, v - 1, v + 1], 1)
       if (!r) return null
-      return { forma: 'opciones', clave: `${clave}:col${j}`, enunciado, dibujo, pregunta: `¿Cuántos estudiantes en total eligieron ${ops[j].con}?`, ...r }
+      const pasos = [
+        `Columna ${ops[j].et}: ${conValores(
+          filas.map((g) => g.et),
+          col,
+        )}`,
+        `Total: ${sumados(col)} = ${num(v)}`,
+      ]
+      return { forma: 'opciones', clave: `${clave}:col${j}`, enunciado, dibujo, pregunta: `¿Cuántos estudiantes en total eligieron ${ops[j].con}?`, ...r, pasos }
     }
     if (modo < 0.8) {
       const v = suma(m[i])
       const r = opcionesNum(azar, v, [suma(col), suma(m[(i + 1) % filas.length]), v + 10, v - 10, v + 1, v - 1], 1)
       if (!r) return null
-      return { forma: 'opciones', clave: `${clave}:fila${i}`, enunciado, dibujo, pregunta: `¿${filas[i].cuantos} respondieron la encuesta?`, ...r }
+      return { forma: 'opciones', clave: `${clave}:fila${i}`, enunciado, dibujo, pregunta: `¿${filas[i].cuantos} respondieron la encuesta?`, ...r, pasos: [leeFila, `Total: ${sumados(m[i])} = ${num(v)}`] }
     }
     const k = unico(m[i])
     if (k < 0) return null
@@ -886,7 +947,7 @@ const dobleEntrada = tipo(
       ops.map((o) => o.et),
     )
     if (!r) return null
-    return { forma: 'opciones', clave: `${clave}:mas${i}`, enunciado, dibujo, pregunta: `¿Qué eligieron más ${filas[i].quienes}?`, ...r }
+    return { forma: 'opciones', clave: `${clave}:mas${i}`, enunciado, dibujo, pregunta: `¿Qué eligieron más ${filas[i].quienes}?`, ...r, pasos: [leeFila, `El mayor es ${num(m[i][k])}: ${ops[k].et}`] }
   },
 )
 
@@ -920,8 +981,10 @@ const dobleCompleta = tipo(
         pregunta: '¿Qué número va en el recuadro?',
         ...r,
         nota: `${num(totF[i])} − ${num(otros)} = ${num(v)}`,
+        pasos: [`En la fila ${filas[i].et}, el total es ${num(totF[i])}`, `Los otros datos de la fila: ${sumados(m[i].filter((_, b) => b !== j))} = ${num(otros)}`, `En el recuadro: ${num(totF[i])} − ${num(otros)} = ${num(v)}`],
       }
     }
+    const col0 = m.map((fila) => fila[0])
     return {
       forma: 'abierta',
       clave: `${clave}:totales`,
@@ -933,6 +996,11 @@ const dobleCompleta = tipo(
       ),
       respuesta: `${filas.map((g, i) => `${g.et}: ${totF[i]}`).join(' · ')} · ${ops.map((o, j) => `${o.et}: ${totC[j]}`).join(' · ')} · Total: ${todo}`,
       espacio: 'dibujo',
+      pasos: [
+        `Cada fila se suma. ${filas[0].et}: ${sumados(m[0])} = ${num(totF[0])}`,
+        `Cada columna se suma. ${ops[0].et}: ${sumados(col0)} = ${num(totC[0])}`,
+        `Total: ${sumados(totF)} = ${num(todo)}`,
+      ],
     }
   },
 )
@@ -970,7 +1038,8 @@ const pictograma = tipo(
       const errores = r.medio ? [simbolosDe(r), r.k * vale, (r.k + 1) * vale, v + vale, r.k * vale + 1, v - vale] : [r.k, v + vale, v - vale, r.k * 10 === v ? r.k * 5 : r.k * 10, v + 1]
       const alt = opcionesNum(azar, v, errores, 1)
       if (!alt) return null
-      return { forma: 'opciones', clave: `${clave}:${i}`, enunciado, dibujo, pregunta: ctx.cuantos(r.cat), ...alt }
+      const pasos = [`${cap(ctx.para(r.cat))}: ${cuantosSimbolos(r.k, r.medio).toLowerCase()}`, leyendaPaso(vale, r.medio), cuentaFila(r, vale)]
+      return { forma: 'opciones', clave: `${clave}:${i}`, enunciado, dibujo, pregunta: ctx.cuantos(r.cat), ...alt, pasos }
     }
     if (modo < 0.75) {
       const par = intentar(() => {
@@ -983,13 +1052,30 @@ const pictograma = tipo(
       const d = valores[a] - valores[b]
       const alt = opcionesNum(azar, d, [simbolosDe(filas[a]) - simbolosDe(filas[b]), valores[a] + valores[b], valores[a], valores[b], d + vale, d - vale], 1)
       if (!alt) return null
-      return { forma: 'opciones', clave: `${clave}:${a}-${b}`, enunciado, dibujo, pregunta: ctx.masQue(filas[a].cat, filas[b].cat), ...alt }
+      const pasos = [
+        leyendaPaso(vale, filas[a].medio || filas[b].medio),
+        `${cap(ctx.para(filas[a].cat))}: ${cuentaFila(filas[a], vale)}`,
+        `${cap(ctx.para(filas[b].cat))}: ${cuentaFila(filas[b], vale)}`,
+        `Diferencia: ${num(valores[a])} − ${num(valores[b])} = ${num(d)}`,
+      ]
+      return { forma: 'opciones', clave: `${clave}:${a}-${b}`, enunciado, dibujo, pregunta: ctx.masQue(filas[a].cat, filas[b].cat), ...alt, pasos }
     }
     const tot = suma(valores)
     const sinMedios = suma(filas.map((r) => r.k * vale))
     const alt = opcionesNum(azar, tot, [suma(filas.map(simbolosDe)), sinMedios !== tot ? sinMedios : tot + 2 * vale, tot + vale, tot - vale, tot - valores[valores.length - 1]], 1)
     if (!alt) return null
-    return { forma: 'opciones', clave: `${clave}:total`, enunciado, dibujo, pregunta: ctx.total, ...alt }
+    const pasos = [
+      leyendaPaso(
+        vale,
+        filas.some((r) => r.medio),
+      ),
+      conValores(
+        filas.map((r) => r.cat),
+        valores,
+      ),
+      `Total: ${sumados(valores)} = ${num(tot)}`,
+    ]
+    return { forma: 'opciones', clave: `${clave}:total`, enunciado, dibujo, pregunta: ctx.total, ...alt, pasos }
   },
 )
 
@@ -1023,6 +1109,7 @@ const pictogramaCompleta = tipo(
         pregunta: '¿Cuánto vale cada símbolo?',
         ...alt,
         nota: `${num(v)} ÷ ${r.k} = ${num(vale)}`,
+        pasos: [`${cap(ctx.para(r.cat))}: ${num(r.k)} símbolos son ${num(v)} ${ctx.unidad}`, `Cada símbolo vale: ${num(v)} ÷ ${num(r.k)} = ${num(vale)}`],
       }
     }
     const i = entero(azar, 0, filas.length - 1)
@@ -1031,6 +1118,12 @@ const pictogramaCompleta = tipo(
     r.vacia = true
     const v = valorFila(r, vale)
     const dibujo = dibujoPictograma(ctx, filas, vale, vertical)
+    const enteros = r.k * vale
+    // Cómo se sabe cuántos símbolos van; el último paso lo pone cada forma de pregunta.
+    const calculo = [
+      `${cap(ctx.para(r.cat))}: ${num(v)} ${ctx.unidad}; cada símbolo vale ${num(vale)}`,
+      r.medio ? `${num(r.k)} × ${num(vale)} = ${num(enteros)}; faltan ${num(v)} − ${num(enteros)} = ${num(vale / 2)}: medio símbolo` : `${num(v)} ÷ ${num(vale)} = ${num(r.k)}`,
+    ]
     if (modo < 0.65) {
       const errores = [cuantosSimbolos(v, false), r.medio ? cuantosSimbolos(r.k + 1, false) : cuantosSimbolos(r.k + 1, false), r.medio ? cuantosSimbolos(r.k, false) : cuantosSimbolos(Math.max(1, r.k - 1), false)]
       for (const otro of [2, 5, 10]) if (otro !== vale && v % otro === 0) errores.push(cuantosSimbolos(v / otro, false))
@@ -1043,15 +1136,18 @@ const pictogramaCompleta = tipo(
         dibujo,
         pregunta: `¿Cuántos símbolos hay que dibujar para ${ctx.para(r.cat)}?`,
         ...alt,
+        pasos: [...calculo, `Hay que dibujar ${cuantosSimbolos(r.k, r.medio)}`],
       }
     }
+    const dibujar = `${r.k} ${r.k === 1 ? 'símbolo entero' : 'símbolos enteros'}${r.medio ? ' y medio símbolo' : ''}`
     return {
       forma: 'abierta',
       clave: `${clave}:dibuja${i}`,
       enunciado: `${ctx.dato(r.cat, v)} Dibuja en el pictograma los símbolos que faltan.`,
       dibujo,
-      respuesta: `${r.k} ${r.k === 1 ? 'símbolo entero' : 'símbolos enteros'}${r.medio ? ' y medio símbolo' : ''} (${num(v)} ÷ ${num(vale)})`,
+      respuesta: `${dibujar} (${num(v)} ÷ ${num(vale)})`,
       espacio: 'dibujo',
+      pasos: [...calculo, `Hay que dibujar ${dibujar}`],
     }
   },
 )
@@ -1078,25 +1174,28 @@ const leeBarras = tipo(
       const v = valores[i]
       const alt = opcionesNum(azar, v, [v / 10, v + 10, v - 10, v + 5, v - 5, ...valores.filter((x) => x !== v)], 1, 10)
       if (!alt) return null
-      return { forma: 'opciones', clave: `${clave}:${i}`, enunciado, dibujo, pregunta: ctx.cuantos(idx[i]), ...alt }
+      const pasos = [`La escala va de ${num(cada)} en ${num(cada)}`, leeBarra(cats[i], v, cada)]
+      return { forma: 'opciones', clave: `${clave}:${i}`, enunciado, dibujo, pregunta: ctx.cuantos(idx[i]), ...alt, pasos }
     }
     if (modo < 0.65) {
       const [a, b] = barajar(azar, cats.map((_, i) => i)).slice(0, 2).sort((x, y) => valores[y] - valores[x])
       const d = valores[a] - valores[b]
       const alt = opcionesNum(azar, d, [d / 10, valores[a] + valores[b], valores[a], valores[b], d + 10, d - 10], 1, 10)
       if (!alt) return null
-      return { forma: 'opciones', clave: `${clave}:${a}-${b}`, enunciado, dibujo, pregunta: ctx.masQue(idx[a], idx[b]), ...alt }
+      const pasos = [`La barra de ${cats[a]} llega a ${num(valores[a])} y la de ${cats[b]}, a ${num(valores[b])}`, `Diferencia: ${num(valores[a])} − ${num(valores[b])} = ${num(d)}`]
+      return { forma: 'opciones', clave: `${clave}:${a}-${b}`, enunciado, dibujo, pregunta: ctx.masQue(idx[a], idx[b]), ...alt, pasos }
     }
     if (modo < 0.85) {
       const i = entero(azar, 0, cats.length - 1)
       const alt = ordenar(alternativas(azar, cats[i], cats.filter((_, j) => j !== i), 4), cats)
       if (!alt) return null
-      return { forma: 'opciones', clave: `${clave}:cual${i}`, enunciado, dibujo, pregunta: ctx.cual(valores[i]), ...alt }
+      const pasos = [`Se busca en la escala el ${num(valores[i])} y la barra que llega ahí`, `Llega a ${num(valores[i])} la barra de ${cats[i]}`]
+      return { forma: 'opciones', clave: `${clave}:cual${i}`, enunciado, dibujo, pregunta: ctx.cual(valores[i]), ...alt, pasos }
     }
     const tot = suma(valores)
     const alt = opcionesNum(azar, tot, [tot / 10, tot - valores[0], tot + 10, tot - 10, tot + 20], 1, 10)
     if (!alt) return null
-    return { forma: 'opciones', clave: `${clave}:total`, enunciado, dibujo, pregunta: ctx.total, ...alt }
+    return { forma: 'opciones', clave: `${clave}:total`, enunciado, dibujo, pregunta: ctx.total, ...alt, pasos: [`Las barras: ${conValores(cats, valores)}`, `Total: ${sumados(valores)} = ${num(tot)}`] }
   },
 )
 
@@ -1119,6 +1218,11 @@ const barrasCompleta = tipo(
         dibujo: lamina(ctx.titulo, [barras({ eje: ctx.eje, cats, valores: valores.map((x, j) => (j === i ? null : x)), max, cada })], `Gráfico de barras «${ctx.titulo}» sin la barra de ${cats[i]}`),
         respuesta: `Una barra para ${cats[i]} que llega hasta ${num(v)}.`,
         espacio: 'dibujo',
+        pasos: [
+          `La escala va de ${num(cada)} en ${num(cada)}`,
+          ...(v % cada === 0 ? [] : [`${num(v)} queda entre ${num(v - (v % cada))} y ${num(v - (v % cada) + cada)}, en la línea del medio`]),
+          `Se dibuja la barra de ${cats[i]} hasta ${num(v)}`,
+        ],
       }
     }
     if (modo < 0.65) {
@@ -1137,6 +1241,10 @@ const barrasCompleta = tipo(
         dibujo: lamina(ctx.titulo, [barras({ eje: ctx.eje, cats, valores, max, cada, oculta })], `Gráfico de barras con la escala de ${cada} en ${cada} y un número borrado`),
         pregunta: '¿Qué número va en el recuadro?',
         ...alt,
+        pasos: [
+          `La escala: ${Array.from({ length: marcas + 1 }, (_, x) => (x === k ? '?' : num(x * cada))).join(', ')}`,
+          `Va de ${num(cada)} en ${num(cada)}: ${num(prev)} + ${num(cada)} = ${num(oculta)}`,
+        ],
       }
     }
     // Una tabla y su gráfico: una barra no coincide con la tabla.
@@ -1161,6 +1269,7 @@ const barrasCompleta = tipo(
       pregunta: '¿Qué barra está mal dibujada?',
       ...alt,
       nota: `La barra de ${cats[i]} llega a ${num(mal)}, pero en la tabla dice ${num(valores[i])}.`,
+      pasos: ['Se compara cada barra con su número en la tabla', `${cats[i]}: en la tabla dice ${num(valores[i])}, pero la barra llega a ${num(mal)}`, `Está mal la barra de ${cats[i]}`],
     }
   },
 )
@@ -1228,11 +1337,15 @@ const moda = tipo(
     const orden = [...l.frec.entries()].sort((a, b) => b[1] - a[1])
     const segunda = orden[1][0]
     const menos = orden[orden.length - 1][0]
+    const cuantasVeces = (vs: number[]) => vs.map((v) => `${num(v)}: ${veces(l.frec.get(v) ?? 0)}`).join(', ')
+    const salen = cuantasVeces([...l.frec.keys()].sort((a, b) => a - b))
+    const masSeRepite = `Se repite más el ${num(l.moda)} (${veces(l.fModa)}): la moda es ${num(l.moda)}`
     const modo = azar()
     if (modo < 0.45) {
       const r = opcionesNum(azar, l.moda, [l.fModa, max, segunda, l.datos[0], min, menos])
       if (!r) return null
-      return { forma: 'opciones', clave, enunciado: intro, dibujo: lamina(ctx.titulo, [pieza], alt), pregunta: '¿Cuál es la moda de estos datos?', ...r }
+      const pasos = ['Se cuenta cuántas veces sale cada dato', salen, masSeRepite]
+      return { forma: 'opciones', clave, enunciado: intro, dibujo: lamina(ctx.titulo, [pieza], alt), pregunta: '¿Cuál es la moda de estos datos?', ...r, pasos }
     }
     if (modo < 0.75) {
       const bien = `La moda es ${l.moda}, porque es el dato que más se repite.`
@@ -1246,7 +1359,8 @@ const moda = tipo(
       ]
       const r = alternativas(azar, bien, malas, 4)
       if (!r) return null
-      return { forma: 'opciones', clave: `${clave}:explica`, enunciado: intro, dibujo: lamina(ctx.titulo, [pieza], alt), pregunta: '¿Qué afirmación es correcta?', ...r }
+      const pasos = ['Se cuenta cuántas veces sale cada dato', salen, bien]
+      return { forma: 'opciones', clave: `${clave}:explica`, enunciado: intro, dibujo: lamina(ctx.titulo, [pieza], alt), pregunta: '¿Qué afirmación es correcta?', ...r, pasos }
     }
     const [lo, hi] = ctx.dominio
     const vals: number[] = []
@@ -1260,6 +1374,7 @@ const moda = tipo(
       dibujo: lamina(ctx.titulo, [pieza, t, linea], `${alt}; debajo, una tabla de frecuencias vacía`, 14),
       respuesta: `${vals.map((v) => `${v}: ${l.frec.get(v) ?? 0}`).join(' · ')}. La moda es ${l.moda}.`,
       espacio: 'dibujo',
+      pasos: ['Se cuenta cuántas veces sale cada dato y se anota en la tabla', cuantasVeces(vals), masSeRepite],
     }
   },
 )
@@ -1286,7 +1401,8 @@ const modaTabla = tipo(
     if (azar() < 0.55) {
       const r = alternativas(azar, cats[iMax], [num(vMax), cats[orden[orden.length - 1][1]], cats[iSeg], cats[orden[2][1]]], 4)
       if (!r) return null
-      return { forma: 'opciones', clave, enunciado, dibujo, pregunta: '¿Cuál es la moda?', ...r, nota: `La moda es el dato con mayor frecuencia: ${cats[iMax]} (${num(vMax)} votos).` }
+      const pasos = [`Votos: ${conValores(cats, valores)}`, `La mayor frecuencia es ${num(vMax)}: la moda es ${cats[iMax]}`]
+      return { forma: 'opciones', clave, enunciado, dibujo, pregunta: '¿Cuál es la moda?', ...r, nota: `La moda es el dato con mayor frecuencia: ${cats[iMax]} (${num(vMax)} votos).`, pasos }
     }
     // Llegan más votos para el segundo: ¿cambia la moda?
     const paso = enBarras ? 10 : 1
@@ -1301,9 +1417,14 @@ const modaTabla = tipo(
       clave: `${clave}:llegan${llegan}`,
       enunciado,
       dibujo,
-      pregunta: `Después votan ${num(llegan)} estudiantes más y todos eligen ${ops[iSeg].con}. ¿Cuál será la moda?`,
+      pregunta: `Después ${llegan === 1 ? 'vota 1 estudiante más y elige' : `votan ${num(llegan)} estudiantes más y todos eligen`} ${ops[iSeg].con}. ¿Cuál será la moda?`,
       ...r,
       nota: `${cats[iSeg]} queda con ${num(vSeg + llegan)} votos y ${cats[iMax]} con ${num(vMax)}.`,
+      pasos: [
+        `Antes: ${cats[iMax]} ${num(vMax)} y ${cats[iSeg]} ${num(vSeg)}`,
+        `${cats[iSeg]}: ${num(vSeg)} + ${num(llegan)} = ${num(vSeg + llegan)}`,
+        cambia ? `${num(vSeg + llegan)} es más que ${num(vMax)}: la moda será ${cats[iSeg]}` : `${num(vSeg + llegan)} es menos que ${num(vMax)}: la moda sigue siendo ${cats[iMax]}`,
+      ],
     }
   },
 )
@@ -1377,6 +1498,7 @@ const mediaTorres = tipo(
         pregunta: 'Si emparejan las torres pasando cubos de una a otra, ¿cuántos cubos tendrá cada torre?',
         ...alt,
         nota: `Hay ${suma(h)} cubos; repartidos en ${n} torres iguales, quedan ${m} en cada una.`,
+        pasos: [`Cubos de cada torre: ${conValores(nombres.slice(0, n), h)}`,`Total: ${sumados(h)} = ${num(suma(h))} cubos`, `Repartidos en ${num(n)} torres: ${num(suma(h))} ÷ ${num(n)} = ${num(m)}`],
       }
     }
     if (modo < 0.7) {
@@ -1398,6 +1520,7 @@ const mediaTorres = tipo(
         pregunta: `¿Cuántos cubos debe pasar ${nombres[0]} a la torre de ${nombres[1]}?`,
         ...alt,
         nota: `Así las dos quedan con ${(a + b) / 2} cubos.`,
+        pasos: [`${nombres[0]} tiene ${num(a)} cubos y ${nombres[1]}, ${num(b)}`, `Diferencia: ${num(a)} − ${num(b)} = ${num(a - b)}`, `Se pasa la mitad: ${num(a - b)} ÷ 2 = ${num(pasa)}`],
       }
     }
     // Falta una torre: se sabe cuánto queda cada una al emparejarlas.
@@ -1423,6 +1546,11 @@ const mediaTorres = tipo(
       pregunta: `¿Cuántos cubos tenía la torre de ${nombres[i]}?`,
       ...alt,
       nota: `En total hay ${n} × ${m} = ${n * m} cubos; ${n * m} − ${otras} = ${h[i]}.`,
+      pasos: [
+        `Las otras torres: ${sumados(h.filter((_, k) => k !== i))} = ${num(otras)} cubos`,
+        `Al emparejarlas: ${num(n)} × ${num(m)} = ${num(n * m)} cubos en total`,
+        `Torre de ${nombres[i]}: ${num(n * m)} − ${num(otras)} = ${num(h[i])}`,
+      ],
     }
   },
 )
@@ -1490,6 +1618,7 @@ const mediaDatos = tipo(
     const fmt = (v: number) => (ctx.soles ? soles(v) : num(v))
     const q = nombre(azar)
     const conSoles = (r: Alt | null) => (r && ctx.soles ? { ...r, alternativas: r.alternativas.map((a) => `S/ ${a}`) } : r)
+    const plural = ctx.cada === 'día' ? 'días' : 'semanas'
     const modo = azar()
     if (modo < 0.6) {
       const t = tabla([[ctx.etiquetas === DIAS ? 'Día' : 'Semana', ...ets], [ctx.fila, ...xs.map(fmt)]], [anchoCol([ctx.fila, 'Semana'], 96), ...ets.map((e) => anchoCol([e], 74))], { alto: 36 })
@@ -1503,6 +1632,7 @@ const mediaDatos = tipo(
         pregunta: `¿Cuál es la media? Es decir: ${ctx.pregunta.charAt(0).toLowerCase()}${ctx.pregunta.slice(1)}`,
         ...r,
         nota: `${xs.map(num).join(' + ')} = ${num(suma(xs))}; ${num(suma(xs))} ÷ ${n} = ${num(m)}`,
+        pasos: [`Se suman los datos de la tabla: ${sumados(xs)} = ${num(suma(xs))}`, `Se reparte igual en ${num(n)} ${plural}: ${num(suma(xs))} ÷ ${num(n)} = ${fmt(m)}`],
       }
     }
     const i = intentar(() => {
@@ -1522,6 +1652,11 @@ const mediaDatos = tipo(
       pregunta: ctx.falta(m, ets[i]),
       ...r,
       nota: `${n} × ${num(m)} = ${num(n * m)}; ${num(n * m)} − ${num(otras)} = ${num(xs[i])}`,
+      pasos: [
+        `${ctx.cada === 'día' ? 'Los otros días' : 'Las otras semanas'}: ${sumados(xs.filter((_, k) => k !== i))} = ${num(otras)}`,
+        `Si fuera lo mismo cada ${ctx.cada}: ${num(n)} × ${num(m)} = ${num(n * m)}`,
+        `${ets[i]}: ${num(n * m)} − ${num(otras)} = ${fmt(xs[i])}`,
+      ],
     }
   },
 )
@@ -1575,6 +1710,8 @@ function leyendaBolitas(x: number, y: number, vertical = true) {
 }
 
 const describirBolsa = (c: Record<Bolita, number>) => BOLITAS.filter((t) => c[t] > 0).map((t) => `${c[t]} ${t}${c[t] === 1 ? '' : 's'}`).join(', ')
+/** "3 negras, 5 blancas y 2 rayadas", para los pasos. */
+const enBolsa = (c: Record<Bolita, number>) => yLista(BOLITAS.filter((t) => c[t] > 0).map((t) => `${num(c[t])} ${t}${c[t] === 1 ? '' : 's'}`))
 
 const probableBolsa = tipo(
   'da-bolsa',
@@ -1603,6 +1740,7 @@ const probableBolsa = tipo(
         dibujo: svg(380, 222, bolsa(azar, cuantas, 2, 2) + leyendaBolitas(230, 76), `Bolsa con ${describirBolsa(cuantas)}`),
         pregunta: `¿De qué tipo es ${mas ? 'más' : 'menos'} probable que salga la bolita?`,
         ...r,
+        pasos: [`En la bolsa hay ${enBolsa(cuantas)}`, `${nombresT[i]}: es el tipo con ${mas ? 'más' : 'menos'} bolitas (${num(c[i])})`],
       }
     }
     if (modo < 0.75) {
@@ -1627,6 +1765,7 @@ const probableBolsa = tipo(
         dibujo: svg(380, 222, bolsa(azar, cuantas, 2, 2) + leyendaBolitas(230, 76), `Bolsa con ${describirBolsa(cuantas)}`),
         pregunta: '¿Qué afirmación es correcta?',
         ...r,
+        pasos: [`En la bolsa hay ${enBolsa(cuantas)}`, `Hay más negras (${num(n)}) que blancas (${num(b)})`, bien],
       }
     }
     // Tres bolsas con la misma cantidad de bolitas: ¿de cuál es más probable (o seguro) sacar una negra?
@@ -1657,6 +1796,10 @@ const probableBolsa = tipo(
       dibujo: dib,
       pregunta: seguro ? '¿De qué bolsa es seguro que saldrá una bolita negra?' : '¿De qué bolsa es más probable sacar una bolita negra?',
       ...r,
+      pasos: [
+        `Negras: ${conValores(rot, negras)}, de ${num(total)} bolitas cada una`,
+        seguro ? `En la ${rot[i]} las ${num(total)} bolitas son negras: es seguro` : `La ${rot[i]} tiene más negras (${num(negras[i])} de ${num(total)}): es más probable`,
+      ],
     }
   },
 )
@@ -1750,6 +1893,10 @@ const probableRuleta = tipo(
         pregunta: `¿En qué premio es ${q === 'menos' ? 'menos' : 'más'} probable que pare la flecha?`,
         ...r,
         nota: q === 'igual' ? `Cada premio ocupa ${cs[0]} de las ${n} partes.` : `${bien} ocupa ${cs[q === 'mas' ? 0 : 2]} de las ${n} partes.`,
+        pasos: [
+          `Partes de la ruleta: ${conValores(premios, cs)}, de ${num(n)}`,
+          q === 'igual' ? `${igual}: cada premio ocupa ${num(cs[0])} partes` : `${bien}: ocupa ${q === 'mas' ? 'más' : 'menos'} partes (${num(cs[q === 'mas' ? 0 : 2])} de ${num(n)})`,
+        ],
       }
     }
     // Dos ruletas con el mismo número de partes: ¿con cuál es más probable ganar una pelota?
@@ -1800,6 +1947,10 @@ const probableRuleta = tipo(
       pregunta: '¿Con qué ruleta es más probable ganar una pelota?',
       ...r,
       nota: `Pelota: ${a} de ${n} partes en la A y ${b} de ${n} en la B.`,
+      pasos: [
+        `Partes de pelota: ${num(a)} de ${num(n)} en la A y ${num(b)} de ${num(n)} en la B`,
+        a === b ? `${bien}: las dos tienen ${num(a)} ${a === 1 ? 'parte' : 'partes'} de pelota` : `${bien}: tiene más partes de pelota (${num(Math.max(a, b))})`,
+      ],
     }
   },
 )
@@ -1965,6 +2116,7 @@ const combinaciones = tipo(
         pregunta: ctx.pregunta,
         ...r,
         nota: `${n} ${ctx.a} × ${m} ${ctx.b} = ${n * m} combinaciones.`,
+        pasos: [`Hay ${num(n)} ${ctx.a} y ${num(m)} ${ctx.b}`, `Cada ${singular(ctx.unoA)} se combina con los ${num(m)} ${ctx.b}`, `${num(n)} × ${num(m)} = ${num(n * m)}`],
       }
     }
     // ¿Cuál falta? Ya se escribieron todas menos una.
@@ -1994,6 +2146,11 @@ const combinaciones = tipo(
       dibujo: lamina('', [pieza, lista], `${alt}; lista de ${escritas.length} combinaciones`, 14),
       pregunta: '¿Qué combinación falta en la lista?',
       ...r,
+      pasos: [
+        `Deben ser ${num(n)} × ${num(m)} = ${num(n * m)}; en la lista hay ${num(escritas.length)}`,
+        `${cap(ctx.etA(as[Math.floor(todas.indexOf(falta) / m)]))} aparece ${veces(m - 1)}; debe aparecer ${veces(m)}`,
+        `Falta: ${cap(falta)}`,
+      ],
     }
   },
 )
@@ -2060,6 +2217,11 @@ const arbol = tipo(
         dibujo: dibujoArbol(ctx, as, bs, 1, true),
         respuesta: `${as.flatMap((x) => bs.map((y) => cap(ctx.combo(x, y)))).join(' · ')}. Total: ${n * m}.`,
         espacio: 'dibujo',
+        pasos: [
+          `Cada ${singular(ctx.unoA)} se une con los ${num(m)} ${ctx.b}, como en la primera rama`,
+          `En cada rama se escribe la combinación: ${cap(ctx.combo(as[1], bs[0]))}…`,
+          `Total: ${num(n)} × ${num(m)} = ${num(n * m)} combinaciones`,
+        ],
       }
     }
     if (modo < 0.75) {
@@ -2076,6 +2238,10 @@ const arbol = tipo(
         pregunta: `Si ${ctx.ropa ? `${quien} tuviera` : 'hubiera'} ${una} más, ¿cuántas combinaciones ${ctx.ropa ? 'podría hacer' : 'habría'}?`,
         ...r,
         nota: masB ? `${n} × ${m + 1} = ${nuevo}` : `${n + 1} × ${m} = ${nuevo}`,
+        pasos: [
+          `Ahora: ${num(n)} ${ctx.a} × ${num(m)} ${ctx.b} = ${num(n * m)} combinaciones`,
+          `Con ${una} más: ${masB ? `${num(n)} × ${num(m + 1)}` : `${num(n + 1)} × ${num(m)}`} = ${num(nuevo)}`,
+        ],
       }
     }
     const y = elegir(azar, bs)
@@ -2088,13 +2254,15 @@ const arbol = tipo(
       dibujo: dibujoArbol(ctx, as, bs, null, false),
       pregunta: `¿En cuántas combinaciones está ${ctx.conB(y)}?`,
       ...r,
+      pasos: [`${cap(ctx.conB(y))} sale una vez con cada ${singular(ctx.unoA)}`, `Hay ${num(n)} ${ctx.a}: está en ${num(n)} combinaciones`],
     }
   },
 )
 
 // ---------- Conclusiones a partir de datos ----------
 
-type Afirmacion = { texto: string; verdad: boolean; tipo: string }
+/** `por`: la cuenta que muestra si es verdad o no, para los pasos de la clave. */
+type Afirmacion = { texto: string; verdad: boolean; tipo: string; por: string }
 
 /** Afirmaciones verdaderas y falsas sobre unos votos. `paso`: 10 en gráficos con escala, 1 en tablas. */
 function afirmaciones(azar: Azar, ops: Cat[], v: number[], paso: number): Afirmacion[] {
@@ -2110,37 +2278,38 @@ function afirmaciones(azar: Azar, ops: Cat[], v: number[], paso: number): Afirma
     return v[a] > v[b] ? [a, b] : [b, a]
   }
   const [a, b] = par()
-  out.push({ texto: `${C(a)} tuvo más votos que ${o(b)}.`, verdad: true, tipo: 'mas' })
-  out.push({ texto: `${C(b)} tuvo más votos que ${o(a)}.`, verdad: false, tipo: 'mas' })
+  out.push({ texto: `${C(a)} tuvo más votos que ${o(b)}.`, verdad: true, tipo: 'mas', por: `${num(v[a])} es más que ${num(v[b])}` })
+  out.push({ texto: `${C(b)} tuvo más votos que ${o(a)}.`, verdad: false, tipo: 'mas', por: `${num(v[b])} es menos que ${num(v[a])}` })
   const [c, d] = par()
   const dif = v[c] - v[d]
-  out.push({ texto: `${C(c)} tuvo ${num(dif)} ${dif === 1 ? 'voto' : 'votos'} más que ${o(d)}.`, verdad: true, tipo: 'dif' })
+  out.push({ texto: `${C(c)} tuvo ${num(dif)} ${dif === 1 ? 'voto' : 'votos'} más que ${o(d)}.`, verdad: true, tipo: 'dif', por: `${num(v[c])} − ${num(v[d])} = ${num(dif)}` })
   const difMal = paso === 10 ? (dif / 10 !== dif ? dif / 10 : dif + 10) : dif + elegir(azar, [1, 2, -1])
-  if (difMal > 0 && difMal !== dif) out.push({ texto: `${C(c)} tuvo ${num(difMal)} ${difMal === 1 ? 'voto' : 'votos'} más que ${o(d)}.`, verdad: false, tipo: 'dif' })
+  if (difMal > 0 && difMal !== dif) out.push({ texto: `${C(c)} tuvo ${num(difMal)} ${difMal === 1 ? 'voto' : 'votos'} más que ${o(d)}.`, verdad: false, tipo: 'dif', por: `${num(v[c])} − ${num(v[d])} = ${num(dif)}, no ${num(difMal)}` })
   const tot = suma(v)
-  out.push({ texto: `En total votaron ${num(tot)} estudiantes.`, verdad: true, tipo: 'total' })
-  out.push({ texto: `En total votaron ${num(tot + elegir(azar, [paso, -paso, 2 * paso]))} estudiantes.`, verdad: false, tipo: 'total' })
+  out.push({ texto: `En total votaron ${num(tot)} estudiantes.`, verdad: true, tipo: 'total', por: `${sumados(v)} = ${num(tot)}` })
+  const totMal = tot + elegir(azar, [paso, -paso, 2 * paso])
+  out.push({ texto: `En total votaron ${num(totMal)} estudiantes.`, verdad: false, tipo: 'total', por: `${sumados(v)} = ${num(tot)}, no ${num(totMal)}` })
   const iMax = unico(v)
   const iMin = unico(v, false)
   if (iMax >= 0) {
-    out.push({ texto: `Lo que más eligieron fue ${o(iMax)}.`, verdad: true, tipo: 'max' })
+    out.push({ texto: `Lo que más eligieron fue ${o(iMax)}.`, verdad: true, tipo: 'max', por: `Lo que más eligieron: ${o(iMax)}, con ${num(v[iMax])}` })
     const otro = elegir(
       azar,
       ops.map((_, i) => i).filter((i) => i !== iMax),
     )
-    out.push({ texto: `Lo que más eligieron fue ${o(otro)}.`, verdad: false, tipo: 'max' })
+    out.push({ texto: `Lo que más eligieron fue ${o(otro)}.`, verdad: false, tipo: 'max', por: `Lo que más eligieron: ${o(iMax)}, con ${num(v[iMax])}` })
   }
   if (iMin >= 0) {
-    out.push({ texto: `Lo que menos eligieron fue ${o(iMin)}.`, verdad: true, tipo: 'min' })
-    if (iMax >= 0) out.push({ texto: `Lo que menos eligieron fue ${o(iMax)}.`, verdad: false, tipo: 'min' })
+    out.push({ texto: `Lo que menos eligieron fue ${o(iMin)}.`, verdad: true, tipo: 'min', por: `Lo que menos eligieron: ${o(iMin)}, con ${num(v[iMin])}` })
+    if (iMax >= 0) out.push({ texto: `Lo que menos eligieron fue ${o(iMax)}.`, verdad: false, tipo: 'min', por: `Lo que menos eligieron: ${o(iMin)}, con ${num(v[iMin])}` })
   }
   for (let x = 0; x < n; x++)
     for (let y = 0; y < n; y++) {
-      if (x !== y && v[x] === 2 * v[y]) out.push({ texto: `${C(x)} tuvo el doble de votos que ${o(y)}.`, verdad: true, tipo: 'doble' })
+      if (x !== y && v[x] === 2 * v[y]) out.push({ texto: `${C(x)} tuvo el doble de votos que ${o(y)}.`, verdad: true, tipo: 'doble', por: `${num(v[y])} × 2 = ${num(v[x])}` })
     }
   if (!out.some((s) => s.tipo === 'doble')) {
     const [x, y] = par()
-    if (v[x] !== 2 * v[y]) out.push({ texto: `${C(x)} tuvo el doble de votos que ${o(y)}.`, verdad: false, tipo: 'doble' })
+    if (v[x] !== 2 * v[y]) out.push({ texto: `${C(x)} tuvo el doble de votos que ${o(y)}.`, verdad: false, tipo: 'doble', por: `${num(v[y])} × 2 = ${num(2 * v[y])}, no ${num(v[x])}` })
   }
   return out
 }
@@ -2190,7 +2359,7 @@ const conclusion = tipo(
   CITA.conclusiones,
   ({ azar }) => {
     const enBarras = azar() < 0.6
-    const { t, ops, v, sec, dibujo } = datosVotos(azar, enBarras)
+    const { t, ops, v, sec, cats, dibujo } = datosVotos(azar, enBarras)
     const todas = afirmaciones(azar, ops, v, enBarras ? 10 : 1)
     const noEs = azar() < 0.35
     const sel = elegirAfirmaciones(azar, todas, noEs ? 3 : 1, noEs ? 1 : 3)
@@ -2211,6 +2380,7 @@ const conclusion = tipo(
       dibujo,
       pregunta: noEs ? '¿Qué conclusión NO es correcta?' : '¿Qué conclusión es correcta?',
       ...r,
+      pasos: [`Votos: ${conValores(cats, v)}`, bien.por, `${noEs ? 'No es correcta' : 'Es correcta'}: ${bien.texto}`],
     }
   },
 )
@@ -2244,6 +2414,8 @@ const decision = tipo(
     const clave = `decision:${dc.cosa}:${cats.join(',')}:${v.join('-')}`
     const masMenos = dc.mas ? 'más' : 'menos'
     const otroMM = dc.mas ? 'menos' : 'más'
+    const votos = `Votos: ${conValores(cats, v)}`
+    const mayor = dc.mas ? 'El mayor' : 'El menor'
     if (azar() < 0.7) {
       const primero = iBien !== 0 && iOtro !== 0 ? 0 : iBien !== cats.length - 1 && iOtro !== cats.length - 1 ? cats.length - 1 : -1
       const resto = cats.map((_, i) => i).filter((i) => i !== iBien && i !== iOtro && i !== primero)
@@ -2253,9 +2425,10 @@ const decision = tipo(
         resto.length ? `${cats[resto[0]]}, porque a mí me gusta más.` : `${cats[iOtro]}, porque a mí me gusta más.`,
         `${cats[iBien]}, porque tiene ${otroMM} votos.`,
       ].filter(Boolean)
-      const r = alternativas(azar, `${cats[iBien]}, porque tiene ${masMenos} votos.`, malas, 4)
+      const bien = `${cats[iBien]}, porque tiene ${masMenos} votos.`
+      const r = alternativas(azar, bien, malas, 4)
       if (!r) return null
-      return { forma: 'opciones', clave, enunciado, dibujo, pregunta: `${dc.pregunta} ¿Por qué?`, ...r }
+      return { forma: 'opciones', clave, enunciado, dibujo, pregunta: `${dc.pregunta} ¿Por qué?`, ...r, pasos: [votos, `${mayor} es ${num(v[iBien])}, de ${cats[iBien]}`, bien] }
     }
     return {
       forma: 'abierta',
@@ -2265,6 +2438,7 @@ const decision = tipo(
       pregunta: `${dc.pregunta} Explica tu decisión con los datos.`,
       respuesta: `${cats[iBien]}, porque tiene ${num(v[iBien])} votos: es la opción con ${masMenos} votos.`,
       espacio: 'renglones',
+      pasos: [votos, `${mayor} número de votos es ${num(v[iBien])}`, `${cats[iBien]}, con ${num(v[iBien])} votos: se decide con los datos, no con el gusto`],
     }
   },
 )
