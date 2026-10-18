@@ -1,4 +1,4 @@
-// Adaptar examen: el docente sube su examen de siempre (PDF o foto) y recibe el mismo examen adaptado,
+// Adaptar examen: el docente sube su examen de siempre (PDF, Word o foto) y recibe el mismo examen adaptado,
 // ambientado en lo que le gusta a la clase y/o para quien aprende distinto. El PDF se arma en el navegador.
 //
 //   POST /api/examen  multipart: ficha (JSON), opciones (JSON { interes, necesidades }), examen (archivo)  → Examen
@@ -35,12 +35,12 @@ const REGLAS: Record<Necesidad, string> = {
 
 export async function POST(request: Request) {
   try {
-    if (!(request.headers.get('content-type') ?? '').includes('multipart/form-data')) return json({ error: 'Sube tu examen (PDF o foto).' }, 400)
+    if (!(request.headers.get('content-type') ?? '').includes('multipart/form-data')) return json({ error: 'Sube tu examen (PDF, Word o foto).' }, 400)
     const datos = await request.formData()
     const ficha = JSON.parse(String(datos.get('ficha') ?? '{}')) as Ficha
     const opciones = JSON.parse(String(datos.get('opciones') ?? '{}')) as { interes?: string | null; necesidades?: string[] }
     const archivo = datos.get('examen')
-    if (!(archivo instanceof File)) return json({ error: 'Sube tu examen (PDF o foto).' }, 400)
+    if (!(archivo instanceof File)) return json({ error: 'Sube tu examen (PDF, Word o foto).' }, 400)
 
     const interes = typeof opciones.interes === 'string' && opciones.interes.trim() ? opciones.interes.trim().slice(0, 80) : null
     const necesidades = (opciones.necesidades ?? []).filter((n): n is Necesidad => n in REGLAS)

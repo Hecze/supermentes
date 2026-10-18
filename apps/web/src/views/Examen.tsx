@@ -134,11 +134,11 @@ function SubirExamen({ archivo, cambiar }: { archivo: File | null; cambiar: (f: 
       >
         <Upload className="size-7" style={{ color: COLOR }} aria-hidden />
         <span className="text-lg font-semibold">Elegir mi examen</span>
-        <span className="text-sm text-ink-soft">PDF o foto de la hoja</span>
+        <span className="text-sm text-ink-soft">PDF, Word o foto de la hoja</span>
         <input
           id="examen-archivo"
           type="file"
-          accept=".pdf,application/pdf,image/*"
+          accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
           className="sr-only"
           onChange={(e) => cambiar(e.target.files?.[0] ?? null)}
         />
@@ -161,7 +161,7 @@ const resumen = (e: Eleccion) =>
     .filter(Boolean)
     .join(' · ')
 
-/** Adaptar el examen del docente: lo sube en PDF o foto y recibe un PDF adaptado (con IA, gasta créditos). */
+/** Adaptar el examen del docente: lo sube en PDF, Word o foto y recibe un PDF adaptado (con IA, gasta créditos). */
 function AdaptarExamen({ accion }: { accion?: ReactNode }) {
   const { ficha, resultados, guardar, avisar, creditos } = useStore()
   const { ocupado, generar } = useGeneracion()
