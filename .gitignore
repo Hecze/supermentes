@@ -8,3 +8,4 @@ obsidian/.obsidian/workspace*.json
 .vercel
 .dev.vars
 .wrangler
+apps/web/public/presentacion

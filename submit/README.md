@@ -7,8 +7,8 @@ Se puede reenviar para actualizar hasta el cierre.
 | --- | --- | --- |
 | Descripción | `proyecto.md` | Tracción y "qué funciona hoy" al día |
 | Deployment | `enlaces.env` → supermentes.app | Abre la landing, `/app` y un `/t/CÓDIGO` |
-| GitHub | `enlaces.env` → Hecze/supermentes | **Es privado**: hacerlo público (Hecze) o el jurado no lo ve |
-| Presentación | `enlaces.env` → deck; contenido en `../presentacion/` | Compartir por link desde Share y probar en ventana privada |
+| GitHub | `enlaces.env` → Hecze/supermentes | Público desde el 18-oct |
+| Presentación | supermentes.app/presentacion, armado desde `../presentacion/` | Editar `presentacion/slides/*.html` y hacer push |
 | Avances publicados | `avances/` | Ya enviados con `andes project update --file` |
 
 Enviar: `sh submit/enviar.sh` (muestra) y `sh submit/enviar.sh --enviar` (envía).
