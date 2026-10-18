@@ -1,6 +1,6 @@
 ---
 actualizado: 2026-10-18
-estado: decisiones tomadas; falta el visto bueno del prototipo para pasar a código
+estado: aprobado por Harold (18-oct), flujo y prototipo; listo para implementar después de cuentas y salones
 ---
 
 # Revisar tareas (problema 3 del ciclo)
