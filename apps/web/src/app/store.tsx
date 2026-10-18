@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Examen, type Ficha, type Juego, type Sesion } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
+import type { ConfigExamen } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
 export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
@@ -19,6 +20,8 @@ export type Resultados = {
   cancion?: Cancion
   audio?: AudioCancion
   examen?: Examen
+  /** El examen listo del tema (examenes/): qué preguntas lleva y con qué números, para volver a la misma versión. */
+  examenListo?: ConfigExamen
   juego?: Juego
   /** Con qué se juega este tema: sus palabras y preguntas, o una habilidad de cálculo (src/juegos). */
   juegos?: { fuente: 'tema' } | { fuente: 'calculo'; habilidad: string; nivel: number }

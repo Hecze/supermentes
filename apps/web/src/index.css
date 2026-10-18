@@ -144,6 +144,17 @@ h3 {
   box-decoration-break: clone;
 }
 
+/* La hoja del examen listo siempre se ve como papel blanco (también en modo oscuro): así se ve igual que impresa. */
+.papel {
+  --surface: #ffffff;
+  --surface-2: #f1f1f1;
+  --ink: #1b1b1b;
+  --ink-soft: #555555;
+  --line: #cfcfcf;
+  color: var(--ink);
+  color-scheme: light;
+}
+
 /* Líneas para escribir la respuesta en el examen impreso. */
 .renglones {
   background-image: linear-gradient(transparent calc(100% - 1px), var(--line) 0);

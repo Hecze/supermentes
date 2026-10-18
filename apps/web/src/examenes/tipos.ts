@@ -75,7 +75,8 @@ export type Version = {
   fila: string
   /** Código corto de la versión, impreso en la hoja y en las respuestas para que el docente las junte. */
   codigo: string
-  items: (Generado & { tipo: string })[]
+  /** `indice`: el lugar de la pregunta en `ConfigExamen.items` (si una no se pudo armar, las demás no se corren). */
+  items: (Generado & { tipo: string; indice: number })[]
 }
 
 /** Un grupo de tipos de pregunta y los temas (tal cual en el currículo) donde va cada uno, en orden. */

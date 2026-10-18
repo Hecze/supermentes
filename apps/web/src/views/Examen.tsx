@@ -1,12 +1,15 @@
-import { Check, CircleCheck, Columns2, Download, Eye, FileText, Printer, RefreshCw, Sparkles, Upload, X } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, Check, CircleCheck, Columns2, Download, Eye, FileText, Printer, RefreshCw, Sparkles, Upload, X } from 'lucide-react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { api, COSTOS, MODO_EJEMPLO, type Necesidad, type OpcionesExamen } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { BarraHoja, Boton, Chip, Generando, Hoja, NotaCreditos, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
+import { useBanco } from '../banco/banco'
+import { tiposDelTema } from '../examenes/catalogo'
 import { nombreArchivo, pdfExamen } from '../lib/pdfExamen'
+import { ExamenListo } from './ExamenListo'
 
 const COLOR = 'var(--examen)'
 
@@ -158,7 +161,8 @@ const resumen = (e: Eleccion) =>
     .filter(Boolean)
     .join(' · ')
 
-export function Examen() {
+/** Adaptar el examen del docente: lo sube en PDF o foto y recibe un PDF adaptado (con IA, gasta créditos). */
+function AdaptarExamen({ accion }: { accion?: ReactNode }) {
   const { ficha, resultados, guardar, avisar, creditos } = useStore()
   const { ocupado, generar } = useGeneracion()
   const examen = resultados.examen
@@ -203,7 +207,7 @@ export function Examen() {
   if (!examen) {
     return (
       <>
-        <EncabezadoHerramienta id="examen" />
+        <EncabezadoHerramienta id="examen" accion={accion} />
         <Pregunta titulo="1. Sube tu examen">
           <p className="-mt-1 text-ink-soft">El de siempre. Mantenemos tus mismas preguntas y lo que evalúan.</p>
           <SubirExamen archivo={archivo} cambiar={setArchivo} />
@@ -231,7 +235,7 @@ export function Examen() {
 
   return (
     <>
-      <EncabezadoHerramienta id="examen" />
+      <EncabezadoHerramienta id="examen" accion={accion} />
       <p className="-mt-3 text-ink-soft print:hidden">
         Tu examen «{examen.archivo}», adaptado {resumen(examen.opciones)}.
       </p>
@@ -324,6 +328,47 @@ export function Examen() {
           <NotaCreditos n={COSTOS.examen} quedan={creditos} />
         </div>
       </Ventana>
+    </>
+  )
+}
+
+/**
+ * El examen del tema. Si el tema tiene examen listo (hoy, 4.º de primaria), se ve armado apenas se abre: gratis, con
+ * otra versión cuando se quiera. Arriba a la derecha queda "Adaptar mi examen" para quien prefiere subir el suyo.
+ */
+export function Examen() {
+  const { ficha } = useStore()
+  if (!ficha) return <SinTema />
+  return <ExamenDelTema ficha={ficha} />
+}
+
+function ExamenDelTema({ ficha }: { ficha: NonNullable<ReturnType<typeof useStore>['ficha']> }) {
+  const { resultados } = useStore()
+  const banco = useBanco(ficha)
+  const tipos = useMemo(() => (banco === undefined ? null : tiposDelTema(ficha.gradoId, ficha.areaId, ficha.titulo, banco)), [banco, ficha.gradoId, ficha.areaId, ficha.titulo])
+  // Si ya adaptó su examen en este tema, vuelve a ver ese.
+  const [adaptar, setAdaptar] = useState(!!resultados.examen && !resultados.examenListo)
+
+  if (tipos === null) return <EncabezadoHerramienta id="examen" />
+  if (!tipos.length || adaptar) {
+    const volver = tipos.length ? (
+      <Boton variante="contorno" onClick={() => setAdaptar(false)}>
+        <ArrowLeft className="size-5" aria-hidden /> Examen listo del tema
+      </Boton>
+    ) : undefined
+    return <AdaptarExamen accion={volver} />
+  }
+  return (
+    <>
+      <EncabezadoHerramienta
+        id="examen"
+        accion={
+          <Boton variante="contorno" onClick={() => setAdaptar(true)}>
+            <Upload className="size-5" aria-hidden /> Adaptar mi examen
+          </Boton>
+        }
+      />
+      <ExamenListo ficha={ficha} banco={banco ?? null} tipos={tipos} />
     </>
   )
 }

@@ -36,12 +36,12 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   },
   examen: {
     id: 'examen',
-    pedido: 'Adaptar mi examen',
-    nombre: 'Adaptar examen',
-    descripcion: 'Sube tu examen y recibe un PDF adaptado a tu clase.',
+    pedido: 'Un examen',
+    nombre: 'Examen',
+    descripcion: 'Listo para imprimir, con otra versión cuando quieras. O adapta el tuyo.',
     icono: FileText,
     color: 'var(--examen)',
-    costo: textoCosto(COSTOS.examen),
+    costo: `Gratis · adaptar el tuyo ${textoCosto(COSTOS.examen)}`,
   },
   juego: {
     id: 'juego',

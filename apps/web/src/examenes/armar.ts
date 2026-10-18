@@ -41,13 +41,13 @@ function generarSinRepetir(tipo: TipoPregunta, semilla: number, banco: TemaBanco
 export function armarVersion(config: ConfigExamen, tipos: Map<string, TipoPregunta>, banco: TemaBanco | null, fila: 0 | 1 = 0): Version {
   const usadas = new Set<string>()
   const items: Version['items'] = []
-  for (const it of config.items) {
+  for (const [indice, it] of config.items.entries()) {
     const tipo = tipos.get(it.tipo)
     if (!tipo) continue
     const g = generarSinRepetir(tipo, fila === 0 ? it.semilla : mezclar(it.semilla, 7919), banco, usadas)
     if (!g) continue
     usadas.add(g.clave)
-    items.push({ ...g, tipo: tipo.id })
+    items.push({ ...g, tipo: tipo.id, indice })
   }
   const semilla = fila === 0 ? config.semilla : mezclar(config.semilla, 7919)
   return { fila: config.filas ? (fila === 0 ? 'Fila A' : 'Fila B') : '', codigo: codigoDe(semilla), items }
@@ -117,11 +117,11 @@ export function otraVersion(config: ConfigExamen, semilla = nuevaSemilla()): Con
   return { ...config, semilla, items: config.items.map((it, i) => ({ tipo: it.tipo, semilla: mezclar(semilla, i + 1) })) }
 }
 
-/** Cambia una sola pregunta por otra del mismo tipo que no se repita con las demás. */
+/** Cambia una sola pregunta (`i`: su lugar en `config.items`) por otra del mismo tipo que no se repita con las demás. */
 export function cambiarItem(config: ConfigExamen, i: number, tipos: Map<string, TipoPregunta>, banco: TemaBanco | null): ConfigExamen {
   const actual = armarVersion(config, tipos, banco)
-  const otras = new Set(actual.items.filter((_, k) => k !== i).map((x) => x.clave))
-  const antes = actual.items[i]?.clave
+  const otras = new Set(actual.items.filter((x) => x.indice !== i).map((x) => x.clave))
+  const antes = actual.items.find((x) => x.indice === i)?.clave
   const tipo = tipos.get(config.items[i].tipo)
   if (!tipo) return config
   for (let k = 0; k < INTENTOS; k++) {
