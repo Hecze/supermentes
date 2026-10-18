@@ -30,7 +30,6 @@ import { citaDelTipo } from '../examenes/catalogo'
 import type { Clase, ConfigHoja, Dibujo, Fuente, Item, Teoria, TipoPregunta, Version } from '../examenes/tipos'
 import { cargarArea, fuenteDe, useAreas, useColegio, useTemasDelGrado, type Area, type Colegio } from '../examenes/usar'
 import { letra } from '../examenes/util'
-import { nombreArchivo } from '../lib/pdfExamen'
 import { Bloque, BotonInfo, Cita, useSustento } from './SustentoJuego'
 
 const COLOR = 'var(--examen)'
@@ -44,6 +43,16 @@ const CLASES: { id: Clase; nombre: string }[] = [
 const TITULOS: Record<Clase, string> = { examen: 'Examen', practica: 'Práctica', balotario: 'Balotario' }
 
 const ROMANOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+
+/** El nombre del PDF: «examen-fracciones-de-una-cantidad-k7q2-clave.pdf». */
+const nombreArchivo = (titulo: string, sufijo: string) =>
+  `${titulo
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 50) || 'hoja'}-${sufijo}.pdf`
 
 /** Los cursos de la hoja, sin repetir: «Matemática», o «Matemática · Comunicación» en una miscelánea de varios. */
 const cursosDe = (config: ConfigHoja, fuentes: Fuentes) => [...new Set(config.temas.map((t) => fuentes.get(t)?.area).filter(Boolean))].join(' · ')

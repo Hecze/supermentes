@@ -22,7 +22,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     nombre: 'Sesión de aprendizaje',
     descripcion: 'Lista para presentar, en el formato del MINEDU.',
     icono: ClipboardList,
-    color: 'var(--adaptar)',
+    color: 'var(--sesion)',
     costo: textoCosto(COSTOS.sesion),
   },
   cancion: {
@@ -38,10 +38,10 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     id: 'examen',
     pedido: 'Un examen',
     nombre: 'Examen',
-    descripcion: 'Listo para imprimir, con otra versión cuando quieras. O adapta el tuyo.',
+    descripcion: 'Examen, práctica y balotario listos para imprimir, con su clave.',
     icono: FileText,
     color: 'var(--examen)',
-    costo: `Gratis · adaptar el tuyo ${textoCosto(COSTOS.examen)}`,
+    costo: textoCosto(COSTOS.examen),
   },
   juego: {
     id: 'juego',

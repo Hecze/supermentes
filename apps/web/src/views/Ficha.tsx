@@ -13,7 +13,7 @@ export function Ficha() {
   const listos: Partial<Record<string, boolean>> = {
     sesion: !!resultados.sesion,
     cancion: !!resultados.cancion,
-    examen: !!resultados.examen || !!resultados.hojas,
+    examen: !!resultados.hojas,
     juego: !!resultados.juego,
     crucigrama: !!resultados.crucigrama?.filas.some((f) => f.palabra.trim().length > 1),
   }

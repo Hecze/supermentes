@@ -16,12 +16,10 @@ flowchart LR
   T --> FI[Ficha del tema<br/>competencias, desempeños,<br/>vocabulario]
   FI --> S[Sesión de aprendizaje<br/>formato MINEDU, Word]
   FI --> C[Canción]
-  FI --> EL[Examen listo<br/>otra versión, Fila A y B]
-  EX[Examen del docente<br/>PDF o foto] --> E[Adaptar examen<br/>PDF adaptado]
-  FI --> E
+  FI --> EL[Examen, práctica y balotario<br/>con su clave]
   FI --> J[Juego web]
   FI --> X[Crucigrama]
-  S & C & EL & E & X --> H[Hoja: imprimir, PDF<br/>o WhatsApp]
+  S & C & EL & X --> H[Hoja: imprimir, PDF<br/>o WhatsApp]
   J --> Q[Link + QR para<br/>los alumnos]
   H & Q --> B[Biblioteca]
 ```
@@ -36,7 +34,6 @@ flowchart LR
 | Sesión de aprendizaje | La sesión que el docente entrega al director, en el formato del MINEDU: datos, competencia y capacidades oficiales, criterios con su desempeño citado ("i"), enfoque transversal, materiales, momentos con tiempos (45 o 90 min), ficha de aplicación y escala de valoración para 30. Se corrige con un clic, se imprime o se descarga en Word | **Real** (`api/sesion.ts`, ~35 s; citas verificadas contra `packages/curriculo`) | 1 crédito | Probarla con docentes; Word es un .doc hecho con HTML (abre y se edita, no es .docx nativo) |
 | Canción | En 4.º, primero las 2 canciones propias del tema (banco, `apps/web/src/banco`, con cita); cada una con ▶ para escucharla ahí mismo; luego las de YouTube que ya existen (206 de primaria, `apps/web/src/canciones`). Arriba a la derecha, «Crear canción» como en Suno: la letra la escribe Supermentes o el docente, y se elige el ritmo. Todas suenan con Lyria vía `/api/audio` (se guarda en Blob la primera vez) | **Real**: banco, catálogo, letra con `/api/cancion` y audio con `/api/audio` | Gratis las del banco y las existentes; 1 + 3 créditos la nueva | Banco para los otros grados |
 | Hojas listas (examen, práctica y balotario) | En 4.º, cada tema trae sus tres hojas armadas para imprimir, desde el tema de la barra lateral (grado y curso no se vuelven a preguntar): retos con dibujos de la vida real en Matemática y problemas con recuadro de procedimiento (685, con pasos), preguntas del banco en todos los cursos. Cambiar, fijar y quitar cada pregunta; «+ Tema» arma la miscelánea (también de varios cursos, buscando); «Otra versión», «Fila A y B», «Armar examen» desde el balotario; encabezado del colegio sobre la hoja; PDF y clave con tabla de respuestas, pasos y la cita de cada pregunta | **Real** (`apps/web/src/examenes`, sin IA) | Gratis | Otros grados (necesitan su banco) |
-| Adaptar examen | Solo en temas sin hojas listas (grados sin banco). El docente sube su examen (PDF o foto) y descarga un PDF ambientado en lo que le gusta a la clase y/o para TDAH, dislexia, TEA o lectura fácil (formato incluido: letra grande, casillas, apoyos) | Código real (`api/examen.ts`; PDF en el navegador). En producción sale el ejemplo hasta configurar la clave | 1 crédito | `OPENROUTER_API_KEY` y `VITE_API=real` en Vercel |
 | Juego web | 17 juegos para cualquier tema; 22 habilidades de cálculo; en 4.º cada tema trae sus preguntas y parejas (banco) | **Real** con cálculo, vocabulario y banco de 4.º | Gratis / 1 crédito fuera del banco | Banco para los otros grados |
 | Compartir juego | Código de 6 letras y QR para el celular del alumno | **Real** (`api/juegos-compartidos.ts`) | Gratis | Probar en el aula |
 | Crucigrama | Grilla con las palabras del docente | **Real** (algoritmo) | Gratis | — |
@@ -53,7 +50,7 @@ cuello de botella.
   funciones de Vercel en `api/`, currículo en `packages/curriculo`, notas en `obsidian/`.
 - **Producción:** https://www.supermentes.app (Vercel, cuenta de Hecze). Datos en Vercel Blob.
 - **Contratos UI ↔ backend:** `apps/web/src/api/types.ts`. Cambiar de ejemplo a real: `VITE_API=real`.
-- **IA prevista:** Claude (texto; lee el examen que sube el docente para adaptarlo), ElevenLabs (audio), ARASAAC (pictogramas).
+- **IA prevista:** Claude (texto), ElevenLabs (audio), ARASAAC (pictogramas).
 
 ## Decisiones abiertas
 

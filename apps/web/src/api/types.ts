@@ -71,41 +71,6 @@ export type AudioCancion = {
   duracionSeg: number
 }
 
-/** Lo que necesita quien aprende distinto. Se adapta el texto y también cómo se ve la hoja. */
-export type Necesidad = 'tdah' | 'dislexia' | 'tea' | 'facil'
-
-export type OpcionesExamen = {
-  /** Ambientar las preguntas en lo que le gusta a la clase. null: no cambiar la historia. */
-  interes: string | null
-  /** Para quien aprende distinto; puede ir vacío. */
-  necesidades: Necesidad[]
-  /** El examen del docente (PDF o foto). */
-  examen?: File
-}
-
-export type PreguntaExamen = {
-  /** La pregunta tal cual estaba en el examen del docente. */
-  original: string
-  /** La pregunta adaptada. */
-  texto: string
-  /** Alternativas, si es de opción múltiple. */
-  alternativas?: string[]
-  /** Un apoyo corto para quien lo necesita: los pasos, una pista o un ejemplo. */
-  apoyo?: string
-  respuesta: string
-}
-
-export type Examen = {
-  opciones: Omit<OpcionesExamen, 'examen'>
-  /** Nombre del archivo que subió el docente. */
-  archivo: string
-  titulo: string
-  instrucciones: string
-  /** Cómo se llama cada pregunta: "Pregunta", o "Jugada", "Rescate"… si se ambientó. */
-  etiquetaPaso: string
-  preguntas: PreguntaExamen[]
-}
-
 export type Carta = { texto: string; fraccion?: Fraccion }
 
 export type Juego = {
@@ -184,8 +149,6 @@ export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
   generarCancion(ficha: Ficha, opciones: OpcionesCancion): Promise<Cancion>
   generarAudio(cancion: Cancion): Promise<AudioCancion>
-  /** Adapta el examen que sube el docente. */
-  adaptarExamen(ficha: Ficha, opciones: OpcionesExamen & { examen: File }): Promise<Examen>
   generarJuego(ficha: Ficha): Promise<Juego>
   generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   biblioteca(): Promise<Material[]>

@@ -17,7 +17,7 @@ punta, con IA real, desde el link y en una ventana privada.
 2. Supermentes arma la **ficha** con Claude. **Listo** (`api/ficha.ts`).
 3. Elige qué necesita:
    - **Sesión de aprendizaje** lista para presentar, en el formato del MINEDU, con cada criterio citado del currículo; se imprime o se descarga en Word. **Lista** (`api/sesion.ts`).
-   - **Adaptar examen**: sube su examen de siempre (PDF o foto) y descarga el PDF adaptado: ambientado en lo que le gusta a su clase y/o para quien aprende distinto. **Listo** (`api/examen.ts`, PDF con jsPDF).
+   - **Examen, práctica y balotario** del tema, generados desde cero y listos para imprimir con su clave. **Listo** en 4.º (`apps/web/src/examenes`, sin IA al usarlo).
    - **Canción**: letra con ritmo peruano **lista** (`api/cancion.ts`); audio con ElevenLabs **pendiente**
      (falta la key).
    - **Juego** con preguntas del tema, compartido por QR a los celulares. **Listo** (`api/juego.ts`): preguntas, parejas y palabras del tema con IA; los juegos y el QR ya funcionaban.
@@ -35,7 +35,7 @@ punta, con IA real, desde el link y en una ventana privada.
 ## Qué no hacer (hasta después del evento)
 - **No migrar a Next ni a Mastra.** Vite + funciones de Vercel ya resuelven todo; migrar rompe lo que
   Hector sube en paralelo. Mastra recién si aparece un flujo con forma de agente.
-- **La inclusión va dentro de "Adaptar examen"**: ya no es una herramienta aparte (los alumnos no dan exámenes en el celular; el docente quiere su PDF adaptado y listo).
+- **No adaptar el examen del docente.** Se quitó (18-oct): nos centramos en generar los materiales que pidió Lucho (`MATERIALES.md`).
 - **No ilustraciones del examen.** Caras, lentas y no cambian la demo (se quitaron).
 - **No cuentas, login, créditos en el servidor ni pagos.** Para la demo, todo abierto.
 - **No biblioteca compartida ni persistencia.** El currículo ya da la biblioteca que se ve.
