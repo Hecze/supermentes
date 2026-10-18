@@ -362,7 +362,9 @@ export function TareasPorSalon({ tareas, abrir }: { tareas: TareaRevisada[]; abr
 }
 
 /** Los 5 mejores con al menos un acierto, y nunca el último: el podio celebra, no expone. */
-const podioDe = (filas: TareaRevisada['intentos']) => filas.filter((i) => i.aciertos > 0).slice(0, Math.min(5, Math.max(1, filas.length - 1)))
+// En el podio y con medalla solo quien llegó a la mitad: una medalla con 1 de 10 confunde.
+const conMedalla = (i: { aciertos: number; total: number }) => i.aciertos * 2 >= i.total
+const podioDe = (filas: TareaRevisada['intentos']) => filas.filter(conMedalla).slice(0, Math.min(5, Math.max(1, filas.length - 1)))
 
 const fechaHora = (iso: string) => new Date(iso).toLocaleString('es-PE', { weekday: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '')
 
@@ -454,7 +456,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
           <div className="rounded-2xl bg-white p-4">
             {tarea.desempeno && <p className="font-semibold">«…{tarea.desempeno}»</p>}
             <p className="mt-1 text-sm text-[#536075]">
-              {peor.fallaron} de {peor.vieron} fallaron. Lo que más costó: «{peor.pregunta}»
+              {peor.fallaron} de {peor.vieron} {peor.fallaron === 1 ? 'falló' : 'fallaron'}. Lo que más costó: «{peor.pregunta}»
               {peor.elegida ? `, la mayoría respondió «${peor.elegida}».` : ', a la mayoría se le acabó el tiempo.'}
             </p>
           </div>
@@ -486,7 +488,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
                 <tr key={i.alumno} className="border-b border-line">
                   <td className="py-2.5 pr-2">
                     <span className="inline-block w-7" aria-hidden>
-                      {i.aciertos > 0 ? (MEDALLAS[n] ?? '') : ''}
+                      {conMedalla(i) ? (MEDALLAS[n] ?? '') : ''}
                     </span>
                     {nombreDe(i.alumno)}
                     {i.salidas > 0 && (
