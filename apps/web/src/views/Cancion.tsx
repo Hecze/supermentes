@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, LoaderCircle, Pause, PenLine, Play, Plus, Printer, Sparkles } from 'lucide-react'
+import { ArrowLeft, Copy, Music, Pause, PenLine, Play, Plus, Printer, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { api, COSTOS, textoCosto, type AudioCancion, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
@@ -51,7 +51,7 @@ function ElegirRitmo({ opciones, cambiar }: { opciones: OpcionesCancion; cambiar
  * El reproductor, siempre en el mismo lugar: antes de tener audio, ▶ lo crea (Lyria, api/audio.ts) y suena ahí
  * mismo apenas llega; mientras tanto el mismo botón muestra que está cargando.
  */
-function Reproductor({ audio, crear, creando }: { audio?: AudioCancion; crear: () => void; creando: boolean }) {
+function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; crear: () => void; creando: boolean; ritmo: string }) {
   const [sonando, setSonando] = useState(false)
   const [t, setT] = useState(0)
   const reproductor = useRef<HTMLAudioElement | null>(null)
@@ -110,7 +110,21 @@ function Reproductor({ audio, crear, creando }: { audio?: AudioCancion; crear: (
     setSonando(!sonando)
   }
 
-  const estado = creando ? 'Creando la música… hasta 1 minuto' : !audio ? `Escuchar · usa ${textoCosto(COSTOS.audio)}` : url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`
+  // Sin música todavía: un botón que dice lo que hace, no un reproductor vacío que parece roto.
+  if (!audio) {
+    return (
+      <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface p-2 pr-4">
+        <Boton variante="herramienta" herramienta="cancion" onClick={tocar} cargando={creando}>
+          {!creando && <Music className="size-5" aria-hidden />} {creando ? 'Creando la música…' : 'Crear la música'}
+        </Boton>
+        <span className="hidden min-w-0 text-sm text-ink-soft sm:block" role="status">
+          {creando ? `Con voz y ritmo de ${ritmo.toLowerCase()}. Puede tardar hasta 1 minuto; sonará apenas esté.` : `Con voz y ritmo de ${ritmo.toLowerCase()} · usa ${textoCosto(COSTOS.audio)}`}
+        </span>
+      </div>
+    )
+  }
+
+  const estado = url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface p-2.5 pr-4">
       <button
@@ -118,16 +132,16 @@ function Reproductor({ audio, crear, creando }: { audio?: AudioCancion; crear: (
         onClick={tocar}
         className="grid size-11 shrink-0 place-items-center rounded-full text-on-tool transition hover:scale-105"
         style={{ background: COLOR }}
-        aria-label={creando ? 'Creando la música' : sonando ? 'Pausar' : 'Escuchar la canción'}
+        aria-label={sonando ? 'Pausar' : 'Escuchar la canción'}
       >
-        {creando ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : sonando ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
+        {sonando ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
       </button>
       <div className="hidden h-9 min-w-0 flex-1 items-center gap-[3px] sm:flex" aria-hidden>
         {barras.map((h, i) => (
           <span
             key={i}
-            className={cx('min-w-[2px] flex-1 rounded-full', (sonando || creando) && 'barra-onda')}
-            style={{ height: `${h * 100}%`, background: audio && i / barras.length <= t / duracion ? COLOR : tinte(COLOR, 28), animationDelay: `${(i % 7) * 0.09}s` }}
+            className={cx('min-w-[2px] flex-1 rounded-full', sonando && 'barra-onda')}
+            style={{ height: `${h * 100}%`, background: i / barras.length <= t / duracion ? COLOR : tinte(COLOR, 28), animationDelay: `${(i % 7) * 0.09}s` }}
           />
         ))}
       </div>
@@ -349,7 +363,13 @@ export function Cancion() {
       )}
 
       <BarraHoja>
-        {cancion.opciones.modo === 'ritmo' && <Reproductor audio={audio} crear={crearAudio} creando={grabando} />}
+        {cancion.opciones.modo === 'ritmo' ? (
+          <Reproductor audio={audio} crear={crearAudio} creando={grabando} ritmo={cancion.opciones.ritmo} />
+        ) : (
+          <p className="min-w-0 flex-1 rounded-2xl border border-line bg-surface px-4 py-3 text-ink-soft">
+            Se canta con la melodía de «{cancion.opciones.melodia}», sin música grabada.
+          </p>
+        )}
         <Boton variante="contorno" onClick={() => imprimir(avisar)} aria-label="Imprimir la letra">
           <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
         </Boton>

@@ -77,6 +77,7 @@ Nunca digas que la música "hace más inteligente": la formación musical no mej
 
 | Quién | Precio | Fuente |
 | --- | --- | --- |
+| **Supermentes (nuestra primera venta, 18-oct)** | **S/ 15 al mes**: Lucho, profesor de Matemática; lo usará en sus dos colegios el próximo mes | Venta de Hector |
 | Profe Ágil (sesiones CNEB) | 5 usos gratis; luego S/ 4.90 por 30 días, por Yape | https://profeagil.online/ [V] |
 | ProfeYA (sesiones y fichas CNEB) | Gratis 2 documentos al mes; S/ 14.90, 19.90 ("el más elegido") y 49.90 al mes | https://profeya.org/ [V] |
 | DidácticaIA | Gratis o S/ 15–70 al mes; dice tener +5,000 docentes | https://didacticaia.com/ [V] |
