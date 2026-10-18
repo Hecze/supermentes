@@ -5,18 +5,13 @@ import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTemporizadores } from '../motor/bucle'
 import { Cuy } from '../motor/Cuy'
-import { Enunciado, Flotante, TextoMat, Vidas, elogio } from '../motor/piezas'
+import { Enunciado, Flotante, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
 const VIDAS = 3
 
 type Asomado = { id: number; texto: string; correcto: boolean; hasta: number; estado: 'arriba' | 'golpe' | 'mal' | 'baja' }
-
-function tamTexto(t: string) {
-  const n = [...t].length
-  return n <= 3 ? 1 : n <= 6 ? 0.78 : n <= 10 ? 0.6 : 0.48
-}
 
 export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
@@ -202,12 +197,12 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
                     className={`absolute inset-x-[6%] bottom-[-2%] flex h-full max-h-[40cqmin] flex-col items-center justify-end ${a.estado === 'baja' ? 'esconder' : 'asomar'}`}
                   >
                     <span
-                      className={`relative z-10 mb-[-4%] grid h-[36%] w-full max-w-[34cqmin] shrink-0 place-items-center rounded-[1.4cqmin] border-[0.6cqmin] px-[0.8cqmin] font-bold leading-tight ${a.estado === 'mal' ? 'temblar' : ''}`}
+                      className={`relative z-10 mb-[-4%] grid h-[36%] w-full max-w-[40cqmin] shrink-0 place-items-center rounded-[1.4cqmin] border-[0.6cqmin] px-[0.8cqmin] font-bold leading-tight ${a.estado === 'mal' ? 'temblar' : ''}`}
                       style={{
                         background: a.estado === 'golpe' ? '#2fc46f' : a.estado === 'mal' ? '#ff6b6b' : '#f6d6a3',
                         borderColor: a.estado === 'golpe' ? '#1f9d55' : a.estado === 'mal' ? '#d64545' : '#b7804a',
-                        color: a.estado === 'arriba' ? '#4a2c00' : '#fff',
-                        fontSize: `calc(clamp(16px, 4.6cqmin, 42px) * ${tamTexto(a.texto)})`,
+                        color: a.estado === 'golpe' || a.estado === 'mal' ? '#fff' : '#4a2c00',
+                        fontSize: letraOpciones(reto.opciones, 'min(38cqmin, 36cqw)', 'clamp(22px, 5cqmin, 42px)', 18),
                       }}
                     >
                       <TextoMat texto={a.texto} />
