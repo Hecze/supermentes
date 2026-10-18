@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperti
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTeclas, useTemporizadores } from '../motor/bucle'
-import { Enunciado, Flotante, TextoMat, Vidas, elogio } from '../motor/piezas'
+import { Enunciado, Flotante, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -48,11 +48,6 @@ function Nube({ className, style }: { className?: string; style?: CSSProperties 
       <span className="absolute -right-[22%] top-[25%] h-[55%] w-[48%] rounded-full bg-white/95" />
     </div>
   )
-}
-
-function tamTexto(t: string) {
-  const n = [...t].length
-  return n <= 3 ? 1 : n <= 6 ? 0.8 : n <= 10 ? 0.62 : 0.5
 }
 
 export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: PropsJuego) {
@@ -142,7 +137,9 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
 
   function flotar(texto: string, y: number, color?: string) {
     const id = ++contador.current
-    setFlotantes((f) => [...f, { id, y: `${(y / alto) * 100}%`, texto, color }])
+    // Por debajo de la pregunta, para que no se encime con ella.
+    const yy = Math.max(y, zona().arriba + 24)
+    setFlotantes((f) => [...f, { id, y: `${(yy / alto) * 100}%`, texto, color }])
     despues(() => setFlotantes((f) => f.filter((x) => x.id !== id)), 900)
   }
 
@@ -176,7 +173,7 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
               ? {
                   estrellas: acertadas >= meta / 2 ? 1 : 0,
                   titulo: '¡Aterrizaje de emergencia!',
-                  detalle: `Pasaste ${acertadas} de ${meta} puertas por la respuesta correcta.`,
+                  detalle: `Pasaste ${acertadas} de ${n} puertas por la respuesta correcta.`,
                   puntaje: acertadas * 100,
                 }
               : {
@@ -203,7 +200,7 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
       f.y = z.arriba + z.alto * 0.5 + Math.sin(f.t * 3) * 8
     } else {
       f.vy = Math.min(f.vy + 1.25 * alto * dt, 0.75 * alto)
-      f.y = Math.max(z.arriba + tam * 0.2, Math.min(z.abajo - tam * 0.25, f.y + f.vy * dt))
+      f.y = Math.max(z.arriba + tam * 0.45, Math.min(z.abajo - tam * 0.25, f.y + f.vy * dt))
       if (f.y >= z.abajo - tam * 0.25) f.vy = 0
       // La puerta avanza hacia el cóndor.
       if (puerta && !terminado) {
@@ -247,8 +244,8 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
           {puerta.huecos.map((h, i) => (
             <div key={i} className="absolute inset-x-[-40%] flex items-center justify-center" style={{ top: rango(h, z).arriba, height: rango(h, z).abajo - rango(h, z).arriba }}>
               <span
-                className="rounded-[1.4cqmin] border-[0.5cqmin] border-[#b7804a] bg-[#f6d6a3] px-[1.4cqmin] py-[0.6cqmin] font-bold text-[#4a2c00] shadow-md"
-                style={{ fontSize: `calc(clamp(18px, 5.4cqmin, 46px) * ${tamTexto(h.texto)})` }}
+                className="whitespace-nowrap rounded-[1.4cqmin] border-[0.5cqmin] border-[#b7804a] bg-[#f6d6a3] px-[1.4cqmin] py-[0.6cqmin] font-bold text-[#4a2c00] shadow-md"
+                style={{ fontSize: letraOpciones(puerta.huecos.map((x) => x.texto), '38cqw', 'clamp(24px, 5.6cqmin, 46px)', 22) }}
               >
                 <TextoMat texto={h.texto} />
               </span>
@@ -269,6 +266,9 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
           </span>
           <span className="rounded-full bg-white/85 px-[1.8cqmin] py-[0.5cqmin] font-semibold tabular-nums shadow-sm" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
             🏔️ {pasadas} / {meta}
+          </span>
+          <span className="rounded-full bg-white/85 px-[1.8cqmin] py-[0.5cqmin] font-semibold tabular-nums text-[#1f9d55] shadow-sm" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
+            ✓ {aciertos}
           </span>
         </div>
         {puerta && (
