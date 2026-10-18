@@ -40,14 +40,7 @@ function BotonTema() {
 }
 
 function Docente() {
-  const { lista, entro, nombre, entrar, salir } = useCuenta()
-  if (lista && !entro) {
-    return (
-      <Boton tam="sm" variante="contorno" onClick={() => void entrar()}>
-        Entrar con Google
-      </Boton>
-    )
-  }
+  const { entro, nombre, salir } = useCuenta()
   if (!entro) {
     return (
       <div className="min-w-0">
