@@ -3,12 +3,15 @@
 // porque el docente está parado en otro tema.
 import { ChevronDown, Gamepad2, LoaderCircle, RefreshCw, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useCuenta } from '../app/cuenta'
 import { cuando, useStore } from '../app/store'
 import { Boton, cx } from '../components/ui'
 import { juegoPorId } from '../juegos/catalogo'
 import { cargarResultados, enviados, type Enviado, type FilaResultado } from '../juegos/compartir/resultados'
 import { TextoMat } from '../juegos/motor/piezas'
 import { num } from '../juegos/matematica/formato'
+import type { TareaRevisada } from '../juegos/compartir/tareas'
+import { RevisarTarea, TareasPorSalon, useTareas } from './Tareas'
 
 const MEDALLAS = ['🥇', '🥈', '🥉']
 
@@ -93,7 +96,7 @@ function TablaResultados({ envio }: { envio: Enviado }) {
                   <tr key={f.id} className="border-b border-line last:border-0">
                     <td className="py-2 pr-2 font-medium">
                       <span className="inline-block w-7" aria-hidden>
-                        {MEDALLAS[i] ?? ''}
+                        {f.mejor.puntaje > 0 ? (MEDALLAS[i] ?? '') : ''}
                       </span>
                       {f.nombre}
                     </td>
@@ -146,6 +149,10 @@ function FilaEnvio({ envio, abierto, alternar }: { envio: Enviado; abierto: bool
 export function ResultadosJuegos() {
   const { ficha, ir } = useStore()
   const lista = useEnviados()
+  const tareas = useTareas()
+  // Con cuenta, los envíos vienen de la cuenta (/api/mis-envios); sin ella, solo los de esta computadora.
+  const donde = useCuenta().entro ? 'con tu cuenta' : 'desde esta computadora'
+  const [tarea, setTarea] = useState<TareaRevisada | null>(null)
 
   // Agrupados por tema: primero el tema abierto (si mandó juegos de él) y luego por el envío más reciente.
   const temas = useMemo(() => {
@@ -158,19 +165,23 @@ export function ResultadosJuegos() {
   // Se abre solo el envío más reciente del primer tema: el que el docente probablemente viene a ver.
   const [abierto, setAbierto] = useState<string | null>(() => temas[0]?.[0]?.codigo ?? null)
 
+  if (tarea) return <RevisarTarea tarea={tarea} volver={() => setTarea(null)} />
+
   return (
     <>
       <header className="flex flex-col gap-1">
-        <h1 className="font-display text-4xl font-bold">Resultados de juegos</h1>
-        <p className="max-w-2xl text-lg text-ink-soft">Quién jugó cada juego que mandaste a las familias y su puntaje más alto.</p>
+        <h1 className="font-display text-4xl font-bold">Revisar</h1>
+        <p className="max-w-2xl text-lg text-ink-soft">Las tareas de tus salones, ya revisadas, y quién jugó cada juego que mandaste a las familias.</p>
       </header>
+      {tareas && <TareasPorSalon tareas={tareas} abrir={setTarea} />}
+      <h2 className="text-2xl font-semibold">Juegos para practicar</h2>
 
       {lista.length === 0 ? (
         <section className="flex flex-col items-start gap-4 rounded-3xl border-2 border-dashed border-line bg-surface p-6 sm:p-8">
           <span className="grid size-12 place-items-center rounded-xl bg-warn/12 text-warn">
             <Trophy className="size-6" aria-hidden />
           </span>
-          <h2 className="text-xl font-semibold">Todavía no mandaste juegos desde esta computadora</h2>
+          <h2 className="text-xl font-semibold">Todavía no mandaste juegos {donde}</h2>
           <p className="max-w-xl text-ink-soft">
             Abre un tema, entra a <strong className="text-ink">Juego web</strong> y toca <strong className="text-ink">Enviar a las familias</strong>. Cuando tus alumnos jueguen,
             aquí verás quién jugó y su puntaje más alto.
@@ -190,7 +201,7 @@ export function ResultadosJuegos() {
               ))}
             </section>
           ))}
-          <p className="text-sm text-ink-soft">Aquí aparecen los juegos que mandaste desde esta computadora.</p>
+          <p className="text-sm text-ink-soft">Aquí aparecen los juegos que mandaste {donde}{donde === 'con tu cuenta' ? ', desde cualquier computadora' : ''}.</p>
         </>
       )}
     </>

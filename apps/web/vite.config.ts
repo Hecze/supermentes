@@ -7,12 +7,12 @@ import tailwindcss from '@tailwindcss/vite'
 const raiz = fileURLToPath(new URL('.', import.meta.url))
 const repo = resolve(raiz, '../..')
 
-// En desarrollo, /j/ABC234 abre la página del alumno, como hace vercel.json en producción.
+// En desarrollo, /j/ABC234 (y la tarea /t/ABC234) abre la página del alumno, como hace vercel.json en producción.
 const rutasDelAlumno: Plugin = {
   name: 'rutas-del-alumno',
   configureServer(server) {
     server.middlewares.use((req, _res, next) => {
-      if (req.url && /^\/j\/[A-Za-z0-9]{6}\/?(\?.*)?$/.test(req.url)) req.url = '/j/index.html'
+      if (req.url && /^\/[jt]\/[A-Za-z0-9]{6}\/?(\?.*)?$/.test(req.url)) req.url = '/j/index.html'
       next()
     })
   },

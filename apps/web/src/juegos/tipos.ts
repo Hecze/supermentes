@@ -59,13 +59,19 @@ export type Resultado = {
   detalle: string
   /** Para guardar el récord del juego en este dispositivo. */
   puntaje?: number
+  /** Solo en una tarea: cada pregunta, lo que eligió y la correcta, para que el docente la vea revisada. */
+  respuestas?: Respuesta[]
 }
+
+export type Respuesta = { pregunta: string; elegida: string; correcta: string }
 
 export type PropsJuego = {
   contenido: Contenido
   ritmo: Ritmo
   /** Cambia en cada partida para que el orden no se repita. */
   semilla: number
+  /** Tarea para la casa (solo el Concurso): 10 preguntas, este reloj por pregunta y no se pausa. */
+  tarea?: { segundos: number }
   terminar: (r: Resultado) => void
 }
 

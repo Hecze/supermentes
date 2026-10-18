@@ -12,6 +12,10 @@
     {
       "source": "/j/:codigo",
       "destination": "/j/index.html"
+    },
+    {
+      "source": "/t/:codigo",
+      "destination": "/j/index.html"
     }
   ]
 }

@@ -57,8 +57,8 @@ function lado(v: unknown): Lado | null {
   return l.texto || l.visual ? l : null
 }
 
-/** Devuelve el juego limpio, o un texto con lo que falta. */
-function validar(datos: unknown) {
+/** Devuelve el juego limpio, o un texto con lo que falta. También valida el Concurso de una tarea (api/tareas.ts). */
+export function validar(datos: unknown) {
   const o = objeto(datos)
   const juego = texto(o.juego, 20)
   if (!JUEGOS.has(juego)) return 'Juego desconocido.'

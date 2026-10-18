@@ -71,7 +71,9 @@ const CLAVE = 'supermentes-colegio'
 function leer(): Colegio {
   try {
     const c = JSON.parse(localStorage.getItem(CLAVE) ?? '{}') as Partial<Colegio>
-    return { colegio: c.colegio ?? '', docente: c.docente ?? '', seccion: c.seccion ?? '' }
+    // Si aún no lo escribió, sale del onboarding (app/perfil.ts): nombre en clase y colegio.
+    const p = JSON.parse(localStorage.getItem('supermentes-perfil') ?? '{}') as { nombre?: string; colegio?: string }
+    return { colegio: c.colegio ?? p.colegio ?? '', docente: c.docente ?? p.nombre ?? '', seccion: c.seccion ?? '' }
   } catch {
     return { colegio: '', docente: '', seccion: '' }
   }
