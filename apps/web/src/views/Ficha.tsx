@@ -3,7 +3,6 @@ import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { SinTema } from '../components/Shell'
 import { Desplegable, Editable, tinte } from '../components/ui'
-import { GuiaClase } from './GuiaClase'
 import { RecursosDelTema } from './RecursosDelTema'
 
 export function Ficha() {
@@ -32,7 +31,7 @@ export function Ficha() {
       <button
         type="button"
         onClick={() => verCurriculo(ficha.gradoId, ficha.areaId)}
-        className="group flex items-center gap-4 rounded-2xl border-2 border-line bg-surface p-4 text-left transition hover:border-ink sm:p-5 print:hidden"
+        className="group flex items-center gap-4 rounded-2xl border-2 border-line bg-surface p-4 text-left transition hover:border-ink sm:p-5"
       >
         <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-surface-2">
           <BookMarked className="size-6" aria-hidden />
@@ -50,7 +49,7 @@ export function Ficha() {
         </span>
       </button>
 
-      <section className="flex flex-col gap-4 print:hidden">
+      <section className="flex flex-col gap-4">
         <h2 className="font-display text-2xl font-bold sm:text-3xl">¿Qué necesitas para tu clase?</h2>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {ORDEN_HERRAMIENTAS.map((id) => {
@@ -83,15 +82,10 @@ export function Ficha() {
         </div>
       </section>
 
-      <GuiaClase ficha={ficha} />
-
-      {/* Al imprimir el tema sale solo la guía de la clase. */}
-      <div className="print:hidden">
-        <RecursosDelTema ficha={ficha} />
-      </div>
+      <RecursosDelTema ficha={ficha} />
 
       {ficha.coincidenciasBiblioteca > 0 && (
-        <button type="button" onClick={() => ir('biblioteca')} className="flex items-center gap-2 self-start rounded-lg text-ink-soft hover:text-ink print:hidden">
+        <button type="button" onClick={() => ir('biblioteca')} className="flex items-center gap-2 self-start rounded-lg text-ink-soft hover:text-ink">
           <Library className="size-5" aria-hidden />
           Otros profes ya hicieron {ficha.coincidenciasBiblioteca} materiales de este tema. Usarlos es gratis.
           <ChevronRight className="size-4" aria-hidden />
