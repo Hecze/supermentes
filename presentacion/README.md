@@ -7,4 +7,4 @@ Se arma con `node presentacion/armar.mjs`, que corre solo en el build: editar `s
 Aquí va una copia del contenido para que quede mapeado: `deck.json` (orden y fuentes) y `slides/*.html`
 (una diapositiva por archivo, con las notas para hablar en `<aside>`). Se edita aquí.
 
-Tracción con cifras reales (18-oct): 1 docente cliente, 3 entrevistas, 3 en la lista de espera. Solución en 3 momentos (preparar, dar la clase, revisar) y demo con tarea por salón.
+Tracción con cifras reales (18-oct): 1 docente cliente, 3 entrevistas, 4 en la lista de espera. Solución en 3 momentos (preparar, dar la clase, revisar) y demo con tarea por salón.
