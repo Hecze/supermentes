@@ -54,16 +54,21 @@ function ElegirRitmo({ opciones, cambiar }: { opciones: OpcionesCancion; cambiar
 function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; crear: () => void; creando: boolean; ritmo: string }) {
   const [sonando, setSonando] = useState(false)
   const [t, setT] = useState(0)
+  const [real, setReal] = useState<number | null>(null)
+  // Si el navegador no deja sonar (iPhone, tras esperar) o el audio no carga, se dice: nunca falla callado.
+  const [aviso, setAviso] = useState<string | null>(null)
   const reproductor = useRef<HTMLAudioElement | null>(null)
   // Se tocó ▶ antes de que hubiera audio: suena apenas llegue.
   const pedido = useRef(false)
   const url = audio?.url ?? null
-  const duracion = audio?.duracionSeg ?? 0
+  const duracion = real ?? audio?.duracionSeg ?? 0
   const barras = useMemo(() => Array.from({ length: 48 }, (_, i) => 0.3 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)) * 0.7), [])
 
   // Con audio real suena el mp3; sin url (datos de ejemplo) solo avanza la barra.
   useEffect(() => {
     setT(0)
+    setReal(null)
+    setAviso(null)
     if (!audio) return setSonando(false)
     if (pedido.current) {
       pedido.current = false
@@ -71,6 +76,11 @@ function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; c
     }
     if (!url) return
     const a = new Audio(url)
+    a.onloadedmetadata = () => Number.isFinite(a.duration) && setReal(Math.round(a.duration))
+    a.onerror = () => {
+      setSonando(false)
+      setAviso('No se pudo reproducir el audio. Vuelve a crearlo.')
+    }
     a.ontimeupdate = () => setT(Math.floor(a.currentTime))
     a.onended = () => {
       setSonando(false)
@@ -85,8 +95,13 @@ function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; c
 
   useEffect(() => {
     if (url) {
-      if (sonando) reproductor.current?.play().catch(() => setSonando(false))
-      else reproductor.current?.pause()
+      if (sonando) {
+        setAviso(null)
+        reproductor.current?.play().catch(() => {
+          setSonando(false)
+          setAviso('Lista: toca ▶ para escucharla.')
+        })
+      } else reproductor.current?.pause()
       return
     }
     if (!sonando || !audio) return
@@ -124,7 +139,7 @@ function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; c
     )
   }
 
-  const estado = url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`
+  const estado = aviso ?? (url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`)
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface p-2.5 pr-4">
       <button

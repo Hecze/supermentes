@@ -5,7 +5,9 @@ import type { Api } from './types'
 async function leer<T>(res: Response): Promise<T> {
   if (res.ok) return res.json() as Promise<T>
   const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null
-  throw new Error(cuerpo?.error ?? 'No pudimos conectar con Supermentes. Vuelve a intentarlo.')
+  if (cuerpo?.error) throw new Error(cuerpo.error)
+  // Sin mensaje propio (la función no cargó o Vercel la cortó por tiempo): se dice el código para poder rastrearlo.
+  throw new Error(res.status === 504 ? 'La IA tardó demasiado en responder. Vuelve a intentarlo.' : `No pudimos conectar con Supermentes (error ${res.status}). Vuelve a intentarlo.`)
 }
 
 // Vercel acepta hasta 4,5 MB por pedido y una foto de celular suele pasarlo: se achica a 1600 px en JPEG.

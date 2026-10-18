@@ -48,8 +48,9 @@ export const mockApi: Api = {
     return cancionEjemplo(opciones)
   },
   async generarAudio() {
-    await esperar(2200)
-    return { url: null, duracionSeg: 102 }
+    // Sin backend no hay música: se dice claro en vez de mostrar un reproductor que no suena.
+    await esperar(600)
+    throw new Error('Esta es la versión de prueba: aquí no se crea música de verdad.')
   },
   async adaptarExamen(_ficha, { examen, ...opciones }) {
     await esperar(1500)

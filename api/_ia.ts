@@ -41,9 +41,17 @@ export function json(datos: unknown, estado = 200) {
 }
 
 /** Respuesta de error para el docente: el mensaje se muestra tal cual, el detalle va al log. */
+/** Sin la clave, cada función lo dice claro (al docente y en los logs de Vercel) en vez de fallar callada. */
+export const SIN_CLAVE = 'La IA no está configurada en el servidor: falta OPENROUTER_API_KEY en Vercel. Avísale al equipo de Supermentes.'
+
 export function fallo(e: unknown) {
   console.error(e)
+  if (!process.env.OPENROUTER_API_KEY) return json({ error: SIN_CLAVE }, 503)
   if (e instanceof ErrorIA) return json({ error: e.message }, 502)
+  if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError) {
+    return json({ error: 'La clave de la IA (OPENROUTER_API_KEY) no es válida. Avísale al equipo de Supermentes.' }, 503)
+  }
+  if (e instanceof Anthropic.APIError && e.status === 402) return json({ error: 'Se acabó el saldo de la IA en OpenRouter. Avísale al equipo de Supermentes.' }, 503)
   if (e instanceof Anthropic.RateLimitError) return json({ error: 'Hay muchos docentes generando a la vez. Espera un momento y vuelve a intentarlo.' }, 429)
   return json({ error: 'No pudimos generar el material. Vuelve a intentarlo.' }, 500)
 }

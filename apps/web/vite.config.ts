@@ -51,6 +51,10 @@ const funcionesDeVercel: Plugin = {
 // El modo "artifact" genera solo la app en un HTML para compartir el prototipo por link.
 export default defineConfig(({ mode, command }) => {
   const vistaPrevia = mode === 'artifact'
+  // Publicar sin VITE_API=real deja la app en datos de ejemplo (sin IA ni música): que se vea en el log del build.
+  if (command === 'build' && !vistaPrevia && (process.env.VITE_API ?? loadEnv(mode, repo, '').VITE_API) !== 'real') {
+    console.warn('\n⚠️  VITE_API no es "real": esta versión sale con DATOS DE EJEMPLO (sin IA ni música). En Vercel: VITE_API=real.\n')
+  }
   const blobEnMemoria = command === 'serve' && !loadEnv('development', repo, '').BLOB_READ_WRITE_TOKEN
   const paginas: Record<string, string> = vistaPrevia
     ? { app: resolve(raiz, 'app/index.html') }
