@@ -108,10 +108,35 @@ const RESULTADOS_INICIALES: Record<string, Resultados> = MODO_EJEMPLO
   ? { [FICHA_EJEMPLO.id]: { juego: JUEGO_EJEMPLO } }
   : {}
 
+// Los temas de la docente sobreviven a recargar la página (en este navegador). Lo generado con IA no se guarda:
+// el banco lo vuelve a dar al instante y lo demás se vuelve a pedir.
+const CLAVE_TEMAS = 'supermentes-temas'
+const MAX_TEMAS = 20
+
+function temasGuardados(): { temas: Ficha[]; fichaId: string | null } {
+  try {
+    const g = JSON.parse(localStorage.getItem(CLAVE_TEMAS) ?? 'null') as { temas?: Ficha[]; fichaId?: string | null } | null
+    const temas = Array.isArray(g?.temas) ? g.temas.filter((t) => t?.id && t.titulo) : []
+    return { temas, fichaId: temas.some((t) => t.id === g?.fichaId) ? (g?.fichaId ?? null) : (temas[0]?.id ?? null) }
+  } catch {
+    return { temas: [], fichaId: null }
+  }
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [vista, setVista] = useState<Vista>(vistaDelHash)
-  const [temas, setTemas] = useState<Ficha[]>(MODO_EJEMPLO ? TEMAS_INICIALES : [])
-  const [fichaId, setFichaId] = useState<string | null>(MODO_EJEMPLO ? FICHA_EJEMPLO.id : null)
+  const [guardados] = useState(() => (MODO_EJEMPLO ? null : temasGuardados()))
+  const [temas, setTemas] = useState<Ficha[]>(guardados?.temas ?? TEMAS_INICIALES)
+  const [fichaId, setFichaId] = useState<string | null>(guardados ? guardados.fichaId : FICHA_EJEMPLO.id)
+
+  useEffect(() => {
+    if (MODO_EJEMPLO) return
+    try {
+      localStorage.setItem(CLAVE_TEMAS, JSON.stringify({ temas: temas.slice(0, MAX_TEMAS), fichaId }))
+    } catch {
+      // Sin almacenamiento los temas duran esta visita.
+    }
+  }, [temas, fichaId])
   const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
   const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
   const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)

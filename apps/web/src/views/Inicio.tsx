@@ -179,7 +179,9 @@ function Momentos({ gradoId }: { gradoId: string }) {
       </Tarjeta>
 
       <Tarjeta n={3} color="var(--ok)" etiqueta="REVISAR" titulo={alumnos.enviados ? 'Cómo les va a tus alumnos' : 'Tareas que no se copian'} accion="Revisar y reforzar" onClick={() => ir('resultados')}>
-        {alumnos.enviados ? (
+        {alumnos.enviados && !alumnos.cargando && alumnos.alumnos === 0 ? (
+          <p>Mandaste {alumnos.enviados === 1 ? 'un juego' : `${alumnos.enviados} juegos`}. Todavía nadie jugó: cuando jueguen, aquí verás quién y qué reforzar.</p>
+        ) : alumnos.enviados ? (
           <>
             <p className="flex items-baseline gap-2">
               <span className="font-display text-4xl font-bold text-ink">{alumnos.cargando ? '…' : alumnos.alumnos}</span>

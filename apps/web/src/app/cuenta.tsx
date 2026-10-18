@@ -103,17 +103,44 @@ const APARIENCIA = {
   },
 }
 
+// ponytail: esES de Clerk trata de usted; se pasa a tú con reemplazos sobre todos los textos. Si un texto queda raro,
+// se corrige con una clave explícita abajo.
+const A_TU: [RegExp, string][] = [
+  [/\b(Ingrese|Introduzca)\b/g, 'Escribe'],
+  [/\b(ingrese|introduzca)\b/g, 'escribe'],
+  [/\bRevise\b/g, 'Revisa'],
+  [/\bVerifique\b/g, 'Verifica'],
+  [/\bContinúe\b/g, 'Continúa'],
+  [/\bIntente\b/g, 'Intenta'],
+  [/\bintente\b/g, 'intenta'],
+  [/\brecibió\b/g, 'recibiste'],
+  [/\bSu\b/g, 'Tu'],
+  [/\bsu\b/g, 'tu'],
+  [/\bsus\b/g, 'tus'],
+]
+function aTu<T>(v: T): T {
+  if (typeof v === 'string') return A_TU.reduce((t, [re, r]) => t.replace(re, r), v as string) as T
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, aTu(x)])) as T
+  return v
+}
+const ES = aTu(esES)
+
 const LOCALIZACION = {
-  ...esES,
+  ...ES,
+  identityPreviewEditButton__identifier: 'Cambiar',
+  unstable__errors: {
+    ...ES.unstable__errors,
+    zxcvbn: { ...ES.unstable__errors?.zxcvbn, goodPassword: 'Tu contraseña está bien.', couldBeStronger: 'Sirve, pero podría ser más segura.', notEnough: 'Tu contraseña es muy débil.' },
+  },
   formFieldInputPlaceholder__emailAddress: 'tucorreo@ejemplo.com',
   formFieldInputPlaceholder__password: 'Tu contraseña',
   signIn: {
-    ...esES.signIn,
-    start: { ...esES.signIn?.start, title: 'Entra a Supermentes', titleCombined: 'Entra a Supermentes', subtitle: 'Con Google o con tu correo.', subtitleCombined: 'Con Google o con tu correo.' },
+    ...ES.signIn,
+    start: { ...ES.signIn?.start, title: 'Entra a Supermentes', titleCombined: 'Entra a Supermentes', subtitle: 'Con Google o con tu correo.', subtitleCombined: 'Con Google o con tu correo.' },
   },
   signUp: {
-    ...esES.signUp,
-    start: { ...esES.signUp?.start, title: 'Crea tu cuenta', subtitle: 'Es gratis y toma un minuto.' },
+    ...ES.signUp,
+    start: { ...ES.signUp?.start, title: 'Crea tu cuenta', subtitle: 'Es gratis y toma un minuto.' },
   },
 }
 
