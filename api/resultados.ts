@@ -10,7 +10,7 @@
 // El plan Hobby de Vercel permite 2.000 operaciones avanzadas (put, list) al mes y bloquea Blob 30 días si se
 // pasan (ver api/lista-espera.ts). Por eso solo se escribe cuando el alumno mejora su puntaje (el celular ni
 // siquiera llama si no lo superó) y el docente lista los resultados solo del juego que abre.
-import { guardar, todos } from './_almacen.js'
+import { list, put } from '@vercel/blob'
 import { CODIGO, JUEGOS, claveCorrecta, demasiadas, entero, json, leerJson, leerJuego, objeto, texto } from './_juegos.js'
 
 type Registro = {
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (previo && puntaje <= previo.mejor.puntaje) return json({ ok: true, mejor: previo.mejor.puntaje, nuevoRecord: false })
     if (demasiadas(request, 'resultado', 60)) return json({ error: 'Demasiados puntajes seguidos. Espera unos minutos.' }, 429)
     const registro: Registro = { id, nombre, mejor: { puntaje, estrellas, juego, fecha: new Date().toISOString() } }
-    await guardar(ruta(codigo, id), registro)
+    await put(ruta(codigo, id), JSON.stringify(registro), { access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
     return json({ ok: true, mejor: puntaje, nuevoRecord: true })
   } catch (e) {
     console.error('No se pudo guardar el resultado', e)
@@ -62,7 +62,19 @@ export async function GET(request: Request) {
     if (!juego) return json({ error: 'No encontramos ese juego.' }, 404)
     if (!claveCorrecta(juego.clave, url.searchParams.get('clave'))) return json({ error: 'Solo el docente que compartió el juego puede ver los resultados.' }, 401)
 
-    const alumnos = await todos<Registro>(`resultados/${codigo}/`)
+    const rutas: string[] = []
+    let cursor: string | undefined
+    do {
+      const pagina = await list({ prefix: `resultados/${codigo}/`, cursor, limit: 1000 })
+      rutas.push(...pagina.blobs.map((b) => b.pathname))
+      cursor = pagina.hasMore ? pagina.cursor : undefined
+    } while (cursor)
+
+    const alumnos: Registro[] = []
+    for (let i = 0; i < rutas.length; i += 20) {
+      const tanda = await Promise.all(rutas.slice(i, i + 20).map((r) => leerJson<Registro>(r)))
+      alumnos.push(...tanda.filter((r): r is Registro => r !== null))
+    }
     alumnos.sort((a, b) => b.mejor.puntaje - a.mejor.puntaje || a.nombre.localeCompare(b.nombre))
     return json({ juego: { codigo, juego: juego.juego, tema: juego.tema, creado: juego.creado }, alumnos })
   } catch (e) {
