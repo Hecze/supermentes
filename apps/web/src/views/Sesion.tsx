@@ -1,13 +1,13 @@
 // Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
 // Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Check, Download, FileText, Gamepad2, Music, Printer, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
+import { BadgeCheck, Check, Download, FileText, Gamepad2, Music, Printer, RefreshCw, RotateCcw, Sparkles, TriangleAlert } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { api, COSTOS, type OpcionesSesion, type Sesion as TipoSesion } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Desplegable, Editable, Hoja, NotaCreditos, Pregunta, cx, descargar, imprimir, tinte } from '../components/ui'
+import { BarraHoja, Boton, Chip, Desplegable, Editable, Hoja, NotaCreditos, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
 import { useCurriculo, type AreaCurriculo } from '../curriculo/cargar'
 import type { Nivel } from '../curriculo/catalogo'
 import { ubicarCita } from '../curriculo/citas'
@@ -197,9 +197,10 @@ function HojaSesion({ s, area }: { s: TipoSesion; area: AreaCurriculo | null }) 
 
       <section className="flex flex-col gap-2">
         <Titulo>II. Propósitos de aprendizaje</Titulo>
-        {/* Sin scroll horizontal: recortaría la ventanita del desempeño. */}
+        {/* Sin scroll horizontal: recortaría la ventanita del desempeño. En el celular las palabras se cortan con
+            guion para que la tabla quepa y la página no se deslice de lado. */}
         <div>
-          <table className="w-full border-collapse text-sm">
+          <table className="w-full border-collapse text-sm max-sm:hyphens-auto max-sm:[&_*]:[overflow-wrap:anywhere]">
             <thead>
               <tr>
                 <th className={th}>Competencia</th>
@@ -313,7 +314,7 @@ function HojaSesion({ s, area }: { s: TipoSesion; area: AreaCurriculo | null }) 
         <Editable como="h3" className="text-center text-lg font-bold">
           {s.ficha.titulo}
         </Editable>
-        <p>Nombre: ________________________________________ Fecha: ______________</p>
+        <p className="[overflow-wrap:anywhere]">Nombre: ________________________________________ Fecha: ______________</p>
         <ol className="flex list-decimal flex-col gap-4 pl-5">
           {s.ficha.actividades.map((a, i) => (
             <li key={i}>
@@ -431,6 +432,7 @@ export function Sesion() {
   const sesion = resultados.sesion
   const [opciones, setOpciones] = useState<OpcionesSesion>(sesion?.opciones ?? { duracion: ficha?.duracion?.startsWith('90') ? 90 : 45 })
   const [error, setError] = useState<string | null>(null)
+  const [otra, setOtra] = useState(false)
   const hoja = useRef<HTMLDivElement>(null)
   const gradoId = ficha?.gradoId ?? 'primaria-1'
   const cur = useCurriculo(gradoId.split('-')[0] as Nivel, gradoId, ficha?.areaId ?? 'matematica')
@@ -477,16 +479,21 @@ export function Sesion() {
     <>
       <EncabezadoHerramienta id="sesion" />
 
-      <Acciones>
-        <Boton variante="herramienta" herramienta="sesion" tam="lg" onClick={bajarWord} disabled={ocupado}>
+      <BarraHoja>
+        <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord} disabled={ocupado}>
           <Download className="size-5" aria-hidden /> Descargar en Word
         </Boton>
-        <Boton variante="contorno" onClick={() => imprimir(avisar)} disabled={ocupado}>
-          <Printer className="size-5" aria-hidden /> Imprimir
+        <Boton variante="contorno" onClick={() => imprimir(avisar)} disabled={ocupado} aria-label="Imprimir">
+          <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
         </Boton>
-      </Acciones>
+        <Boton variante="contorno" onClick={() => setOtra(true)} cargando={ocupado}>
+          {!ocupado && <RefreshCw className="size-5" aria-hidden />} Otra versión
+        </Boton>
+      </BarraHoja>
       <p className="-mt-3 text-sm text-ink-soft print:hidden">Si algo no te convence, haz clic sobre el texto y corrígelo. Lo que cambies sale en el Word y al imprimir.</p>
 
+      {/* Si la otra versión falla, el aviso sale arriba de la hoja, donde se está mirando. */}
+      {error && !ocupado && <Fallo texto={error} reintentar={crear} />}
       {ocupado ? (
         <Avance />
       ) : (
@@ -496,7 +503,6 @@ export function Sesion() {
           </div>
         </Hoja>
       )}
-      {error && !ocupado && <Fallo texto={error} reintentar={crear} />}
 
       <section className="flex flex-col gap-3 print:hidden">
         <h2 className="font-display text-2xl font-bold">Completa tu sesión</h2>
@@ -515,15 +521,24 @@ export function Sesion() {
         </div>
       </section>
 
-      <Desplegable titulo="Cambiar la duración o crear otra versión">
+      <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Otra versión de tu sesión">
         <ElegirOpciones opciones={opciones} cambiar={setOpciones} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Boton onClick={crear} cargando={ocupado}>
+        <div className="flex flex-col items-start gap-2">
+          <Boton
+            tam="lg"
+            variante="herramienta"
+            herramienta="sesion"
+            onClick={() => {
+              setOtra(false)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+              void crear()
+            }}
+          >
             Crear otra versión
           </Boton>
           <NotaCreditos n={COSTOS.sesion} quedan={creditos} />
         </div>
-      </Desplegable>
+      </Ventana>
     </>
   )
 }

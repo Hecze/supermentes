@@ -177,7 +177,7 @@ function Avisos() {
       {avisos.map((a) => (
         <div
           key={a.id}
-          className="aviso-entra pointer-events-auto flex max-w-sm items-start gap-2 rounded-xl bg-primary px-4 py-3 text-sm text-primary-ink shadow-lg"
+          className="aviso-entra pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-xl bg-primary px-4 py-3 text-sm text-primary-ink shadow-lg"
         >
           {a.tono === 'error' ? (
             <CircleAlert className="mt-px size-4 shrink-0" aria-hidden />

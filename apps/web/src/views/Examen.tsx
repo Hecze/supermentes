@@ -1,11 +1,11 @@
-import { Check, CircleCheck, Download, Eye, FileText, Printer, Sparkles, Upload, X } from 'lucide-react'
+import { Check, CircleCheck, Columns2, Download, Eye, FileText, Printer, RefreshCw, Sparkles, Upload, X } from 'lucide-react'
 import { useState } from 'react'
 import { api, COSTOS, MODO_EJEMPLO, type Necesidad, type OpcionesExamen } from '../api'
 import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Desplegable, Generando, Hoja, NotaCreditos, Pregunta, cx, descargar, imprimir, tinte } from '../components/ui'
+import { BarraHoja, Boton, Chip, Generando, Hoja, NotaCreditos, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
 import { nombreArchivo, pdfExamen } from '../lib/pdfExamen'
 
 const COLOR = 'var(--examen)'
@@ -167,6 +167,7 @@ export function Examen() {
   const [respuestas, setRespuestas] = useState(false)
   const [original, setOriginal] = useState(false)
   const [armando, setArmando] = useState(false)
+  const [otra, setOtra] = useState(false)
 
   if (!ficha) return <SinTema />
 
@@ -235,20 +236,26 @@ export function Examen() {
         Tu examen «{examen.archivo}», adaptado {resumen(examen.opciones)}.
       </p>
 
-      <Acciones>
-        <Boton variante="herramienta" herramienta="examen" tam="lg" onClick={() => bajarPdf(false)} cargando={armando}>
+      <BarraHoja>
+        <Boton variante="herramienta" herramienta="examen" onClick={() => bajarPdf(false)} cargando={armando} disabled={ocupado}>
           <Download className="size-5" aria-hidden /> Descargar PDF
         </Boton>
-        <Boton variante="contorno" onClick={() => bajarPdf(true)} disabled={armando}>
-          <CircleCheck className="size-5" aria-hidden /> PDF de respuestas
+        <Boton variante="contorno" onClick={() => bajarPdf(true)} disabled={armando || ocupado}>
+          <CircleCheck className="size-5" aria-hidden /> PDF con respuestas
         </Boton>
-        <Boton variante="contorno" onClick={() => imprimir(avisar)}>
-          <Printer className="size-5" aria-hidden /> Imprimir
+        <Boton variante="contorno" onClick={() => imprimir(avisar)} disabled={ocupado} aria-label="Imprimir">
+          <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
         </Boton>
-        <Boton variante="suave" onClick={() => setOriginal(!original)}>
-          <Eye className="size-5" aria-hidden /> {original ? 'Ocultar original' : 'Comparar con el original'}
+        <Boton variante="contorno" onClick={() => setRespuestas(!respuestas)} aria-pressed={respuestas} style={respuestas ? { background: tinte(COLOR, 12), borderColor: COLOR } : undefined}>
+          <Eye className="size-5" aria-hidden /> Respuestas
         </Boton>
-      </Acciones>
+        <Boton variante="contorno" onClick={() => setOriginal(!original)} aria-pressed={original} style={original ? { background: tinte(COLOR, 12), borderColor: COLOR } : undefined}>
+          <Columns2 className="size-5" aria-hidden /> Original
+        </Boton>
+        <Boton variante="contorno" onClick={() => setOtra(true)} cargando={ocupado}>
+          {!ocupado && <RefreshCw className="size-5" aria-hidden />} Adaptar de nuevo
+        </Boton>
+      </BarraHoja>
 
       {ocupado ? (
         <Generando texto="Adaptando otra vez tu examen…" />
@@ -296,23 +303,27 @@ export function Examen() {
         </Hoja>
       )}
 
-      <Acciones>
-        <Boton variante="suave" onClick={() => setRespuestas(!respuestas)}>
-          <CircleCheck className="size-5" aria-hidden /> {respuestas ? 'Ocultar respuestas' : 'Ver respuestas en pantalla'}
-        </Boton>
-      </Acciones>
-
-      <Desplegable titulo="Adaptarlo de otra forma o subir otro examen">
+      <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Adaptar de nuevo">
         <SubirExamen archivo={archivo} cambiar={setArchivo} />
         {!archivo && anterior && <p className="-mt-2 text-sm text-ink-soft">Si no subes otro, volvemos a adaptar «{examen.archivo}».</p>}
         <ElegirAdaptacion eleccion={eleccion} cambiar={setEleccion} />
-        <div className="flex flex-wrap items-center gap-3">
-          <Boton onClick={adaptar} cargando={ocupado} disabled={!eligio || !aAdaptar}>
+        <div className="flex flex-col items-start gap-2">
+          <Boton
+            tam="lg"
+            variante="herramienta"
+            herramienta="examen"
+            disabled={!eligio || !aAdaptar}
+            onClick={() => {
+              setOtra(false)
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+              void adaptar()
+            }}
+          >
             Adaptar de nuevo
           </Boton>
           <NotaCreditos n={COSTOS.examen} quedan={creditos} />
         </div>
-      </Desplegable>
+      </Ventana>
     </>
   )
 }

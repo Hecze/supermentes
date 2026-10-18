@@ -1,10 +1,11 @@
-import { Eye, EyeOff, ImageDown, Plus, Printer, Shuffle, Trash2 } from 'lucide-react'
+import { Eye, ImageDown, ListChecks, Plus, Printer, Shuffle, Sparkles, Trash2 } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { mejorCrucigrama, normalizar } from '../lib/crucigrama'
 import { imagenCrucigrama } from '../lib/imagenCrucigrama'
 import { useStore, type FilaCrucigrama } from '../app/store'
+import { useBanco } from '../banco/banco'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Desplegable, Hoja, descargar, imprimir } from '../components/ui'
+import { BarraHoja, Boton, Chip, Hoja, descargar, imprimir, tinte } from '../components/ui'
 
 const COLOR = 'var(--crucigrama)'
 
@@ -37,6 +38,7 @@ export function Crucigrama() {
 
   const datos = resultados.crucigrama
   const filas = datos?.filas ?? []
+  const temaBanco = useBanco(ficha)
 
   // El crucigrama empieza vacío: las palabras las elige el docente.
   useEffect(() => {
@@ -53,7 +55,13 @@ export function Crucigrama() {
   if (!ficha) return <SinTema />
 
   const usadas = new Set(filas.map((f) => normalizar(f.palabra)))
-  const sugerencias = ficha.vocabulario.filter((v) => !usadas.has(normalizar(v.palabra)))
+  // Primero las palabras del banco del tema (con su pista), después las de la ficha; sin repetir.
+  const sugerencias = [...(temaBanco?.palabras.map((p) => ({ palabra: p.palabra, definicion: p.pista })) ?? []), ...ficha.vocabulario].filter((v) => {
+    const k = normalizar(v.palabra)
+    if (usadas.has(k)) return false
+    usadas.add(k)
+    return true
+  })
   const sinPista = cruci.ubicadas.filter((u) => !u.pista).length
 
   function cambiarFilas(nuevas: FilaCrucigrama[]) {
@@ -96,7 +104,6 @@ export function Crucigrama() {
     }
   }
 
-  const celda = Math.min(40, Math.floor(720 / Math.max(cruci.cols, 1)))
   const listas = [
     ['Horizontales', cruci.ubicadas.filter((u) => u.dir === 'horizontal')],
     ['Verticales', cruci.ubicadas.filter((u) => u.dir === 'vertical')],
@@ -106,9 +113,9 @@ export function Crucigrama() {
     <>
       <EncabezadoHerramienta id="crucigrama" />
 
-      {/* En pantallas anchas: las palabras a la izquierda y el crucigrama a la derecha. */}
-      <div className="grid gap-7 2xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)] 2xl:items-start print:block">
-        <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:p-6 2xl:sticky 2xl:top-6 print:hidden">
+      {/* Desde una laptop: las palabras a la izquierda y el crucigrama a la derecha, que cambia mientras se escribe. */}
+      <div className="grid gap-7 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:items-start print:block">
+        <section className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5 sm:p-6 print:hidden">
           <div>
             <h2 className="font-display text-2xl font-bold">Tus palabras</h2>
             <p className="text-ink-soft">Escribe cada palabra con su pista. El crucigrama se arma solo mientras escribes.</p>
@@ -191,14 +198,42 @@ export function Crucigrama() {
 
         <div className="flex min-w-0 flex-col gap-7">
           {validas.length < 2 ? (
-            <div className="rounded-2xl border-2 border-dashed border-line px-6 py-10 text-center text-ink-soft print:hidden">
+            <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-line px-6 py-10 text-center text-ink-soft print:hidden">
               Escribe al menos dos palabras para ver tu crucigrama.
+              {sugerencias.length >= 2 && (
+                <Boton variante="herramienta" herramienta="crucigrama" onClick={agregarTodas}>
+                  <Sparkles className="size-5" aria-hidden /> Armarlo con las palabras del tema
+                </Boton>
+              )}
             </div>
           ) : (
             <>
+              <BarraHoja>
+                <Boton tam="sm" variante="herramienta" herramienta="crucigrama" onClick={() => imprimir(avisar)}>
+                  <Printer className="size-4" aria-hidden /> Imprimir
+                </Boton>
+                <Boton tam="sm" variante="contorno" onClick={descargarImagen} title="Descargar la grilla en PNG, para tus fichas o diapositivas" aria-label="Descargar imagen">
+                  <ImageDown className="size-4" aria-hidden />
+                </Boton>
+                <Boton tam="sm" variante="contorno" onClick={() => setRespuestas(!respuestas)} aria-pressed={respuestas} style={respuestas ? { background: tinte(COLOR, 12), borderColor: COLOR } : undefined}>
+                  <Eye className="size-4" aria-hidden /> Respuestas
+                </Boton>
+                <Boton tam="sm" variante="contorno" onClick={() => setBanco(!banco)} aria-pressed={banco} title="Muestra la lista de palabras debajo: más fácil" style={banco ? { background: tinte(COLOR, 12), borderColor: COLOR } : undefined}>
+                  <ListChecks className="size-4" aria-hidden /> Lista
+                </Boton>
+                <Boton tam="sm" variante="contorno" onClick={() => setSemilla((x) => x + 1)}>
+                  <Shuffle className="size-4" aria-hidden /> Otra forma
+                </Boton>
+              </BarraHoja>
+
               {cruci.sinUbicar.length > 0 && (
-                <p className="rounded-xl bg-warn/10 px-4 py-3 text-warn print:hidden">
-                  No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba "Otra forma" o quita alguna palabra: la grilla tiene que caber en una hoja.
+                <p className="-mt-3 rounded-xl bg-warn/10 px-4 py-3 text-warn print:hidden">
+                  No entraron: {cruci.sinUbicar.map((e) => e.palabra).join(', ')}. Prueba «Otra forma» o quita alguna palabra: la grilla tiene que caber en una hoja.
+                </p>
+              )}
+              {sinPista > 0 && (
+                <p className="-mt-3 text-sm text-warn print:hidden">
+                  {sinPista === 1 ? 'A una palabra le falta la pista.' : `A ${sinPista} palabras les falta la pista.`} Escríbela junto a la palabra.
                 </p>
               )}
 
@@ -210,8 +245,9 @@ export function Crucigrama() {
 
                 <div className="overflow-x-auto pb-1">
                   <div
-                    className="mx-auto grid w-max"
-                    style={{ gridTemplateColumns: `repeat(${cruci.cols}, ${celda}px)` }}
+                    className="@container mx-auto grid"
+                    // Casillas de hasta 40 px que se achican para caber en la hoja, en pantalla y al imprimir.
+                    style={{ gridTemplateColumns: `repeat(${cruci.cols}, minmax(0, 1fr))`, width: `min(100%, ${cruci.cols * 40}px)` }}
                     role="img"
                     aria-label={`Crucigrama de ${cruci.ubicadas.length} palabras`}
                   >
@@ -222,7 +258,7 @@ export function Crucigrama() {
                           <div key={`${f}-${c}`} className={letra ? 'relative -ml-px -mt-px aspect-square border border-ink bg-surface' : 'aspect-square'}>
                             {numero && <span className="absolute left-0.5 top-0 text-[9px] font-semibold leading-tight">{numero}</span>}
                             {letra && respuestas && (
-                              <span className="grid h-full place-items-center pt-1 font-display font-bold" style={{ color: COLOR, fontSize: celda * 0.45 }}>
+                              <span className="grid h-full place-items-center pt-1 font-display font-bold" style={{ color: COLOR, fontSize: `${45 / cruci.cols}cqw` }}>
                                 {letra}
                               </span>
                             )}
@@ -265,39 +301,6 @@ export function Crucigrama() {
                 )}
               </Hoja>
 
-              {sinPista > 0 && (
-                <p className="-mt-3 text-sm text-warn print:hidden">
-                  {sinPista === 1 ? 'A una palabra le falta la pista.' : `A ${sinPista} palabras les falta la pista.`} Escríbela en la tabla de arriba.
-                </p>
-              )}
-
-              <Acciones>
-                <Boton variante="herramienta" herramienta="crucigrama" onClick={() => imprimir(avisar)}>
-                  <Printer className="size-5" aria-hidden /> Imprimir
-                </Boton>
-                <Boton variante="contorno" onClick={descargarImagen}>
-                  <ImageDown className="size-5" aria-hidden /> Descargar imagen
-                </Boton>
-                <Boton variante="contorno" onClick={() => setRespuestas(!respuestas)}>
-                  {respuestas ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
-                  {respuestas ? 'Ocultar respuestas' : 'Ver respuestas'}
-                </Boton>
-                <Boton variante="contorno" onClick={() => setSemilla((s) => s + 1)}>
-                  <Shuffle className="size-5" aria-hidden /> Otra forma
-                </Boton>
-              </Acciones>
-
-              <Desplegable titulo="Más opciones">
-                <label htmlFor="cruci-banco" className="flex cursor-pointer items-center gap-3">
-                  <input id="cruci-banco" type="checkbox" checked={banco} onChange={(e) => setBanco(e.target.checked)} className="size-5 accent-[var(--crucigrama)]" />
-                  Mostrar la lista de palabras (más fácil)
-                </label>
-                <p className="text-sm text-ink-soft">
-                  "Descargar imagen" baja solo la grilla en PNG con fondo transparente, para pegarla en tus fichas o diapositivas. Si tienes las respuestas a la
-                  vista, la imagen las incluye.
-                </p>
-                <p className="text-sm text-ink-soft">El crucigrama lo arma un algoritmo con tus palabras, así que no gasta créditos.</p>
-              </Desplegable>
             </>
           )}
         </div>

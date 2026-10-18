@@ -1,13 +1,13 @@
-import { ArrowLeft, Pause, PenLine, Play, Plus, Printer, Share2, Sparkles, X } from 'lucide-react'
+import { ArrowLeft, Copy, LoaderCircle, Pause, PenLine, Play, Plus, Printer, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { api, COSTOS, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
+import { api, COSTOS, textoCosto, type AudioCancion, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { useBanco } from '../banco/banco'
 import { partesDeLetra } from '../canciones/letra'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, Editable, Generando, Hoja, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
+import { BarraHoja, Boton, Chip, Editable, Generando, Hoja, NotaCreditos, Ventana, cx, imprimir, tinte } from '../components/ui'
 import { CancionesDelTema } from './CancionesDelTema'
 import { CancionesExistentes } from './CancionesExistentes'
 
@@ -47,61 +47,93 @@ function ElegirRitmo({ opciones, cambiar }: { opciones: OpcionesCancion; cambiar
   )
 }
 
-function Reproductor({ duracion, url }: { duracion: number; url: string | null }) {
+/**
+ * El reproductor, siempre en el mismo lugar: antes de tener audio, ▶ lo crea (Lyria, api/audio.ts) y suena ahí
+ * mismo apenas llega; mientras tanto el mismo botón muestra que está cargando.
+ */
+function Reproductor({ audio, crear, creando }: { audio?: AudioCancion; crear: () => void; creando: boolean }) {
   const [sonando, setSonando] = useState(false)
   const [t, setT] = useState(0)
-  const audio = useRef<HTMLAudioElement | null>(null)
+  const reproductor = useRef<HTMLAudioElement | null>(null)
+  // Se tocó ▶ antes de que hubiera audio: suena apenas llegue.
+  const pedido = useRef(false)
+  const url = audio?.url ?? null
+  const duracion = audio?.duracionSeg ?? 0
   const barras = useMemo(() => Array.from({ length: 48 }, (_, i) => 0.3 + Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.6)) * 0.7), [])
 
   // Con audio real suena el mp3; sin url (datos de ejemplo) solo avanza la barra.
   useEffect(() => {
+    setT(0)
+    if (!audio) return setSonando(false)
+    if (pedido.current) {
+      pedido.current = false
+      setSonando(true)
+    }
     if (!url) return
     const a = new Audio(url)
     a.ontimeupdate = () => setT(Math.floor(a.currentTime))
-    a.onended = () => { setSonando(false); setT(0) }
-    audio.current = a
-    return () => { a.pause(); audio.current = null }
-  }, [url])
-
-  useEffect(() => {
-    if (url) {
-      if (sonando) audio.current?.play().catch(() => setSonando(false))
-      else audio.current?.pause()
-      return
-    }
-    if (!sonando) return
-    const id = window.setInterval(() => setT((x) => Math.min(x + 1, duracion)), 1000)
-    return () => window.clearInterval(id)
-  }, [sonando, duracion, url])
-
-  useEffect(() => {
-    if (!url && t >= duracion) {
+    a.onended = () => {
       setSonando(false)
       setT(0)
     }
-  }, [t, duracion, url])
+    reproductor.current = a
+    return () => {
+      a.pause()
+      reproductor.current = null
+    }
+  }, [audio, url])
 
+  useEffect(() => {
+    if (url) {
+      if (sonando) reproductor.current?.play().catch(() => setSonando(false))
+      else reproductor.current?.pause()
+      return
+    }
+    if (!sonando || !audio) return
+    const id = window.setInterval(() => setT((x) => Math.min(x + 1, duracion)), 1000)
+    return () => window.clearInterval(id)
+  }, [sonando, duracion, url, audio])
+
+  useEffect(() => {
+    if (audio && !url && t >= duracion) {
+      setSonando(false)
+      setT(0)
+    }
+  }, [t, duracion, url, audio])
+
+  function tocar() {
+    if (creando) return
+    if (!audio) {
+      pedido.current = true
+      return crear()
+    }
+    setSonando(!sonando)
+  }
+
+  const estado = creando ? 'Creando la música… hasta 1 minuto' : !audio ? `Escuchar · usa ${textoCosto(COSTOS.audio)}` : url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-3 print:hidden">
+    <div className="flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-line bg-surface p-2.5 pr-4">
       <button
         type="button"
-        onClick={() => setSonando(!sonando)}
-        className="grid size-12 shrink-0 place-items-center rounded-full text-on-tool"
+        onClick={tocar}
+        className="grid size-11 shrink-0 place-items-center rounded-full text-on-tool transition hover:scale-105"
         style={{ background: COLOR }}
-        aria-label={sonando ? 'Pausar' : 'Reproducir'}
+        aria-label={creando ? 'Creando la música' : sonando ? 'Pausar' : 'Escuchar la canción'}
       >
-        {sonando ? <Pause className="size-5" /> : <Play className="ml-0.5 size-5" />}
+        {creando ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : sonando ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
       </button>
-      <div className="flex h-10 min-w-0 flex-1 items-center gap-[3px]" aria-hidden>
+      <div className="hidden h-9 min-w-0 flex-1 items-center gap-[3px] sm:flex" aria-hidden>
         {barras.map((h, i) => (
           <span
             key={i}
-            className={cx('min-w-[2px] flex-1 rounded-full', sonando && 'barra-onda')}
-            style={{ height: `${h * 100}%`, background: i / barras.length <= t / duracion ? COLOR : tinte(COLOR, 28), animationDelay: `${(i % 7) * 0.09}s` }}
+            className={cx('min-w-[2px] flex-1 rounded-full', (sonando || creando) && 'barra-onda')}
+            style={{ height: `${h * 100}%`, background: audio && i / barras.length <= t / duracion ? COLOR : tinte(COLOR, 28), animationDelay: `${(i % 7) * 0.09}s` }}
           />
         ))}
       </div>
-      <span className="text-sm text-ink-soft tabular-nums">{url ? minutos(duracion - t) : `${minutos(t)} · ejemplo sin sonido`}</span>
+      <span className="min-w-0 truncate text-sm text-ink-soft tabular-nums" role="status">
+        {estado}
+      </span>
     </div>
   )
 }
@@ -134,18 +166,10 @@ function CrearCancion({
   tituloTema: string
 }) {
   const { creditos } = useStore()
-  const dialogo = useRef<HTMLDialogElement>(null)
   const [modo, setModo] = useState<'auto' | 'propia'>('auto')
   const [titulo, setTitulo] = useState('')
   const [letra, setLetra] = useState('')
   const partes = useMemo(() => partesDeLetra(letra), [letra])
-
-  useEffect(() => {
-    const d = dialogo.current
-    if (!d) return
-    if (abierta && !d.open) d.showModal()
-    if (!abierta && d.open) d.close()
-  }, [abierta])
 
   const pestana = (m: 'auto' | 'propia', icono: ReactNode, texto: string) => (
     <button
@@ -161,92 +185,75 @@ function CrearCancion({
   )
 
   return (
-    <dialog
-      ref={dialogo}
-      onClose={cerrar}
-      onClick={(e) => e.target === dialogo.current && cerrar()}
-      aria-labelledby="crear-cancion-titulo"
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(38rem,calc(100vw-2rem))] overflow-y-auto rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45"
-    >
-      <div className="flex flex-col gap-5 p-5 sm:p-7">
-        <header className="flex items-start justify-between gap-3">
-          <h2 id="crear-cancion-titulo" className="font-display text-2xl font-bold">
-            Crear una canción
-          </h2>
-          <button type="button" onClick={cerrar} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface-2" aria-label="Cerrar">
-            <X className="size-5" />
-          </button>
-        </header>
-
-        <div role="tablist" aria-label="¿Quién escribe la letra?" className="grid grid-cols-2 gap-1 rounded-2xl bg-surface-2 p-1">
-          {pestana('auto', <Sparkles className="size-4 shrink-0" aria-hidden />, 'La escribimos')}
-          {pestana('propia', <PenLine className="size-4 shrink-0" aria-hidden />, 'Yo la escribo')}
-        </div>
-
-        {modo === 'auto' ? (
-          <p className="-mt-1 text-ink-soft">Escribimos la letra con las palabras de «{tituloTema}». Después la puedes corregir.</p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <label className="flex flex-col gap-1.5">
-              <span className="font-semibold">Título</span>
-              <input
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                placeholder={tituloTema}
-                maxLength={80}
-                className="h-12 rounded-xl border-2 border-line bg-surface px-3 focus:border-ink focus:outline-none"
-              />
-            </label>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="crear-cancion-letra" className="font-semibold">
-                Letra
-              </label>
-              <textarea
-                id="crear-cancion-letra"
-                aria-describedby="crear-cancion-ayuda"
-                value={letra}
-                onChange={(e) => setLetra(e.target.value)}
-                placeholder={EJEMPLO_LETRA}
-                rows={9}
-                maxLength={3000}
-                className="resize-y rounded-xl border-2 border-line bg-surface px-3 py-2.5 font-display text-lg leading-relaxed focus:border-ink focus:outline-none"
-              />
-              <p id="crear-cancion-ayuda" className="text-sm text-ink-soft">
-                Marca las partes con [Coro] o [Estrofa 1] en su propia línea. Si no, cada párrafo es una estrofa.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2">
-          <p className="font-semibold">Ritmo</p>
-          <ElegirRitmo opciones={opciones} cambiar={cambiar} />
-        </div>
-
-        <div className="flex flex-col items-start gap-2">
-          {modo === 'auto' ? (
-            <>
-              <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearAuto}>
-                Crear la canción
-              </Boton>
-              <NotaCreditos n={COSTOS.letra} quedan={creditos} />
-            </>
-          ) : (
-            <>
-              <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={() => crearPropia(titulo.trim() || tituloTema, partes)} disabled={!partes.length}>
-                Crear la canción
-              </Boton>
-              <p className="text-sm text-ink-soft">Tu letra no gasta créditos. Escucharla con música usa {COSTOS.audio}.</p>
-            </>
-          )}
-        </div>
+    <Ventana abierta={abierta} cerrar={cerrar} titulo="Crear una canción">
+      <div role="tablist" aria-label="¿Quién escribe la letra?" className="grid grid-cols-2 gap-1 rounded-2xl bg-surface-2 p-1">
+        {pestana('auto', <Sparkles className="size-4 shrink-0" aria-hidden />, 'La escribimos')}
+        {pestana('propia', <PenLine className="size-4 shrink-0" aria-hidden />, 'Yo la escribo')}
       </div>
-    </dialog>
+
+      {modo === 'auto' ? (
+        <p className="-mt-1 text-ink-soft">Escribimos la letra con las palabras de «{tituloTema}». Después la puedes corregir.</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1.5">
+            <span className="font-semibold">Título</span>
+            <input
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder={tituloTema}
+              maxLength={80}
+              className="h-12 rounded-xl border-2 border-line bg-surface px-3 focus:border-ink focus:outline-none"
+            />
+          </label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="crear-cancion-letra" className="font-semibold">
+              Letra
+            </label>
+            <textarea
+              id="crear-cancion-letra"
+              aria-describedby="crear-cancion-ayuda"
+              value={letra}
+              onChange={(e) => setLetra(e.target.value)}
+              placeholder={EJEMPLO_LETRA}
+              rows={9}
+              maxLength={3000}
+              className="resize-y rounded-xl border-2 border-line bg-surface px-3 py-2.5 font-display text-lg leading-relaxed focus:border-ink focus:outline-none"
+            />
+            <p id="crear-cancion-ayuda" className="text-sm text-ink-soft">
+              Marca las partes con [Coro] o [Estrofa 1] en su propia línea. Si no, cada párrafo es una estrofa.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2">
+        <p className="font-semibold">Ritmo</p>
+        <ElegirRitmo opciones={opciones} cambiar={cambiar} />
+      </div>
+
+      <div className="flex flex-col items-start gap-2">
+        {modo === 'auto' ? (
+          <>
+            <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearAuto}>
+              Crear la canción
+            </Boton>
+            <NotaCreditos n={COSTOS.letra} quedan={creditos} />
+          </>
+        ) : (
+          <>
+            <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={() => crearPropia(titulo.trim() || tituloTema, partes)} disabled={!partes.length}>
+              Crear la canción
+            </Boton>
+            <p className="text-sm text-ink-soft">Tu letra no gasta créditos. Escucharla con música usa {COSTOS.audio}.</p>
+          </>
+        )}
+      </div>
+    </Ventana>
   )
 }
 
 export function Cancion() {
-  const { ficha, resultados, guardar, creditos, avisar } = useStore()
+  const { ficha, resultados, guardar, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
   const cancion = resultados.cancion
   const audio = resultados.audio
@@ -271,6 +278,17 @@ export function Cancion() {
     setCreando(false)
     guardar('cancion', { titulo, opciones, partes })
     guardar('audio', undefined)
+  }
+
+  async function copiarLetra() {
+    if (!cancion) return
+    const texto = [cancion.titulo, '', ...cancion.partes.flatMap((p) => [`[${p.etiqueta}]`, ...p.lineas, ''])].join('\n').trim()
+    try {
+      await navigator.clipboard.writeText(texto)
+      avisar('Letra copiada. Pégala en el grupo de WhatsApp de las familias.', 'ok')
+    } catch {
+      avisar('No se pudo copiar. Selecciona la letra y cópiala a mano.', 'error')
+    }
   }
 
   async function crearAudio() {
@@ -330,12 +348,15 @@ export function Cancion() {
         </Boton>
       )}
 
-      {cancion.opciones.modo === 'ritmo' &&
-        (audio ? (
-          <Reproductor duracion={audio.duracionSeg} url={audio.url} />
-        ) : grabando ? (
-          <Generando texto="Grabando la canción. Puede tardar un minuto…" />
-        ) : null)}
+      <BarraHoja>
+        {cancion.opciones.modo === 'ritmo' && <Reproductor audio={audio} crear={crearAudio} creando={grabando} />}
+        <Boton variante="contorno" onClick={() => imprimir(avisar)} aria-label="Imprimir la letra">
+          <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
+        </Boton>
+        <Boton variante="contorno" onClick={() => void copiarLetra()} aria-label="Copiar la letra para WhatsApp">
+          <Copy className="size-5" aria-hidden /> <span className="hidden sm:inline">Copiar letra</span>
+        </Boton>
+      </BarraHoja>
 
       {ocupado && !grabando ? (
         <Generando texto="Escribiendo otra versión…" />
@@ -365,21 +386,6 @@ export function Cancion() {
           </div>
         </Hoja>
       )}
-
-      <Acciones>
-        {cancion.opciones.modo === 'ritmo' && !audio && (
-          <Boton variante="herramienta" herramienta="cancion" onClick={crearAudio} cargando={grabando} disabled={ocupado}>
-            <Play className="size-5" aria-hidden /> Escuchar la canción
-          </Boton>
-        )}
-        <Boton variante="contorno" onClick={() => imprimir(avisar)}>
-          <Printer className="size-5" aria-hidden /> Imprimir la letra
-        </Boton>
-        <Boton variante="contorno" onClick={() => avisar('Link de la canción copiado para tu clase.', 'ok')}>
-          <Share2 className="size-5" aria-hidden /> Compartir
-        </Boton>
-      </Acciones>
-      {cancion.opciones.modo === 'ritmo' && !audio && <NotaCreditos n={COSTOS.audio} quedan={creditos} />}
 
       <CancionesExistentes ficha={ficha} plegado />
     </>

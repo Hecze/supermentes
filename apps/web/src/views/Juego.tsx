@@ -1,11 +1,11 @@
-import { ArrowLeft, Calculator, Check, ChevronDown, Copy, ExternalLink, LoaderCircle, MessageCircle, Presentation, Printer, QrCode, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
+import { ArrowLeft, Calculator, Check, ChevronDown, Copy, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { juegoDelBanco, useBanco } from '../banco/banco'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Acciones, Boton, Chip, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
+import { Boton, Chip, NotaCreditos, Ventana, cx, imprimir, tinte } from '../components/ui'
 import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
 import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
@@ -303,13 +303,7 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
   const { avisar } = useStore()
   const [enlace, setEnlace] = useState<{ url: string; codigo: string | null } | null>(null)
   const [grande, setGrande] = useState(false)
-  const panel = useRef<HTMLElement>(null)
   const clave = JSON.stringify(publicado)
-
-  // El panel aparece debajo del juego: se desplaza para que se vea entero.
-  useEffect(() => {
-    panel.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [enlace])
 
   useEffect(() => {
     let vivo = true
@@ -330,7 +324,7 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
 
   if (!enlace) {
     return (
-      <section ref={panel} className="flex items-center gap-3 rounded-2xl print:hidden border-2 bg-surface p-5 text-ink-soft" style={{ borderColor: COLOR }} role="status">
+      <section className="flex items-center gap-3 py-6 text-ink-soft" role="status">
         <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando el link para las familias…
       </section>
     )
@@ -350,46 +344,39 @@ function Compartir({ publicado, nombreJuego, grado, practica }: { publicado: Pub
   }
 
   return (
-    <section ref={panel} className="flex flex-col gap-5 rounded-2xl print:hidden border-2 bg-surface p-5 sm:flex-row sm:items-center" style={{ borderColor: COLOR }}>
-      <button type="button" onClick={() => setGrande(true)} className="shrink-0 self-center rounded-xl border border-line bg-white p-1.5" aria-label="Mostrar el código QR en grande">
-        <Qr texto={enlace.url} tam={152} />
-      </button>
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <p className="font-semibold">Mándalo al grupo de WhatsApp de las familias</p>
-          <p className="text-ink-soft">
-            Los niños juegan desde el celular de casa, sin cuenta: la primera vez escriben su nombre.{' '}
-            {enlace.codigo && 'Verás quién jugó y su puntaje más alto en «Resultados de juegos», en el menú.'}
-          </p>
-          {enlace.codigo ? (
-            <p className="text-sm text-ink-soft">
-              En clase también pueden escanear el código o entrar a <strong className="text-ink">{sitio}</strong> y escribir{' '}
-              <strong className="rounded-md bg-surface-2 px-1.5 font-mono text-base tracking-widest text-ink">{enlace.codigo}</strong>.
-            </p>
-          ) : (
-            <p className="text-sm text-ink-soft">No pudimos crear un código corto: el link funciona igual, con todo el juego adentro.</p>
+    <section className="flex flex-col gap-4">
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl px-5 text-lg font-semibold text-on-tool hover:opacity-90"
+        style={{ background: COLOR }}
+      >
+        <MessageCircle className="size-6" aria-hidden /> Enviar por WhatsApp
+      </a>
+
+      <div className="flex items-center gap-2 rounded-xl border border-line bg-surface-2 p-1.5 pl-3">
+        <span className="min-w-0 flex-1 truncate text-ink-soft">{enlace.url.replace(/^https?:\/\/(www\.)?/, '')}</span>
+        <Boton tam="sm" variante="contorno" onClick={copiar}>
+          <Copy className="size-4" aria-hidden /> Copiar
+        </Boton>
+      </div>
+
+      {/* En clase: escanear el código o escribirlo en supermentes.app/j. */}
+      <div className="flex items-center gap-4 border-t border-line pt-4">
+        <button type="button" onClick={() => setGrande(true)} className="shrink-0 rounded-xl border border-line bg-white p-1.5" aria-label="Ver el código QR en grande" title="Ver en grande">
+          <Qr texto={enlace.url} tam={96} />
+        </button>
+        <p className="text-ink-soft">
+          Para la clase: que lo escaneen
+          {enlace.codigo && (
+            <>
+              {' '}o entren a <strong className="text-ink">{sitio}</strong> con el código{' '}
+              <strong className="font-mono tracking-widest text-ink">{enlace.codigo}</strong>
+            </>
           )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(mensaje)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-11 items-center gap-2 rounded-xl px-4 font-medium text-on-tool hover:opacity-90"
-            style={{ background: COLOR }}
-          >
-            <MessageCircle className="size-5" aria-hidden /> Enviar a las familias
-          </a>
-          <Boton variante="contorno" onClick={copiar}>
-            <Copy className="size-5" aria-hidden /> Copiar link
-          </Boton>
-          <Boton variante="contorno" onClick={() => setGrande(true)}>
-            <QrCode className="size-5" aria-hidden /> Mostrar en grande
-          </Boton>
-          <a href={enlace.url} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-xl px-3 font-medium text-ink-soft hover:bg-surface-2 hover:text-ink">
-            <ExternalLink className="size-5" aria-hidden /> Probar
-          </a>
-        </div>
+          .
+        </p>
       </div>
 
       {grande && (
@@ -420,6 +407,7 @@ export function Juego() {
 
   // Al abrir un juego, la escena queda entera a la vista (en el celular el encabezado la empuja hacia abajo).
   useEffect(() => {
+    setCompartir(false)
     if (elegido) pantalla.ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [elegido, pantalla.ref])
 
@@ -448,6 +436,8 @@ export function Juego() {
     if (nuevo) {
       guardar('juego', nuevo)
       guardar('juegos', { fuente: 'tema' })
+      // Los juegos nuevos aparecen arriba, en la lista: se sube a verlos.
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -456,16 +446,25 @@ export function Juego() {
     return (
       <>
         <EncabezadoHerramienta id="juego" />
-        <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-          <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3">
+        {/* Todo lo del juego va arriba, a la vista: volver, el sustento, proyectar y enviar. */}
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
+          <Boton variante="suave" onClick={() => setElegido(null)} className="-ml-3 mr-auto">
             <ArrowLeft className="size-5" aria-hidden /> Todos los juegos
           </Boton>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <p className="text-sm text-ink-soft">
-              Practican: <TextoMat texto={nombreFuente(fuente, ficha)} className="font-medium text-ink" />
-            </p>
-            <InfoCurricular sustento={sustento} def={enJuego.def} chip />
-          </div>
+          <InfoCurricular sustento={sustento} def={enJuego.def} chip />
+          {enJuego.def.id === 'pupiletras' && (
+            <Boton variante="contorno" onClick={() => imprimir(avisar)} aria-label="Imprimir pupiletras">
+              <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
+            </Boton>
+          )}
+          <Boton variante={deCelular ? 'contorno' : 'herramienta'} herramienta="juego" onClick={pantalla.alternar} title={deCelular ? undefined : 'Este juego es para la clase, en una sola pantalla'}>
+            <Presentation className="size-5" aria-hidden /> Proyectar
+          </Boton>
+          {deCelular && (
+            <Boton variante="herramienta" herramienta="juego" onClick={() => setCompartir(true)}>
+              <Share2 className="size-5" aria-hidden /> Enviar a las familias
+            </Boton>
+          )}
         </div>
         <Partida
           key={`${elegido}-${claveFuente}`}
@@ -476,49 +475,27 @@ export function Juego() {
           alSalir={() => setElegido(null)}
           className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
-        <Acciones>
-          {deCelular ? (
-            <>
-              <Boton variante="herramienta" herramienta="juego" onClick={() => setCompartir(!compartir)}>
-                <Share2 className="size-5" aria-hidden /> Enviar a las familias
-              </Boton>
-              <Boton variante="contorno" onClick={pantalla.alternar}>
-                <Presentation className="size-5" aria-hidden /> Proyectar en clase
-              </Boton>
-            </>
-          ) : (
-            <>
-              <Boton variante="herramienta" herramienta="juego" onClick={pantalla.alternar}>
-                <Presentation className="size-5" aria-hidden /> Proyectar en clase
-              </Boton>
-              <p className="text-sm text-ink-soft">Este juego es para la clase, en una sola pantalla. Para mandar a casa, elige uno de celular.</p>
-            </>
-          )}
-          {enJuego.def.id === 'pupiletras' && (
-            <Boton variante="contorno" onClick={() => imprimir(avisar)}>
-              <Printer className="size-5" aria-hidden /> Imprimir pupiletras
-            </Boton>
-          )}
-        </Acciones>
         {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
-        {compartir && deCelular && (
-          <Compartir
-            nombreJuego={enJuego.def.nombre}
-            grado={ficha.grado}
-            practica={nombreFuente(fuente, ficha)}
-            publicado={{
-              v: 1,
-              juego: enJuego.def.id,
-              ritmo: ritmoDe(ficha.gradoId),
-              tema: ficha.titulo,
-              grado: ficha.gradoId,
-              fuente:
-                fuente.fuente === 'calculo'
-                  ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
-                  : { tipo: 'tema', contenido: { titulo: contenido.titulo, retos: contenido.retos, pares: contenido.pares, palabras: contenido.palabras } },
-            }}
-          />
-        )}
+        <Ventana abierta={compartir && deCelular} cerrar={() => setCompartir(false)} titulo="Enviar a las familias">
+          {compartir && deCelular && (
+            <Compartir
+              nombreJuego={enJuego.def.nombre}
+              grado={ficha.grado}
+              practica={nombreFuente(fuente, ficha)}
+              publicado={{
+                v: 1,
+                juego: enJuego.def.id,
+                ritmo: ritmoDe(ficha.gradoId),
+                tema: ficha.titulo,
+                grado: ficha.gradoId,
+                fuente:
+                  fuente.fuente === 'calculo'
+                    ? { tipo: 'calculo', habilidad: fuente.habilidad, nivel: fuente.nivel }
+                    : { tipo: 'tema', contenido: { titulo: contenido.titulo, retos: contenido.retos, pares: contenido.pares, palabras: contenido.palabras } },
+              }}
+            />
+          )}
+        </Ventana>
       </>
     )
   }
