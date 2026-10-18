@@ -9,7 +9,8 @@ import { sonar } from '../motor/sonido'
 import type { PropsJuego } from '../tipos'
 
 const GLOBOS = 6
-const FILAS = ['ABCDEFGHI', 'JKLMNÑOPQ', 'RSTUVWXYZ']
+// Siete teclas por fila: en un celular cada una queda de unos 50 px, cómoda para el dedo.
+const FILAS = ['ABCDEFG', 'HIJKLMN', 'ÑOPQRST', 'UVWXYZ']
 
 export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
@@ -104,10 +105,10 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
 
         <div className="flex min-w-0 max-w-[min(62cqw,640px)] flex-1 flex-col items-center justify-center gap-[2.4cqmin] [@container(orientation:portrait)]:max-w-full [@container(orientation:portrait)]:flex-none">
           <div className="tarjeta-juego w-full px-[3cqmin] py-[1.8cqmin] text-center">
-            <p className="font-medium text-[var(--j-tinta-suave)]" style={{ fontSize: 'clamp(12px, 2.6cqmin, 22px)' }}>
+            <p className="font-medium text-[var(--j-tinta-suave)]" style={{ fontSize: 'clamp(14px, 3cqmin, 24px)' }}>
               Pista
             </p>
-            <p className="font-semibold leading-snug" style={{ fontSize: 'clamp(16px, 4cqmin, 36px)' }}>
+            <p className="font-semibold leading-snug" style={{ fontSize: 'clamp(20px, 4.8cqmin, 36px)' }}>
               {actual.pista}
             </p>
           </div>
@@ -117,8 +118,8 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
               return (
                 <span
                   key={`${n}-${i}`}
-                  className={`grid aspect-[4/5] w-[clamp(26px,6.4cqmin,64px)] place-items-center rounded-[1.2cqmin] bg-white font-bold shadow-[0_0.5cqmin_0_#e2c3d3] ${ver ? 'entrar' : ''}`}
-                  style={{ fontSize: 'clamp(18px, 5cqmin, 48px)', color: ver && !usadas.has(l) ? '#e23b55' : undefined }}
+                  className={`grid aspect-[4/5] w-[clamp(30px,7.4cqmin,64px)] place-items-center rounded-[1.2cqmin] bg-white font-bold shadow-[0_0.5cqmin_0_#e2c3d3] ${ver ? 'entrar' : ''}`}
+                  style={{ fontSize: 'clamp(20px, 5.4cqmin, 48px)', color: ver && !usadas.has(l) ? '#e23b55' : undefined }}
                 >
                   {ver ? l : ''}
                 </span>
@@ -152,8 +153,8 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
                     type="button"
                     disabled={usada}
                     onClick={() => probar(l)}
-                    className={`b3d grid aspect-square w-[clamp(30px,8.6cqmin,72px)] place-items-center ${usada ? (esta ? 'bien' : 'apagado') : 'b3d-blanco'}`}
-                    style={{ fontSize: 'clamp(15px, 4.4cqmin, 36px)' }}
+                    className={`b3d grid aspect-square w-[min(12.2cqw,9.5cqh,72px)] place-items-center ${usada ? (esta ? 'bien' : 'apagado') : 'b3d-blanco'}`}
+                    style={{ fontSize: 'clamp(20px, 5.4cqmin, 36px)' }}
                     aria-label={`Letra ${l}`}
                   >
                     {l}
