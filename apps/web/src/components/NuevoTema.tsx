@@ -2,9 +2,11 @@ import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useStore } from '../app/store'
 import { fichaDesdeCurriculo } from '../app/temaInstantaneo'
+import { cargarBanco, temaEnBanco } from '../banco/banco'
 import { buscarEnGrado, buscarEnTodos, fundamento, normalizar, temasDe, type Resultado } from '../curriculo/buscar'
 import { GRADOS_CURRICULO, NIVELES, areaPorId, nivelDe } from '../curriculo/catalogo'
 import { cargarNivel, useCurriculo, type GradoCurriculo } from '../curriculo/cargar'
+import { ubicarCita } from '../curriculo/citas'
 import { cx } from './ui'
 
 const NOMBRES = Object.fromEntries(GRADOS_CURRICULO.map((g) => [g.id, g.corto]))
@@ -65,10 +67,13 @@ export function NuevoTema() {
   const grado = cur.estado === 'listo' ? cur.grado : null
 
   async function crear(r: Resultado) {
-    const datos = await cargarNivel(nivelDe(r.gradoId))
+    const [datos, banco] = await Promise.all([cargarNivel(nivelDe(r.gradoId)), cargarBanco(r.gradoId, r.areaId)])
     const area = datos?.grados.find((g) => g.id === r.gradoId)?.areas.find((a) => a.id === r.areaId)
     if (!area) return
-    const nueva = fichaDesdeCurriculo({ ...r, ...fundamento(area, r.tema, r.cita, r.indiceCompetencia) })
+    // Si el tema está en el banco, su desempeño ya se eligió leyendo el currículo: se usa ese.
+    const t = temaEnBanco(banco, r.tema)
+    const u = t ? ubicarCita(area, t.cita, t.competencia) : null
+    const nueva = fichaDesdeCurriculo({ ...r, ...fundamento(area, r.tema, u?.desempeno ?? r.cita, u ? u.numeroCompetencia - 1 : r.indiceCompetencia) })
     try {
       localStorage.setItem(CLAVE_GRADO, r.gradoId)
     } catch {

@@ -5,6 +5,7 @@ import { BadgeCheck, Info, TriangleAlert } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
+import type { TemaBanco } from '../banco/banco'
 import { cx } from '../components/ui'
 import { fundamento, normalizar } from '../curriculo/buscar'
 import { useCurriculo, type AreaCurriculo } from '../curriculo/cargar'
@@ -73,8 +74,11 @@ function desempenoDelTema(area: AreaCurriculo, ficha: Ficha, competencia: string
   return mejor && puntos(mejor) >= 2 ? ubicarCita(area, mejor) : null
 }
 
-/** Arma el sustento con los datos oficiales del grado: el área del tema y, para cálculo, Matemática. */
-export function useSustento(ficha: Ficha | null, fuente: Fuente): Sustento | null {
+/**
+ * Arma el sustento con los datos oficiales del grado: el área del tema y, para cálculo, Matemática. Si el tema se
+ * juega con el banco (banco/banco.ts), su cita dice qué parte exacta del desempeño trabajan las preguntas.
+ */
+export function useSustento(ficha: Ficha | null, fuente: Fuente, banco?: TemaBanco | null): Sustento | null {
   const gradoId = ficha?.gradoId ?? 'primaria-1'
   const delTema = useCurriculo(nivelDe(gradoId), gradoId, ficha?.areaId ?? 'matematica')
   const mate = useCurriculo(nivelDe(gradoId), gradoId, 'matematica')
@@ -94,14 +98,15 @@ export function useSustento(ficha: Ficha | null, fuente: Fuente): Sustento | nul
     }
 
     if (fuente.fuente === 'tema') {
+      const u = banco ? ubicarCita(area, banco.cita, banco.competencia) : null
       return {
         ...base,
         fuente: 'tema' as const,
         practica: `las palabras y preguntas de «${ficha.titulo}»`,
-        palabras: ficha.vocabulario.slice(0, 5).map((v) => v.palabra),
-        desempeno: null,
-        mismaCompetencia: true,
-        mismoDesempeno: true,
+        palabras: (banco ? banco.palabras.map((p) => p.palabra) : ficha.vocabulario.map((v) => v.palabra)).slice(0, 5),
+        desempeno: u && banco ? { ...u, cita: banco.cita } : null,
+        mismaCompetencia: !u || normalizar(u.competencia) === normalizar(base.tema.competencia),
+        mismoDesempeno: !u || u.desempeno === temaDesempeno?.desempeno,
       }
     }
 
@@ -121,7 +126,7 @@ export function useSustento(ficha: Ficha | null, fuente: Fuente): Sustento | nul
       mismoDesempeno: !!u && area.id === 'matematica' && u.desempeno === temaDesempeno?.desempeno,
       otrosGrados: u ? undefined : textoGrados(n.grados),
     }
-  }, [delTema, mate, ficha, fuente])
+  }, [delTema, mate, ficha, fuente, banco])
 }
 
 // ---------- Botón "i" con su ventanita ----------
@@ -268,8 +273,8 @@ export function Cita({ u, cita }: { u: Ubicacion; cita?: string }) {
 export function ContenidoSustento({ s, def }: { s: Sustento; def?: DefinicionJuego }) {
   const { verCurriculo } = useStore()
   const d = s.desempeno
-  // En cálculo, si el juego practica una parte del mismo desempeño del tema, se muestra una sola vez, resaltada.
-  const temaConCita = s.fuente === 'calculo' && d && s.mismoDesempeno
+  // Si el juego practica una parte del mismo desempeño del tema, se muestra una sola vez, resaltada.
+  const temaConCita = d && s.mismoDesempeno
   return (
     <div className="flex flex-col gap-3 text-sm leading-snug">
       <div>
@@ -301,7 +306,7 @@ export function ContenidoSustento({ s, def }: { s: Sustento; def?: DefinicionJue
           </>
         )}
         {s.palabras?.length ? <>: {s.palabras.join(', ')}…</> : '.'}
-        {s.fuente === 'tema' && <span className="mt-1 block text-ink-soft">Salen de la ficha del tema, que se armó con ese desempeño.</span>}
+        {s.fuente === 'tema' && !d && <span className="mt-1 block text-ink-soft">Salen de la ficha del tema, que se armó con ese desempeño.</span>}
         {d && !temaConCita && <Cita u={d} cita={d.cita} />}
         {d && (
           <span className="mt-1.5 flex items-start gap-1.5 font-medium text-ok">
@@ -323,7 +328,7 @@ export function ContenidoSustento({ s, def }: { s: Sustento; def?: DefinicionJue
 
       <p className="border-t border-line pt-2 text-xs text-ink-soft">
         Texto copiado tal cual del {s.programa} (MINEDU)
-        {s.fuente === 'calculo' && d ? '; cada cita se verifica letra por letra' : ''}.{' '}
+        {d ? '; cada cita se verifica letra por letra' : ''}.{' '}
         <button type="button" onClick={() => verCurriculo(s.gradoId, s.fuente === 'calculo' ? 'matematica' : s.areaId)} className="underline underline-offset-2 hover:text-ink">
           Ver en el currículo
         </button>

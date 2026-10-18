@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type Ficha } from '../api'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
+import { juegoDelBanco, useBanco } from '../banco/banco'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { Acciones, Boton, Chip, NotaCreditos, cx, imprimir, tinte } from '../components/ui'
 import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
@@ -424,15 +425,18 @@ export function Juego() {
 
   const fuente: Fuente = resultados.juegos ?? (ficha ? fuentePorDefecto(ficha) : { fuente: 'tema' })
   const claveFuente = JSON.stringify(fuente)
+  // Preguntas y parejas del tema: las que se crearon con la IA o, si no, las del banco (listas al instante).
+  const banco = useBanco(ficha)
+  const preguntas = useMemo(() => resultados.juego ?? (banco ? juegoDelBanco(banco) : undefined), [resultados.juego, banco])
   const contenido = useMemo(
-    () => (!ficha ? null : fuente.fuente === 'calculo' ? contenidoMatematica(fuente) : contenidoDelTema(ficha, resultados.juego)),
+    () => (!ficha ? null : fuente.fuente === 'calculo' ? contenidoMatematica(fuente) : contenidoDelTema(ficha, preguntas)),
     // fuente se recrea en cada render; claveFuente cambia solo si cambia lo elegido.
-    [ficha, claveFuente, resultados.juego],
+    [ficha, claveFuente, preguntas],
   )
   const compatibles = useMemo(() => (contenido && ficha ? juegosCompatibles(contenido, ficha.gradoId) : []), [contenido, ficha])
   // fuente se recrea en cada render: se memoriza por su clave para no rearmar el sustento.
   const fuenteEstable = useMemo(() => fuente, [claveFuente]) // eslint-disable-line react-hooks/exhaustive-deps
-  const sustento = useSustento(ficha, fuenteEstable)
+  const sustento = useSustento(ficha, fuenteEstable, banco)
 
   if (!ficha) return <SinTema />
 
@@ -594,7 +598,7 @@ export function Juego() {
         )}
       </section>
 
-      {fuente.fuente === 'tema' && !resultados.juego && (
+      {fuente.fuente === 'tema' && !preguntas && banco === null && (
         <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-dashed border-line bg-surface p-5">
           <p className="font-semibold">Más juegos con tu tema</p>
           <p className="text-ink-soft">
@@ -613,7 +617,7 @@ export function Juego() {
         cerrar={() => setEligiendo(false)}
         ficha={ficha}
         actual={fuente}
-        tieneJuego={!!resultados.juego}
+        tieneJuego={!!preguntas}
         elegir={(f) => guardar('juegos', f)}
       />
     </>

@@ -55,6 +55,8 @@ export type OpcionesCancion = {
   modo: 'ritmo' | 'melodia'
   ritmo: string
   melodia: string
+  /** Cómo se oye, para el generador de música (las canciones del banco lo traen). */
+  estilo?: string
 }
 
 export type Cancion = {

@@ -82,6 +82,7 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/costos.ts` | Créditos que cuesta cada acción |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
 | `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
+| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas, parejas y 2 canciones, con cita del currículo |
 | `src/app/` | Estado global, catálogo de herramientas, cobro de créditos |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |
@@ -94,14 +95,14 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | --- | --- | --- |
 | `POST /api/ficha` | JSON `EntradaTema`: `texto` (tema del currículo), `gradoId`, `areaId`, `grado`, `area`, `competencia`, `capacidad`, `desempenos`, `duracion` | `Ficha` (la app la usa para completar la ficha en segundo plano) |
 | `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
-| `POST /api/audio` | `{ cancion }` | `AudioCancion` |
+| `POST /api/audio` | `{ cancion }` (con `opciones.estilo` opcional) | `AudioCancion` (Lyria vía OpenRouter; se guarda en Blob y la misma canción vuelve a sonar sin pagar) |
 | `POST /api/examen` | multipart: `ficha`, `opciones` (`{ interes, necesidades }`), `examen` (PDF o foto) | `Examen` adaptado |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
 | `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
 
-La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos.
+La ficha, el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 

@@ -1,11 +1,13 @@
-import { Pause, Play, Printer, Share2 } from 'lucide-react'
+import { ArrowLeft, Pause, Play, Printer, Share2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, COSTOS, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
+import { useBanco } from '../banco/banco'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { Acciones, Boton, Chip, Desplegable, Editable, Generando, Hoja, NotaCreditos, Pregunta, cx, imprimir, tinte } from '../components/ui'
+import { CancionesDelTema } from './CancionesDelTema'
 import { CancionesExistentes } from './CancionesExistentes'
 
 const POR_DEFECTO: OpcionesCancion = { modo: 'ritmo', ritmo: 'Cumbia', melodia: 'Los pollitos dicen' }
@@ -110,8 +112,10 @@ export function Cancion() {
   const audio = resultados.audio
   const [opciones, setOpciones] = useState<OpcionesCancion>(cancion?.opciones ?? POR_DEFECTO)
   const [grabando, setGrabando] = useState(false)
+  const banco = useBanco(ficha)
 
   if (!ficha) return <SinTema />
+  const delBanco = !!cancion && !!banco?.canciones.some((c) => c.titulo === cancion.titulo)
 
   async function crearLetra() {
     const nueva = await generar(COSTOS.letra, 'Canción', () => api.generarCancion(ficha!, opciones))
@@ -133,7 +137,8 @@ export function Cancion() {
     return (
       <>
         <EncabezadoHerramienta id="cancion" />
-        <CancionesExistentes ficha={ficha} />
+        {banco && <CancionesDelTema tema={banco} ficha={ficha} />}
+        <CancionesExistentes ficha={ficha} plegado={!!banco} />
         <div className="flex flex-col gap-1 border-t border-line pt-6">
           <h2 className="font-display text-2xl font-bold">O crea una canción nueva</h2>
           <p className="text-ink-soft">Con las palabras de tu tema y el ritmo que le guste a tu clase.</p>
@@ -155,6 +160,18 @@ export function Cancion() {
   return (
     <>
       <EncabezadoHerramienta id="cancion" />
+      {delBanco && (
+        <Boton
+          variante="suave"
+          onClick={() => {
+            guardar('cancion', undefined)
+            guardar('audio', undefined)
+          }}
+          className="-ml-3 self-start print:hidden"
+        >
+          <ArrowLeft className="size-5" aria-hidden /> Canciones del tema
+        </Boton>
+      )}
 
       {cancion.opciones.modo === 'ritmo' &&
         (audio ? (

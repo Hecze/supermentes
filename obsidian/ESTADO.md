@@ -1,5 +1,5 @@
 ---
-actualizado: 2026-10-17
+actualizado: 2026-10-18
 ---
 
 # Estado — Supermentes
@@ -19,19 +19,20 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **Resultados de los alumnos:** el niño pone su nombre en un popup la primera vez (sin cuenta; el código viene en el link) y cuando supera su puntaje lo manda a `api/resultados.ts` (Blob, `resultados/CODIGO/ID.json`; solo escribe si mejora, para cuidar las 2.000 escrituras/mes del plan Hobby). El docente lo ve en "Resultados de juegos" del menú, de todos sus temas: alumno, puntaje más alto, estrellas. Para verlos usa una clave que recibió al publicar y que se guarda en su navegador. En `npm run dev`, sin token de Blob, las funciones usan un Blob en memoria.
 
 - **Sesión de aprendizaje** (primera en "¿Qué necesitas para tu clase?"): `api/sesion.ts` + `views/Sesion.tsx`. 45 o 90 min, formato MINEDU (datos, competencia y capacidades oficiales, criterios con cita verificada contra `packages/curriculo` e icono "i", enfoque, momentos con tiempos que suman, ficha de aplicación y escala para 30). Se corrige con un clic, se imprime y se descarga en Word (.doc hecho con el HTML de la hoja). ~35 s, 1 crédito.
+- **Banco de contenido, 4.º de primaria completo** (`apps/web/src/banco`, ver su README): los 384 temas del currículo de 4.º (10 áreas) traen palabras, 8 preguntas, 6 parejas y 2 canciones propias con ritmos del Perú, cada tema con la cita letra por letra de su desempeño. Al crear un tema de 4.º ya hay 13–17 juegos y al menos 2 canciones, gratis y sin esperar. Las canciones suenan con Lyria vía OpenRouter (`api/audio.ts`) y el audio se guarda en Blob la primera vez. `npm run typecheck` falla si un tema de 4.º tiene menos de 2 juegos o 2 canciones, o si una cita no cuadra.
 - **Canciones que ya existen:** 206 canciones de YouTube para 1.º a 6.º de primaria (Comunicación, Matemática, Ciencia y Tecnología, Personal Social, Inglés, Arte y Cultura, Educación Física) en `apps/web/src/canciones/canciones.json`. Cada grado cita letra por letra un desempeño de su área (lo verifica `npm run typecheck`); la pantalla de Canción las muestra primero, con Ver, Copiar link y la «i».
 
 ## Siguiente paso
 - **Entrega (domingo 18, 9:00):** `proyecto.md` listo en la raíz; presentación lista en `presentacion/` (falta compartirla por link y llenar las cifras de tracción; lista de espera en 1). Aún no se entrega: `andes project submit --file ./proyecto.md`.
 - Backend `/api` con Claude (ficha, letra, examen adaptado, juego): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada endpoint debe recibir `ficha.curriculo.desempenos` y devolver, por ítem, la cita textual del desempeño que trabaja (validada contra `packages/curriculo`), para que canción, examen y preguntas del tema tengan el mismo icono "i" que los juegos de cálculo.
-- Audio con ElevenLabs, persistencia (biblioteca, créditos, links/QR), pictogramas ARASAAC.
+- Banco para los demás grados de primaria (mismo formato, ver `apps/web/src/banco/README.md`); persistencia (biblioteca, créditos), pictogramas ARASAAC.
 - Juegos: que `/api/juego` cree más preguntas de las que entran en una partida (hoy las del tema se repiten al reintentar; el cálculo ya es procedural), clasificar en grupos y, cuando haya cuentas, pasar la clave de resultados a la cuenta del docente.
 
 ## Riesgos
 - Hasta el 17-oct, en producción las funciones con IA (`ficha`, `juego`, `examen`, `cancion`) no cargaban (`FUNCTION_INVOCATION_FAILED`) por importar `./_ia` sin `.js`. Arreglado; `npm run typecheck` ahora lo marca (tsconfig de `api/` en NodeNext). Además necesitan `OPENROUTER_API_KEY` en Vercel.
 - El `package-lock.json` debe incluir los binarios de Linux (`@rolldown/binding-linux-x64-gnu`, etc.) o el build de Vercel falla. Si npm los omite, regenerarlo con `rm -rf node_modules package-lock.json && npm install`.
 - El repo es de Hecze: coordinar antes de pushear cambios de estructura a `main`. Varias sesiones trabajan en paralelo (juegos, tracción): cada una en su rama y luego merge a `main`.
-- Vercel Blob (plan Hobby): 2.000 escrituras y listados al mes para todo, lista de espera y juegos juntos; si se pasan, Blob se bloquea 30 días. Los juegos solo escriben al publicar y cuando un alumno mejora su puntaje. Con muchos docentes de verdad, pasar resultados a una base (Upstash Redis) o a un plan pagado.
+- Vercel Blob (plan Hobby): 2.000 escrituras y listados al mes para todo, lista de espera, juegos y audios de canciones juntos (un audio se escribe solo la primera vez que suena); si se pasan, Blob se bloquea 30 días. Los juegos solo escriben al publicar y cuando un alumno mejora su puntaje. Con muchos docentes de verdad, pasar resultados a una base (Upstash Redis) o a un plan pagado.
 - Los commits con el autor git de Harold (`harold18m`) no despliegan en Vercel ("must have access to the project"); los de autor `Claude <noreply@anthropic.com>` sí.
 - La rama de producción de Vercel aún no es `main`: los push crean previews y producción se publica a mano (o cambiar *Settings → Environments → Production → Branch Tracking*).
 
