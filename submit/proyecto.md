@@ -50,9 +50,9 @@ Stack: Vite + React en Cloudflare Workers, con D1 (base de datos) y R2 (archivos
 
 ## Tracción
 
-- **1 docente cliente.**
-- **3 entrevistas** que cambiaron el producto. Lucho, profesor de Matemática, tarda «4 horas aprox.» solo en armar sus exámenes y dijo que los juegos como tarea «no lo pueden hacer con inteligencia artificial»: de ahí salieron las tareas con reloj. Isaac, docente, escuchó la canción «Refranes con cajón» de 4.º y le gustó. Lucho y Yessly (hija y sobrina de docentes de colegio público) pusieron el precio en S/ 10–15 al mes.
-- **4 docentes en la lista de espera** de la landing (contador público).
+- **5 docentes en la lista de espera** de la landing (contador público).
+- **3 de ellos, entrevistados.** Las entrevistas cambiaron el producto: Lucho, profesor de Matemática, tarda «4 horas aprox.» solo en armar sus exámenes y dijo que los juegos como tarea «no lo pueden hacer con inteligencia artificial»; de ahí salieron las tareas con reloj. Isaac, docente, escuchó la canción «Refranes con cajón» de 4.º y le gustó. Lucho y Yessly (hija y sobrina de docentes de colegio público) pusieron el precio en S/ 10–15 al mes.
+- **1 pagó por el producto ahí mismo:** Lucho, S/ 15 al mes, y lo usa esta semana en sus 2 colegios.
 
 ## Limitaciones
 

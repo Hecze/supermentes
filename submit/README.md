@@ -24,5 +24,5 @@ en producción el 18-oct a las ~6:30.
    sesión iniciada).
 3. Se puede reenviar para corregir hasta las 9:00, pero **no se puede retirar** una entrega una vez hecha.
 
-Demo sugerida (notas en `presentacion/slides/demo.html`): «Los dichos populares» de 4.º → Dar la clase → Juego web,
-Concurso, «Como tarea» para un salón → el jurado escanea el QR, elige un nombre y responde → Revisar.
+Demo sugerida (notas en `presentacion/slides/demo.html`): «Los dichos populares» de 4.º → Preparar (guía y sesión) →
+Juego web, Concurso, «Como tarea» para un salón → el jurado escanea el QR, elige un nombre y responde → Revisar.

@@ -7,4 +7,4 @@ Se arma con `node presentacion/armar.mjs`, que corre solo en el build: editar `s
 Aquí va una copia del contenido para que quede mapeado: `deck.json` (orden y fuentes) y `slides/*.html`
 (una diapositiva por archivo, con las notas para hablar en `<aside>`). Se edita aquí.
 
-Tracción con cifras reales (18-oct): 1 docente cliente, 3 entrevistas, 4 en la lista de espera. Solución en 3 momentos (preparar, dar la clase, revisar) y demo con tarea por salón.
+Guion (18-oct): abre con la noche en vela de Lucho en Los Olivos y las 7 h no pagadas de la ENDO 2021; presenta el Hub que ahorra 6 de esas 7 h (exámenes, balotarios, reforzamientos, canciones con IA y videojuegos); tracción de 5 en lista de espera, 3 entrevistados y 1 que pagó y lo usa en 2 colegios; cierra con «Que ningún docente tenga que amanecer preparando su clase».
