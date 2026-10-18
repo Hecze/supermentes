@@ -111,7 +111,8 @@ const valorPosicional =
     const ds = Array.from({ length: cifras }, (_, i) => (i === cifras - 1 ? entero(azar, 1, 9) : azar() < 0.2 ? 0 : entero(azar, 1, 9)))
     const n = ds.reduce((s, d, i) => s + d * 10 ** i, 0)
     const partes = ds
-      .map((d, i) => (d === 0 ? null : `${d} ${nombres[i]}`))
+      // Espacios que no se cortan: en una carta angosta «6 C» no queda partido en dos renglones.
+      .map((d, i) => (d === 0 ? null : `${d}\u00a0${nombres[i]}`))
       .filter(Boolean)
       .reverse()
     const sinCeros = Number(ds.filter((d) => d !== 0).reverse().join(''))
@@ -119,7 +120,7 @@ const valorPosicional =
     const sumaCifras = ds.reduce((s, d) => s + d, 0)
     return {
       consigna: '¿Qué número es?',
-      pregunta: partes.join(' + '),
+      pregunta: partes.join('\u00a0+ '),
       respuesta: num(n),
       distractores: distractores(n, [sinCeros, volteado, sumaCifras, n * 10, n + 10, n - 10, n + 1], { min: 1 }),
     }
