@@ -8,7 +8,7 @@ import { crearAzar } from '../motor/azar'
 import { useBucle, useTeclas, useTemporizadores } from '../motor/bucle'
 import { Confeti } from '../motor/Confeti'
 import { CuentaRegresiva } from '../motor/CuentaRegresiva'
-import { Enunciado, TextoMat } from '../motor/piezas'
+import { Enunciado, TextoMat, letraOpciones } from '../motor/piezas'
 import { ROBOTS, Robot } from '../motor/Robot'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
@@ -65,7 +65,7 @@ function Panel({
       <div key={ronda.id} className="entrar flex min-h-0 flex-1 items-center justify-center">
         <Enunciado reto={ronda.reto} tam="clamp(22px, 4.4cqmin, 42px)" />
       </div>
-      <div className={`grid grid-cols-2 gap-[1.2cqmin] transition ${bloqueado ? 'opacity-35' : ''}`}>
+      <div className={`grid grid-cols-2 gap-[1.2cqmin] transition ${bloqueado ? 'opacity-35' : ''}`} style={{ containerType: 'inline-size' }}>
         {ronda.opciones.map((o, i) => (
           <button
             key={`${ronda.id}-${o}`}
@@ -75,7 +75,7 @@ function Panel({
             onClick={(e) => e.detail === 0 && elegir(i)}
             aria-keyshortcuts={conTeclas ? TECLAS[lado][i].toUpperCase() : undefined}
             className={`boton-neon relative flex min-h-[clamp(40px,8cqh,84px)] items-center justify-center px-[1cqmin] py-[0.8cqmin] ${marca?.opcion === o ? (marca.bien ? 'bien' : 'mal') : ''}`}
-            style={{ '--c': r.neon, fontSize: `max(15px, calc(clamp(22px, 4.2cqmin, 38px) * ${[...o].length > 8 ? 0.62 : [...o].length > 4 ? 0.8 : 1}))` } as CSSProperties}
+            style={{ '--c': r.neon, fontSize: letraOpciones(ronda.opciones, '42cqi', 'clamp(22px, 4.6cqmin, 40px)') } as CSSProperties}
           >
             {conTeclas && (
               <span aria-hidden className="absolute left-[0.6cqmin] top-[0.4cqmin] hidden text-[clamp(10px,1.8cqmin,15px)] uppercase opacity-60 [@media(pointer:fine)]:block">
@@ -285,7 +285,8 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
         <div className="absolute inset-x-0 bottom-[34%] h-[0.5cqmin] bg-[#ff3dc8] shadow-[0_0_2cqmin_#ff3dc8]" aria-hidden />
         <div className="piso-neon absolute inset-x-[-30%] bottom-[-20%] h-[56%]" aria-hidden />
 
-        <div className="absolute inset-x-[3cqmin] top-[10cqmin] flex items-start gap-[3cqmin]">
+        {/* Debajo de los botones de sonido y pantalla completa, que antes tapaban la vida de NOVA. */}
+        <div className="absolute inset-x-[3cqmin] top-[calc(4cqmin+clamp(36px,7cqmin,52px))] flex items-start gap-[3cqmin]">
           <Barra lado="volt" vida={vida.volt} />
           <span className="texto-neon shrink-0" style={{ '--brillo': '#ffc23d', fontSize: 'clamp(16px, 4cqmin, 34px)' } as CSSProperties}>
             VS
