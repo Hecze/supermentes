@@ -477,8 +477,8 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
             <tr className="border-b border-line text-sm text-ink-soft">
               <th className="py-2 pr-2 font-medium">Alumno</th>
               <th className="py-2 pr-2 font-medium">Aciertos</th>
-              <th className="py-2 pr-2 font-medium">Tardó</th>
-              <th className="py-2 font-medium">Entregó</th>
+              <th className="hidden py-2 pr-2 font-medium sm:table-cell">Tardó</th>
+              <th className="hidden py-2 font-medium sm:table-cell">Entregó</th>
             </tr>
           </thead>
           <tbody>
@@ -497,23 +497,32 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
                       </span>
                     )}
                   </td>
-                  <td className={cx('py-2.5 pr-2 font-semibold', bajo && 'text-danger')}>
+                  <td className={cx('whitespace-nowrap py-2.5 pr-2 font-semibold', bajo && 'text-danger')}>
                     {bajo && <CircleAlert className="mr-1 inline size-4 align-[-2px]" aria-label="No llegó a la mitad" />}
                     {i.aciertos} de {i.total}
                   </td>
-                  <td className="py-2.5 pr-2">{Math.max(1, Math.round(i.segundos / 60))} min</td>
-                  <td className="py-2.5">{fechaHora(i.fecha)}</td>
+                  <td className="hidden py-2.5 pr-2 sm:table-cell">{Math.max(1, Math.round(i.segundos / 60))} min</td>
+                  <td className="hidden py-2.5 sm:table-cell">{fechaHora(i.fecha)}</td>
                 </tr>
               )
             })}
             {faltan.length > 0 && (
               <tr>
-                <td className="py-2.5 pr-2">
+                {/* En el celular la fila ocupa todo el ancho: el aviso y el botón uno debajo del otro. */}
+                <td className="py-2.5 pr-2" colSpan={2}>
                   {faltan.length === 1 ? '1 no la hizo' : `${faltan.length} no la hicieron`}: {faltan.map((a) => a.nombre.split(' ')[0]).join(', ')}
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(recordatorio)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 block font-semibold sm:hidden print:hidden"
+                    style={{ color: VERDE }}
+                  >
+                    Recordar por WhatsApp
+                  </a>
                 </td>
-                <td className="py-2.5 pr-2">—</td>
-                <td className="py-2.5 pr-2">—</td>
-                <td className="py-2.5">
+                <td className="hidden py-2.5 pr-2 sm:table-cell">—</td>
+                <td className="hidden py-2.5 sm:table-cell">
                   <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(recordatorio)}`} target="_blank" rel="noreferrer" className="font-semibold print:hidden" style={{ color: VERDE }}>
                     Recordar por WhatsApp
                   </a>
