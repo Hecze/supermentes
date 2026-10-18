@@ -124,7 +124,8 @@ obviamente tengo que evaluar todas las clases anteriores… la miscelánea" (27:
   cada uno, con subtítulo por tema.
 - **Elegir antes de imprimir:** varias candidatas por lugar, el profe marca cuál va; puede fijar una o cambiarle los
   números.
-- **Estilo:** "Formato del colegio" (sobrio, con su encabezado) o "Con retos y estrellas" (el de hoy, para primaria).
+- **Estilo:** el formato del colegio, sobrio, con su encabezado y preguntas numeradas (1., 2., 3.…). Sin estrellas, "retos" ni
+  caritas: no queremos diferenciarnos mucho de sus exámenes de siempre (decidido el 18-oct).
 - **Fila A y B** para que no se copien (ya existe).
 
 ```
@@ -243,7 +244,7 @@ del mismo tema.
 ## Qué tiene Supermentes hoy y qué falta
 | Material | Hoy | Falta (en este orden) |
 | --- | --- | --- |
-| Examen | Examen listo en 4.º: tipos de pregunta con semilla, otra versión, Fila A y B, elegir cuántas de cada tipo, cambiar o quitar una, PDF y PDF de respuestas; estilo con retos y estrellas | Encabezado del colegio y estilo sobrio; fijar una pregunta; editar sus números; niveles; recuadro de procedimiento; puntaje por pregunta; miscelánea de varios temas |
+| Examen | Examen listo en 4.º: tipos de pregunta con semilla, otra versión, Fila A y B, elegir cuántas de cada tipo, cambiar o quitar una, PDF y PDF de respuestas; estilo sobrio, como su examen de siempre | Encabezado del colegio y estilo sobrio; fijar una pregunta; editar sus números; niveles; recuadro de procedimiento; puntaje por pregunta; miscelánea de varios temas |
 | Clave | Respuesta por pregunta y qué evalúa (cita) | Procedimiento en pasos; tabla de respuestas de una línea; lectura cómoda en el celular |
 | Balotario | — | Balotario de 30–40 por temas y "armar el examen con este balotario" (igualitas o parecidas) |
 | Material extra | — | Hoja de práctica con teoría corta y ejercicios de menos a más, "otra hoja" |

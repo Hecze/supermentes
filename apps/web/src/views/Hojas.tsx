@@ -122,27 +122,6 @@ function SustentoTipo({ tipo, ficha, f }: { tipo: TipoPregunta; ficha: Ficha; f:
   )
 }
 
-/** Una estrella para pintar, como en la hoja impresa. */
-function Estrella() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 shrink-0" aria-hidden>
-      <path d="M12 2.5l2.9 6.2 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.9 3.3 1.4-6.6-5-4.5 6.6-.7z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function Carita({ animo }: { animo: 1 | 0 | -1 }) {
-  const boca = animo === 1 ? 'M8 14.5q4 3.5 8 0' : animo === 0 ? 'M8.5 15.5h7' : 'M8 16.5q4-3.5 8 0'
-  return (
-    <svg viewBox="0 0 24 24" className="size-9 shrink-0" aria-hidden>
-      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="1.5" />
-      <circle cx="8.5" cy="9.5" r="1.1" fill="currentColor" />
-      <circle cx="15.5" cy="9.5" r="1.1" fill="currentColor" />
-      <path d={boca} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 /** El circulito para marcar. Con `marcado`, una X encima, como la marcaría el alumno (solo en la pantalla). */
 function Circulo({ marcado }: { marcado?: boolean }) {
   return (
@@ -361,11 +340,7 @@ function Pregunta({
   const conRecuadro = !compacta && it.forma === 'abierta' && it.espacio === 'procedimiento'
   const cabeza = (
     <div className={cx('flex items-start gap-3', !conRecuadro && 'sm:pr-40')}>
-      {compacta ? (
-        <span className="shrink-0 text-lg font-bold tabular-nums">{n}.</span>
-      ) : (
-        <span className="shrink-0 rounded-lg bg-ink px-2.5 py-0.5 font-bold text-surface">Reto {n}</span>
-      )}
+      <span className="shrink-0 text-lg font-bold tabular-nums">{n}.</span>
       <p className={cx('text-lg leading-snug', !compacta && 'font-semibold')}>{it.enunciado}</p>
     </div>
   )
@@ -489,16 +464,6 @@ function VistaHoja({
             </span>
             {v.fila && <span className="font-semibold">{v.fila}</span>}
           </p>
-          {clase === 'examen' && (
-            <div className="flex flex-col gap-2 rounded-2xl bg-surface-2 px-4 py-3">
-              <p className="text-lg">Resuelve los {v.items.length} retos. Por cada reto que logres, pinta una estrella.</p>
-              <div className="flex flex-wrap gap-1.5 text-ink">
-                {v.items.map((it) => (
-                  <Estrella key={it.indice} />
-                ))}
-              </div>
-            </div>
-          )}
         </header>
 
         {grupos.map((g, k) => {
@@ -537,23 +502,6 @@ function VistaHoja({
             </section>
           )
         })}
-
-        {clase !== 'balotario' && (
-          <footer className="flex flex-col gap-3 rounded-2xl border border-line px-4 py-4">
-            <p className="text-lg font-semibold">¿Cómo me fue? Marca una carita.</p>
-            <div className="flex flex-wrap gap-x-10 gap-y-3 text-lg">
-              <span className="flex items-center gap-2">
-                <Carita animo={1} /> ¡Lo logré!
-              </span>
-              <span className="flex items-center gap-2">
-                <Carita animo={0} /> Lo logré con ayuda
-              </span>
-              <span className="flex items-center gap-2">
-                <Carita animo={-1} /> Necesito practicar más
-              </span>
-            </div>
-          </footer>
-        )}
       </Hoja>
     </div>
   )

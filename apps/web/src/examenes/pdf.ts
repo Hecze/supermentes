@@ -110,36 +110,6 @@ function escribir(c: Ctx, ls: string[], pt: number, x = MARGEN, estilo: 'normal'
   }
 }
 
-/** Estrella de cinco puntas para pintar. */
-function estrella(doc: JsPDF, cx: number, cy: number, r: number) {
-  const pts: [number, number][] = []
-  for (let i = 0; i < 10; i++) {
-    const a = -Math.PI / 2 + (i * Math.PI) / 5
-    const radio = i % 2 === 0 ? r : r * 0.45
-    pts.push([cx + radio * Math.cos(a), cy + radio * Math.sin(a)])
-  }
-  const tramos = pts.slice(1).map((p, i) => [p[0] - pts[i][0], p[1] - pts[i][1]])
-  doc.lines(tramos, pts[0][0], pts[0][1], [1, 1], 'S', true)
-}
-
-/** Carita para la autoevaluación: feliz (1), seria (0) o preocupada (−1). */
-function carita(doc: JsPDF, cx: number, cy: number, r: number, animo: 1 | 0 | -1) {
-  doc.circle(cx, cy, r, 'S')
-  doc.circle(cx - r * 0.35, cy - r * 0.25, r * 0.09, 'F')
-  doc.circle(cx + r * 0.35, cy - r * 0.25, r * 0.09, 'F')
-  const y0 = cy + r * 0.35
-  const curva = animo * r * 0.22
-  const pasos = 8
-  const puntos: [number, number][] = Array.from({ length: pasos + 1 }, (_, i) => {
-    const t = i / pasos
-    const x = cx - r * 0.42 + t * r * 0.84
-    return [x, y0 + curva * (1 - (2 * t - 1) ** 2) - (animo < 0 ? curva : 0)]
-  })
-  const tramos = puntos.slice(1).map((p, i) => [p[0] - puntos[i][0], p[1] - puntos[i][1]])
-  doc.lines(tramos, puntos[0][0], puntos[0][1], [1, 1], 'S', false)
-}
-
-
 const PT = 11.5
 const ROMANOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
@@ -194,30 +164,7 @@ function encabezado(c: Ctx, d: DatosPdf, v: Version, clave: boolean) {
   const largoNombre = W - doc.getTextWidth('Apellidos y nombres:') - doc.getTextWidth(fecha) - 3 - 8 - largoFecha
   const fin = campo(doc, 'Apellidos y nombres:', MARGEN, c.y, largoNombre)
   campo(doc, fecha, fin + 8, c.y, largoFecha)
-  c.y += 6
-  if (d.clase !== 'examen') {
-    c.y += 2
-    return
-  }
-  // Los retos: una estrella por cada uno, para que el alumno las pinte al revisar.
-  const n = v.items.length
-  const texto = lineas(doc, `Resuelve los ${n} retos. Por cada reto que logres, pinta una estrella.`, PT, W - 10)
-  const r = 3.4
-  const porFila = Math.floor((W - 10) / (2 * r + 3.2))
-  const filasEstrellas = Math.ceil(n / porFila)
-  const h = texto.length * alto(PT) + filasEstrellas * (2 * r + 3) + 7
-  doc.setFillColor(243, 243, 243)
-  doc.setDrawColor(190)
-  doc.roundedRect(MARGEN, c.y, W, h, 2.5, 2.5, 'FD')
-  c.y += 3.5
-  escribir(c, texto, PT, MARGEN + 5)
-  c.y += 1
-  doc.setDrawColor(40)
-  doc.setLineWidth(0.35)
-  for (let i = 0; i < n; i++) estrella(doc, MARGEN + 5 + r + (i % porFila) * (2 * r + 3.2), c.y + r + Math.floor(i / porFila) * (2 * r + 3), r)
-  doc.setLineWidth(0.2)
-  c.y += filasEstrellas * (2 * r + 3) + 3.5
-  c.y += 5
+  c.y += 8
 }
 
 /** Ancho de cada alternativa si caben todas en una fila, o null. */
@@ -247,28 +194,16 @@ function pregunta(c: Ctx, it: Item, n: number, clase: Clase, medir: boolean): nu
   const conRecuadro = !compacta && it.forma === 'abierta' && it.espacio === 'procedimiento'
   const izq = conRecuadro ? ancho * 0.55 : ancho
 
-  // "Reto 1" en una etiqueta oscura (en el balotario, solo "1.") y al lado lo que hay que hacer.
+  // El número, como en cualquier examen ("1."), y al lado lo que hay que hacer.
   doc.setFont('helvetica', 'bold')
-  doc.setFontSize(compacta ? PT : 10.5)
-  const etiqueta = compacta ? `${n}.` : `Reto ${n}`
-  const we = doc.getTextWidth(etiqueta) + (compacta ? 1.5 : 5)
+  doc.setFontSize(PT)
+  const etiqueta = `${n}.`
+  const we = doc.getTextWidth(etiqueta) + 1.5
   const estilo = compacta ? 'normal' : 'bold'
   const enunciado = lineas(doc, it.enunciado, PT, izq - we - 3, estilo)
-  if (!medir) {
-    if (compacta) {
-      doc.text(etiqueta, X, c.y, { baseline: 'top' })
-    } else {
-      doc.setFillColor(35, 35, 35)
-      doc.roundedRect(X, c.y - 0.8, we, 6, 1.6, 1.6, 'F')
-      doc.setTextColor(255)
-      doc.text(etiqueta, X + 2.5, c.y + 2.2, { baseline: 'middle' })
-      doc.setTextColor(0)
-    }
-  }
-  const yTexto = c.y
+  if (!medir) doc.text(etiqueta, X, c.y, { baseline: 'top' })
   if (medir) c.y += enunciado.length * alto(PT)
   else escribir(c, enunciado, PT, X + we + 3, estilo)
-  c.y = Math.max(c.y, yTexto + (compacta ? 0 : 6))
 
   if (it.dibujo) {
     const m = medidas(it.dibujo, izq - 8, compacta ? 55 : 75)
@@ -420,32 +355,6 @@ function recuerda(c: Ctx, t: Teoria, medir: boolean): number {
   return h
 }
 
-function autoevaluacion(c: Ctx) {
-  const { doc } = c
-  const h = 30
-  if (c.y + h > LIMITE) nuevaPagina(c)
-  doc.setDrawColor(190)
-  doc.roundedRect(MARGEN, c.y, W, h, 2.5, 2.5, 'S')
-  c.y += 4
-  escribir(c, ['¿Cómo me fue? Marca una carita.'], PT, MARGEN + 5, 'bold')
-  const opciones: [1 | 0 | -1, string][] = [
-    [1, '¡Lo logré!'],
-    [0, 'Lo logré con ayuda'],
-    [-1, 'Necesito practicar más'],
-  ]
-  doc.setDrawColor(40)
-  doc.setLineWidth(0.35)
-  opciones.forEach(([animo, t], k) => {
-    const cx = MARGEN + 11 + k * (W / 3)
-    carita(doc, cx, c.y + 7, 5.2, animo)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10.5)
-    doc.text(t, cx + 8, c.y + 7, { baseline: 'middle' })
-  })
-  doc.setLineWidth(0.2)
-  c.y += h - 4
-}
-
 /** Lo que va en la clave para cada pregunta. */
 export function respuestaDe(it: Item): string {
   if (it.forma === 'opciones') return `${letra(it.correcta)}) ${it.alternativas[it.correcta]}`
@@ -578,7 +487,6 @@ export async function pdfHoja(d: DatosPdf, { clave: conClave = false } = {}): Pr
       })
       c.y += 3
     })
-    if (d.clase !== 'balotario') autoevaluacion(c)
   })
   pie(c)
   return doc.output('blob')

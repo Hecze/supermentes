@@ -13,7 +13,7 @@ Examen, práctica y balotario son **la misma hoja de preguntas** con otro largo 
 | | Examen | Práctica | Balotario |
 |---|---|---|---|
 | Preguntas | ~10 | ~12, de menos a más | ~30 |
-| Arriba | Nota y estrellas | «Recuerda»: la idea y un ejemplo resuelto | "Para el examen del" |
+| Arriba | Nota | «Recuerda»: la idea y un ejemplo resuelto | "Para el examen del" |
 | Espacio para resolver | Sí (recuadro de procedimiento en los problemas) | Sí | No: se resuelve en el cuaderno |
 | Extra | Fila A y B | | «Armar examen»: saca el examen del balotario |
 
