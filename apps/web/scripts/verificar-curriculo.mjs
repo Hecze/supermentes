@@ -1,6 +1,7 @@
 // Comprueba que cada práctica de cálculo, cada canción y cada tema del banco cite, letra por letra, un desempeño oficial
 // del grado donde se ofrece, y que en los grados con banco cada tema tenga al menos 2 juegos y 2 canciones.
-// Ver src/juegos/matematica/verificar.ts y src/banco/verificar.ts. Falla (código 1) si algo no cuadra.
+// También que cada tema de esos grados tenga examen listo y que sus versiones al azar no salgan rotas.
+// Ver src/juegos/matematica/verificar.ts, src/banco/verificar.ts y src/examenes/verificar.ts. Falla (código 1) si algo no cuadra.
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 
@@ -30,6 +31,14 @@ try {
     process.exitCode = 1
   } else if (banco.grados.length) {
     console.log(`✓ Banco (${banco.grados.join(', ')}): ${banco.citas} citas tal cual; los ${banco.temas} temas tienen al menos ${MINIMO} juegos y ${MINIMO} canciones.`)
+  }
+  const { verificarExamenes } = await vite.ssrLoadModule('/src/examenes/verificar.ts')
+  const examenes = verificarExamenes()
+  if (examenes.errores.length) {
+    console.error(`✗ Exámenes listos: ${examenes.errores.length} problemas:\n- ${examenes.errores.slice(0, 40).join('\n- ')}${examenes.errores.length > 40 ? '\n…' : ''}`)
+    process.exitCode = 1
+  } else {
+    console.log(`✓ Exámenes listos (${examenes.grados.join(', ')}): ${examenes.tipos} tipos de pregunta, ${examenes.citas} citas tal cual; los ${examenes.temas} temas tienen examen y ninguna versión sale rota.`)
   }
 } finally {
   await vite.close()

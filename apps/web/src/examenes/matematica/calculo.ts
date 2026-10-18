@@ -46,9 +46,10 @@ export function deCalculo(o: { id: string; habilidad: string; nivel: string; nom
       return {
         forma: 'opciones',
         clave: `${o.id}:${r.consigna ?? ''}|${r.pregunta}|${r.visual ? JSON.stringify(r.visual) : ''}`,
-        enunciado: o.enunciado ?? r.consigna ?? '',
+        // Sin consigna ("7 × 8 = ?"), el ejercicio mismo va como enunciado.
+        enunciado: o.enunciado ?? r.consigna ?? r.pregunta,
         dibujo,
-        pregunta: o.enunciado ? [r.consigna, r.pregunta].filter(Boolean).join(': ') : r.pregunta,
+        pregunta: o.enunciado ? [r.consigna, r.pregunta].filter(Boolean).join(': ') : r.consigna ? r.pregunta || undefined : undefined,
         ...alt,
       }
     },
