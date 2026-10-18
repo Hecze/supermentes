@@ -1,6 +1,6 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { useStore } from '../app/store'
+import { useStore, type Vista } from '../app/store'
 import { fichaDesdeCurriculo } from '../app/temaInstantaneo'
 import { cargarBanco, temaEnBanco } from '../banco/banco'
 import { buscarEnGrado, buscarEnTodos, fundamento, normalizar, temasDe, type Resultado } from '../curriculo/buscar'
@@ -66,7 +66,7 @@ export function NuevoTema() {
   const cur = useCurriculo(nivelDe(gradoId), gradoId)
   const grado = cur.estado === 'listo' ? cur.grado : null
 
-  async function crear(r: Resultado) {
+  async function crear(r: Resultado, destino: Vista = 'ficha') {
     const [datos, banco] = await Promise.all([cargarNivel(nivelDe(r.gradoId)), cargarBanco(r.gradoId, r.areaId)])
     const area = datos?.grados.find((g) => g.id === r.gradoId)?.areas.find((a) => a.id === r.areaId)
     if (!area) return
@@ -81,7 +81,7 @@ export function NuevoTema() {
     }
     setFicha(nueva)
     cerrarNuevoTema()
-    ir('ficha')
+    ir(destino)
     completarFicha(nueva)
   }
 
@@ -98,7 +98,7 @@ export function NuevoTema() {
         areaId: previoTema.areaId,
         area: areaPorId(g, previoTema.areaId)?.nombre ?? previoTema.areaId,
         indiceCompetencia: previoTema.indiceCompetencia,
-      })
+      }, previoTema.destino)
       return
     }
     if (nuevoTemaAbierto && !d.open) {

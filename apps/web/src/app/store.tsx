@@ -8,6 +8,7 @@ export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigr
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
+export type PestanaBiblioteca = 'curriculo' | 'examenes' | 'materiales'
 export type Aviso = { id: number; texto: string; tono: Tono }
 type Tema = 'light' | 'dark'
 
@@ -28,7 +29,15 @@ export type Resultados = {
 }
 
 /** Lo que la ventana de "Nuevo tema" trae ya escrito (por ejemplo, desde un tema del currículo). */
-export type PrevioTema = { texto?: string; gradoId?: string; areaId?: string; /** Índice de la competencia del tema, si se conoce. */ indiceCompetencia?: number }
+export type PrevioTema = {
+  texto?: string
+  gradoId?: string
+  areaId?: string
+  /** Índice de la competencia del tema, si se conoce. */
+  indiceCompetencia?: number
+  /** A dónde ir apenas se crea (por defecto, la ficha del tema). */
+  destino?: Vista
+}
 
 type Store = {
   vista: Vista
@@ -48,8 +57,8 @@ type Store = {
   abrirNuevoTema: (previo?: PrevioTema) => void
   cerrarNuevoTema: () => void
   /** Pestaña de la Biblioteca y documento del currículo que está abierto. */
-  pestanaBiblioteca: 'curriculo' | 'materiales'
-  setPestanaBiblioteca: (p: 'curriculo' | 'materiales') => void
+  pestanaBiblioteca: PestanaBiblioteca
+  setPestanaBiblioteca: (p: PestanaBiblioteca) => void
   curriculoAbierto: { gradoId: string; areaId: string } | null
   verCurriculo: (gradoId: string, areaId: string) => void
   resultados: Resultados
@@ -105,7 +114,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
   const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
   const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)
-  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<'curriculo' | 'materiales'>('curriculo')
+  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<PestanaBiblioteca>('curriculo')
   const [curriculoAbierto, setCurriculoAbierto] = useState<{ gradoId: string; areaId: string } | null>(null)
   const [creditos, setCreditos] = useState(MODO_EJEMPLO ? 18 : CREDITOS_MENSUALES)
   const [avisos, setAvisos] = useState<Aviso[]>([])
