@@ -3,11 +3,12 @@ import type { CSSProperties, ReactNode } from 'react'
 import type { Reto, Visual } from '../tipos'
 
 /** Colores de globos, cartas y botones, con el color de texto que se lee bien encima. */
+// Sin verde ni rojo: son los colores de "bien" y "mal", y un botón no debe parecer respondido antes de tocarlo.
 export const PALETA: { c: string; t: string }[] = [
-  { c: '#ff5d73', t: '#ffffff' },
+  { c: '#ff6fb5', t: '#ffffff' },
   { c: '#ff9636', t: '#ffffff' },
   { c: '#ffc93c', t: '#5a3a00' },
-  { c: '#2fc46f', t: '#ffffff' },
+  { c: '#11a3a3', t: '#ffffff' },
   { c: '#2fb2ff', t: '#ffffff' },
   { c: '#4f6dff', t: '#ffffff' },
   { c: '#9f63ff', t: '#ffffff' },

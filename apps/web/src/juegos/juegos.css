@@ -81,13 +81,14 @@
   --t: #2b2d5c;
   --borde: #cfd3ee;
 }
+/* !important: cada botón trae su color en línea (colorBoton) y sin esto el verde y el rojo no se veían. */
 .b3d.bien {
-  --c: var(--j-verde);
-  --t: #ffffff;
+  --c: var(--j-verde) !important;
+  --t: #ffffff !important;
 }
 .b3d.mal {
-  --c: #ff6b6b;
-  --t: #ffffff;
+  --c: #ff4d4d !important;
+  --t: #ffffff !important;
   animation: temblar 0.4s ease;
 }
 .b3d.apagado {

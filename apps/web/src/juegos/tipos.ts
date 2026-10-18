@@ -18,6 +18,8 @@ export type Reto = {
   visual?: Visual
   respuesta: string
   distractores: string[]
+  /** Los distractores son otras palabras o parejas del tema, sin orden: se toman al azar en cada partida. */
+  distractoresAlAzar?: true
 }
 
 export type Lado = { texto: string; visual?: Visual }

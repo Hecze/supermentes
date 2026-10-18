@@ -61,7 +61,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
     const reto = siguienteReto()
     // Mitad y mitad; las mentiras usan los primeros distractores, que son los errores más comunes.
     const verdad = azar() < 0.5
-    const candidato = verdad ? reto.respuesta : reto.distractores[Math.floor(azar() * Math.min(2, reto.distractores.length))]
+    const candidato = verdad ? reto.respuesta : reto.distractores[Math.floor(azar() * (reto.distractoresAlAzar ? reto.distractores.length : Math.min(2, reto.distractores.length)))]
     return { reto, candidato, verdad, n }
   }
 

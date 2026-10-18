@@ -91,6 +91,7 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
       visual: p.b.visual,
       respuesta: p.a.texto,
       distractores: pares.filter((_, j) => j !== i).map((x) => x.a.texto),
+      distractoresAlAzar: true as const,
     })),
     // Y cada palabra clave: se lee la pista y se busca la palabra.
     ...palabras.map((p, i) => ({
@@ -98,6 +99,7 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
       pregunta: p.pista,
       respuesta: p.palabra,
       distractores: palabras.filter((_, j) => j !== i).map((x) => x.palabra),
+      distractoresAlAzar: true as const,
     })),
   ].filter((r) => r.respuesta && r.distractores.length > 0)
 
@@ -106,7 +108,9 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
 
 /** Respuesta correcta y hasta n − 1 distractores, en orden al azar. */
 export function opcionesDe(reto: Reto, n: number, azar: () => number) {
-  return barajar(azar, [reto.respuesta, ...reto.distractores.slice(0, Math.max(1, n - 1))])
+  // Sin barajar, las palabras del tema salían siempre las mismas y la nueva delataba la respuesta.
+  const distractores = reto.distractoresAlAzar ? barajar(azar, [...reto.distractores]) : reto.distractores
+  return barajar(azar, [reto.respuesta, ...distractores.slice(0, Math.max(1, n - 1))])
 }
 
 /** Fuente de retos para una partida: sin fin si se generan, o la lista barajada que vuelve a empezar. */
