@@ -12,3 +12,17 @@ Se puede reenviar para actualizar hasta el cierre.
 | Avances publicados | `avances/` | Ya enviados con `andes project update --file` |
 
 Enviar: `sh submit/enviar.sh` (muestra) y `sh submit/enviar.sh --enviar` (envía).
+
+## Para Hector: cómo cerrar la entrega
+
+Hoy no hay nada entregado (`andes project --output json` → `submission: null`). Todo lo de arriba está listo y verificado
+en producción el 18-oct a las ~6:30.
+
+1. Revisa `proyecto.md` y el deck (supermentes.app/presentacion). Para cambiar una diapositiva, edita
+   `presentacion/slides/<id>.html` y haz push: se publica sola.
+2. `sh submit/enviar.sh` para ver qué se manda, y `sh submit/enviar.sh --enviar` para mandarlo (necesita `andes` con
+   sesión iniciada).
+3. Se puede reenviar para corregir hasta las 9:00, pero **no se puede retirar** una entrega una vez hecha.
+
+Demo sugerida (notas en `presentacion/slides/demo.html`): «Los dichos populares» de 4.º → Dar la clase → Juego web,
+Concurso, «Como tarea» para un salón → el jurado escanea el QR, elige un nombre y responde → Revisar.
