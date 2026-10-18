@@ -7,6 +7,7 @@ import * as juego from '../api/juego.js'
 import * as juegosCompartidos from '../api/juegos-compartidos.js'
 import * as listaEspera from '../api/lista-espera.js'
 import * as misEnvios from '../api/mis-envios.js'
+import * as perfil from '../api/perfil.js'
 import * as recursos from '../api/recursos.js'
 import * as resultados from '../api/resultados.js'
 import * as sesion from '../api/sesion.js'
@@ -20,6 +21,7 @@ const API: Record<string, Record<string, Handler>> = {
   'juegos-compartidos': juegosCompartidos,
   'lista-espera': listaEspera,
   'mis-envios': misEnvios,
+  perfil,
   recursos,
   resultados,
   sesion,

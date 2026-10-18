@@ -3,6 +3,7 @@
 import { ChevronRight, FileCheck, Gamepad2, Lightbulb, Music, Search, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useCuenta } from '../app/cuenta'
+import { usePerfil } from '../app/perfil'
 import { cuando, useStore } from '../app/store'
 import { DOCENTE } from '../api/ejemplos'
 import { tieneBanco } from '../banco/banco'
@@ -164,6 +165,7 @@ function Recientes() {
 export function Inicio() {
   const { abrirNuevoTema, temas } = useStore()
   const { nombre } = useCuenta()
+  const { perfil } = usePerfil()
   const [gradoId, setGradoId] = useState(gradoGuardado)
 
   function elegirGrado(id: string) {
@@ -178,7 +180,7 @@ export function Inicio() {
   return (
     <>
       <header className="flex flex-col gap-4">
-        <p className="text-lg text-ink-soft">Hola, {nombre ? `profe ${nombre}` : DOCENTE.saludo} 👋</p>
+        <p className="text-lg text-ink-soft">Hola, {perfil?.nombre ?? (nombre ? `profe ${nombre}` : DOCENTE.saludo)} 👋</p>
         <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">¿Qué tema toca mañana?</h1>
         <button
           type="button"

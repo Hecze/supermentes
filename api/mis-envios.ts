@@ -4,14 +4,13 @@
 //
 // El navegador manda los envíos que conoce y recibe la unión con los que ya estaban en su cuenta (tabla envios de D1).
 // Necesita CLERK_SECRET_KEY.
-import { verifyToken } from '@clerk/backend'
+import { docente } from './_cuenta.js'
 import { db } from './_db.js'
 import { CODIGO, JUEGOS, json, objeto, texto } from './_juegos.js'
 
 type Enviado = { codigo: string; clave: string; juego: string; tema: string; grado?: string; practica?: string; fecha: string }
 
 const MAXIMO = 200
-const ORIGENES = ['https://www.supermentes.app', 'https://supermentes.app', 'https://supermentes.haroldmedrano33.workers.dev', 'http://localhost:5173', 'http://localhost:8787']
 
 function limpiar(v: unknown): Enviado | null {
   const o = objeto(v)
@@ -21,17 +20,6 @@ function limpiar(v: unknown): Enviado | null {
   const fecha = texto(o.fecha, 30)
   if (!CODIGO.test(codigo) || !clave || !JUEGOS.has(juego) || Number.isNaN(Date.parse(fecha))) return null
   return { codigo, clave, juego, tema: texto(o.tema, 120), grado: texto(o.grado, 40) || undefined, practica: texto(o.practica, 200) || undefined, fecha }
-}
-
-async function docente(request: Request) {
-  const token = request.headers.get('Authorization')?.replace(/^Bearer /, '')
-  if (!token || !process.env.CLERK_SECRET_KEY) return null
-  try {
-    const { sub } = await verifyToken(token, { secretKey: process.env.CLERK_SECRET_KEY, authorizedParties: ORIGENES })
-    return /^user_[A-Za-z0-9]+$/.test(sub) ? sub : null
-  } catch {
-    return null
-  }
 }
 
 export async function POST(request: Request) {

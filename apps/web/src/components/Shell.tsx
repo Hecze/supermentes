@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
+import { usePerfil } from '../app/perfil'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { Logo } from './Logo'
@@ -41,6 +42,7 @@ function BotonTema() {
 
 function Docente() {
   const { entro, nombre, salir } = useCuenta()
+  const { perfil } = usePerfil()
   if (!entro) {
     return (
       <div className="min-w-0">
@@ -51,7 +53,10 @@ function Docente() {
   }
   return (
     <div className="flex items-center justify-between gap-2">
-      <p className="truncate text-sm font-semibold">Prof. {nombre ?? ''}</p>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">{perfil?.nombre ?? nombre ?? ''}</p>
+        {perfil?.colegio && <p className="truncate text-xs text-ink-soft">{perfil.colegio}</p>}
+      </div>
       <button type="button" onClick={salir} className="text-xs text-ink-soft underline-offset-4 hover:underline">
         Salir
       </button>
