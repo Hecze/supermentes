@@ -365,7 +365,7 @@ function Pregunta({
   // Como en el libro: el enunciado a la izquierda y el recuadro para el procedimiento a la derecha.
   const conRecuadro = !compacta && it.forma === 'abierta' && it.espacio === 'procedimiento'
   const cabeza = (
-    <div className={cx('flex items-start gap-3', !conRecuadro && (nivel ? 'sm:pr-60' : 'sm:pr-40'))}>
+    <div className={cx('flex items-start gap-3', !conRecuadro && (nivel ? 'sm:pr-[17rem]' : 'sm:pr-40'))}>
       <span className="shrink-0 text-lg font-bold tabular-nums">{n}.</span>
       <p className={cx('text-lg leading-snug', !compacta && 'font-semibold')}>{it.enunciado}</p>
     </div>
