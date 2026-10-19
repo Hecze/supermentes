@@ -16,6 +16,21 @@ Un jurado, un director o un docente puede preguntar en cualquier momento "¿por 
 - **Canciones: solo las que están en YouTube** (`obsidian/CANCIONES.md`). La app no crea canciones ni muestra letras sin video; cada canción cita su desempeño igual que todo lo demás.
 - **Se muestra con el icono "i"** (`apps/web/src/views/SustentoJuego.tsx`), en dos partes: "El tema abarca" (la competencia y el desempeño oficial) y "El juego abarca" (qué hacen los alumnos y la parte exacta del desempeño, resaltada). Las demás herramientas deben mostrar lo mismo.
 
+## La sesión de aprendizaje: todo o nada
+
+Para el docente, la sesión de aprendizaje solo sirve si cumple **todas** las normas del MINEDU, sin excepción: la
+presenta al director y la revisa el evaluador. Una sola parte que no cumpla, por pequeña que sea, la vuelve inútil y
+le hace daño al docente.
+
+- **Cada parte se apoya en una norma o documento oficial del MINEDU** (resolución, Currículo Nacional, programa
+  curricular, orientaciones o sesiones publicadas por el MINEDU), con la cita y el enlace anotados. Nada de
+  hipótesis, suposiciones ni cosas que «se ven bien»: si no hay fuente oficial, esa parte no va.
+- **No se fijan cantidades ni pasos que dependen del docente** (cuántos ejercicios resuelve, cuánta teoría o
+  práctica): cambian según el tema, el colegio (público o privado, con libro o sin él) y el salón.
+- **Si no se puede cumplir todo** (falta información, una limitación técnica, lo que sea), la sesión no se ofrece y
+  **no llega a producción**. Mientras tanto, la vista lleva arriba el aviso «En construcción» y no debe usarse
+  (`apps/web/src/views/Sesion.tsx`).
+
 ## Antes de trabajar
 
 Lee:
