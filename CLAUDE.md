@@ -2,10 +2,6 @@
 
 Herramientas de IA para docentes del Perú, hechas para Hack the Andes 2026 (entrega: 18 de octubre de 2026, 9:00 a. m., hora de Lima).
 
-## Mockup antes de código
-
-Toda pantalla o UI nueva se dibuja primero en pen.dev y Hector aprueba la captura; recién después se codea. Vale para cada sesión y cada agente en paralelo. Cambios chicos sobre una pantalla existente no lo necesitan.
-
 ## El currículo es el eje
 
 Un jurado, un director o un docente puede preguntar en cualquier momento "¿por qué esto cumple el currículo?". La respuesta no puede ser "yo creo que": tiene que ser una cita del texto oficial, mostrada en segundos. Antes de crear, ofrecer o cambiar cualquier contenido, piensa esto primero; no adivines.

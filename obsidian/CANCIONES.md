@@ -48,8 +48,6 @@ Una **página oculta «Canal»**. Que la URL sea secreta no basta: solo entran l
    - Al terminar, guarda el vínculo tema ↔ video con su cita verificada contra `packages/curriculo`.
 4. Un video puede servir a varios temas y grados (por ejemplo, una canción de multiplicar sirve en 3.º y 4.º), cada uno con su propia cita.
 
-Es una pantalla nueva: **primero el mockup en pen.dev y que Hector lo apruebe** (regla de CLAUDE.md).
-
 **Límites de la API de YouTube** (documentación oficial, consultada el 19-oct):
 
 | Operación | Costo |
@@ -108,6 +106,6 @@ Reglas del diseño:
 1. **Con el canal creado:**
    - las tablas, el JSON por grado y la revisión diaria;
    - en la pantalla Canción, los videos del canal entran en la misma lista, primero (no se separan de los de otros canales: el nombre del canal ya lo dice);
-   - el mockup de la página Canal y, después, su código: vincular videos ya subidos.
+   - la página Canal: vincular videos ya subidos.
 2. **Subida desde la página Canal**, con título, descripción, lista y cita armados solos.
 3. **La fábrica:** el script que produce y sube las canciones del banco, grado por grado.
