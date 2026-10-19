@@ -36,11 +36,14 @@ export type Item =
   | (Base & { forma: 'unir'; izquierda: string[]; derecha: string[]; /** solucion[i]: el índice en `derecha` que va con izquierda[i]. */ solucion: number[] })
   | (Base & { forma: 'completar'; /** Las palabras del recuadro, ya barajadas. */ palabras: string[]; /** Cada frase con "____" donde va la palabra. */ frases: string[]; respuestas: string[] })
 
+/** La dificultad: 1 más fácil, 2 normal, 3 más difícil. Siempre dentro del desempeño del grado que cita el tipo. */
+export type Nivel = 1 | 2 | 3
+
 export type Generado = Item & {
   /** Lo que hace distinta a esta pregunta (el dato o la pregunta del banco): no se repite en un mismo examen. */
   clave: string
   /** 1 directa, 2 de dos pasos, 3 de más pensamiento. La práctica va de menos a más. */
-  nivel?: 1 | 2 | 3
+  nivel?: Nivel
 }
 
 /** Un problema del banco de problemas del tema (examenes/problemas): con sus pasos y su nivel. */
@@ -59,6 +62,12 @@ export type Contexto = {
   banco: TemaBanco | null
   /** Los problemas del tema con sus pasos, si existen. */
   problemas?: TemaProblemas | null
+  /**
+   * La dificultad pedida (2 si no se dice). Con 2 sale exactamente la pregunta de siempre para esa semilla; con 1, la
+   * misma idea con números más chicos, menos datos o un paso menos; con 3, más datos, un paso más o distractores más
+   * finos. Solo la usan los tipos con `niveles`.
+   */
+  nivel?: Nivel
 }
 
 export type TipoPregunta = {
@@ -79,13 +88,22 @@ export type TipoPregunta = {
   cambia: 'numeros' | 'orden'
   /** Arma una pregunta; null si este tema no tiene con qué (por ejemplo, el banco no trae parejas). */
   generar: (ctx: Contexto) => Generado | null
+  /** Si la pregunta cambia con `Contexto.nivel` (más fácil o más difícil). Sin esto, el docente no ve el control. */
+  niveles?: boolean
 }
 
 /** Para qué es la hoja. Las tres son la misma hoja de preguntas con otro largo y otra forma de imprimirse. */
 export type Clase = 'examen' | 'practica' | 'balotario'
 
 /** Una pregunta de la hoja: de qué tema y tipo, con qué semilla y si está fijada (ya no cambia). */
-export type ItemHoja = { tipo: string; tema: string; semilla: number; fija?: boolean }
+export type ItemHoja = {
+  tipo: string
+  tema: string
+  semilla: number
+  fija?: boolean
+  /** La dificultad de esta pregunta, si el docente la cambió (si no, la de la hoja). */
+  nivel?: Nivel
+}
 
 /** Lo que se guarda de una hoja. Con esto se vuelve a armar igual (la misma versión que se imprimió). */
 export type ConfigHoja = {
@@ -98,6 +116,8 @@ export type ConfigHoja = {
   items: ItemHoja[]
   /** Solo en el examen: dos versiones (Fila A y Fila B) con los mismos tipos y otros números. */
   filas: boolean
+  /** La dificultad de toda la hoja (2 si no se dice). */
+  nivel?: Nivel
 }
 
 /** Con qué se arman las preguntas de un tema. */

@@ -21,10 +21,15 @@ export const problemasDelTema: TipoPregunta = {
   nombre: 'Problemas del tema',
   queHacen: 'Resuelven situaciones del tema, de directas a más pensadas, y muestran su procedimiento.',
   cambia: 'orden',
-  generar({ azar, problemas }) {
+  niveles: true,
+  generar({ azar, problemas, nivel = 2 }) {
     const lista = problemas?.problemas ?? []
     if (!lista.length) return null
-    const i = Math.floor(azar() * lista.length)
+    // Normal: de todos los niveles, como siempre. Más fácil: los directos; más difícil: los más pensados (si el tema
+    // no tiene de ese nivel, los del nivel vecino).
+    const quiero = nivel === 1 ? [[1], [1, 2]] : nivel === 3 ? [[3], [2, 3]] : [[1, 2, 3]]
+    const indices = quiero.map((ns) => lista.flatMap((p, i) => (ns.includes(p.nivel) ? [i] : []))).find((l) => l.length) ?? lista.map((_, i) => i)
+    const i = indices[Math.floor(azar() * indices.length)]
     const p = lista[i]
     // Como en el libro, con su recuadro para el procedimiento: es lo que el docente revisa y los padres quieren ver.
     // (Sus alternativas sirvieron para resolverlo a ciegas al generarlo.)

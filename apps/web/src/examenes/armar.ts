@@ -3,7 +3,7 @@
 // versión que se imprimió) y otra semilla da el mismo tipo de pregunta con otros números. Las preguntas fijadas no
 // cambian nunca: ni con «Otra versión» ni en la Fila B.
 import { crearAzar, nuevaSemilla } from '../juegos/motor/azar'
-import type { Clase, ConfigHoja, Fuente, Generado, ItemHoja, TipoPregunta, Version } from './tipos'
+import type { Clase, ConfigHoja, Fuente, Generado, ItemHoja, Nivel, TipoPregunta, Version } from './tipos'
 
 /** Mezcla dos enteros en uno nuevo (para derivar semillas: la de la Fila B, la del reintento k). */
 export function mezclar(a: number, b: number) {
@@ -37,13 +37,16 @@ function ultimo<T>(lista: T[], cumple: (x: T) => boolean) {
 
 const INTENTOS = 24
 
-/** Nivel de una pregunta: el suyo, o 2 si es de dibujos y números y 1 si es del banco. */
-const nivelDe = (g: Generado, tipo: TipoPregunta) => g.nivel ?? (tipo.cambia === 'numeros' ? 2 : 1)
+/** La dificultad pedida para una pregunta: la suya, si el docente la cambió, o la de la hoja. */
+export const nivelPedido = (config: ConfigHoja, it: ItemHoja): Nivel => it.nivel ?? config.nivel ?? 2
+
+/** Nivel de una pregunta: el suyo, el pedido si el tipo cambia con la dificultad, o 2 si es de dibujos y 1 si es del banco. */
+const nivelDe = (g: Generado, tipo: TipoPregunta, pedido: Nivel) => g.nivel ?? (tipo.niveles ? pedido : tipo.cambia === 'numeros' ? 2 : 1)
 
 /** Una pregunta del tipo con esa semilla; si sale repetida (misma clave), prueba semillas derivadas. */
-function generarSinRepetir(tipo: TipoPregunta, semilla: number, f: Fuente, usadas: Set<string>): Generado | null {
+function generarSinRepetir(tipo: TipoPregunta, semilla: number, f: Fuente, usadas: Set<string>, nivel: Nivel): Generado | null {
   for (let k = 0; k < INTENTOS; k++) {
-    const g = tipo.generar({ azar: crearAzar(k === 0 ? semilla : mezclar(semilla, k)), banco: f.banco, problemas: f.problemas })
+    const g = tipo.generar({ azar: crearAzar(k === 0 ? semilla : mezclar(semilla, k)), banco: f.banco, problemas: f.problemas, nivel })
     if (g && !usadas.has(`${f.tema}|${g.clave}`)) return g
   }
   return null
@@ -59,10 +62,11 @@ export function armarVersion(config: ConfigHoja, fuentes: Fuentes, fila: 0 | 1 =
     const tipo = tipoDe(fuentes, it)
     if (!f || !tipo) continue
     // La Fila B usa otra semilla, salvo en las preguntas fijadas.
-    const g = generarSinRepetir(tipo, fila === 0 || it.fija ? it.semilla : mezclar(it.semilla, 7919), f, usadas)
+    const pedido = nivelPedido(config, it)
+    const g = generarSinRepetir(tipo, fila === 0 || it.fija ? it.semilla : mezclar(it.semilla, 7919), f, usadas, pedido)
     if (!g) continue
     usadas.add(`${f.tema}|${g.clave}`)
-    items.push({ ...g, nivel: nivelDe(g, tipo), tipo: tipo.id, tema: it.tema, indice, fija: !!it.fija })
+    items.push({ ...g, nivel: nivelDe(g, tipo, pedido), tipo: tipo.id, tema: it.tema, indice, fija: !!it.fija })
   }
   // La práctica va de menos a más dentro de cada tema; el resto conserva su orden.
   if (config.clase === 'practica') {
@@ -156,10 +160,10 @@ function ordenar(f: Fuente, n: Map<string, number>): string[] {
 }
 
 /** Una hoja nueva de esta clase con los temas dados (en orden). Cada pregunta lleva su propia semilla. */
-export function hojaNueva(clase: Clase, temas: Fuente[], filas = false, semilla = nuevaSemilla()): ConfigHoja {
+export function hojaNueva(clase: Clase, temas: Fuente[], filas = false, semilla = nuevaSemilla(), nivel?: Nivel): ConfigHoja {
   const items: ItemHoja[] = []
   for (const f of temas) for (const tipo of ordenar(f, cantidades(f, clase, temas.length))) items.push({ tipo, tema: f.tema, semilla: mezclar(semilla, items.length + 1) })
-  return { clase, temas: temas.map((f) => f.tema), areas: Object.fromEntries(temas.map((f) => [f.tema, f.areaId])), semilla, items, filas }
+  return { clase, temas: temas.map((f) => f.tema), areas: Object.fromEntries(temas.map((f) => [f.tema, f.areaId])), semilla, items, filas, ...(nivel && nivel !== 2 ? { nivel } : {}) }
 }
 
 /** Otra versión: los mismos tipos en el mismo orden, con otras semillas; las fijadas no cambian. */
@@ -178,7 +182,7 @@ export function cambiarItem(config: ConfigHoja, i: number, fuentes: Fuentes): Co
   const antes = actual.items.find((x) => x.indice === i)?.clave
   for (let k = 0; k < INTENTOS; k++) {
     const semilla = nuevaSemilla()
-    const g = tipo.generar({ azar: crearAzar(semilla), banco: f.banco, problemas: f.problemas })
+    const g = tipo.generar({ azar: crearAzar(semilla), banco: f.banco, problemas: f.problemas, nivel: nivelPedido(config, it) })
     if (g && g.clave !== antes && !otras.has(`${f.tema}|${g.clave}`)) {
       return { ...config, items: config.items.map((x, j) => (j === i ? { ...x, semilla, fija: false } : x)) }
     }
@@ -186,11 +190,27 @@ export function cambiarItem(config: ConfigHoja, i: number, fuentes: Fuentes): Co
   return config
 }
 
-/** Fija o suelta una pregunta. */
+/** Fija o suelta una pregunta. Al fijarla guarda su dificultad, para que tampoco cambie con la de la hoja. */
 export const fijarItem = (config: ConfigHoja, i: number): ConfigHoja => ({
   ...config,
-  items: config.items.map((x, j) => (j === i ? { ...x, fija: !x.fija } : x)),
+  items: config.items.map((x, j) => (j === i ? { ...x, fija: !x.fija, nivel: nivelPedido(config, x) } : x)),
 })
+
+const acotar = (n: number): Nivel => (n <= 1 ? 1 : n >= 3 ? 3 : 2)
+
+/** La dificultad de toda la hoja: las preguntas vuelven a la de la hoja, salvo las fijadas. Cada una conserva su semilla. */
+export function cambiarNivelHoja(config: ConfigHoja, nivel: Nivel): ConfigHoja {
+  return { ...config, nivel, items: config.items.map((it) => (it.fija ? it : { ...it, nivel: undefined })) }
+}
+
+/** Una pregunta más fácil (−1) o más difícil (+1): la misma semilla con otra dificultad; deja de estar fijada. */
+export function cambiarNivelItem(config: ConfigHoja, i: number, delta: 1 | -1): ConfigHoja {
+  const it = config.items[i]
+  if (!it) return config
+  const nivel = acotar(nivelPedido(config, it) + delta)
+  if (nivel === nivelPedido(config, it)) return config
+  return { ...config, items: config.items.map((x, j) => (j === i ? { ...x, nivel: nivel === (config.nivel ?? 2) ? undefined : nivel, fija: false } : x)) }
+}
 
 /** Cuántas preguntas de cada tipo y tema tiene la hoja (clave "tema|tipo"). */
 export function contar(config: ConfigHoja) {
@@ -218,14 +238,14 @@ export function cambiarCantidad(config: ConfigHoja, tema: string, tipo: string, 
 export function agregarTema(config: ConfigHoja, f: Fuente, fuentes: Fuentes): ConfigHoja {
   if (config.temas.includes(f.tema)) return config
   const temas = [...config.temas.map((t) => fuentes.get(t)).filter((x): x is Fuente => !!x), f]
-  return conFijas(hojaNueva(config.clase, temas, config.filas), config.items)
+  return conFijas(hojaNueva(config.clase, temas, config.filas, undefined, config.nivel), config.items)
 }
 
 /** Quita un tema (el primero, el tema abierto, no se quita). */
 export function quitarTema(config: ConfigHoja, tema: string, fuentes: Fuentes): ConfigHoja {
   if (config.temas[0] === tema || !config.temas.includes(tema)) return config
   const temas = config.temas.filter((t) => t !== tema).map((t) => fuentes.get(t)).filter((x): x is Fuente => !!x)
-  return conFijas(hojaNueva(config.clase, temas, config.filas), config.items.filter((it) => it.tema !== tema))
+  return conFijas(hojaNueva(config.clase, temas, config.filas, undefined, config.nivel), config.items.filter((it) => it.tema !== tema))
 }
 
 /** Las fijadas de antes se quedan, en el lugar de su tema. */
@@ -253,11 +273,12 @@ export function examenDesdeBalotario(balotario: ConfigHoja, fuentes: Fuentes, cu
   }
   const parecidas = elegidas.map((it, k) => {
     const tipo = tipoDe(fuentes, it)
-    return tipo?.cambia === 'numeros' ? { tipo: it.tipo, tema: it.tema, semilla: mezclar(semilla, k + 1) } : { tipo: it.tipo, tema: it.tema, semilla: it.semilla }
+    const nivel = it.nivel ? { nivel: it.nivel } : {}
+    return tipo?.cambia === 'numeros' ? { tipo: it.tipo, tema: it.tema, semilla: mezclar(semilla, k + 1), ...nivel } : { tipo: it.tipo, tema: it.tema, semilla: it.semilla, ...nivel }
   })
   // En el orden del balotario: por tema.
   const items = [...fijas, ...parecidas].sort((a, b) => balotario.temas.indexOf(a.tema) - balotario.temas.indexOf(b.tema))
-  return { clase: 'examen', temas: balotario.temas, areas: balotario.areas, semilla, items, filas: false }
+  return { clase: 'examen', temas: balotario.temas, areas: balotario.areas, semilla, items, filas: false, ...(balotario.nivel ? { nivel: balotario.nivel } : {}) }
 }
 
 /** Las preguntas de una versión por tema, en el orden de la hoja (así se numeran en la pantalla, el PDF y la clave). */

@@ -11,7 +11,7 @@ import { ubicarCita } from '../curriculo/citas'
 import { crearAzar } from '../juegos/motor/azar'
 import { armarVersion, examenDesdeBalotario, hojaNueva, type Fuentes } from './armar'
 import { TIPOS, gruposDe, tiposDelTema } from './catalogo'
-import type { Clase, Fuente, Generado, TemaProblemas } from './tipos'
+import type { Clase, Fuente, Generado, Nivel, TemaProblemas, TipoPregunta } from './tipos'
 
 const niveles = import.meta.glob<CurriculoNivel>('../../../../packages/curriculo/data/*.json', { import: 'default', eager: true })
 const bancos = import.meta.glob<TemaBanco[]>('../banco/*/*.json', { import: 'default', eager: true })
@@ -75,6 +75,56 @@ export function pasosMal(g: Generado): string | null {
   return null
 }
 
+const SEMILLAS_NIVEL = 120
+
+/** Lo que ve el alumno de una pregunta, para saber si dos dificultades dieron la misma. */
+const huella = (g: Generado) => JSON.stringify([g.enunciado, g.pregunta, g.dibujo?.svg, g.forma === 'opciones' ? g.alternativas : g.forma === 'abierta' ? g.respuesta : ''])
+
+/**
+ * Un tipo con `niveles`: con nivel 2 sale lo mismo que sin nivel (los exámenes ya guardados no cambian), los niveles 1
+ * y 3 salen bien (sin texto roto, con sus pasos) y de verdad son otra pregunta en la mayoría de las semillas.
+ */
+function revisarNiveles(t: TipoPregunta, banco: TemaBanco | null): string[] {
+  const errores: string[] = []
+  const nombre = `${t.nombre} (${t.id})`
+  const distintas = { 1: 0, 3: 0 }
+  let comparadas = 0
+  for (let s = 1; s <= SEMILLAS_NIVEL; s++) {
+    const semilla = s * 2654435761
+    const de = (nivel?: Nivel) => t.generar({ azar: crearAzar(semilla), banco, nivel })
+    let base: Generado | null, normal: Generado | null, gs: [1 | 3, Generado | null][]
+    try {
+      base = de()
+      normal = de(2)
+      gs = [
+        [1, de(1)],
+        [3, de(3)],
+      ]
+    } catch (e) {
+      errores.push(`${nombre}, semilla ${s}: ${(e as Error).message}`)
+      break
+    }
+    if ((base && huella(base)) !== (normal && huella(normal))) {
+      errores.push(`${nombre}, semilla ${s}: con nivel 2 no sale la misma pregunta que sin nivel.`)
+      break
+    }
+    if (!base) continue
+    comparadas++
+    for (const [n, g] of gs) {
+      if (!g) continue
+      const p = problemaDe(g) ?? (t.cambia === 'numeros' ? pasosMal(g) : null)
+      if (p) {
+        errores.push(`${nombre}, nivel ${n}, semilla ${s}: ${p}`)
+        return errores
+      }
+      if (huella(g) !== huella(base)) distintas[n]++
+    }
+  }
+  for (const n of [1, 3] as const)
+    if (comparadas && distintas[n] < comparadas * 0.6) errores.push(`${nombre}: con nivel ${n} sale la misma pregunta que la normal en ${comparadas - distintas[n]} de ${comparadas} semillas.`)
+  return errores
+}
+
 export function verificarExamenes() {
   const errores: string[] = []
   const areas = new Map(Object.values(niveles).flatMap((n) => n.grados.flatMap((g) => g.areas.map((a) => [`${g.id}|${a.id}`, a] as const))))
@@ -123,6 +173,7 @@ export function verificarExamenes() {
     if (marcar >= 50 && Math.max(...lugar) > marcar * 0.65)
       errores.push(`${t.nombre} (${t.id}): la correcta cae en la misma letra en ${Math.round((Math.max(...lugar) / marcar) * 100)} % de las versiones.`)
     if (nulos > SEMILLAS_TIPO * 0.2) errores.push(`${t.nombre} (${t.id}): no arma pregunta en ${nulos} de ${SEMILLAS_TIPO} semillas.`)
+    if (t.niveles) errores.push(...revisarNiveles(t, banco4[0] ?? null))
   }
 
   // 3. El banco de problemas: cada tema existe en el banco del grado y cada problema está completo.
@@ -176,7 +227,8 @@ export function verificarExamenes() {
       for (let s = 1; s <= SEMILLAS_TEMA; s++) {
         const clase = (['examen', 'practica', 'balotario'] as const)[s % 3]
         const temasHoja = s % 5 === 0 && otro.tema !== b.tema ? [f, fuentes.get(otro.tema)!] : [f]
-        const config = hojaNueva(clase, temasHoja, clase === 'examen', s * 40503)
+        // También más fáciles y más difíciles.
+        const config = hojaNueva(clase, temasHoja, clase === 'examen', s * 40503, s % 7 === 0 ? 1 : s % 7 === 1 ? 3 : undefined)
         const hojas = [config, ...(clase === 'balotario' ? [examenDesdeBalotario(config, fuentes, 10, s)] : [])]
         for (const h of hojas) {
           for (const fila of h.filas ? ([0, 1] as const) : ([0] as const)) {
