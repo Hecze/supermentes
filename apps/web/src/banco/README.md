@@ -6,7 +6,7 @@ Por tema (`primaria-4/<área>.json`, uno por área; se descarga solo cuando se a
 
 - `cita`: fragmento copiado **letra por letra** de un desempeño oficial del área en el grado, y `competencia` (su número). Es lo que muestra la «i».
 - `palabras` (6–8, con pista), `preguntas` (8, con 3 distractores que son errores típicos) y `pares` (6): alimentan los 17 juegos (`juegoDelBanco` las pasa a la forma de `/api/juego`).
-- `canciones` (2, con ritmos distintos del Perú: cumbia, huayno, festejo, marinera, saya, valicha, tondero, landó): título, `estilo` para el músico y `letra` con `[Estrofa 1]`, `[Coro]`… Se ven en la pantalla de Canción y suenan con Lyria vía OpenRouter (`api/audio.ts`); el audio se guarda en Blob la primera vez y después sale al instante.
+- `canciones` (2, con ritmos distintos del Perú: cumbia, huayno, festejo, marinera, saya, valicha, tondero, landó): título, `estilo` para el músico y `letra` con `[Estrofa 1]`, `[Coro]`… Se ven en la pantalla de Canción como letras para cantar, imprimir o mandar por WhatsApp; son la materia prima de las canciones del canal de YouTube (`obsidian/CANCIONES.md`).
 
 ## Verificación
 

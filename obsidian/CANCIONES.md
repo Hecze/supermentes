@@ -93,12 +93,13 @@ Reglas del diseño:
 ## Costos que no se ven a primera vista
 
 - **El plan Hobby de Vercel no permite uso comercial.** Al cobrar S/ 15 hay que pasar a Pro (US$ 20 al mes por miembro).
+- **Hobby acepta hasta 12 funciones por despliegue** (con más, falla todo el despliegue). Hoy son 8. Lo del canal va en **una sola función**, `api/canal.ts`, que atiende la página Canal, la subida y la revisión diaria (como `api/cuentas.ts`).
 - **En Vercel, evitar:**
   - la optimización de imágenes: usar las miniaturas de `i.ytimg.com` tal cual;
   - guardar videos o audio en Blob: van a YouTube;
   - funciones largas: ya no hay canciones con IA;
   - los eventos personalizados de Analytics, que son de Pro. Qué canciones se usan lo dice YouTube Studio, gratis.
-- **IA por docente:** con S/ 15 al mes, lo que se genere para cada docente tiene que costar centavos. La salida es la misma: generar una vez por tema (ficha, preguntas, sesión base) y servirlo a todos. Medir cuánto cuesta cada herramienta por uso antes de lanzar.
+- **IA por docente:** con S/ 15 al mes, lo que se genere para cada docente tiene que costar centavos. Desde el 19-oct no hay créditos (uso sin límite): hace falta un tope por cuenta y por día en los endpoints con IA, o un docente (o un abuso) se come el margen de muchos. La salida es la misma: generar una vez por tema (ficha, preguntas, sesión base) y servirlo a todos. Medir cuánto cuesta cada herramienta por uso antes de lanzar.
 - **Anuncios:** YouTube puede mostrar anuncios contextuales en videos para niños aunque el canal no esté monetizado, y en clase se ven. El insertado con `youtube-nocookie.com` y `rel=0` muestra solo videos del canal al final, pero los anuncios no se pueden quitar del todo.
 
 ## Fases
@@ -106,7 +107,7 @@ Reglas del diseño:
 0. **Ya (19-oct):** la app deja de crear canciones. Se van «Crear canción», la música con IA y los endpoints `/api/cancion` y `/api/audio`. Quedan las letras del banco (para cantar e imprimir) y las canciones que ya existen en YouTube.
 1. **Con el canal creado:**
    - las tablas, el JSON por grado y la revisión diaria;
-   - en la pantalla Canción, «Canciones de Supermentes» primero;
+   - en la pantalla Canción, los videos del canal entran en la misma lista, primero (no se separan de los de otros canales: el nombre del canal ya lo dice) y reemplazan la tarjeta de su letra;
    - el mockup de la página Canal y, después, su código: vincular videos ya subidos.
 2. **Subida desde la página Canal**, con título, descripción, lista y cita armados solos.
 3. **La fábrica:** el script que produce y sube las canciones del banco, grado por grado.

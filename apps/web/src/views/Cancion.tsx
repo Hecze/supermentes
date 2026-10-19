@@ -1,12 +1,12 @@
-// Canciones del tema. La app no crea canciones (obsidian/CANCIONES.md): muestra las letras del banco para cantar e
-// imprimir y las canciones que ya existen en YouTube. Las del canal de Supermentes entran aquí cuando exista.
+// Canciones del tema. La app no crea canciones (obsidian/CANCIONES.md): muestra en una sola lista las de Supermentes
+// (hoy, las letras del banco, para cantar e imprimir) y las de YouTube. Las del canal de Supermentes entran ahí.
 import { ArrowLeft, Copy, Printer } from 'lucide-react'
 import { useStore } from '../app/store'
-import { useBanco } from '../banco/banco'
+import { cancionDelBanco, useBanco } from '../banco/banco'
+import { textoDeLetra } from '../canciones/letra'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { BarraHoja, Boton, Editable, Hoja, cx, imprimir } from '../components/ui'
-import { CancionesDelTema } from './CancionesDelTema'
-import { CancionesExistentes } from './CancionesExistentes'
+import { ListaCanciones } from './ListaCanciones'
 
 const COLOR = 'var(--cancion)'
 
@@ -21,17 +21,23 @@ export function Cancion() {
     return (
       <>
         <EncabezadoHerramienta id="cancion" />
-        {banco && <CancionesDelTema tema={banco} ficha={ficha} />}
-        <CancionesExistentes ficha={ficha} plegado={!!banco} />
+        <ListaCanciones
+          ficha={ficha}
+          banco={banco}
+          abrirLetra={(i) => {
+            if (!banco) return
+            guardar('cancion', cancionDelBanco(banco.canciones[i]))
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+        />
       </>
     )
   }
 
   async function copiarLetra() {
     if (!cancion) return
-    const texto = [cancion.titulo, '', ...cancion.partes.flatMap((p) => [`[${p.etiqueta}]`, ...p.lineas, ''])].join('\n').trim()
     try {
-      await navigator.clipboard.writeText(texto)
+      await navigator.clipboard.writeText(textoDeLetra(cancion))
       avisar('Letra copiada. Pégala en el grupo de WhatsApp de las familias.', 'ok')
     } catch {
       avisar('No se pudo copiar. Selecciona la letra y cópiala a mano.', 'error')
@@ -78,8 +84,6 @@ export function Cancion() {
           ))}
         </div>
       </Hoja>
-
-      <CancionesExistentes ficha={ficha} plegado />
     </>
   )
 }

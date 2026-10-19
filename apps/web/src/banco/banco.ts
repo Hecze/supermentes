@@ -81,7 +81,7 @@ export function juegoDelBanco(t: TemaBanco): Juego {
 const RITMOS: Record<string, string> = { lando: 'Landó' }
 const nombreRitmo = (r: string) => RITMOS[normalizar(r)] ?? r.charAt(0).toUpperCase() + r.slice(1)
 
-/** La canción del banco lista para mostrarse, imprimirse y sonar (api/audio.ts). */
+/** La canción del banco lista para mostrarse e imprimirse. */
 export function cancionDelBanco(c: CancionBanco): Cancion {
   return { titulo: c.titulo, opciones: { modo: 'ritmo', ritmo: nombreRitmo(c.ritmo), melodia: '', estilo: c.estilo }, partes: partesDeLetra(c.letra) }
 }

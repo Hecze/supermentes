@@ -29,3 +29,8 @@ export function partesDeLetra(texto: string | string[]): Cancion['partes'] {
   }
   return partes.filter((p) => p.lineas.length)
 }
+
+/** La letra en texto plano, para pegarla en el grupo de WhatsApp de las familias. */
+export function textoDeLetra(c: Cancion) {
+  return [c.titulo, '', ...c.partes.flatMap((p) => [`[${p.etiqueta}]`, ...p.lineas, ''])].join('\n').trim()
+}

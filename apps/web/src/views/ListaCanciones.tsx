@@ -1,8 +1,10 @@
-// Canciones que ya existen para el tema: material listo para proyectar en clase o mandar al grupo de WhatsApp
-// de las familias. Cada una trae su "i" con el desempeño oficial del grado que trabaja, citado tal cual.
+// Las canciones del tema en una sola lista, para proyectar en clase o mandar al grupo de WhatsApp de las familias:
+// las de Supermentes (hoy, las letras del banco) y las de YouTube. No se separan: el canal dice de quién es cada una.
+// Cada una trae su "i" con el desempeño oficial del grado que trabaja, citado tal cual.
 import { BadgeCheck, Copy, ExternalLink, Play, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { Ficha } from '../api'
+import type { TemaBanco } from '../banco/banco'
 import { useStore } from '../app/store'
 import { cancionesDelTema, useCanciones, type CancionExistente } from '../canciones/catalogo'
 import { Boton, Desplegable } from '../components/ui'
@@ -10,6 +12,7 @@ import { ubicarCita } from '../curriculo/citas'
 import { useCurriculo } from '../curriculo/cargar'
 import { nivelDe } from '../curriculo/catalogo'
 import { Bloque, BotonInfo, Cita, useSustento, type Sustento } from './SustentoJuego'
+import { TarjetaLetra } from './TarjetaLetra'
 
 const enlace = (id: string) => `https://youtu.be/${id}`
 
@@ -145,61 +148,42 @@ function Tarjeta({ c, s, ficha, ver }: { c: CancionExistente; s: Sustento | null
   )
 }
 
-function Lista({ canciones, s, ficha, ver }: { canciones: CancionExistente[]; s: Sustento | null; ficha: Ficha; ver: (c: CancionExistente) => void }) {
-  return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-      {canciones.map((c) => (
-        <Tarjeta key={c.id} c={c} s={s} ficha={ficha} ver={() => ver(c)} />
-      ))}
-    </ul>
-  )
-}
-
-/** Las canciones del tema; si no hay, las del mismo grado y curso. */
-export function CancionesExistentes({ ficha, plegado }: { ficha: Ficha; plegado?: boolean }) {
+/** Las canciones del tema (primero las de Supermentes); si el tema no tiene, las del mismo grado y curso. */
+export function ListaCanciones({ ficha, banco, abrirLetra }: { ficha: Ficha; banco?: TemaBanco | null; abrirLetra: (i: number) => void }) {
   const todas = useCanciones()
   const s = useSustento(ficha, { fuente: 'tema' })
   const [viendo, setViendo] = useState<CancionExistente | null>(null)
   if (!todas) return null
   const { delTema, otras } = cancionesDelTema(todas, ficha)
-  if (!delTema.length && !otras.length) {
-    // Plegado va debajo de otras canciones (las del banco o la recién creada): ahí el aviso confunde.
-    if (plegado) return null
+  const letras = banco?.canciones.length ? banco : null
+  const hayDelTema = !!letras || delTema.length > 0
+  if (!hayDelTema && !otras.length) {
     return (
       <p className="rounded-2xl border border-dashed border-line px-5 py-4 text-ink-soft">
-        Todavía no tenemos canciones ya hechas de {ficha.area} para {ficha.grado}. Crea una nueva aquí abajo.
+        Todavía no tenemos canciones de {ficha.area} para {ficha.grado}. Estamos subiendo canciones de cada tema a nuestro canal.
       </p>
     )
   }
 
-  const contenido = (
-    <div className="flex flex-col gap-4">
-      {delTema.length > 0 ? (
-        <Lista canciones={delTema} s={s} ficha={ficha} ver={setViendo} />
-      ) : (
-        <p className="text-ink-soft">No encontramos una canción justo de «{ficha.titulo}». Estas son de {ficha.area} para {ficha.grado}:</p>
-      )}
-      {otras.length > 0 &&
-        (delTema.length > 0 ? (
-          <Desplegable titulo={`Más canciones de ${ficha.area} para ${ficha.grado} (${otras.length})`}>
-            <Lista canciones={otras} s={s} ficha={ficha} ver={setViendo} />
-          </Desplegable>
-        ) : (
-          <Lista canciones={otras} s={s} ficha={ficha} ver={setViendo} />
-        ))}
-      {viendo && <Ver c={viendo} cerrar={() => setViendo(null)} />}
-    </div>
-  )
-
-  const total = delTema.length || otras.length
-  if (plegado) return <Desplegable titulo={`Canciones que ya existen para este tema (${total})`}>{contenido}</Desplegable>
+  const videos = (lista: CancionExistente[]) => lista.map((c) => <Tarjeta key={c.id} c={c} s={s} ficha={ficha} ver={() => setViendo(c)} />)
+  const rejilla = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4'
   return (
-    <section className="flex flex-col gap-3">
-      <div>
-        <h2 className="font-display text-2xl font-bold">Canciones que ya existen</h2>
-        <p className="text-ink-soft">Listas para proyectar en clase o mandar al grupo de las familias. Toca la «i» para ver qué parte del currículo trabajan.</p>
-      </div>
-      {contenido}
+    <section className="flex flex-col gap-4">
+      <p className="text-ink-soft">
+        {hayDelTema
+          ? 'Proyéctalas en clase o manda el link al grupo de las familias. La «i» dice qué parte del currículo trabaja cada una.'
+          : `No encontramos una canción justo de «${ficha.titulo}». Estas son de ${ficha.area} para ${ficha.grado}:`}
+      </p>
+      <ul className={rejilla}>
+        {letras?.canciones.map((c, i) => <TarjetaLetra key={c.titulo} tema={letras} i={i} ficha={ficha} abrir={() => abrirLetra(i)} />)}
+        {videos(hayDelTema ? delTema : otras)}
+      </ul>
+      {hayDelTema && otras.length > 0 && (
+        <Desplegable titulo={`Más canciones de ${ficha.area} para ${ficha.grado} (${otras.length})`}>
+          <ul className={rejilla}>{videos(otras)}</ul>
+        </Desplegable>
+      )}
+      {viendo && <Ver c={viendo} cerrar={() => setViendo(null)} />}
     </section>
   )
 }
