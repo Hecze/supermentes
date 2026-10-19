@@ -3,10 +3,11 @@
 import { ArrowRight, Search } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useCuenta } from '../app/cuenta'
-import { ENSENANZA_INICIAL, guardarPerfil, type Ensenanza } from '../app/perfil'
+import { ENSENANZA_INICIAL, colegioValido, guardarPerfil, type Ensenanza } from '../app/perfil'
+import type { TipoColegio } from '../curriculo/catalogo'
 import { useStore } from '../app/store'
 import { tieneBanco } from '../banco/banco'
-import { ElegirCursos, ElegirGrados } from '../components/GradosCursos'
+import { ElegirCursos, ElegirGrados, ElegirTipo } from '../components/GradosCursos'
 import { Logo } from '../components/Logo'
 import { cx } from '../components/ui'
 import { sugerenciasPara } from '../curriculo/buscar'
@@ -60,6 +61,7 @@ export function Onboarding() {
   const [nombre, setNombre] = useState(cuenta.nombre ? `Profe ${cuenta.nombre}` : '')
   const [colegio, setColegio] = useState('')
   const [ensenanza, setEnsenanza] = useState<Ensenanza>(ENSENANZA_INICIAL)
+  const [tipo, setTipo] = useState<TipoColegio>('publico')
   // Los temas del paso 3 salen de su primer grado (y de sus cursos).
   const grado = ensenanza.grados[0] ?? 'primaria-4'
   const cur = useCurriculo(nivelDe(grado), grado)
@@ -67,7 +69,7 @@ export function Onboarding() {
   const temas = cur.estado === 'listo' ? sugerenciasPara([cur.grado], ensenanza.cursos, { [grado]: corto }, 4) : []
 
   function terminar(previo: Parameters<typeof abrirNuevoTema>[0]) {
-    guardarPerfil({ nombre: nombre.trim(), colegio: colegio.trim() || undefined, grado, grados: ensenanza.grados, cursos: ensenanza.cursos })
+    void guardarPerfil({ nombre: nombre.trim(), colegio: colegio.trim() || undefined, grado }, [{ nombre: colegio.trim(), tipo, ...ensenanza }])
     abrirNuevoTema(previo)
   }
 
@@ -125,16 +127,27 @@ export function Onboarding() {
             if (ensenanza.grados.length) setPaso(3)
           }}
         >
+          <div className="flex w-full flex-wrap items-center gap-3">
+            <p className="font-semibold">Tu colegio es</p>
+            <ElegirTipo
+              valor={tipo}
+              onChange={(t) => {
+                setTipo(t)
+                // En un público no existen los cursos partidos (Álgebra, Geometría…): se quitan.
+                setEnsenanza({ ...ensenanza, cursos: colegioValido({ ...ensenanza, tipo: t })?.cursos ?? ensenanza.cursos })
+              }}
+            />
+          </div>
           <div className="flex w-full flex-col gap-3">
             <p className="font-semibold">Tus grados (todos los que quieras)</p>
             <ElegirGrados valor={ensenanza.grados} onChange={(grados) => setEnsenanza({ ...ensenanza, grados })} />
           </div>
           <div className="flex w-full flex-col gap-3">
             <p className="font-semibold">Tus cursos</p>
-            <ElegirCursos grados={ensenanza.grados} valor={ensenanza.cursos} onChange={(cursos) => setEnsenanza({ ...ensenanza, cursos })} />
+            <ElegirCursos grados={ensenanza.grados} tipo={tipo} valor={ensenanza.cursos} onChange={(cursos) => setEnsenanza({ ...ensenanza, cursos })} />
           </div>
           <Seguir disabled={!ensenanza.grados.length}>Seguir</Seguir>
-          <p className="text-sm text-ink-soft">Puedes cambiarlo cuando quieras en «Mi perfil».</p>
+          <p className="text-sm text-ink-soft">Si enseñas en más de un colegio, agrégalos después en «Mi perfil».</p>
         </form>
       </Paso>
     )

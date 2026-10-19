@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
-import { useEnsenanza, usePerfil } from '../app/perfil'
+import { useColegios, useEnsenanza, usePerfil } from '../app/perfil'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { temaPorDefecto } from '../app/temaInstantaneo'
@@ -142,12 +142,13 @@ function ContenidoLateral() {
   )
 }
 
-/** Debajo de "Mi perfil": qué grados y cursos enseña, para que sepa por qué el buscador muestra esos temas. */
+/** Debajo de "Mi perfil": dónde enseña, para que sepa por qué el buscador muestra esos temas. */
 function LoQueEnsena() {
-  const { grados, cursos } = useEnsenanza()
+  const colegios = useColegios()
+  const [c] = colegios
   return (
     <span className="truncate text-xs font-normal text-ink-soft">
-      {nombreGrados(grados)} · {nombreCursos(cursos)}
+      {colegios.length > 1 ? `${colegios.length} colegios` : `${nombreGrados(c.grados)} · ${nombreCursos(c.cursos)}`}
     </span>
   )
 }

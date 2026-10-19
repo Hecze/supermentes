@@ -1,31 +1,52 @@
-// Perfil de la docente: cómo la llaman, su colegio y lo que enseña (grados y cursos). Sale del onboarding y de
-// "Mi perfil"; se guarda en el navegador y, con cuenta, en /api/perfil (tabla docentes), así no se lo volvemos a
-// preguntar en otra computadora. Lo que enseña también vale sin cuenta: el buscador de temas abre con eso.
+// Perfil de la docente: cómo la llaman y dónde enseña (sus colegios, cada uno público o privado, con sus grados y
+// cursos). Sale del onboarding y de "Mi perfil"; se guarda en el navegador y, al tocar «Guardar», en la base
+// (/api/perfil): con cuenta, en docentes; sin cuenta, solo dónde enseña, en docentes_sin_cuenta. El buscador de temas
+// abre con los grados y cursos de su colegio.
 import { useEffect, useState } from 'react'
-import { GRADOS_DOCENTE, cursosDe } from '../curriculo/catalogo'
+import { CURSOS_PRIVADOS, GRADOS_DOCENTE, cursosDe, nivelDe, type TipoColegio } from '../curriculo/catalogo'
 import { tokenDeCuenta, useCuenta } from './cuenta'
 
-export type Perfil = { nombre: string; colegio?: string; grado: string; grados?: string[]; cursos?: string[] }
+/** Un colegio donde enseña. En un privado puede tener cursos que parten un área (Álgebra, Geometría…). */
+export type Colegio = { nombre: string; tipo: TipoColegio; grados: string[]; cursos: string[] }
 
-/** Grados y cursos que enseña la docente. `cursos` vacío = todos los cursos (lo normal en primaria). */
+export type Perfil = { nombre: string; colegio?: string; grado: string; grados?: string[]; cursos?: string[]; colegios?: Colegio[] }
+
+/** Grados y cursos con los que busca temas. `cursos` vacío = todos los cursos. */
 export type Ensenanza = { grados: string[]; cursos: string[] }
 
-/** 4.º de primaria, todos los cursos: el grado con más contenido listo (banco, hojas y canciones). */
+/** 4.º de primaria, todos los cursos: el grado con más contenido listo (banco y hojas). */
 export const ENSENANZA_INICIAL: Ensenanza = { grados: ['primaria-4'], cursos: [] }
+export const COLEGIO_NUEVO: Colegio = { nombre: '', tipo: 'publico', ...ENSENANZA_INICIAL }
 
 const CLAVE = 'supermentes-perfil'
-const CLAVE_ENSENANZA = 'supermentes-ensenanza'
+const CLAVE_COLEGIOS = 'supermentes-colegios'
+const CLAVE_ACTIVO = 'supermentes-colegio-activo'
+const CLAVE_ANONIMO = 'supermentes-anonimo'
 const EVENTO = 'supermentes-perfil'
 
-/** Solo grados y cursos que existen (sin inicial), en el orden del currículo. */
-export function ensenanzaValida(e: Partial<Ensenanza> | null | undefined): Ensenanza | null {
+/** Cursos que se pueden elegir en esos grados: las áreas del currículo y, en un privado, sus cursos propios. */
+function cursosValidos(grados: string[], tipo: TipoColegio) {
+  const niveles = new Set(grados.map(nivelDe))
+  return [
+    ...cursosDe(grados).map((a) => a.id),
+    ...(tipo === 'privado' ? CURSOS_PRIVADOS.filter((c) => c.niveles.some((n) => niveles.has(n))).map((c) => c.id) : []),
+  ]
+}
+
+/** Solo grados y cursos que existen (sin inicial), en el orden del catálogo. */
+export function ensenanzaValida(e: Partial<Ensenanza> | null | undefined, tipo: TipoColegio = 'privado'): Ensenanza | null {
   const grados = GRADOS_DOCENTE.filter((g) => e?.grados?.includes(g.id)).map((g) => g.id)
   if (!grados.length) return null
-  const cursos = cursosDe(grados)
-    .filter((a) => e?.cursos?.includes(a.id))
-    .map((a) => a.id)
-  return { grados, cursos }
+  return { grados, cursos: cursosValidos(grados, tipo).filter((id) => e?.cursos?.includes(id)) }
 }
+
+export function colegioValido(c: Partial<Colegio> | null | undefined): Colegio | null {
+  const tipo = c?.tipo === 'privado' ? 'privado' : 'publico'
+  const e = ensenanzaValida(c, tipo)
+  return e && { nombre: (c?.nombre ?? '').trim().slice(0, 120), tipo, ...e }
+}
+
+const validos = (cs: unknown) => (Array.isArray(cs) ? cs.map(colegioValido).filter((c): c is Colegio => !!c).slice(0, 6) : [])
 
 function leer<T>(clave: string): T | null {
   try {
@@ -40,56 +61,112 @@ function perfilLocal(): Perfil | null {
   return p?.nombre && p.grado ? p : null
 }
 
-/** El grado que se elegía antes en el inicio (un solo grado, sin cursos). */
-function gradoAntiguo(): string[] {
+/** Lo que se guardaba antes de los colegios: un grado (el inicio) o grados y cursos sueltos. */
+function colegioAntiguo(p: Perfil | null): Colegio | null {
+  let grado: string | null = null
   try {
-    const g = localStorage.getItem('supermentes-grado')
-    return g ? [g] : []
+    grado = localStorage.getItem('supermentes-grado')
   } catch {
-    return []
+    // Sin almacenamiento no hay nada de antes.
+  }
+  const e = leer<Ensenanza>('supermentes-ensenanza')
+  return colegioValido({ nombre: p?.colegio, tipo: 'publico', grados: e?.grados ?? p?.grados ?? (p ? [p.grado] : grado ? [grado] : []), cursos: e?.cursos ?? p?.cursos ?? [] })
+}
+
+/** Dónde enseña, según este navegador. Nunca vacío: si no eligió nada, 4.º de primaria. */
+export function colegiosGuardados(): Colegio[] {
+  const cs = validos(leer(CLAVE_COLEGIOS))
+  if (cs.length) return cs
+  const p = perfilLocal()
+  const de = validos(p?.colegios)
+  if (de.length) return de
+  return [colegioAntiguo(p) ?? COLEGIO_NUEVO]
+}
+
+/** El colegio con el que abre el buscador (el último que usó). */
+export function colegioActivo(): number {
+  const i = Number(leer<number>(CLAVE_ACTIVO) ?? 0)
+  return Number.isInteger(i) && i >= 0 && i < colegiosGuardados().length ? i : 0
+}
+
+export function elegirColegioActivo(i: number) {
+  try {
+    localStorage.setItem(CLAVE_ACTIVO, JSON.stringify(i))
+  } catch {
+    // Sin almacenamiento dura esta visita.
   }
 }
 
-/** Lo que enseña, de este navegador; si nunca lo eligió, el grado del onboarding o 4.º de primaria. */
+/** Grados y cursos de su colegio activo: con eso abre el buscador y se elige el primer tema. */
 export function ensenanzaGuardada(): Ensenanza {
-  const p = perfilLocal()
-  return (
-    ensenanzaValida(leer<Ensenanza>(CLAVE_ENSENANZA)) ??
-    ensenanzaValida({ grados: p ? [p.grado] : gradoAntiguo(), cursos: [] }) ??
-    ENSENANZA_INICIAL
-  )
+  const c = colegiosGuardados()[colegioActivo()]
+  return { grados: c.grados, cursos: c.cursos }
 }
 
-function guardarLocal(p: Perfil | null, e?: Ensenanza) {
+function guardarLocal(p: Perfil | null, colegios: Colegio[]) {
   try {
     if (p) localStorage.setItem(CLAVE, JSON.stringify(p))
-    if (e) localStorage.setItem(CLAVE_ENSENANZA, JSON.stringify(e))
+    localStorage.setItem(CLAVE_COLEGIOS, JSON.stringify(colegios))
   } catch {
     // Sin almacenamiento vale por esta visita.
   }
   window.dispatchEvent(new Event(EVENTO))
 }
 
-function subir(p: Perfil) {
-  tokenDeCuenta().then((t) => {
-    if (t) void fetch('/api/perfil', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(p) }).catch(() => {})
-  })
+/** Id que este navegador inventa la primera vez: así se guarda dónde enseña quien usa la app sin cuenta. */
+function idSinCuenta(): string {
+  try {
+    let id = localStorage.getItem(CLAVE_ANONIMO)
+    if (!id) {
+      id = crypto.randomUUID()
+      localStorage.setItem(CLAVE_ANONIMO, id)
+    }
+    return id
+  } catch {
+    return crypto.randomUUID()
+  }
 }
 
-export function guardarPerfil(p: Perfil) {
-  const e = ensenanzaValida({ grados: p.grados ?? [p.grado], cursos: p.cursos ?? [] }) ?? ensenanzaGuardada()
-  const completo = { ...p, grado: e.grados[0], grados: e.grados, cursos: e.cursos }
-  guardarLocal(completo, e)
-  subir(completo)
+/** Todos sus grados y cursos juntos, para la base (la verdad está en `colegios`). */
+function juntos(colegios: Colegio[]): Ensenanza {
+  const grados = GRADOS_DOCENTE.filter((g) => colegios.some((c) => c.grados.includes(g.id))).map((g) => g.id)
+  return { grados, cursos: [...new Set(colegios.flatMap((c) => c.cursos))] }
 }
 
-/** Guarda lo que enseña; con cuenta también va al perfil del servidor. */
-export function guardarEnsenanza(e: Ensenanza) {
-  const valida = ensenanzaValida(e)
-  if (!valida) return
+/** Lo manda a la base: con cuenta, el perfil completo; sin cuenta, solo dónde enseña. `true` si se guardó. */
+async function subir(p: Perfil | null, colegios: Colegio[]): Promise<boolean> {
+  try {
+    const t = await tokenDeCuenta()
+    const todo = juntos(colegios)
+    const datos = t && p ? { ...p, ...todo, colegios } : { ...todo, colegios, anonimo: idSinCuenta() }
+    const r = await fetch('/api/perfil', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(t && p ? { Authorization: `Bearer ${t}` } : {}) },
+      body: JSON.stringify(datos),
+    })
+    return r.ok
+  } catch {
+    return false
+  }
+}
+
+/** Guarda cómo la llaman y dónde enseña, en este navegador y en la base. `true` si llegó a la base. */
+export function guardarPerfil(p: Perfil, colegios: Colegio[]): Promise<boolean> {
+  const cs = validos(colegios)
+  const lista = cs.length ? cs : colegiosGuardados()
+  const completo: Perfil = { ...p, colegio: lista[0].nombre || p.colegio, grado: lista[0].grados[0], ...juntos(lista), colegios: lista }
+  guardarLocal(completo, lista)
+  return subir(completo, lista)
+}
+
+/** Guarda dónde enseña, con o sin cuenta. `true` si llegó a la base. */
+export function guardarColegios(colegios: Colegio[]): Promise<boolean> {
   const p = perfilLocal()
-  if (!p) return guardarLocal(null, valida)
-  guardarPerfil({ ...p, grados: valida.grados, cursos: valida.cursos })
+  if (p) return guardarPerfil(p, colegios)
+  const cs = validos(colegios)
+  if (!cs.length) return Promise.resolve(false)
+  guardarLocal(null, cs)
+  return subir(null, cs)
 }
 
 /** El perfil, buscándolo en la cuenta si este navegador no lo tiene. `cargando` mientras se pregunta. */
@@ -113,8 +190,8 @@ export function usePerfil() {
       .then((r) => (r?.ok ? (r.json() as Promise<{ perfil: Perfil | null }>) : null))
       .then((d) => {
         if (!d?.perfil) return
-        const e = ensenanzaValida({ grados: d.perfil.grados?.length ? d.perfil.grados : [d.perfil.grado], cursos: d.perfil.cursos ?? [] })
-        guardarLocal(d.perfil, e ?? undefined)
+        const cs = validos(d.perfil.colegios)
+        guardarLocal(d.perfil, cs.length ? cs : [colegioAntiguo(d.perfil) ?? COLEGIO_NUEVO])
       })
       .catch(() => {})
       .finally(() => vivo && setCargando(false))
@@ -126,7 +203,18 @@ export function usePerfil() {
   return { perfil, cargando }
 }
 
-/** Lo que enseña la docente, al día con "Mi perfil". */
+/** Dónde enseña, al día con "Mi perfil". */
+export function useColegios(): Colegio[] {
+  const [cs, setCs] = useState(colegiosGuardados)
+  useEffect(() => {
+    const actualizar = () => setCs(colegiosGuardados())
+    window.addEventListener(EVENTO, actualizar)
+    return () => window.removeEventListener(EVENTO, actualizar)
+  }, [])
+  return cs
+}
+
+/** Grados y cursos de su colegio activo, al día con "Mi perfil". */
 export function useEnsenanza(): Ensenanza {
   const [e, setE] = useState(ensenanzaGuardada)
   useEffect(() => {

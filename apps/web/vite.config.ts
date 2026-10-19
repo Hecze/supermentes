@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
@@ -29,7 +30,10 @@ const funcionesDeVercel: Plugin = {
       const nombre = req.url?.match(/^\/api\/([a-z-]+)(?:\?|$)/)?.[1]
       if (!nombre) return next()
       try {
-        const modulo = await server.ssrLoadModule(resolve(repo, `api/${nombre}.ts`))
+        // Las rutas de la cuenta (perfil, salones, tareas…) viven en api/_<ruta>.ts y las atiende api/cuentas.ts,
+        // como hace la reescritura de vercel.json en producción.
+        const archivo = existsSync(resolve(repo, `api/${nombre}.ts`)) || !existsSync(resolve(repo, `api/_${nombre}.ts`)) ? nombre : 'cuentas'
+        const modulo = await server.ssrLoadModule(resolve(repo, `api/${archivo}.ts`))
         const manejar = modulo[req.method ?? 'GET']
         if (!manejar) return void res.writeHead(405).end()
         const partes: Buffer[] = []
