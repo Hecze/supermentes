@@ -1,19 +1,19 @@
 // Supermentes en Cloudflare: la app estática (apps/web/dist) y las funciones de api/ en un solo Worker.
 // Las mismas rutas que vercel.json.
 import { D1_GLOBAL } from '../api/_db.js'
-import * as entrarDemo from '../api/entrar-demo.js'
+import * as entrarDemo from '../api/_entrar-demo.js'
 import * as ficha from '../api/ficha.js'
-import * as intentos from '../api/intentos.js'
+import * as intentos from '../api/_intentos.js'
 import * as juego from '../api/juego.js'
 import * as juegosCompartidos from '../api/juegos-compartidos.js'
 import * as listaEspera from '../api/lista-espera.js'
-import * as misEnvios from '../api/mis-envios.js'
-import * as perfil from '../api/perfil.js'
+import * as misEnvios from '../api/_mis-envios.js'
+import * as perfil from '../api/_perfil.js'
 import * as recursos from '../api/recursos.js'
 import * as resultados from '../api/resultados.js'
-import * as salones from '../api/salones.js'
+import * as salones from '../api/_salones.js'
 import * as sesion from '../api/sesion.js'
-import * as tareas from '../api/tareas.js'
+import * as tareas from '../api/_tareas.js'
 
 type Handler = (request: Request) => Promise<Response>
 const API: Record<string, Record<string, Handler>> = {
