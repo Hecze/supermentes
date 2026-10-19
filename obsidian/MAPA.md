@@ -5,7 +5,7 @@ actualizado: 2026-10-19
 # Mapa — Supermentes
 
 > Todo el producto en una página: qué hace, qué funciona de verdad y qué falta. El porqué está en
-> [[VISION]], dónde quedamos en [[ESTADO]] y el evento en [[HACKATHON]].
+> [[VISION]] y dónde quedamos en [[ESTADO]].
 
 ## El flujo
 
@@ -59,7 +59,5 @@ cuello de botella.
   privados, UGEL/MINEDU, o freemium con donante. Sin decidir.
 - **Costo por docente.** Cuánto cuesta en IA un docente activo al mes, ahora que con cuenta el uso no tiene
   límite (sin créditos desde el 19-oct). Sin medir.
-- **Qué mostrar en la entrega** (domingo 18, 9:00 a. m.). Cuáles herramientas tienen que funcionar
-  con IA real y cuáles pueden quedar como ejemplo.
 - **Canal.** Grupos de WhatsApp de docentes y referidos de la lista de espera parecen el canal
   natural; sin probar.

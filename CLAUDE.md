@@ -1,10 +1,10 @@
 # Supermentes
 
-Herramientas de IA para docentes del Perú, hechas para Hack the Andes 2026 (entrega: 18 de octubre de 2026, 9:00 a. m., hora de Lima).
+Herramientas de IA para docentes del Perú.
 
 ## El currículo es el eje
 
-Un jurado, un director o un docente puede preguntar en cualquier momento "¿por qué esto cumple el currículo?". La respuesta no puede ser "yo creo que": tiene que ser una cita del texto oficial, mostrada en segundos. Antes de crear, ofrecer o cambiar cualquier contenido, piensa esto primero; no adivines.
+Un director o un docente puede preguntar en cualquier momento "¿por qué esto cumple el currículo?". La respuesta no puede ser "yo creo que": tiene que ser una cita del texto oficial, mostrada en segundos. Antes de crear, ofrecer o cambiar cualquier contenido, piensa esto primero; no adivines.
 
 - **Todo se apoya en un desempeño oficial del grado** (`packages/curriculo`, copiado de los programas curriculares del MINEDU): juegos, canciones, exámenes, crucigramas y adaptaciones. Si ningún desempeño del grado lo respalda, no se ofrece en ese grado.
 - **Cita textual o no va.** Se guarda el fragmento exacto del desempeño, no un resumen, y se verifica que aparezca tal cual. Ejemplo: `apps/web/src/juegos/matematica/curriculo.ts` y `npm run verificar:curriculo` (corre también en `npm run typecheck` y falla si una cita no coincide letra por letra).
@@ -37,7 +37,6 @@ Lee:
 - `obsidian/VISION.md`: qué construimos, para quién y los principios de diseño.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/ESTADO.md`: dónde quedamos, qué sigue y los riesgos conocidos.
-- `obsidian/HACKATHON.md`: condiciones del evento, reto de tracción y créditos gratis.
 - `obsidian/MATERIALES.md`: cómo son los materiales del docente (balotario, examen, clave, material extra…) y cómo deben verse, dicho por docentes. Léelo antes de tocar exámenes o materiales.
 - `obsidian/DATOS.md`: cifras con fuente (docentes, horas extra, aprendizajes, cuánto pagan, costos de IA). Úsalas en vez de inventar números.
 - `README.md`: páginas, principios de diseño, endpoints y costos.

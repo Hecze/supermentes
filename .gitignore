@@ -6,4 +6,3 @@ dist-preview
 .DS_Store
 obsidian/.obsidian/workspace*.json
 .vercel
-apps/web/public/presentacion

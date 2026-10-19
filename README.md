@@ -2,8 +2,6 @@
 
 Herramientas de IA para docentes del Perú. El docente busca su tema en el Currículo Nacional y Supermentes lo crea al instante con su **ficha del tema** (competencia y desempeños oficiales; la IA completa ideas clave y vocabulario en segundo plano) y, a partir de ella, crea solo lo que el docente pide: una sesión de aprendizaje en formato MINEDU, una canción, un juego web, un crucigrama, o las hojas del tema listas para imprimir: examen, práctica y balotario, con su clave (en 4.º; ver `apps/web/src/examenes`).
 
-Proyecto para Hack the Andes 2026.
-
 ## Páginas
 
 | Ruta | Qué es |

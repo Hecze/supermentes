@@ -4,7 +4,7 @@ actualizado: 2026-10-19
 
 # Visión — Supermentes
 
-> Qué queremos construir y por qué. Lo que ya está hecho va en [[ESTADO]]; el evento, en [[HACKATHON]].
+> Qué queremos construir y por qué. Lo que ya está hecho va en [[ESTADO]].
 
 ## En una frase
 **Crea canciones, juegos y exámenes para tu clase en minutos**, a partir del Currículo Nacional del Perú.

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node ../../presentacion/armar.mjs && vite build",
+    "build": "vite build",
     "typecheck": "tsc --noEmit && node scripts/verificar-curriculo.mjs",
     "verificar:curriculo": "node scripts/verificar-curriculo.mjs",
     "verificar:enlaces": "node scripts/verificar-enlaces.mjs",

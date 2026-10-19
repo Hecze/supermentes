@@ -1,6 +1,6 @@
 // "¿Por qué cumple el currículo?": el icono "i" de cada juego. Con texto oficial del MINEDU dice qué competencia
 // abarca el tema, qué hacen los alumnos en el juego y qué parte exacta del desempeño del grado practican.
-// Pensado para leerse en voz alta en segundos, frente a un jurado o a un director.
+// Pensado para leerse en voz alta en segundos, frente a un director o a un docente.
 import { BadgeCheck, Info, TriangleAlert } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Ficha } from '../api'

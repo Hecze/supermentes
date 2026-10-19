@@ -4,8 +4,8 @@ actualizado: 2026-10-17
 
 # Datos — Supermentes
 
-> Cifras con fuente sobre el docente peruano, sus alumnos y cuánto se paga hoy por material. Sirven para el
-> pitch, la landing, los videos y cualquier texto. Quién paga y cómo vendemos está en [[GTM]].
+> Cifras con fuente sobre el docente peruano, sus alumnos y cuánto se paga hoy por material. Sirven para la
+> landing, los videos y cualquier texto. Quién paga y cómo vendemos está en [[GTM]].
 >
 > **Regla:** usa la cifra con su fuente y en palabras del aula (columna "Cómo decirlo"). Si no está aquí,
 > búscala antes de escribirla; no la inventes.

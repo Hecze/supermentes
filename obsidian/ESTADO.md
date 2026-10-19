@@ -7,7 +7,7 @@ actualizado: 2026-10-19
 > Única fuente de verdad de "dónde quedamos". Se reemplaza, no se acumula (≤ 60 líneas).
 
 ## En qué estamos
-Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/supermentes`, rama `main`). Monorepo Turborepo: el sitio en `apps/web`, funciones en `api/` en la raíz (funciones de Vercel), notas en `obsidian/`.
+Herramientas de IA para docentes del Perú (repo `Hecze/supermentes`, rama `main`). Monorepo Turborepo: el sitio en `apps/web`, funciones en `api/` en la raíz (funciones de Vercel), notas en `obsidian/`.
 
 - **Producción en Vercel** (proyecto `supermentes`, https://www.supermentes.app; el dominio usa los DNS de Vercel). Cloudflare se dejó el 19-oct: se borraron el Worker, `wrangler.jsonc` y las tablas de D1. Variables en Vercel hoy (19-oct): `DATABASE_URL` (Neon), `OPENROUTER_API_KEY`, `LISTA_CLAVE` y `BLOB_READ_WRITE_TOKEN`. **Faltan `CLERK_SECRET_KEY`** (sin ella toda ruta de la cuenta responde «Entra con tu cuenta») **y `EXA_API_KEY`** (videos del tema), y **crear las tablas en Neon** con `npm run db:postgres` (sin ellas `GET /api/tareas?codigo=…` da 500). Las `VITE_*` ya van en `.env` y `.env.production`. Archivos en Vercel Blob. Lo guardado en D1 y R2 durante Cloudflare no se copió.
 - **Landing en `/`** con lista de espera real: `api/lista-espera.ts` guarda cada registro como archivo privado en Vercel Blob. Contador público, enlace para invitar (`?ref=`) y fuente (`utm_source`). CSV de inscritos: `/api/lista-espera?formato=csv&clave=…` (clave en `LISTA_CLAVE`).
@@ -28,7 +28,6 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 - **Tareas por salón (en producción, 0179c44):** flujo de `obsidian/TAREAS.md` y `demos/tareas/`. En "Manda el juego a las familias", "Como tarea" asigna el Concurso a un salón (la primera vez pega la lista de nombres; pide cuenta si no la hay) y manda el link `/t/CODIGO` por WhatsApp. El alumno elige su nombre ("ya la hizo"), juega 10 preguntas con reloj por grado (30/20/15 s, no se pausa, barajadas) y cuenta el primer intento. "Revisar" muestra cada tarea por salón: entregaron, promedio, quién no llegó a la mitad, lo que más costó con la cita del desempeño, podio y recordar por WhatsApp. Tablas: `migrations-postgres/0001_tablas.sql` (Neon) y `migrations/0003_salones_tareas.sql` (D1); endpoints `api/salones.ts`, `api/tareas.ts`, `api/intentos.ts`.
 
 ## Siguiente paso
-- **Entrega (domingo 18, 9:00):** todo en `submit/` (descripción, enlaces, avances y `enviar.sh`; ver su README). Deck en supermentes.app/presentacion, armado desde `presentacion/` en cada build. Repo público. Falta enviar con `sh submit/enviar.sh --enviar`.
 - Backend `/api` con Claude (ficha, juego): contratos en `apps/web/src/api/types.ts`, endpoints en el README. Cada endpoint debe recibir `ficha.curriculo.desempenos` y devolver, por ítem, la cita textual del desempeño que trabaja (validada contra `packages/curriculo`), para que examen y preguntas del tema tengan el mismo icono "i" que los juegos de cálculo.
 - Banco para los demás grados de primaria y de secundaria, sin orden de preferencia (mismo formato, ver `apps/web/src/banco/README.md`): con él cada tema tiene juegos, canciones y examen listo; los tipos de Matemática con dibujos necesitan las citas de ese grado. Persistencia (biblioteca), pictogramas ARASAAC.
 - Juegos: que `/api/juego` cree más preguntas de las que entran en una partida (hoy las del tema se repiten al reintentar; el cálculo ya es procedural), clasificar en grupos y, cuando haya cuentas, pasar la clave de resultados a la cuenta del docente.
@@ -47,14 +46,10 @@ Herramientas de IA para docentes del Perú (Hack the Andes 2026, repo `Hecze/sup
 
 ## Dónde mirar
 - `obsidian/DATOS.md`: cifras con fuente (horas extra del docente, aprendizajes, cuánto pagan, costos de IA).
-- `presentacion/`: el deck del pitch (link en su README).
-- `obsidian/GTM.md`: tracción para el jurado, quién paga y guiones de TikTok.
+- `obsidian/GTM.md`: tracción, quién paga y guiones de TikTok.
 - `obsidian/MATERIALES.md`: cómo son y cómo deben verse los materiales del docente (balotario, examen por tema y bimestral, clave con procedimiento, material extra, hoja tipo libro, reforzamiento, reportes), según la entrevista del 18-oct, y qué falta en Supermentes.
 - `obsidian/entrevistas/`: entrevistas con docentes (la del 18-oct con Lucho y Yessly: exámenes, balotarios, material extra, precio S/ 10–15).
-- `obsidian/MVP.md`: qué tiene que funcionar para la entrega y qué no hacer.
 - `obsidian/MAPA.md`: el producto en una página (flujo, estado de cada pieza, decisiones abiertas).
 - `obsidian/VISION.md`: visión y principios del producto.
-- `obsidian/HACKATHON.md`: condiciones del evento, entrega y créditos gratis.
-- `obsidian/TRACCION.md`: plan para conseguir docentes reales antes de la entrega (canales, textos listos, anuncio de S/50 y cómo medir).
 - `README.md` de la raíz: páginas, lista de espera, currículo, principios de diseño, endpoints y costos.
 - `packages/curriculo/README.md`: fuentes oficiales y formato de los JSON.
