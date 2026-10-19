@@ -1,10 +1,10 @@
 // Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
 // Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Download, FileText, Gamepad2, Music, Printer, SlidersHorizontal } from 'lucide-react'
+import { BadgeCheck, Download, Printer, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { type OpcionesSesion, type Sesion as TipoSesion } from '../api'
 import { INTERESES } from '../app/herramientas'
-import { useStore, type Vista } from '../app/store'
+import { useStore } from '../app/store'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { BarraHoja, Boton, Chip, Desplegable, Editable, Hoja, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
 import { sesionPlantilla } from '../sesion/plantilla'
@@ -380,14 +380,8 @@ const archivo = (titulo: string) =>
 
 // ---------- La vista ----------
 
-const ATAJOS: { vista: Vista; texto: string; icono: typeof Music }[] = [
-  { vista: 'cancion', texto: 'Agrega una canción para esta sesión', icono: Music },
-  { vista: 'juego', texto: 'Agrega un juego para esta sesión', icono: Gamepad2 },
-  { vista: 'examen', texto: 'Agrega un examen para esta sesión', icono: FileText },
-]
-
 export function Sesion() {
-  const { ficha, resultados, guardar, avisar, ir } = useStore()
+  const { ficha, resultados, guardar, avisar } = useStore()
   const sesion = resultados.sesion
   const [opciones, setOpciones] = useState<OpcionesSesion>(sesion?.opciones ?? { duracion: ficha?.duracion?.startsWith('90') ? 90 : 45 })
   const [otra, setOtra] = useState(false)
@@ -441,23 +435,6 @@ export function Sesion() {
           <HojaSesion s={actual} area={area} />
         </div>
       </Hoja>
-
-      <section className="flex flex-col gap-3 print:hidden">
-        <h2 className="font-display text-2xl font-bold">Completa tu sesión</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {ATAJOS.map(({ vista, texto, icono: Icono }) => (
-            <button
-              key={vista}
-              type="button"
-              onClick={() => ir(vista)}
-              className="flex items-center gap-3 rounded-2xl border-2 border-line bg-surface p-4 text-left font-medium transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <Icono className="size-6 shrink-0" style={{ color: `var(--${vista})` }} aria-hidden />
-              {texto}
-            </button>
-          ))}
-        </div>
-      </section>
 
       <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Ajusta tu sesión">
         <ElegirOpciones opciones={opciones} cambiar={setOpciones} />
