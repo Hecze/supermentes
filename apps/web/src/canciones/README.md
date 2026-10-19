@@ -20,6 +20,6 @@ Cada entrada:
 
 Búsqueda en YouTube por área y grado, solo canciones con letra que enseñan el tema, para niños, de canales educativos y en español (Inglés en inglés). Cada canción se asignó solo a los grados cuyo desempeño la respalda.
 
-Huecos conocidos (no hay canción buena o ningún desempeño lo respalda; en 4.º los cubre el banco de contenido, `src/banco`, con 2 canciones propias por tema): cadenas alimenticias, célula, ecosistemas y sistema solar en Ciencia; perímetro, área, medidas, estadística y dinero en Matemática; tipos de texto (cuento, fábula, carta, noticia) y pronombres en Comunicación; símbolos patrios (no figuran en los desempeños de primaria), culturas preíncas y departamentos en Personal Social; arte tradicional peruano en 6.º; postura, equilibrio y juegos cooperativos en Educación Física.
+Huecos conocidos (no hay canción buena o ningún desempeño lo respalda; los irá llenando nuestro canal, `obsidian/CANCIONES.md`): cadenas alimenticias, célula, ecosistemas y sistema solar en Ciencia; perímetro, área, medidas, estadística y dinero en Matemática; tipos de texto (cuento, fábula, carta, noticia) y pronombres en Comunicación; símbolos patrios (no figuran en los desempeños de primaria), culturas preíncas y departamentos en Personal Social; arte tradicional peruano en 6.º; postura, equilibrio y juegos cooperativos en Educación Física.
 
 Algunas se eligieron solo por título, canal y vistas porque YouTube bloqueó la lectura de descripciones: conviene revisarlas antes de usarlas en clase.

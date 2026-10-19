@@ -81,7 +81,7 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/real.ts` | Llamadas a `/api/*` |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
 | `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
-| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas, parejas y 2 canciones, con cita del currículo |
+| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas y parejas, con cita del currículo |
 | `src/app/` | Estado global, catálogo de herramientas, cuenta |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |
@@ -98,7 +98,7 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 ## Costos
 
-No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 19-oct). La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no llaman a la IA. La app no crea canciones: salen de nuestro canal de YouTube, una por tema para todos los docentes (`obsidian/CANCIONES.md`). Lo caro (imágenes) se genera solo a pedido y después de una vista previa barata: primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez con la IA y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
+No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 19-oct). La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no llaman a la IA. La app no crea canciones: salen de nuestro canal de YouTube, una por tema para todos los docentes (`obsidian/CANCIONES.md`). Lo caro (imágenes) se genera solo a pedido y después de una vista previa barata: primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez con la IA y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas y parejas: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 

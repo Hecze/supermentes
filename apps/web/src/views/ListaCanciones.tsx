@@ -1,10 +1,9 @@
-// Las canciones del tema en una sola lista, para proyectar en clase o mandar al grupo de WhatsApp de las familias:
-// las de Supermentes (hoy, las letras del banco) y las de YouTube. No se separan: el canal dice de quién es cada una.
+// Las canciones del tema en una sola lista, para proyectar en clase o mandar al grupo de WhatsApp de las familias.
+// Solo videos de YouTube: los del canal de Supermentes y los de otros canales van juntos; el canal dice de quién es.
 // Cada una trae su "i" con el desempeño oficial del grado que trabaja, citado tal cual.
 import { BadgeCheck, Copy, ExternalLink, Play, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { Ficha } from '../api'
-import type { TemaBanco } from '../banco/banco'
 import { useStore } from '../app/store'
 import { cancionesDelTema, useCanciones, type CancionExistente } from '../canciones/catalogo'
 import { Boton, Desplegable } from '../components/ui'
@@ -12,7 +11,6 @@ import { ubicarCita } from '../curriculo/citas'
 import { useCurriculo } from '../curriculo/cargar'
 import { nivelDe } from '../curriculo/catalogo'
 import { Bloque, BotonInfo, Cita, useSustento, type Sustento } from './SustentoJuego'
-import { TarjetaLetra } from './TarjetaLetra'
 
 const enlace = (id: string) => `https://youtu.be/${id}`
 
@@ -148,16 +146,14 @@ function Tarjeta({ c, s, ficha, ver }: { c: CancionExistente; s: Sustento | null
   )
 }
 
-/** Las canciones del tema (primero las de Supermentes); si el tema no tiene, las del mismo grado y curso. */
-export function ListaCanciones({ ficha, banco, abrirLetra }: { ficha: Ficha; banco?: TemaBanco | null; abrirLetra: (i: number) => void }) {
+/** Las canciones del tema; si el tema no tiene, las del mismo grado y curso. */
+export function ListaCanciones({ ficha }: { ficha: Ficha }) {
   const todas = useCanciones()
   const s = useSustento(ficha, { fuente: 'tema' })
   const [viendo, setViendo] = useState<CancionExistente | null>(null)
   if (!todas) return null
   const { delTema, otras } = cancionesDelTema(todas, ficha)
-  const letras = banco?.canciones.length ? banco : null
-  const hayDelTema = !!letras || delTema.length > 0
-  if (!hayDelTema && !otras.length) {
+  if (!delTema.length && !otras.length) {
     return (
       <p className="rounded-2xl border border-dashed border-line px-5 py-4 text-ink-soft">
         Todavía no tenemos canciones de {ficha.area} para {ficha.grado}. Estamos subiendo canciones de cada tema a nuestro canal.
@@ -170,15 +166,12 @@ export function ListaCanciones({ ficha, banco, abrirLetra }: { ficha: Ficha; ban
   return (
     <section className="flex flex-col gap-4">
       <p className="text-ink-soft">
-        {hayDelTema
+        {delTema.length
           ? 'Proyéctalas en clase o manda el link al grupo de las familias. La «i» dice qué parte del currículo trabaja cada una.'
           : `No encontramos una canción justo de «${ficha.titulo}». Estas son de ${ficha.area} para ${ficha.grado}:`}
       </p>
-      <ul className={rejilla}>
-        {letras?.canciones.map((c, i) => <TarjetaLetra key={c.titulo} tema={letras} i={i} ficha={ficha} abrir={() => abrirLetra(i)} />)}
-        {videos(hayDelTema ? delTema : otras)}
-      </ul>
-      {hayDelTema && otras.length > 0 && (
+      <ul className={rejilla}>{videos(delTema.length ? delTema : otras)}</ul>
+      {delTema.length > 0 && otras.length > 0 && (
         <Desplegable titulo={`Más canciones de ${ficha.area} para ${ficha.grado} (${otras.length})`}>
           <ul className={rejilla}>{videos(otras)}</ul>
         </Desplegable>

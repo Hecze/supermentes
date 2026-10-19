@@ -1,24 +1,14 @@
 import { useEffect, useState } from 'react'
-import type { Cancion, Ficha, Juego } from '../api'
-import { partesDeLetra } from '../canciones/letra'
+import type { Ficha, Juego } from '../api'
 import { normalizar } from '../curriculo/buscar'
 
-// Banco de contenido listo por tema del Currículo Nacional: palabras, preguntas, parejas y dos canciones.
-// Así cada tema tiene juegos y canciones apenas se crea, sin esperar ni gastar en la IA.
+// Banco de contenido listo por tema del Currículo Nacional: palabras, preguntas y parejas.
+// Así cada tema tiene juegos apenas se crea, sin esperar ni gastar en la IA. Las canciones no van aquí: solo se
+// muestran las que están en YouTube (obsidian/CANCIONES.md).
 //
 // Hoy cubre todos los temas de 4.º de primaria (`primaria-4/<área>.json`). Cada tema guarda `cita`: un fragmento
 // copiado letra por letra de un desempeño oficial de su área y grado. `npm run verificar:curriculo` comprueba cada
-// cita y que todos los temas del grado tengan al menos 2 juegos y 2 canciones (banco/verificar.ts).
-
-export type CancionBanco = {
-  titulo: string
-  /** cumbia, huayno, festejo, marinera, saya, valicha, tondero o landó. */
-  ritmo: string
-  /** Cómo se oye, para el generador de música: "huayno andino alegre, 95 bpm, charango y quena…". */
-  estilo: string
-  /** Líneas de la letra; las marcas de sección van solas: "[Coro]", "[Estrofa 1]". */
-  letra: string[]
-}
+// cita y que todos los temas del grado tengan al menos 2 juegos (banco/verificar.ts).
 
 export type TemaBanco = {
   /** El tema tal cual figura en el currículo (packages/curriculo). */
@@ -30,7 +20,6 @@ export type TemaBanco = {
   palabras: { palabra: string; pista: string }[]
   preguntas: { pregunta: string; respuesta: string; distractores: string[] }[]
   pares: { a: string; b: string }[]
-  canciones: CancionBanco[]
 }
 
 const archivos = import.meta.glob<TemaBanco[]>('./*/*.json', { import: 'default' })
@@ -76,12 +65,4 @@ export function juegoDelBanco(t: TemaBanco): Juego {
     pares: t.pares.map((p) => ({ a: { texto: p.a }, b: { texto: p.b } })),
     palabras: t.palabras,
   }
-}
-
-const RITMOS: Record<string, string> = { lando: 'Landó' }
-const nombreRitmo = (r: string) => RITMOS[normalizar(r)] ?? r.charAt(0).toUpperCase() + r.slice(1)
-
-/** La canción del banco lista para mostrarse e imprimirse. */
-export function cancionDelBanco(c: CancionBanco): Cancion {
-  return { titulo: c.titulo, opciones: { modo: 'ritmo', ritmo: nombreRitmo(c.ritmo), melodia: '', estilo: c.estilo }, partes: partesDeLetra(c.letra) }
 }
