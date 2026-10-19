@@ -8,6 +8,8 @@ export type DatosDocumento = {
   institucion: string
   docente: string
   logo?: string
+  /** El lema del colegio, para el pie de las hojas. */
+  lema?: string
 }
 
 /** Cómo se escribe el colegio en un documento. */
@@ -30,7 +32,7 @@ export function useDatosDocumento(tema: { gradoId: string; areaId: string } | nu
   const colegios = useColegios()
   const { perfil } = usePerfil()
   const c = colegioPara(colegios, tema?.gradoId, tema?.areaId)
-  return { institucion: rotuloColegio(c), docente: perfil?.nombre ?? '', logo: c?.logo }
+  return { institucion: rotuloColegio(c), docente: perfil?.nombre ?? '', logo: c?.logo, lema: c?.lema }
 }
 
 /** Ancho y alto de una imagen (para ubicar el logo en el PDF sin deformarlo). */
@@ -45,27 +47,32 @@ export async function medirImagen(url: string): Promise<{ url: string; ancho: nu
   }
 }
 
-/** Achica la imagen que sube la docente a un logo de hasta 256 px (PNG, conserva el fondo transparente). */
-export async function logoDesdeArchivo(archivo: File): Promise<string | null> {
+/** La imagen que eligió la docente, lista para medirla y recortarla (null si no es una imagen). */
+export async function cargarImagen(archivo: File): Promise<HTMLImageElement | null> {
   if (!archivo.type.startsWith('image/')) return null
-  const url = URL.createObjectURL(archivo)
+  const img = new Image()
+  img.src = URL.createObjectURL(archivo)
   try {
-    const img = new Image()
-    img.src = url
     await img.decode()
-    for (const lado of [256, 192, 128]) {
-      const escala = Math.min(1, lado / Math.max(img.naturalWidth, img.naturalHeight))
-      const c = document.createElement('canvas')
-      c.width = Math.max(1, Math.round(img.naturalWidth * escala))
-      c.height = Math.max(1, Math.round(img.naturalHeight * escala))
-      c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height)
-      const png = c.toDataURL('image/png')
-      if (png.length <= 200_000) return png
-    }
-    return null
+    return img
   } catch {
     return null
-  } finally {
-    URL.revokeObjectURL(url)
   }
+}
+
+export const esCuadrada = (img: HTMLImageElement) => Math.abs(img.naturalWidth - img.naturalHeight) <= Math.max(img.naturalWidth, img.naturalHeight) * 0.02
+
+/**
+ * El logo: el cuadrado de la imagen que empieza en (x, y) y mide `lado` (en píxeles de la imagen), a 256 px en PNG
+ * (conserva el fondo transparente). Si pesa mucho, más chico.
+ */
+export function logoRecortado(img: HTMLImageElement, x: number, y: number, lado: number): string | null {
+  for (const px of [256, 192, 128]) {
+    const c = document.createElement('canvas')
+    c.width = c.height = px
+    c.getContext('2d')!.drawImage(img, x, y, lado, lado, 0, 0, px, px)
+    const png = c.toDataURL('image/png')
+    if (png.length <= 200_000) return png
+  }
+  return null
 }

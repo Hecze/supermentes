@@ -65,7 +65,7 @@ export function fuenteDe(gradoId: string, tema: string, area: Area): Fuente {
   return { tema: banco?.tema ?? tema, areaId: area.areaId, area: area.nombre, banco, problemas, tipos: tiposDelTema(gradoId, area.areaId, tema, banco, problemas) }
 }
 
-export type Colegio = { colegio: string; docente: string; seccion: string; logo?: string }
+export type Colegio = { colegio: string; docente: string; seccion: string; logo?: string; lema?: string }
 
 const CLAVE_SECCION = 'supermentes-seccion'
 
@@ -99,6 +99,7 @@ export function useColegio(tema: { gradoId: string; areaId: string } | null): [C
     docente: cambios.docente ?? datos.docente,
     seccion: cambios.seccion ?? '',
     logo: datos.logo,
+    lema: datos.lema,
   }
   return [c, cambiar]
 }

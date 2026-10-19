@@ -2,7 +2,7 @@
 //
 //   GET  /api/perfil  Authorization: Bearer <token de Clerk>  → { perfil: { nombre, colegio?, grado, grados, cursos, colegios } | null }
 //   POST /api/perfil  Authorization: Bearer …  { nombre, colegios, grados, cursos }  → { perfil }        (tabla docentes)
-//   (cada colegio: { nombre, numero?, logo?, tipo, grados, cursos }; el logo es un data URL de hasta ~200 KB)
+//   (cada colegio: { nombre, numero?, lema?, logo?, tipo, grados, cursos }; el logo es un data URL de hasta ~200 KB)
 //   POST /api/perfil  { anonimo: <id del navegador>, colegios, grados, cursos }  → { perfil }          (docentes_sin_cuenta)
 //
 // `colegios` es dónde enseña: [{ nombre, tipo: 'publico' | 'privado', grados, cursos }] (cursos vacío = todos; en un
@@ -15,7 +15,7 @@ import { db } from './_db.js'
 import { json, objeto, texto } from './_juegos.js'
 
 type Fila = { nombre: string; colegio: string | null; grado: string; grados: string | null; cursos: string | null; colegios: string | null }
-type Colegio = { nombre: string; numero?: string; logo?: string; tipo: 'publico' | 'privado'; grados: string[]; cursos: string[] }
+type Colegio = { nombre: string; numero?: string; lema?: string; logo?: string; tipo: 'publico' | 'privado'; grados: string[]; cursos: string[] }
 
 /** El logo del colegio: una imagen chica que la app ya achicó (ver apps/web/src/app/documento.ts). */
 const LOGO = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/
@@ -37,10 +37,12 @@ function colegiosDe(v: unknown): Colegio[] {
     .map((x) => {
       const c = objeto(x)
       const numero = texto(c.numero, 12)
+      const lema = texto(c.lema, 120)
       const logo = typeof c.logo === 'string' && c.logo.length <= 300_000 && LOGO.test(c.logo) ? c.logo : undefined
       return {
         nombre: texto(c.nombre, 120),
         ...(numero && { numero }),
+        ...(lema && { lema }),
         ...(logo && { logo }),
         tipo: c.tipo === 'privado' ? 'privado' : 'publico',
         grados: lista(c.grados, GRADO, 11),

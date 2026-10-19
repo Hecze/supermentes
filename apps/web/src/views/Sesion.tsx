@@ -119,17 +119,33 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
   const m = s.minutos
   return (
     <div className="flex flex-col gap-5 text-[15px] leading-relaxed">
-      <header className="flex flex-col items-center gap-1 text-center">
-        {/* El colegio y su logo, de "Mi perfil" (app/documento.ts). */}
-        {doc.logo && <img src={doc.logo} alt="" className="h-16 object-contain" />}
-        {doc.institucion && <p className="font-semibold">{doc.institucion}</p>}
-        <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
-        <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
-          {s.titulo}
-        </Editable>
-        <p className="text-ink-soft">
-          {s.grado} · {s.area} · {s.opciones.duracion} minutos
-        </p>
+      {/* El logo en la columna izquierda (ocupa todas las filas) y el colegio y el título a su derecha. Es una tabla
+          sin bordes para que el .docx (lib/docx.ts) la arme igual. */}
+      <header>
+        <table data-sin-bordes className="w-full border-collapse">
+          <tbody>
+            <tr>
+              {doc.logo && (
+                <td className="w-24 pr-3 align-middle">
+                  <img src={doc.logo} alt="" className="size-24 object-contain" />
+                </td>
+              )}
+              <td className="text-center align-middle">
+                <div className="flex flex-col items-center gap-1">
+                  {doc.institucion && <p className="font-semibold">{doc.institucion}</p>}
+                  <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
+                  <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
+                    {s.titulo}
+                  </Editable>
+                  <p className="text-ink-soft">
+                    {s.grado} · {s.area} · {s.opciones.duracion} minutos
+                  </p>
+                </div>
+              </td>
+              {doc.logo && <td className="w-24" aria-hidden />}
+            </tr>
+          </tbody>
+        </table>
       </header>
 
       <section className="flex flex-col gap-2">

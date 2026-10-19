@@ -476,36 +476,44 @@ function VistaHoja({
   return (
     <div className="papel">
       <Hoja className="gap-6">
-        <header className="flex flex-col gap-3">
-          <div className="flex items-start justify-between gap-4">
-            {colegio.logo && <img src={colegio.logo} alt="" className="size-16 shrink-0 object-contain" />}
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <Campo valor={colegio.colegio} cambiar={(x) => cambiarColegio({ colegio: x })} placeholder="Nombre del colegio" className="text-lg font-semibold" />
-              <p className="flex flex-wrap items-center gap-x-1.5 text-lg text-ink-soft">
-                <span>{cursosDe(config, fuentes)} ·</span>
-                <Campo valor={colegio.seccion} cambiar={(x) => cambiarColegio({ seccion: x })} placeholder={ficha.grado} imprimirVacio />
-                <span>·</span>
-                <Campo valor={colegio.docente} cambiar={(x) => cambiarColegio({ docente: x })} placeholder="Docente" />
+        {/* Como las hojas de los colegios: marco, logo y título en la misma fila, la nota punteada a la derecha,
+            los datos del alumno debajo, una raya gruesa y, al pie, el colegio y su lema. */}
+        <div className="flex flex-1 flex-col gap-6 border border-black p-4 sm:p-6">
+          <header className="flex flex-col gap-2 text-black">
+            <div className="flex items-start gap-3">
+              {colegio.logo && <img src={colegio.logo} alt="" className="size-24 shrink-0 object-contain" />}
+              <h2 className="min-w-0 flex-1 self-center text-center font-serif text-2xl font-bold uppercase leading-tight sm:text-3xl">
+                {TITULOS[clase]} de {cursosDe(config, fuentes)}
+              </h2>
+              {clase === 'examen' && (
+                <div className="flex shrink-0 flex-col items-center gap-1">
+                  <span className="h-24 w-20 border-2 border-dashed border-black" aria-hidden />
+                  <span className="text-[11px] tracking-[0.45em]">NOTA</span>
+                </div>
+              )}
+            </div>
+            <div className={cx('flex flex-col gap-0.5 text-sm', colegio.logo && 'sm:pl-12')}>
+              <p className="flex items-end gap-1">
+                <span className="font-bold">Apellidos y Nombres</span>:
+                <span className="mb-1 flex-1 border-b border-dotted border-black" aria-hidden />
+              </p>
+              <p className="flex flex-wrap items-end gap-x-10 gap-y-0.5">
+                <span className="flex items-end gap-1">
+                  Grado: <Campo valor={colegio.seccion} cambiar={(x) => cambiarColegio({ seccion: x })} placeholder={ficha.grado} imprimirVacio />
+                </span>
+                <span>{clase === 'balotario' ? 'Para el examen del' : 'Fecha'}: ______ / ______ / ________</span>
+                {v.fila && <span className="ml-auto font-bold">{v.fila}</span>}
+              </p>
+              {config.temas.length <= 2 && <p>Tema: {config.temas.join(' · ')}</p>}
+              <p className="flex items-end gap-1">
+                Profesor(a): <Campo valor={colegio.docente} cambiar={(x) => cambiarColegio({ docente: x })} placeholder="Tu nombre" className="uppercase" />
+              </p>
+              <p>
+                <span className="font-bold">¡TEN PRESENTE!</span> Lee atentamente las indicaciones que ofrece cada pregunta.
               </p>
             </div>
-            {clase === 'examen' && (
-              <div className="flex shrink-0 flex-col items-center gap-1">
-                <span className="text-ink-soft">Nota</span>
-                <span className="size-16 rounded-xl border-2 border-ink" aria-hidden />
-              </div>
-            )}
-          </div>
-          <h2 className="font-display text-3xl font-bold leading-tight">{tituloDe(config, fuentes)}</h2>
-          <p className="flex flex-wrap gap-x-8 gap-y-2 text-lg">
-            <span className="flex items-end gap-2">
-              Nombre: <span className="mb-1 h-px w-56 bg-ink-soft sm:w-72" aria-hidden />
-            </span>
-            <span className="flex items-end gap-2">
-              {clase === 'balotario' ? 'Para el examen del' : 'Fecha'}: <span className="mb-1 h-px w-24 bg-ink-soft" aria-hidden />
-            </span>
-            {v.fila && <span className="font-semibold">{v.fila}</span>}
-          </p>
-        </header>
+            <hr className="mt-2 border-t-[3px] border-black" />
+          </header>
 
         {grupos.map((g, k) => {
           const f = fuentes.get(g.tema)
@@ -545,6 +553,16 @@ function VistaHoja({
             </section>
           )
         })}
+          <footer className="mt-auto flex flex-wrap items-end justify-between gap-x-6 gap-y-1 pt-4 text-xs text-black">
+            <Campo
+              valor={colegio.colegio}
+              cambiar={(x) => cambiarColegio({ colegio: x })}
+              placeholder="Nombre del colegio"
+              className="flex-1 font-mono font-bold uppercase tracking-widest"
+            />
+            {colegio.lema && <span className="uppercase">"{colegio.lema}"</span>}
+          </footer>
+        </div>
       </Hoja>
     </div>
   )
@@ -731,6 +749,7 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
           colegio: colegio.colegio,
           docente: colegio.docente,
           logo: colegio.logo ? await medirImagen(colegio.logo) : null,
+          lema: colegio.lema,
           temas: config.temas.map((t) => ({ tema: t, teoria: fuentes.get(t)?.problemas?.teoria ?? null })),
           subtitulos: config.temas.length > 1,
           versiones,

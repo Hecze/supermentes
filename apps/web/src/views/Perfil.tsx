@@ -3,11 +3,12 @@
 // guarda hasta tocar «Guardar» (arriba, siempre a la vista): una sola petición a la base.
 import { Check, ImagePlus, Plus, Trash2 } from 'lucide-react'
 import { useRef, useState, type ReactNode } from 'react'
-import { logoDesdeArchivo } from '../app/documento'
+import { cargarImagen, esCuadrada, logoRecortado } from '../app/documento'
 import { useCuenta } from '../app/cuenta'
 import { COLEGIO_NUEVO, colegioValido, guardarColegios, guardarPerfil, useColegios, usePerfil, type Colegio } from '../app/perfil'
 import { useStore } from '../app/store'
 import { ElegirCursos, ElegirGrados, ElegirTipo } from '../components/GradosCursos'
+import { RecortarLogo } from '../components/RecortarLogo'
 import { Boton } from '../components/ui'
 
 function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -21,22 +22,24 @@ function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) 
 
 const campo = 'h-12 w-full rounded-xl border-2 border-line bg-surface px-4 font-normal focus:border-ink focus:outline-none'
 
-/** El logo para el encabezado de sus documentos: se sube, se achica y se ve al lado del nombre. */
+/** El logo para el encabezado de sus documentos, siempre cuadrado: si la imagen no lo es, se recorta en una ventana. */
 function Logo({ logo, cambiar }: { logo?: string; cambiar: (logo?: string) => void }) {
   const entrada = useRef<HTMLInputElement>(null)
   const { avisar } = useStore()
+  const [recortar, setRecortar] = useState<HTMLImageElement | null>(null)
+  const elegir = () => entrada.current?.click()
   return (
     <div className="flex items-center gap-3">
       <button
         type="button"
-        onClick={() => entrada.current?.click()}
+        onClick={elegir}
         className="grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-dashed border-line bg-surface-2 text-ink-soft hover:border-ink-soft hover:text-ink"
         aria-label={logo ? 'Cambiar el logo' : 'Subir el logo'}
       >
-        {logo ? <img src={logo} alt="Logo del colegio" className="size-full object-contain p-1" /> : <ImagePlus className="size-7" aria-hidden />}
+        {logo ? <img src={logo} alt="Logo del colegio" className="size-full object-contain" /> : <ImagePlus className="size-7" aria-hidden />}
       </button>
       <div className="flex flex-col items-start gap-1 text-sm">
-        <button type="button" onClick={() => entrada.current?.click()} className="font-semibold underline-offset-4 hover:underline">
+        <button type="button" onClick={elegir} className="font-semibold underline-offset-4 hover:underline">
           {logo ? 'Cambiar logo' : 'Subir logo'}
         </button>
         {logo && (
@@ -54,9 +57,20 @@ function Logo({ logo, cambiar }: { logo?: string; cambiar: (logo?: string) => vo
           const archivo = e.target.files?.[0]
           e.target.value = ''
           if (!archivo) return
-          const logo = await logoDesdeArchivo(archivo)
-          if (logo) cambiar(logo)
-          else avisar('No pudimos usar esa imagen. Prueba con un PNG o JPG.', 'error')
+          const img = await cargarImagen(archivo)
+          if (!img) return avisar('No pudimos usar esa imagen. Prueba con un PNG o JPG.', 'error')
+          if (!esCuadrada(img)) return setRecortar(img)
+          const lado = Math.min(img.naturalWidth, img.naturalHeight)
+          const listo = logoRecortado(img, (img.naturalWidth - lado) / 2, (img.naturalHeight - lado) / 2, lado)
+          if (listo) cambiar(listo)
+        }}
+      />
+      <RecortarLogo
+        imagen={recortar}
+        cancelar={() => setRecortar(null)}
+        listo={(l) => {
+          cambiar(l)
+          setRecortar(null)
         }}
       />
     </div>
@@ -104,6 +118,16 @@ function TarjetaColegio({ colegio, n, cambiar, quitar }: { colegio: Colegio; n: 
             value={colegio.nombre}
             onChange={(e) => cambiar({ ...colegio, nombre: e.target.value })}
             placeholder="José Carlos Mariátegui"
+            maxLength={120}
+            className={campo}
+          />
+        </label>
+        <label className="flex w-full flex-col gap-1.5 font-semibold">
+          Lema (opcional)
+          <input
+            value={colegio.lema ?? ''}
+            onChange={(e) => cambiar({ ...colegio, lema: e.target.value })}
+            placeholder="El colegio de la disciplina y la excelencia académica"
             maxLength={120}
             className={campo}
           />

@@ -6,6 +6,8 @@ import type { FileChild, IParagraphOptions, ParagraphChild } from 'docx'
 type Docx = typeof import('docx')
 
 const INLINE = /^inline/
+/** Ancho útil de una hoja A4 con márgenes de 2 cm, en twips (1/20 de punto). */
+const ANCHO_UTIL = 11906 - 2 * 1134
 const OCULTO = (el: Element) => el.tagName === 'BUTTON' || el.classList.contains('print:hidden') || getComputedStyle(el).display === 'none'
 
 /** "rgb(23, 32, 49)" → "172031"; transparente → null. */
@@ -73,9 +75,21 @@ function armador(d: Docx) {
   const soloEnLinea = (el: Element) =>
     [...el.children].every((h) => OCULTO(h) || h.tagName === 'BR' || INLINE.test(getComputedStyle(h).display))
 
-  const tabla = (el: HTMLTableElement): FileChild =>
-    new d.Table({
-      width: { size: 100, type: d.WidthType.PERCENTAGE },
+  // Las columnas, con el ancho que tienen en pantalla. Una tabla con data-sin-bordes (por ejemplo, el logo al lado
+  // del título) se arma sin bordes.
+  const tabla = (el: HTMLTableElement): FileChild => {
+    const ancho = el.getBoundingClientRect().width || 1
+    const twips = (celda: HTMLTableCellElement) => {
+      // Una celda con imagen (el logo) mide al menos lo que la imagen: 1 px = 15 twips, más los márgenes de la celda.
+      const img = celda.querySelector('img')
+      const minimo = img ? Math.round(img.getBoundingClientRect().width * 15) + 240 : 300
+      return Math.max(minimo, Math.round((celda.getBoundingClientRect().width / ancho) * ANCHO_UTIL))
+    }
+    const primera = [...(el.rows[0]?.cells ?? [])]
+    return new d.Table({
+      width: { size: ANCHO_UTIL, type: d.WidthType.DXA },
+      columnWidths: primera.flatMap((c) => Array(c.colSpan).fill(Math.round(twips(c) / c.colSpan))),
+      ...(el.hasAttribute('data-sin-bordes') && { borders: d.TableBorders.NONE }),
       rows: [...el.rows].map(
         (tr) =>
           new d.TableRow({
@@ -87,11 +101,14 @@ function armador(d: Docx) {
                 columnSpan: celda.colSpan > 1 ? celda.colSpan : undefined,
                 shading: fondo && fondo !== 'FFFFFF' ? { fill: fondo, type: d.ShadingType.CLEAR, color: 'auto' } : undefined,
                 margins: { top: 60, bottom: 60, left: 80, right: 80 },
+                verticalAlign: getComputedStyle(celda).verticalAlign === 'middle' ? d.VerticalAlign.CENTER : undefined,
+                width: { size: twips(celda), type: d.WidthType.DXA },
               })
             }),
           }),
       ),
     })
+  }
 
   /** Los bloques de un elemento: párrafos, tablas, viñetas e imágenes, en orden. */
   function bloques(el: Element): FileChild[] {
