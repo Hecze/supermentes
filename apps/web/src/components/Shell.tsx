@@ -1,11 +1,13 @@
-import { CircleAlert, CircleCheck, House, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { CircleAlert, CircleCheck, Info, Library, LoaderCircle, Menu, Moon, Search, Sun, UserRound, X } from 'lucide-react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
-import { usePerfil } from '../app/perfil'
+import { useEnsenanza, usePerfil } from '../app/perfil'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
+import { temaPorDefecto } from '../app/temaInstantaneo'
+import { nombreCursos, nombreGrados } from '../curriculo/catalogo'
 import { Logo } from './Logo'
 import { NuevoTema } from './NuevoTema'
 import { SelectorTema } from './SelectorTema'
@@ -32,8 +34,8 @@ function Docente() {
   if (!entro) {
     return (
       <div className="min-w-0">
-        <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
-        <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
+        <p className="truncate text-sm font-semibold">{perfil?.nombre ?? `Prof. ${DOCENTE.nombre}`}</p>
+        <p className="truncate text-xs text-ink-soft">{perfil ? perfil.colegio : DOCENTE.colegio}</p>
       </div>
     )
   }
@@ -97,13 +99,9 @@ function ContenidoLateral() {
   const { ir } = useStore()
   return (
     <>
-      <button type="button" onClick={() => ir('inicio')} className="self-start rounded-lg">
+      <button type="button" onClick={() => ir('ficha')} className="self-start rounded-lg">
         <Logo />
       </button>
-
-      <ItemNav vista="inicio" icono={<House className="size-5" />}>
-        Inicio
-      </ItemNav>
 
       <SelectorTema />
 
@@ -117,6 +115,12 @@ function ContenidoLateral() {
       <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
         <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
           Biblioteca
+        </ItemNav>
+        <ItemNav vista="perfil" icono={<UserRound className="size-5" />}>
+          <span className="flex min-w-0 flex-col">
+            Mi perfil
+            <LoQueEnsena />
+          </span>
         </ItemNav>
       </nav>
 
@@ -138,9 +142,41 @@ function ContenidoLateral() {
   )
 }
 
+/** Debajo de "Mi perfil": qué grados y cursos enseña, para que sepa por qué el buscador muestra esos temas. */
+function LoQueEnsena() {
+  const { grados, cursos } = useEnsenanza()
+  return (
+    <span className="truncate text-xs font-normal text-ink-soft">
+      {nombreGrados(grados)} · {nombreCursos(cursos)}
+    </span>
+  )
+}
+
+/** Nunca falta un tema: si la docente no tiene ninguno, se crea el primero de lo que enseña (4.º de primaria al empezar). */
+function useTemaSiempre() {
+  const { ficha, nuevoTemaAbierto, setFicha, completarFicha } = useStore()
+  const ensenanza = useEnsenanza()
+  const creando = useRef(false)
+  useEffect(() => {
+    if (ficha || nuevoTemaAbierto || creando.current) return
+    creando.current = true
+    temaPorDefecto(ensenanza)
+      .then((f) => {
+        if (!f) return
+        setFicha(f)
+        completarFicha(f)
+      })
+      .catch(() => {})
+      .finally(() => {
+        creando.current = false
+      })
+  }, [ficha, nuevoTemaAbierto, ensenanza, setFicha, completarFicha])
+}
+
 export function Shell({ children }: { children: ReactNode }) {
   const { vista, ficha } = useStore()
   const [menu, setMenu] = useState(false)
+  useTemaSiempre()
 
   // Al navegar o cambiar de tema, el menú del celular se cierra.
   useEffect(() => setMenu(false), [vista, ficha?.id])
@@ -260,16 +296,18 @@ export function EncabezadoHerramienta({ id, accion }: { id: HerramientaId; accio
   )
 }
 
-/** Lo que se ve si todavía no hay ningún tema. */
+/** Lo que se ve el momento en que se prepara el primer tema (useTemaSiempre). */
 export function SinTema() {
   const { abrirNuevoTema } = useStore()
+  const { grados } = useEnsenanza()
   return (
     <div className="flex flex-col items-start gap-4 rounded-3xl border-2 border-dashed border-line bg-surface p-8">
-      <p className="text-lg text-ink-soft">Hola, {DOCENTE.saludo}</p>
-      <h1 className="font-display text-3xl font-bold sm:text-4xl">Empieza con el tema de tu próxima clase</h1>
-      <p className="max-w-xl text-lg text-ink-soft">Búscalo en el Currículo Nacional y preparamos canciones, exámenes, juegos y más. Solo toma un minuto.</p>
-      <Boton tam="lg" onClick={() => abrirNuevoTema()}>
-        <Search className="size-5" aria-hidden /> Buscar mi tema
+      <p className="flex items-center gap-2 text-lg text-ink-soft">
+        <LoaderCircle className="size-5 animate-spin" aria-hidden /> Preparando un tema de {nombreGrados(grados)}…
+      </p>
+      <h1 className="font-display text-3xl font-bold sm:text-4xl">Tu clase, a partir del Currículo Nacional</h1>
+      <Boton tam="lg" variante="contorno" onClick={() => abrirNuevoTema()}>
+        <Search className="size-5" aria-hidden /> Buscar otro tema
       </Boton>
     </div>
   )

@@ -4,7 +4,7 @@ import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { Clase, ConfigHoja } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
-export const VISTAS = ['inicio', 'ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
+export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados', 'perfil'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
@@ -73,9 +73,10 @@ const Ctx = createContext<Store | null>(null)
 function vistaDelHash(): Vista {
   try {
     const h = window.location.hash.replace('#', '')
-    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'inicio'
+    // Sin vista (o la del antiguo inicio), se abre el tema.
+    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'ficha'
   } catch {
-    return 'inicio'
+    return 'ficha'
   }
 }
 
@@ -123,6 +124,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [guardados] = useState(() => (MODO_EJEMPLO ? null : temasGuardados()))
   const [temas, setTemas] = useState<Ficha[]>(guardados?.temas ?? TEMAS_INICIALES)
   const [fichaId, setFichaId] = useState<string | null>(guardados ? guardados.fichaId : FICHA_EJEMPLO.id)
+  // Siempre hay un tema elegido si existe alguno (y si no hay ninguno, lo crea useTemaSiempre en components/Shell.tsx).
+  const ficha = temas.find((t) => t.id === fichaId) ?? temas[0] ?? null
+  const idActual = ficha?.id ?? null
 
   useEffect(() => {
     if (MODO_EJEMPLO) return
@@ -195,10 +199,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const guardar = useCallback(
     <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => {
-      if (!fichaId) return
-      setPorTema((r) => ({ ...r, [fichaId]: { ...r[fichaId], [clave]: valor } }))
+      if (!idActual) return
+      setPorTema((r) => ({ ...r, [idActual]: { ...r[idActual], [clave]: valor } }))
     },
-    [fichaId],
+    [idActual],
   )
 
   const avisar = useCallback((texto: string, tono: Tono = 'info') => {
@@ -218,7 +222,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setTema(siguiente)
   }, [])
 
-  const ficha = temas.find((t) => t.id === fichaId) ?? null
 
   const verCurriculo = useCallback(
     (gradoId: string, areaId: string) => {
@@ -252,7 +255,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setPestanaBiblioteca,
         curriculoAbierto,
         verCurriculo,
-        resultados: (fichaId && porTema[fichaId]) || {},
+        resultados: (idActual && porTema[idActual]) || {},
         guardar,
         avisos,
         avisar,

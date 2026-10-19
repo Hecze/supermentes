@@ -402,7 +402,7 @@ export function RevisarTarea({ tarea, volver }: { tarea: TareaRevisada; volver: 
 
   function abrirTema(v: Vista) {
     const t = temas.find((t) => t.titulo === tarea.tema && t.gradoId === tarea.grado)
-    if (!t) return avisar(`Abre el tema «${tarea.tema}» desde Inicio para ${v === 'sesion' ? 'preparar la sesión' : 'repasarlo'}.`)
+    if (!t) return avisar(`Abre el tema «${tarea.tema}» con «Buscar otro tema» para ${v === 'sesion' ? 'preparar la sesión' : 'repasarlo'}.`)
     elegirTema(t.id)
     ir(v)
   }

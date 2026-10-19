@@ -101,6 +101,29 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
   return res.sort((x, y) => x.orden - y.orden).map(({ orden: _, ...r }) => r)
 }
 
+/** Cursos con los que se empieza cuando la docente enseña "todos los cursos". */
+const PRINCIPALES = ['matematica', 'comunicacion', 'ciencia-y-tecnologia', 'personal-social', 'ciencias-sociales']
+
+/**
+ * Sin escribir nada: los primeros temas de cada grado y curso que enseña, turnándose (un tema de cada uno y luego
+ * el siguiente), para empezar con un clic. Con "todos los cursos" se usan los principales del nivel.
+ */
+export function sugerenciasPara(grados: GradoCurriculo[], cursos: string[], nombres: Record<string, string>, maximo = 8): Resultado[] {
+  const pares = grados.flatMap((g) =>
+    (cursos.length ? cursos : PRINCIPALES)
+      .map((id) => g.areas.find((a) => a.id === id))
+      .filter((a): a is AreaCurriculo => !!a)
+      .map((a) => ({ g, a, temas: temasDe(a) })),
+  )
+  const res: Resultado[] = []
+  for (let i = 0; res.length < maximo && pares.some((p) => p.temas[i]); i++)
+    for (const { g, a, temas } of pares) {
+      const t = temas[i]
+      if (t && res.length < maximo) res.push({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: g.id, grado: nombres[g.id] ?? g.id, areaId: a.id, area: a.nombre })
+    }
+  return res
+}
+
 /** Temas que coinciden en todos los grados (para cuando no aparece en el grado elegido). */
 export async function buscarEnTodos(q: string, nombres: Record<string, string>, excepto?: string): Promise<Resultado[]> {
   const b = consulta(q)

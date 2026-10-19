@@ -7,13 +7,12 @@ import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
-import { Inicio } from './views/Inicio'
 import { Juego } from './views/Juego'
 import { Onboarding } from './views/Onboarding'
+import { Perfil } from './views/Perfil'
 import { Sesion } from './views/Sesion'
 
 const VISTAS = {
-  inicio: Inicio,
   ficha: Ficha,
   sesion: Sesion,
   cancion: Cancion,
@@ -22,6 +21,7 @@ const VISTAS = {
   crucigrama: Crucigrama,
   biblioteca: Biblioteca,
   resultados: Juego,
+  perfil: Perfil,
 }
 
 function Pantalla() {

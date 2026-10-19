@@ -1,37 +1,42 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { ensenanzaGuardada, ensenanzaValida } from '../app/perfil'
 import { useStore, type Vista } from '../app/store'
-import { fichaDesdeCurriculo } from '../app/temaInstantaneo'
-import { cargarBanco, temaEnBanco } from '../banco/banco'
-import { buscarEnGrado, buscarEnTodos, fundamento, normalizar, temasDe, type Resultado } from '../curriculo/buscar'
-import { GRADOS_CURRICULO, NIVELES, areaPorId, nivelDe } from '../curriculo/catalogo'
-import { cargarNivel, useCurriculo, type GradoCurriculo } from '../curriculo/cargar'
-import { ubicarCita } from '../curriculo/citas'
+import { fichaDeResultado } from '../app/temaInstantaneo'
+import { buscarEnGrado, buscarEnTodos, normalizar, sugerenciasPara, type Resultado } from '../curriculo/buscar'
+import { GRADOS_DOCENTE, areaPorId, nivelDe, nombreCursos, nombreGrados, type Nivel } from '../curriculo/catalogo'
+import { cargarNivel, type GradoCurriculo } from '../curriculo/cargar'
+import { FiltroCursos, FiltroGrados } from './GradosCursos'
 import { cx } from './ui'
 
-const NOMBRES = Object.fromEntries(GRADOS_CURRICULO.map((g) => [g.id, g.corto]))
-const CLAVE_GRADO = 'supermentes-grado'
+const NOMBRES = Object.fromEntries(GRADOS_DOCENTE.map((g) => [g.id, g.corto]))
 const MAXIMO = 8
 
-function gradoGuardado() {
-  try {
-    const g = localStorage.getItem(CLAVE_GRADO)
-    return g && NOMBRES[g] ? g : null
-  } catch {
-    return null
-  }
+/** El currículo de los grados elegidos (cada nivel se descarga una vez). */
+function useGrados(ids: string[]): GradoCurriculo[] | null {
+  const [porId, setPorId] = useState<Record<string, GradoCurriculo>>({})
+  const niveles = [...new Set(ids.map(nivelDe))].sort().join(',')
+  useEffect(() => {
+    let vivo = true
+    void Promise.all((niveles ? (niveles.split(',') as Nivel[]) : []).map(cargarNivel)).then((datos) => {
+      if (vivo) setPorId(Object.fromEntries(datos.flatMap((d) => d?.grados ?? []).map((g) => [g.id, g])))
+    })
+    return () => {
+      vivo = false
+    }
+  }, [niveles])
+  const grados = ids.map((id) => porId[id]).filter(Boolean)
+  return grados.length === ids.length ? grados : null
 }
 
-/** Sin escribir nada: dos temas de cada curso principal del grado, para empezar con un clic. */
-export function sugerenciasDelGrado(grado: GradoCurriculo): Resultado[] {
-  const principales = ['matematica', 'comunicacion', 'ciencia-y-tecnologia', 'personal-social']
-  return principales.flatMap((id) => {
-    const a = grado.areas.find((x) => x.id === id)
-    if (!a) return []
-    return temasDe(a)
-      .slice(0, 2)
-      .map((t) => ({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: grado.id, grado: NOMBRES[grado.id] ?? grado.id, areaId: a.id, area: a.nombre }))
-  })
+/** Con varios grados, los resultados se turnan (el mejor de cada grado primero) para que ninguno quede tapado. */
+function turnar(rs: Resultado[]): Resultado[] {
+  const grupos = new Map<string, Resultado[]>()
+  for (const r of rs) grupos.set(r.gradoId, [...(grupos.get(r.gradoId) ?? []), r])
+  const listas = [...grupos.values()]
+  const res: Resultado[] = []
+  for (let i = 0; res.length < rs.length; i++) for (const l of listas) if (l[i]) res.push(l[i])
+  return res
 }
 
 /** Las palabras que coinciden con lo escrito van en negrita, como en un buscador. */
@@ -53,32 +58,25 @@ function Resaltado({ texto, q }: { texto: string; q: string }) {
 /**
  * Buscar un tema: un solo buscador, como el de YouTube. Mientras se escribe aparecen temas del Currículo Nacional
  * y con un clic el tema queda creado. No hay que esperar a la IA: la ficha se completa después (temaInstantaneo.ts).
+ * Busca en los grados y cursos de "Mi perfil"; los filtros son para los imprevistos (suplir a otro profe) y no
+ * cambian el perfil.
  */
 export function NuevoTema() {
-  const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, setFicha, completarFicha, ir, ficha } = useStore()
+  const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, setFicha, completarFicha, ir } = useStore()
   const dialogo = useRef<HTMLDialogElement>(null)
   const buscador = useRef<HTMLInputElement>(null)
-  const [gradoId, setGradoId] = useState(() => ficha?.gradoId ?? gradoGuardado() ?? 'primaria-4')
+  const [filtro, setFiltro] = useState(ensenanzaGuardada)
   const [q, setQ] = useState('')
   const [activo, setActivo] = useState(0)
   const [otros, setOtros] = useState<Resultado[]>([])
 
-  const cur = useCurriculo(nivelDe(gradoId), gradoId)
-  const grado = cur.estado === 'listo' ? cur.grado : null
+  const grados = useGrados(filtro.grados)
+  const enFiltro = (r: Resultado) => filtro.grados.includes(r.gradoId) && (!filtro.cursos.length || filtro.cursos.includes(r.areaId))
+  const variosGrados = filtro.grados.length > 1
 
   async function crear(r: Resultado, destino: Vista = 'ficha') {
-    const [datos, banco] = await Promise.all([cargarNivel(nivelDe(r.gradoId)), cargarBanco(r.gradoId, r.areaId)])
-    const area = datos?.grados.find((g) => g.id === r.gradoId)?.areas.find((a) => a.id === r.areaId)
-    if (!area) return
-    // Si el tema está en el banco, su desempeño ya se eligió leyendo el currículo: se usa ese.
-    const t = temaEnBanco(banco, r.tema)
-    const u = t ? ubicarCita(area, t.cita, t.competencia) : null
-    const nueva = fichaDesdeCurriculo({ ...r, ...fundamento(area, r.tema, u?.desempeno ?? r.cita, u ? u.numeroCompetencia - 1 : r.indiceCompetencia) })
-    try {
-      localStorage.setItem(CLAVE_GRADO, r.gradoId)
-    } catch {
-      // Sin almacenamiento se vuelve a elegir el grado la próxima vez.
-    }
+    const nueva = await fichaDeResultado(r)
+    if (!nueva) return
     setFicha(nueva)
     cerrarNuevoTema()
     ir(destino)
@@ -90,7 +88,7 @@ export function NuevoTema() {
     if (!d) return
     if (nuevoTemaAbierto && previoTema?.texto && previoTema.areaId) {
       // Desde el currículo ya viene el tema: se crea directo, sin mostrar el buscador.
-      const g = previoTema.gradoId ?? ficha?.gradoId ?? 'primaria-4'
+      const g = previoTema.gradoId ?? ensenanzaGuardada().grados[0]
       void crear({
         tema: previoTema.texto,
         gradoId: g,
@@ -102,7 +100,10 @@ export function NuevoTema() {
       return
     }
     if (nuevoTemaAbierto && !d.open) {
-      setGradoId(previoTema?.gradoId ?? ficha?.gradoId ?? gradoGuardado() ?? 'primaria-4')
+      // Cada vez abre con lo que enseña; si viene de otro grado (p. ej. del currículo), con ese grado.
+      const perfil = ensenanzaGuardada()
+      const g = previoTema?.gradoId
+      setFiltro(g && !perfil.grados.includes(g) ? (ensenanzaValida({ grados: [g], cursos: [] }) ?? perfil) : perfil)
       setQ('')
       setActivo(0)
       d.showModal()
@@ -112,26 +113,31 @@ export function NuevoTema() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nuevoTemaAbierto, previoTema])
 
-  const propios = useMemo(() => (grado && q.trim() ? buscarEnGrado(grado, NOMBRES[gradoId] ?? gradoId, q) : []), [grado, gradoId, q])
+  const propios = useMemo(
+    () => (grados && q.trim() ? grados.flatMap((g) => buscarEnGrado(g, NOMBRES[g.id] ?? g.id, q)).filter(enFiltro) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [grados, filtro, q],
+  )
   const exactos = propios.filter((r) => !r.parcial && !r.cita)
 
-  // Si en el grado hay pocos temas con ese nombre, se suman los de otros grados.
+  // Si en sus grados y cursos hay pocos temas con ese nombre, se suman los de otros grados y cursos.
   useEffect(() => {
     setOtros([])
     if (q.trim().length < 3 || exactos.length >= 3) return
     let vivo = true
-    const t = window.setTimeout(() => void buscarEnTodos(q, NOMBRES, gradoId).then((r) => vivo && setOtros(r.slice(0, 4))), 200)
+    const t = window.setTimeout(() => void buscarEnTodos(q, NOMBRES).then((r) => vivo && setOtros(r.filter((x) => !enFiltro(x)).slice(0, 4))), 200)
     return () => {
       vivo = false
       window.clearTimeout(t)
     }
-  }, [q, gradoId, exactos.length])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, filtro, exactos.length])
 
   const sugerencias = useMemo(() => {
-    if (!grado) return []
-    if (!q.trim()) return sugerenciasDelGrado(grado)
+    if (!grados) return []
+    if (!q.trim()) return sugerenciasPara(grados, filtro.cursos, NOMBRES, MAXIMO)
     const vistos = new Set<string>()
-    return [...exactos, ...otros, ...propios.filter((r) => !r.parcial && r.cita), ...propios.filter((r) => r.parcial)]
+    return [...turnar(exactos), ...otros, ...turnar(propios.filter((r) => !r.parcial && r.cita)), ...turnar(propios.filter((r) => r.parcial))]
       .filter((r) => {
         const k = `${r.gradoId}|${r.areaId}|${normalizar(r.tema)}`
         if (vistos.has(k)) return false
@@ -140,9 +146,12 @@ export function NuevoTema() {
       })
       .slice(0, MAXIMO)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [grado, q, propios, otros])
+  }, [grados, q, propios, otros])
 
-  useEffect(() => setActivo(0), [q, gradoId])
+  useEffect(() => setActivo(0), [q, filtro])
+
+  const perfil = ensenanzaGuardada()
+  const esPerfil = perfil.grados.join() === filtro.grados.join() && perfil.cursos.join() === filtro.cursos.join()
 
   function teclas(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
@@ -176,47 +185,51 @@ export function NuevoTema() {
           </button>
         </div>
 
-        <div className="flex items-stretch gap-2">
-          <label htmlFor="nuevo-tema-buscar" className="relative min-w-0 flex-1">
-            <span className="sr-only">Buscar tema</span>
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-ink-soft" aria-hidden />
-            <input
-              id="nuevo-tema-buscar"
-              ref={buscador}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onKeyDown={teclas}
-              placeholder="Fracciones, ciclo del agua, sustantivos…"
-              autoComplete="off"
-              role="combobox"
-              aria-expanded={sugerencias.length > 0}
-              aria-controls="nuevo-tema-sugerencias"
-              aria-activedescendant={sugerencias.length ? `sugerencia-${activo}` : undefined}
-              className="h-13 w-full rounded-2xl border-2 border-line bg-surface pl-11 pr-4 text-lg focus:border-ink focus:outline-none"
-            />
-          </label>
-          <label htmlFor="nuevo-tema-grado" className="shrink-0">
-            <span className="sr-only">Grado</span>
-            <select
-              id="nuevo-tema-grado"
-              value={gradoId}
-              onChange={(e) => setGradoId(e.target.value)}
-              className="h-13 rounded-2xl border-2 border-line bg-surface px-3 font-medium focus:border-ink focus:outline-none"
+        <label htmlFor="nuevo-tema-buscar" className="relative min-w-0">
+          <span className="sr-only">Buscar tema</span>
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-ink-soft" aria-hidden />
+          <input
+            id="nuevo-tema-buscar"
+            ref={buscador}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={teclas}
+            placeholder="Fracciones, ciclo del agua, sustantivos…"
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={sugerencias.length > 0}
+            aria-controls="nuevo-tema-sugerencias"
+            aria-activedescendant={sugerencias.length ? `sugerencia-${activo}` : undefined}
+            className="h-13 w-full rounded-2xl border-2 border-line bg-surface pl-11 pr-4 text-lg focus:border-ink focus:outline-none"
+          />
+        </label>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <FiltroGrados valor={filtro.grados} onChange={(g) => g.length && setFiltro(ensenanzaValida({ grados: g, cursos: filtro.cursos }) ?? filtro)} />
+          <FiltroCursos grados={filtro.grados} valor={filtro.cursos} onChange={(c) => setFiltro({ ...filtro, cursos: c })} />
+          {esPerfil ? (
+            <button
+              type="button"
+              onClick={() => {
+                cerrarNuevoTema()
+                ir('perfil')
+              }}
+              className="px-1 text-sm text-ink-soft underline-offset-4 hover:text-ink hover:underline"
             >
-              {NIVELES.map((n) => (
-                <optgroup key={n.id} label={n.nombre}>
-                  {GRADOS_CURRICULO.filter((g) => g.nivel === n.id).map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.corto}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
+              Cambiar en Mi perfil
+            </button>
+          ) : (
+            <button type="button" onClick={() => setFiltro(perfil)} className="px-1 text-sm font-semibold underline-offset-4 hover:underline">
+              Volver a lo que enseño
+            </button>
+          )}
         </div>
 
-        {!q.trim() && grado && <p className="px-1 text-sm text-ink-soft">Temas de {NOMBRES[gradoId]}</p>}
+        {!q.trim() && grados && (
+          <p className="px-1 text-sm text-ink-soft">
+            Temas de {nombreGrados(filtro.grados)} · {nombreCursos(filtro.cursos)}
+          </p>
+        )}
 
         <ul id="nuevo-tema-sugerencias" role="listbox" aria-label="Temas del Currículo Nacional" className="-mx-1 flex flex-col">
           {sugerencias.map((r, i) => (
@@ -228,22 +241,25 @@ export function NuevoTema() {
                 className={cx('flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left', i === activo && 'bg-surface-2')}
               >
                 <Search className="size-4 shrink-0 text-ink-soft" aria-hidden />
-                <span className="min-w-0 flex-1 truncate text-lg text-ink-soft">
-                  <Resaltado texto={r.tema} q={q} />
-                </span>
-                <span className="shrink-0 text-sm text-ink-soft">
-                  {r.area}
-                  {r.gradoId !== gradoId && ` · ${r.grado}`}
+                {/* En el celular el curso va debajo, para que el tema se lea completo. */}
+                <span className="flex min-w-0 flex-1 flex-col sm:flex-row sm:items-center sm:gap-3">
+                  <span className="min-w-0 flex-1 text-lg leading-snug text-ink-soft sm:truncate">
+                    <Resaltado texto={r.tema} q={q} />
+                  </span>
+                  <span className="shrink-0 text-sm text-ink-soft">
+                    {r.area}
+                    {(variosGrados || !enFiltro(r)) && ` · ${r.grado}`}
+                  </span>
                 </span>
               </button>
             </li>
           ))}
         </ul>
 
-        {q.trim().length > 1 && grado && sugerencias.length === 0 && (
+        {q.trim().length > 1 && grados && sugerencias.length === 0 && (
           <p className="px-1 text-ink-soft">No encontramos «{q.trim()}» en el currículo. Prueba con otra palabra.</p>
         )}
-        {!grado && <p className="px-1 text-ink-soft">Cargando el currículo…</p>}
+        {!grados && <p className="px-1 text-ink-soft">Cargando el currículo…</p>}
 
         <p className="border-t border-line px-1 pt-3 text-sm text-ink-soft">Solo temas del Currículo Nacional. Elige uno y lo preparamos al instante.</p>
       </div>
