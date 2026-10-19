@@ -30,7 +30,7 @@ Un solo video de la app funcionando sirve para todo: se manda a la lista de espe
 **El docente sí paga, por Yape, no con tarjeta.** Hoy se venden por Facebook y WhatsApp paquetes de sesiones de aprendizaje y fichas a S/ 10–50. Si se confirma, competimos con esos vendedores, no con MagicSchool.
 
 Escalera de venta:
-1. **Docente:** gratis (30 créditos/mes) y plan pagado por Yape de S/ 10–15/mes (lo que dijeron Lucho y Yessly el 18-oct; muchos ya pagan ChatGPT Plus a ~S/ 80 y lo comparten entre 2 o 3). Canal WhatsApp y referidos. Plan avanzado aparte para colegios preuniversitarios y academias.
+1. **Docente:** gratis y sin límite con su cuenta (sin créditos desde el 19-oct) y plan pagado por Yape de S/ 10–15/mes (lo que dijeron Lucho y Yessly el 18-oct; muchos ya pagan ChatGPT Plus a ~S/ 80 y lo comparten entre 2 o 3). Canal WhatsApp y referidos. Plan avanzado aparte para colegios preuniversitarios y academias.
 2. **Colegios privados:** licencia por colegio, compra la dirección, con factura.
 3. **UGEL, gobiernos regionales, MINEDU:** el mercado grande, con licitación. Se va con números del paso 1.
 

@@ -1,6 +1,6 @@
-import { CircleAlert, CircleCheck, Coins, House, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, House, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
+import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
 import { usePerfil } from '../app/perfil'
@@ -10,20 +10,6 @@ import { Logo } from './Logo'
 import { NuevoTema } from './NuevoTema'
 import { SelectorTema } from './SelectorTema'
 import { Boton, IconoHerramienta, cx } from './ui'
-
-function Creditos() {
-  const { creditos } = useStore()
-  return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-sm font-medium text-warn tabular-nums"
-      title={`Te quedan ${creditos} de ${CREDITOS_MENSUALES} créditos este mes`}
-    >
-      <Coins className="size-4" aria-hidden />
-      {creditos}
-      <span className="sr-only"> créditos</span>
-    </span>
-  )
-}
 
 function BotonTema() {
   const { tema, cambiarTema } = useStore()
@@ -135,11 +121,12 @@ function ContenidoLateral() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
-        <div className="flex items-center justify-between">
-          <Creditos />
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <Docente />
+          </div>
           <BotonTema />
         </div>
-        <Docente />
         {MODO_EJEMPLO && (
           <p className="flex items-start gap-1.5 text-xs text-ink-soft">
             <Info className="mt-px size-3.5 shrink-0" aria-hidden />
@@ -167,7 +154,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <ContenidoLateral />
       </aside>
 
-      {/* Barra superior (celular): menú, tema actual y créditos */}
+      {/* Barra superior (celular): menú y tema actual */}
       <header
         className="gutter sticky z-30 flex h-14 items-center gap-1 border-b border-line bg-surface lg:hidden print:hidden"
         style={{ top: 'env(safe-area-inset-top, 0px)' }}
@@ -183,7 +170,6 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="min-w-0 flex-1">
           <SelectorTema compacto />
         </div>
-        <Creditos />
       </header>
 
       {menu && (

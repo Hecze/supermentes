@@ -1,13 +1,13 @@
 import { ArrowLeft, Copy, Music, Pause, PenLine, Play, Plus, Printer, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { api, COSTOS, textoCosto, type AudioCancion, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
+import { api, type AudioCancion, type Cancion as CancionTipo, type OpcionesCancion } from '../api'
 import { MELODIAS, RITMOS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { useBanco } from '../banco/banco'
 import { partesDeLetra } from '../canciones/letra'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { BarraHoja, Boton, Chip, Editable, Generando, Hoja, NotaCreditos, Ventana, cx, imprimir, tinte } from '../components/ui'
+import { BarraHoja, Boton, Chip, Editable, Generando, Hoja, Ventana, cx, imprimir, tinte } from '../components/ui'
 import { CancionesDelTema } from './CancionesDelTema'
 import { CancionesExistentes } from './CancionesExistentes'
 
@@ -133,7 +133,7 @@ function Reproductor({ audio, crear, creando, ritmo }: { audio?: AudioCancion; c
           {!creando && <Music className="size-5" aria-hidden />} {creando ? 'Creando la música…' : 'Crear la música'}
         </Boton>
         <span className="hidden min-w-0 text-sm text-ink-soft sm:block" role="status">
-          {creando ? `Con voz y ritmo de ${ritmo.toLowerCase()}. Puede tardar hasta 1 minuto; sonará apenas esté.` : `Con voz y ritmo de ${ritmo.toLowerCase()} · usa ${textoCosto(COSTOS.audio)}`}
+          {creando ? `Con voz y ritmo de ${ritmo.toLowerCase()}. Puede tardar hasta 1 minuto; sonará apenas esté.` : `Con voz y ritmo de ${ritmo.toLowerCase()}`}
         </span>
       </div>
     )
@@ -194,7 +194,6 @@ function CrearCancion({
   crearPropia: (titulo: string, partes: CancionTipo['partes']) => void
   tituloTema: string
 }) {
-  const { creditos } = useStore()
   const [modo, setModo] = useState<'auto' | 'propia'>('auto')
   const [titulo, setTitulo] = useState('')
   const [letra, setLetra] = useState('')
@@ -262,19 +261,13 @@ function CrearCancion({
 
       <div className="flex flex-col items-start gap-2">
         {modo === 'auto' ? (
-          <>
-            <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearAuto}>
-              Crear la canción
-            </Boton>
-            <NotaCreditos n={COSTOS.letra} quedan={creditos} />
-          </>
+          <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={crearAuto}>
+            Crear la canción
+          </Boton>
         ) : (
-          <>
-            <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={() => crearPropia(titulo.trim() || tituloTema, partes)} disabled={!partes.length}>
-              Crear la canción
-            </Boton>
-            <p className="text-sm text-ink-soft">Tu letra no gasta créditos. Escucharla con música usa {COSTOS.audio}.</p>
-          </>
+          <Boton tam="lg" variante="herramienta" herramienta="cancion" onClick={() => crearPropia(titulo.trim() || tituloTema, partes)} disabled={!partes.length}>
+            Crear la canción
+          </Boton>
         )}
       </div>
     </Ventana>
@@ -296,7 +289,7 @@ export function Cancion() {
 
   async function crearLetra() {
     setCreando(false)
-    const nueva = await generar(COSTOS.letra, 'Canción', () => api.generarCancion(ficha!, opciones))
+    const nueva = await generar('Canción', () => api.generarCancion(ficha!, opciones))
     if (nueva) {
       guardar('cancion', nueva)
       guardar('audio', undefined)
@@ -323,7 +316,7 @@ export function Cancion() {
   async function crearAudio() {
     if (!cancion) return
     setGrabando(true)
-    const a = await generar(COSTOS.audio, 'Audio', () => api.generarAudio(cancion))
+    const a = await generar('Audio', () => api.generarAudio(cancion))
     if (a) guardar('audio', a)
     setGrabando(false)
   }

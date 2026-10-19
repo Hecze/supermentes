@@ -39,7 +39,7 @@ Un `Contenido` puede traer además `generar()`: retos sin fin, para la matemáti
 ## De dónde sale el contenido (`contenido.ts`)
 
 - **Cálculo** (`matematica/`): 22 habilidades con niveles por grado (contar, tablas, fracciones, decimales, ecuaciones, medidas…), cada nivel con la cita del desempeño oficial que lo pide (ver "Sustento curricular"). Se generan con algoritmos: **gratis, sin fin y siempre correctas**, y los distractores empiezan por los errores típicos (1/5 + 2/5 = 3/10, 2 + 3 × 4 = 20, 7² = 14). `deducir.ts` reconoce la habilidad a partir del título y el propósito del tema, sin pedirle nada al backend.
-- **El tema**: su vocabulario (gratis, ya está en la ficha) y sus preguntas y parejas: las del banco de contenido (`src/banco`, listas al instante y gratis; hoy todos los temas de 4.º de primaria) o, donde no hay banco, las que crea la IA si el docente las pide (`POST /api/juego`, 1 crédito). Cada pareja y cada palabra se convierten también en retos, así que alimentan a casi todos los juegos.
+- **El tema**: su vocabulario (gratis, ya está en la ficha) y sus preguntas y parejas: las del banco de contenido (`src/banco`, listas al instante y gratis; hoy todos los temas de 4.º de primaria) o, donde no hay banco, las que crea la IA si el docente las pide (`POST /api/juego`). Cada pareja y cada palabra se convierten también en retos, así que alimentan a casi todos los juegos.
 
 ## Compatibilidad (`catalogo.tsx`)
 

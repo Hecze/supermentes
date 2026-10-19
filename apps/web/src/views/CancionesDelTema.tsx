@@ -3,7 +3,7 @@
 // (api/audio.ts) y tocar la tarjeta abre la letra.
 import { BadgeCheck, LoaderCircle, Pause, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { api, COSTOS, textoCosto, type AudioCancion, type Ficha } from '../api'
+import { api, type AudioCancion, type Ficha } from '../api'
 import { useStore } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { cancionDelBanco, type CancionBanco, type TemaBanco } from '../banco/banco'
@@ -99,7 +99,7 @@ export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Fich
     let a = audios.get(clave(c))
     if (!a) {
       setCargando(i)
-      a = (await generar(COSTOS.audio, 'Audio', () => api.generarAudio(cancionDelBanco(c)))) ?? undefined
+      a = (await generar('Audio', () => api.generarAudio(cancionDelBanco(c)))) ?? undefined
       setCargando(null)
       if (!a) return
       audios.set(clave(c), a)
@@ -160,7 +160,6 @@ export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Fich
               className="absolute left-4 top-4 grid size-12 place-items-center rounded-full text-on-tool shadow-md transition hover:scale-105 disabled:opacity-80"
               style={{ background: COLOR }}
               aria-label={sonando === i ? `Pausar «${c.titulo}»` : `Escuchar «${c.titulo}»`}
-              title={sonando === i || audios.has(clave(c)) ? undefined : `Escuchar (la primera vez usa ${textoCosto(COSTOS.audio)})`}
             >
               {cargando === i ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : sonando === i ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
             </button>

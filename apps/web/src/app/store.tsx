@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Cancion, type Ficha, type Juego, type Sesion } from '../api'
+import { MODO_EJEMPLO, type AudioCancion, type Cancion, type Ficha, type Juego, type Sesion } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { Clase, ConfigHoja } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
@@ -64,9 +64,6 @@ type Store = {
   verCurriculo: (gradoId: string, areaId: string) => void
   resultados: Resultados
   guardar: <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => void
-  creditos: number
-  gastar: (n: number) => boolean
-  devolver: (n: number) => void
   avisos: Aviso[]
   avisar: (texto: string, tono?: Tono) => void
   tema: Tema
@@ -142,7 +139,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)
   const [pestanaBiblioteca, setPestanaBiblioteca] = useState<PestanaBiblioteca>('curriculo')
   const [curriculoAbierto, setCurriculoAbierto] = useState<{ gradoId: string; areaId: string } | null>(null)
-  const [creditos, setCreditos] = useState(MODO_EJEMPLO ? 18 : CREDITOS_MENSUALES)
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [tema, setTema] = useState<Tema>(() => {
     const guardado = temaGuardado()
@@ -213,21 +209,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setTimeout(() => setAvisos((a) => a.filter((x) => x.id !== id)), 3600)
   }, [])
 
-  const gastar = useCallback(
-    (n: number) => {
-      if (n === 0) return true
-      if (creditos < n) {
-        avisar(`Te faltan créditos: esto cuesta ${n} y te quedan ${creditos}.`, 'error')
-        return false
-      }
-      setCreditos((c) => c - n)
-      return true
-    },
-    [creditos, avisar],
-  )
-
-  const devolver = useCallback((n: number) => setCreditos((c) => c + n), [])
-
   const cambiarTema = useCallback(() => {
     const siguiente: Tema = temaActual() === 'dark' ? 'light' : 'dark'
     document.documentElement.dataset.theme = siguiente
@@ -275,9 +256,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         verCurriculo,
         resultados: (fichaId && porTema[fichaId]) || {},
         guardar,
-        creditos,
-        gastar,
-        devolver,
         avisos,
         avisar,
         tema,

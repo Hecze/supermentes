@@ -1,6 +1,6 @@
 import { ClipboardList, FileText, Gamepad2, Grid3x3, Music, type LucideProps } from 'lucide-react'
 import type { ComponentType } from 'react'
-import { COSTOS, textoCosto, type HerramientaId } from '../api'
+import type { HerramientaId } from '../api'
 
 export type Herramienta = {
   id: HerramientaId
@@ -10,7 +10,6 @@ export type Herramienta = {
   descripcion: string
   icono: ComponentType<LucideProps>
   color: string
-  costo: string
 }
 
 export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['sesion', 'cancion', 'examen', 'juego', 'crucigrama']
@@ -23,7 +22,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Lista para presentar, en el formato del MINEDU.',
     icono: ClipboardList,
     color: 'var(--sesion)',
-    costo: textoCosto(COSTOS.sesion),
   },
   cancion: {
     id: 'cancion',
@@ -32,7 +30,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Para que memoricen el tema cantando.',
     icono: Music,
     color: 'var(--cancion)',
-    costo: `Letra ${textoCosto(COSTOS.letra)} · audio ${textoCosto(COSTOS.audio)}`,
   },
   examen: {
     id: 'examen',
@@ -41,7 +38,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Examen, práctica y balotario listos para imprimir, con su clave.',
     icono: FileText,
     color: 'var(--examen)',
-    costo: textoCosto(COSTOS.examen),
   },
   juego: {
     id: 'juego',
@@ -50,7 +46,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Lo juegan en el celular o proyectado en clase.',
     icono: Gamepad2,
     color: 'var(--juego)',
-    costo: textoCosto(COSTOS.juego),
   },
   crucigrama: {
     id: 'crucigrama',
@@ -59,7 +54,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Con las palabras que tú elijas, listo para imprimir.',
     icono: Grid3x3,
     color: 'var(--crucigrama)',
-    costo: textoCosto(COSTOS.crucigrama),
   },
 }
 

@@ -40,7 +40,7 @@ Pensado para docentes con poca experiencia digital: simple a primera vista y pot
 - **No es un chat.** Los temas se eligen desde un solo selector, y "Buscar otro tema" abre un buscador del currículo en una ventana.
 - **El resultado se ve como una hoja.** Lo que ves es lo que se imprime, y cualquier texto se corrige con un clic.
 - **Lo avanzado queda plegado** en "Más opciones" o "Cambiar…", nunca en la primera vista.
-- **Palabras del aula, no técnicas.** "Balotario" y "clave", como dicen los profes; los créditos solo aparecen bajo el botón que los gasta.
+- **Palabras del aula, no técnicas.** "Balotario" y "clave", como dicen los profes.
 
 ## Estado
 
@@ -79,11 +79,10 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/types.ts` | Contratos de datos entre la UI y el backend |
 | `src/api/mock.ts`, `src/api/ejemplos.ts` | Implementación con datos de ejemplo |
 | `src/api/real.ts` | Llamadas a `/api/*` |
-| `src/api/costos.ts` | Créditos que cuesta cada acción |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
 | `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
 | `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas, parejas y 2 canciones, con cita del currículo |
-| `src/app/` | Estado global, catálogo de herramientas, cobro de créditos |
+| `src/app/` | Estado global, catálogo de herramientas, cuenta |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |
 
@@ -101,10 +100,10 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 
 ## Costos
 
-La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no gastan créditos. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez (1 crédito) y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
+No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 19-oct). La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no llaman a la IA. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez con la IA y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 
 1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo), letra y juego.
 2. Audio de canciones con ElevenLabs.
-3. Persistencia: biblioteca, créditos en el servidor y guardar lo que el docente corrige en la hoja.
+3. Persistencia: biblioteca y guardar lo que el docente corrige en la hoja.

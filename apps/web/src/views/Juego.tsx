@@ -1,12 +1,12 @@
 import { ArrowLeft, Calculator, Trophy, Check, ChevronDown, Circle, CircleCheck, Copy, Gamepad2, LoaderCircle, MessageCircle, Presentation, Printer, Share2, Smartphone, Sparkles, Users, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { api, COSTOS, type Ficha } from '../api'
+import { api, type Ficha } from '../api'
 import { tokenDeCuenta, useCuenta } from '../app/cuenta'
 import { useStore, type Resultados } from '../app/store'
 import { useGeneracion } from '../app/useGeneracion'
 import { juegoDelBanco, useBanco } from '../banco/banco'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { Boton, Chip, NotaCreditos, Ventana, cx, imprimir, tinte } from '../components/ui'
+import { Boton, Chip, Ventana, cx, imprimir, tinte } from '../components/ui'
 import { JUEGOS, juegosCompatibles, ritmoDe } from '../juegos/catalogo'
 import { contenidoDelTema, contenidoMatematica, nombrePractica } from '../juegos/contenido'
 import { enlaceAutonomo, enlaceConCodigo, origen, publicar, type Publicado } from '../juegos/compartir/publicado'
@@ -550,7 +550,7 @@ function ResultadosDelJuego() {
 }
 
 export function Juego() {
-  const { ficha, vista, resultados, guardar, creditos, avisar } = useStore()
+  const { ficha, vista, resultados, guardar, avisar } = useStore()
   const { ocupado, generar } = useGeneracion()
   const [elegido, setElegido] = useState<JuegoId | null>(null)
   const [eligiendo, setEligiendo] = useState(false)
@@ -585,7 +585,7 @@ export function Juego() {
   const faltan = JUEGOS.filter((j) => !compatibles.some((c) => c.def.id === j.id))
 
   async function crearPreguntas() {
-    const nuevo = await generar(COSTOS.juego, 'Preguntas y parejas', () => api.generarJuego(ficha!))
+    const nuevo = await generar('Preguntas y parejas', () => api.generarJuego(ficha!))
     if (nuevo) {
       guardar('juego', nuevo)
       guardar('juegos', { fuente: 'tema' })
@@ -731,7 +731,6 @@ export function Juego() {
           <Boton variante="herramienta" herramienta="juego" onClick={crearPreguntas} cargando={ocupado}>
             Crear preguntas y parejas
           </Boton>
-          <NotaCreditos n={COSTOS.juego} quedan={creditos} />
         </section>
       )}
 

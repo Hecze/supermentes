@@ -37,7 +37,7 @@ punta, con IA real, desde el link y en una ventana privada.
   Hector sube en paralelo. Mastra recién si aparece un flujo con forma de agente.
 - **No adaptar el examen del docente.** Se quitó (18-oct): nos centramos en generar los materiales que pidió Lucho (`MATERIALES.md`).
 - **No ilustraciones del examen.** Caras, lentas y no cambian la demo (se quitaron).
-- **No cuentas, login, créditos en el servidor ni pagos.** Para la demo, todo abierto.
+- **Sin créditos ni pagos.** Con cuenta, uso sin límite (19-oct).
 - **No biblioteca compartida ni persistencia.** El currículo ya da la biblioteca que se ve.
 - **No audio con "melodías que ya conocen".** Ahí el profe canta; generarlas choca con derechos de autor.
 - **No más juegos nuevos.** Los seis que hay alcanzan; mejor que funcionen con el tema.

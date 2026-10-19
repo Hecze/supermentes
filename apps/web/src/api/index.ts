@@ -9,4 +9,3 @@ export const MODO_EJEMPLO = import.meta.env.VITE_API !== 'real'
 export const api: Api = MODO_EJEMPLO ? mockApi : { ...mockApi, prepararFicha: realApi.prepararFicha, generarCancion: realApi.generarCancion, generarAudio: realApi.generarAudio, generarJuego: realApi.generarJuego, generarSesion: realApi.generarSesion, buscarRecursos: realApi.buscarRecursos }
 
 export * from './types'
-export { COSTOS, CREDITOS_MENSUALES, textoCosto } from './costos'

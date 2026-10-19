@@ -58,5 +58,5 @@ actualizado: 2026-10-17
 ## Hacia dónde va
 - Generación real con IA, siempre a partir de los desempeños del tema.
 - Audio de las canciones (ElevenLabs) y pictogramas (ARASAAC).
-- Juegos publicados con link y QR reales; biblioteca y créditos guardados en el servidor.
+- Juegos publicados con link y QR reales; biblioteca guardada en el servidor.
 - Perfil de cada clase (intereses) para que todo salga a la medida.

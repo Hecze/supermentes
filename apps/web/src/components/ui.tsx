@@ -1,6 +1,6 @@
 import { ChevronDown, LoaderCircle, X } from 'lucide-react'
 import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react'
-import { textoCosto, type Fraccion, type HerramientaId } from '../api'
+import type { Fraccion, HerramientaId } from '../api'
 import { HERRAMIENTAS } from '../app/herramientas'
 
 export function cx(...c: (string | false | null | undefined)[]) {
@@ -96,16 +96,6 @@ export function Boton({ variante = 'primario', herramienta, tam = 'md', cargando
       {cargando && <LoaderCircle className="size-5 animate-spin" aria-hidden />}
       {children}
     </button>
-  )
-}
-
-/** Línea discreta bajo un botón que gasta créditos. */
-export function NotaCreditos({ n, quedan }: { n: number; quedan: number }) {
-  if (n === 0) return <p className="text-sm text-ink-soft">No gasta créditos.</p>
-  return (
-    <p className="text-sm text-ink-soft tabular-nums">
-      Usa {textoCosto(n)} de tus {quedan}.
-    </p>
   )
 }
 
