@@ -1,6 +1,6 @@
 // Las funciones de la cuenta de la docente (entrar con la demo, perfil, salones, tareas, intentos y envíos) en una sola
 // función de Vercel: el plan Hobby permite 12 por despliegue. vercel.json reescribe /api/salones, /api/tareas… a
-// /api/cuentas?ruta=…, así que para la app las rutas no cambian. En Cloudflare, el Worker llama a cada una directo.
+// /api/cuentas?ruta=…, así que para la app las rutas no cambian.
 import * as entrarDemo from './_entrar-demo.js'
 import * as intentos from './_intentos.js'
 import * as misEnvios from './_mis-envios.js'

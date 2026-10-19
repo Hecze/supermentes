@@ -1,10 +1,8 @@
 // Datos de ejemplo para el prototipo. Tienen la misma forma que devolverá el backend real.
 import type {
-  Cancion,
   Ficha,
   Juego,
   Material,
-  OpcionesCancion,
   OpcionesSesion,
   Sesion,
 } from './types'
@@ -128,85 +126,6 @@ export const FICHA_SUSTANTIVOS: Ficha = {
 
 /** Temas que la docente ya preparó, del más reciente al más antiguo. */
 export const TEMAS_INICIALES: Ficha[] = [FICHA_EJEMPLO, FICHA_AGUA, FICHA_SUSTANTIVOS]
-
-// ---------- Canción ----------
-
-const ARTICULO_RITMO: Record<string, string> = {
-  Cumbia: 'La cumbia',
-  Huayno: 'El huayno',
-  Festejo: 'El festejo',
-  Rap: 'El rap',
-  Balada: 'La balada',
-}
-
-export function cancionEjemplo(opciones: OpcionesCancion): Cancion {
-  if (opciones.modo === 'melodia') {
-    return {
-      titulo: 'Las fracciones dicen',
-      opciones,
-      partes: [
-        {
-          etiqueta: 'Estrofa',
-          lineas: [
-            'Las fracciones dicen',
-            'parte, parte, parte,',
-            'cuando el entero',
-            'se va a repartir.',
-          ],
-        },
-        {
-          etiqueta: 'Estrofa',
-          lineas: [
-            'Arriba las que tomo,',
-            'abajo en cuántas parto,',
-            'y así aprendo yo',
-            'a compartir.',
-          ],
-        },
-      ],
-    }
-  }
-  return {
-    titulo: `${ARTICULO_RITMO[opciones.ritmo] ?? 'La canción'} de las fracciones`,
-    opciones,
-    partes: [
-      {
-        etiqueta: 'Verso 1',
-        lineas: [
-          'Tengo una pizza redonda y entera,',
-          'la corto en ocho, ¡qué rica manera!',
-          'Me como tres y te cuento el secreto:',
-          'tres octavos me comí, ¡eso es correcto!',
-        ],
-      },
-      {
-        etiqueta: 'Coro',
-        lineas: [
-          'Arriba el numerador, cuántas partes tomo yo,',
-          'abajo el denominador, en cuántas se partió.',
-          '¡Fracción, fracción, partes iguales son!',
-        ],
-      },
-      {
-        etiqueta: 'Verso 2',
-        lineas: [
-          'Si parto un queque en cuatro pedazos',
-          'y le doy uno a mi abuela con un abrazo,',
-          'un cuarto se fue, me quedan tres cuartos,',
-          '¡las fracciones están en todos lados!',
-        ],
-      },
-      {
-        etiqueta: 'Coro',
-        lineas: [
-          'Arriba el numerador, cuántas partes tomo yo,',
-          'abajo el denominador, en cuántas se partió.',
-          '¡Fracción, fracción, partes iguales son!',
-        ],
-      },
-    ],
-  }
-}
 
 // ---------- Juego ----------
 

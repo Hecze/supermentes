@@ -2,10 +2,6 @@
 
 Herramientas de IA para docentes del Perú, hechas para Hack the Andes 2026 (entrega: 18 de octubre de 2026, 9:00 a. m., hora de Lima).
 
-## Mockup antes de código
-
-Toda pantalla o UI nueva se dibuja primero en pen.dev y Harold aprueba la captura; recién después se codea. Vale para cada sesión y cada agente en paralelo. Cambios chicos sobre una pantalla existente no lo necesitan.
-
 ## El currículo es el eje
 
 Un jurado, un director o un docente puede preguntar en cualquier momento "¿por qué esto cumple el currículo?". La respuesta no puede ser "yo creo que": tiene que ser una cita del texto oficial, mostrada en segundos. Antes de crear, ofrecer o cambiar cualquier contenido, piensa esto primero; no adivines.
@@ -16,7 +12,8 @@ Un jurado, un director o un docente puede preguntar en cualquier momento "¿por 
 - **Los campos `temas` del JSON no son texto oficial:** sirven para buscar, nunca para sustentar.
 - **El tema guarda sus desempeños** (`Ficha.curriculo.desempenos`, texto oficial). Lo que se cree después parte de ellos; no se vuelven a adivinar.
 - **La IA cita.** Cada endpoint de `api/` recibe los desempeños del tema y debe devolver, por cada pregunta, estrofa o ítem, el desempeño que trabaja con su cita textual. El backend descarta las citas que no aparezcan tal cual en `packages/curriculo`.
-- **El banco también cita.** `apps/web/src/banco` trae, por tema (hoy todo 4.º de primaria), palabras, preguntas, parejas y 2 canciones con la cita del desempeño. En un grado con banco, todo tema debe tener al menos 2 juegos y 2 canciones: `npm run typecheck` falla si no.
+- **El banco también cita.** `apps/web/src/banco` trae, por tema (hoy todo 4.º de primaria), palabras, preguntas y parejas con la cita del desempeño. En un grado con banco, todo tema debe tener al menos 2 juegos: `npm run typecheck` falla si no.
+- **Canciones: solo las que están en YouTube** (`obsidian/CANCIONES.md`). La app no crea canciones ni muestra letras sin video; cada canción cita su desempeño igual que todo lo demás.
 - **Se muestra con el icono "i"** (`apps/web/src/views/SustentoJuego.tsx`), en dos partes: "El tema abarca" (la competencia y el desempeño oficial) y "El juego abarca" (qué hacen los alumnos y la parte exacta del desempeño, resaltada). Las demás herramientas deben mostrar lo mismo.
 
 ## Antes de trabajar

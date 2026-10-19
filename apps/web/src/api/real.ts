@@ -31,8 +31,6 @@ const post = <T,>(ruta: string, cuerpo: unknown, limite?: number) =>
 
 export const realApi: Api = {
   prepararFicha: (entrada) => post('ficha', entrada),
-  generarCancion: (ficha, opciones) => post('cancion', { ficha, opciones }),
-  generarAudio: (cancion) => post('audio', { cancion }),
   generarJuego: (ficha) => post('juego', { ficha }),
   // La sesión es el texto más largo que se genera: tiene un poco más de tiempo.
   generarSesion: (ficha, opciones) => post('sesion', { ficha, opciones }, 150_000),

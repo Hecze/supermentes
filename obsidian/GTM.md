@@ -24,7 +24,6 @@ Un solo video de la app funcionando sirve para todo: se manda a la lista de espe
 - **Qué muestra:** un tema real del currículo → el juego → el QR escaneado en un celular. 30–60 s, sin cortes de carga.
 - **Cómo llega:** la lista guarda `correo` y `nombre`, así que va por correo: "Hola {nombre}, así queda tu clase con Supermentes" + el link al video (YouTube o TikTok, no adjunto) + un botón a la app.
 - **Para qué:** que el inscrito vuelva y lo use, y que lo reenvíe con su `?ref=`. Lo que se mide es cuántos abren la app desde el correo.
-- Hay grabaciones en curso en `demos/tiktok/` (otra sesión): reutilizar esas tomas, no grabar de cero.
 
 ## Quién paga (hipótesis, sin verificar)
 **El docente sí paga, por Yape, no con tarjeta.** Hoy se venden por Facebook y WhatsApp paquetes de sesiones de aprendizaje y fichas a S/ 10–50. Si se confirma, competimos con esos vendedores, no con MagicSchool.

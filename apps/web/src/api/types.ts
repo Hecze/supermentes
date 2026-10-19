@@ -51,26 +51,6 @@ export type Ficha = {
   coincidenciasBiblioteca: number
 }
 
-export type OpcionesCancion = {
-  modo: 'ritmo' | 'melodia'
-  ritmo: string
-  melodia: string
-  /** Cómo se oye, para el generador de música (las canciones del banco lo traen). */
-  estilo?: string
-}
-
-export type Cancion = {
-  titulo: string
-  opciones: OpcionesCancion
-  partes: { etiqueta: string; lineas: string[] }[]
-}
-
-export type AudioCancion = {
-  /** null mientras no haya backend: el prototipo no reproduce sonido. */
-  url: string | null
-  duracionSeg: number
-}
-
 export type Carta = { texto: string; fraccion?: Fraccion }
 
 export type Juego = {
@@ -147,8 +127,6 @@ export type Recurso = {
 
 export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
-  generarCancion(ficha: Ficha, opciones: OpcionesCancion): Promise<Cancion>
-  generarAudio(cancion: Cancion): Promise<AudioCancion>
   generarJuego(ficha: Ficha): Promise<Juego>
   generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   biblioteca(): Promise<Material[]>

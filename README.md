@@ -81,7 +81,7 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/real.ts` | Llamadas a `/api/*` |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
 | `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
-| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas, parejas y 2 canciones, con cita del currículo |
+| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas y parejas, con cita del currículo |
 | `src/app/` | Estado global, catálogo de herramientas, cuenta |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |
@@ -93,17 +93,15 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | Endpoint | Entrada | Devuelve |
 | --- | --- | --- |
 | `POST /api/ficha` | JSON `EntradaTema`: `texto` (tema del currículo), `gradoId`, `areaId`, `grado`, `area`, `competencia`, `capacidad`, `desempenos`, `duracion` | `Ficha` (la app la usa para completar la ficha en segundo plano) |
-| `POST /api/cancion` | `{ ficha, opciones }` | `Cancion` |
-| `POST /api/audio` | `{ cancion }` (con `opciones.estilo` opcional) | `AudioCancion` (Lyria vía OpenRouter; se guarda en Blob y la misma canción vuelve a sonar sin pagar) |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
 | `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
 
-No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 19-oct). La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no llaman a la IA. Lo caro (audio e imágenes) se genera solo a pedido y después de una vista previa barata: primero la letra, después el audio; primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez con la IA y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas, parejas y 2 canciones: gratis y al instante.
+No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 19-oct). La ficha, la sesión de aprendizaje (plantilla instantánea con el tema y sus desempeños), las hojas del examen (armadas sin IA), el crucigrama (palabras del docente + algoritmo) y la biblioteca no llaman a la IA. La app no crea canciones: salen de nuestro canal de YouTube, una por tema para todos los docentes (`obsidian/CANCIONES.md`). Lo caro (imágenes) se genera solo a pedido y después de una vista previa barata: primero las preguntas, después las ilustraciones. Los juegos de cálculo y con el vocabulario del tema son gratis; las preguntas y parejas del tema se crean una vez con la IA y sirven para todos los juegos. En los grados con banco de contenido (`src/banco`, hoy 4.º de primaria) cada tema ya trae preguntas y parejas: gratis y al instante.
 
 ## Pendiente para que funcione de verdad
 
-1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo), letra y juego.
-2. Audio de canciones con ElevenLabs.
+1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo) y juego.
+2. Canciones del canal de YouTube de Supermentes en la app (`obsidian/CANCIONES.md`).
 3. Persistencia: biblioteca y guardar lo que el docente corrige en la hoja.

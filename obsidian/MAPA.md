@@ -32,7 +32,7 @@ flowchart LR
 | Currículo | CNEB de Inicial, Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
 | Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude: completa ideas clave y vocabulario en segundo plano (el tema y su currículo ya están) |
 | Sesión de aprendizaje | La sesión que el docente entrega al director, en el formato del MINEDU: datos, competencia y capacidades oficiales, criterios con su desempeño citado ("i"), enfoque transversal, materiales, momentos con tiempos (45 o 90 min), ficha de aplicación y escala de valoración para 30. Se arma al instante con el tema y sus desempeños; se ajusta, se corrige con un clic, se imprime o se descarga en Word | **Real** (plantilla instantánea, sin IA; citas verificadas contra `packages/curriculo`) | Gratis | Probarla con docentes; Word es un .doc hecho con HTML (abre y se edita, no es .docx nativo) |
-| Canción | En 4.º, primero las 2 canciones propias del tema (banco, `apps/web/src/banco`, con cita); cada una con ▶ para escucharla ahí mismo; luego las de YouTube que ya existen (206 de primaria, `apps/web/src/canciones`). Arriba a la derecha, «Crear canción» como en Suno: la letra la escribe Supermentes o el docente, y se elige el ritmo. Todas suenan con Lyria vía `/api/audio` (se guarda en Blob la primera vez) | **Real**: banco, catálogo, letra con `/api/cancion` y audio con `/api/audio` | Gratis | Banco para los otros grados |
+| Canción | No se crean canciones en la app (19-oct, `CANCIONES.md`): salen de nuestro canal de YouTube, una por tema para todos. Solo las que están en YouTube, en una sola lista: las de nuestro canal y las de otros (206 de primaria, `apps/web/src/canciones`); el nombre del canal dice de quién es | **Real**: catálogo | Gratis | Crear el canal y la página oculta «Canal»; producir las canciones |
 | Hojas listas (examen, práctica y balotario) | En 4.º, cada tema trae sus tres hojas armadas para imprimir, desde el tema de la barra lateral (grado y curso no se vuelven a preguntar): preguntas con dibujos de la vida real en Matemática y problemas con recuadro de procedimiento (685, con pasos), preguntas del banco en todos los cursos. Cambiar, fijar y quitar cada pregunta; «+ Tema» arma la miscelánea (también de varios cursos, buscando); «Otra versión», «Fila A y B», «Armar examen» desde el balotario; encabezado del colegio sobre la hoja; PDF y clave con tabla de respuestas, pasos y la cita de cada pregunta | **Real** (`apps/web/src/examenes`, sin IA) | Gratis | Otros grados (necesitan su banco) |
 | Juego web | 17 juegos para cualquier tema; 22 habilidades de cálculo; en 4.º cada tema trae sus preguntas y parejas (banco) | **Real** con cálculo, vocabulario y banco de 4.º | Gratis | Banco para los otros grados |
 | Compartir juego | Código de 6 letras y QR para el celular del alumno | **Real** (`api/juegos-compartidos.ts`) | Gratis | Probar en el aula |
@@ -49,7 +49,7 @@ cuello de botella.
   funciones de Vercel en `api/`, currículo en `packages/curriculo`, notas en `obsidian/`.
 - **Producción:** https://www.supermentes.app (Vercel, cuenta de Hecze). Datos en Vercel Blob.
 - **Contratos UI ↔ backend:** `apps/web/src/api/types.ts`. Cambiar de ejemplo a real: `VITE_API=real`.
-- **IA prevista:** Claude (texto), ElevenLabs (audio), ARASAAC (pictogramas).
+- **IA prevista:** Claude (texto) y ARASAAC (pictogramas). Las canciones salen de nuestro canal de YouTube (`CANCIONES.md`).
 
 ## Decisiones abiertas
 

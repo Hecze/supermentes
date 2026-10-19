@@ -194,7 +194,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
               <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
               <span>
-                <strong>Versión de prueba:</strong> la IA y la música no están conectadas, así que ves ejemplos
+                <strong>Versión de prueba:</strong> la IA no está conectada, así que ves ejemplos
                 {import.meta.env.MODE !== 'artifact' && ' (falta VITE_API=real al publicar)'}.
               </span>
             </p>
