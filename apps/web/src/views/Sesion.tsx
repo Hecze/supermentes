@@ -1,8 +1,9 @@
 // Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
 // Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Download, Printer, SlidersHorizontal } from 'lucide-react'
+import { BadgeCheck, Construction, Download, Printer, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { type OpcionesSesion, type Sesion as TipoSesion } from '../api'
+import { useDatosDocumento, type DatosDocumento } from '../app/documento'
 import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
@@ -57,7 +58,7 @@ function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambi
 
 // ---------- La hoja ----------
 
-/** Celda de tabla: en pantalla con borde suave; en Word, con borde negro (ver aWord). */
+/** Celda de tabla: en pantalla con borde suave. */
 const td = 'border border-line p-2 align-top'
 const th = 'border border-line bg-surface-2 p-2 text-left align-top font-semibold'
 
@@ -114,18 +115,37 @@ function InfoCriterio({ area, cita }: { area: AreaCurriculo | null; cita?: strin
   )
 }
 
-function HojaSesion({ s, area }: { s: TipoSesion; area: AreaCurriculo | null }) {
+function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | null; doc: DatosDocumento }) {
   const m = s.minutos
   return (
     <div className="flex flex-col gap-5 text-[15px] leading-relaxed">
-      <header className="flex flex-col gap-1 text-center">
-        <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
-        <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
-          {s.titulo}
-        </Editable>
-        <p className="text-ink-soft">
-          {s.grado} · {s.area} · {s.opciones.duracion} minutos
-        </p>
+      {/* El logo en la columna izquierda (ocupa todas las filas) y el colegio y el título a su derecha. Es una tabla
+          sin bordes para que el .docx (lib/docx.ts) la arme igual. */}
+      <header>
+        <table data-sin-bordes className="w-full border-collapse">
+          <tbody>
+            <tr>
+              {doc.logo && (
+                <td className="w-24 pr-3 align-middle">
+                  <img src={doc.logo} alt="" className="size-24 object-contain" />
+                </td>
+              )}
+              <td className="text-center align-middle">
+                <div className="flex flex-col items-center gap-1">
+                  {doc.institucion && <p className="font-semibold">{doc.institucion}</p>}
+                  <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
+                  <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
+                    {s.titulo}
+                  </Editable>
+                  <p className="text-ink-soft">
+                    {s.grado} · {s.area} · {s.opciones.duracion} minutos
+                  </p>
+                </div>
+              </td>
+              {doc.logo && <td className="w-24" aria-hidden />}
+            </tr>
+          </tbody>
+        </table>
       </header>
 
       <section className="flex flex-col gap-2">
@@ -133,8 +153,8 @@ function HojaSesion({ s, area }: { s: TipoSesion; area: AreaCurriculo | null }) 
         <table className="w-full border-collapse">
           <tbody>
             {[
-              ['Institución educativa', ''],
-              ['Docente', ''],
+              ['Institución educativa', doc.institucion],
+              ['Docente', doc.docente],
               ['Fecha', ''],
               ['Grado', s.grado],
               ['Área', s.area],
@@ -339,36 +359,7 @@ function HojaSesion({ s, area }: { s: TipoSesion; area: AreaCurriculo | null }) 
 
 // ---------- Word ----------
 
-const ESTILO_WORD: Record<string, string> = {
-  table: 'border-collapse:collapse;width:100%;margin:4pt 0;',
-  th: 'border:1px solid #000;padding:4pt;background:#e8e3f5;text-align:left;vertical-align:top;font-size:10pt;',
-  td: 'border:1px solid #000;padding:4pt;vertical-align:top;font-size:10pt;',
-  h2: 'font-size:16pt;text-align:center;margin:4pt 0;',
-  h3: 'font-size:12pt;margin:10pt 0 4pt;',
-  h4: 'font-size:11pt;margin:6pt 0 2pt;text-decoration:underline;',
-  p: 'margin:2pt 0;font-size:11pt;',
-  li: 'font-size:11pt;margin:1pt 0;',
-}
-
-/** La hoja tal como se ve (con lo que el docente corrigió) en un .doc que Word abre y deja editar. */
-function aWord(hoja: HTMLElement, titulo: string) {
-  const copia = hoja.cloneNode(true) as HTMLElement
-  copia.querySelectorAll('button, .print\\:hidden').forEach((n) => n.remove())
-  copia.querySelectorAll('[data-salto]').forEach((n) => n.setAttribute('style', 'page-break-before:always;'))
-  copia.querySelectorAll<HTMLElement>('*').forEach((n) => {
-    n.removeAttribute('contenteditable')
-    n.removeAttribute('spellcheck')
-    n.removeAttribute('class')
-    const extra = ESTILO_WORD[n.tagName.toLowerCase()]
-    if (extra) n.setAttribute('style', extra + (n.getAttribute('style') ?? ''))
-  })
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="utf-8"><title>${titulo.replace(/</g, '')}</title>
-<style>@page{size:21cm 29.7cm;margin:2cm}body{font-family:Arial,sans-serif;font-size:11pt}</style></head>
-<body>${copia.innerHTML}</body></html>`
-  return new Blob(['﻿', html], { type: 'application/msword' })
-}
-
+/** Nombre del .docx de la hoja tal como se ve (con lo que el docente corrigió; ver lib/docx.ts). */
 const archivo = (titulo: string) =>
   `sesion-${titulo
     .normalize('NFD')
@@ -376,12 +367,13 @@ const archivo = (titulo: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
-    .slice(0, 50)}.doc`
+    .slice(0, 50)}.docx`
 
 // ---------- La vista ----------
 
 export function Sesion() {
   const { ficha, resultados, guardar, avisar } = useStore()
+  const doc = useDatosDocumento(ficha)
   const sesion = resultados.sesion
   const [opciones, setOpciones] = useState<OpcionesSesion>(sesion?.opciones ?? { duracion: ficha?.duracion?.startsWith('90') ? 90 : 45 })
   const [otra, setOtra] = useState(false)
@@ -407,13 +399,26 @@ export function Sesion() {
     setOtra(false)
   }
 
-  function bajarWord() {
-    if (hoja.current) void descargar(aWord(hoja.current, actual.titulo), archivo(actual.titulo), avisar)
+  async function bajarWord() {
+    if (!hoja.current) return
+    // Un .docx de verdad (lo abren Word, LibreOffice y Google Docs), con el logo del colegio adentro.
+    const { hojaADocx } = await import('../lib/docx')
+    void descargar(await hojaADocx(hoja.current, actual.titulo), archivo(actual.titulo), avisar)
   }
 
   return (
     <>
       <EncabezadoHerramienta id="sesion" />
+
+      {/* Hasta que cada parte cumpla la norma del MINEDU con su fuente (CLAUDE.md, «La sesión de aprendizaje: todo o
+          nada»), la vista queda solo para revisarla y se avisa arriba. */}
+      <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
+        <Construction className="mt-0.5 size-5 shrink-0" aria-hidden />
+        <span>
+          <strong>En construcción:</strong> no uses esta sesión en tu clase ni la presentes. Su contenido todavía no
+          cumple todas las normas del MINEDU.
+        </span>
+      </p>
 
       <BarraHoja>
         <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord}>
@@ -432,7 +437,7 @@ export function Sesion() {
 
       <Hoja>
         <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.interes ?? ''}-${version}`}>
-          <HojaSesion s={actual} area={area} />
+          <HojaSesion s={actual} area={area} doc={doc} />
         </div>
       </Hoja>
 

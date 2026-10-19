@@ -2,6 +2,7 @@
 // y, en una miscelánea de varios cursos, los otros), y el encabezado del colegio, que el docente escribe una vez sobre
 // la hoja y queda para todas.
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useDatosDocumento } from '../app/documento'
 import { cargarBanco, temaEnBanco, tieneBanco, type TemaBanco } from '../banco/banco'
 import { areaPorId, areasDe } from '../curriculo/catalogo'
 import { tiposDelTema } from './catalogo'
@@ -64,34 +65,41 @@ export function fuenteDe(gradoId: string, tema: string, area: Area): Fuente {
   return { tema: banco?.tema ?? tema, areaId: area.areaId, area: area.nombre, banco, problemas, tipos: tiposDelTema(gradoId, area.areaId, tema, banco, problemas) }
 }
 
-export type Colegio = { colegio: string; docente: string; seccion: string }
+export type Colegio = { colegio: string; docente: string; seccion: string; logo?: string; lema?: string }
 
-const CLAVE = 'supermentes-colegio'
+const CLAVE_SECCION = 'supermentes-seccion'
 
-function leer(): Colegio {
+function seccionGuardada() {
   try {
-    const c = JSON.parse(localStorage.getItem(CLAVE) ?? '{}') as Partial<Colegio>
-    // Si aún no lo escribió, sale del onboarding (app/perfil.ts): nombre en clase y colegio.
-    const p = JSON.parse(localStorage.getItem('supermentes-perfil') ?? '{}') as { nombre?: string; colegio?: string }
-    return { colegio: c.colegio ?? p.colegio ?? '', docente: c.docente ?? p.nombre ?? '', seccion: c.seccion ?? '' }
+    return localStorage.getItem(CLAVE_SECCION) ?? ''
   } catch {
-    return { colegio: '', docente: '', seccion: '' }
+    return ''
   }
 }
 
-/** El encabezado del colegio, guardado en este navegador. */
-export function useColegio(): [Colegio, (c: Partial<Colegio>) => void] {
-  const [c, setC] = useState<Colegio>(leer)
-  const cambiar = useCallback((cambios: Partial<Colegio>) => {
-    setC((antes) => {
-      const nuevo = { ...antes, ...cambios }
+/**
+ * El encabezado de la hoja. El colegio (con su N.º de I.E. y su logo) y el nombre de la docente salen de "Mi perfil"
+ * (app/documento.ts): el colegio donde enseña el grado y curso del tema. En la hoja se pueden cambiar solo para esta
+ * hoja; la sección (que cambia por salón) sí se recuerda en este navegador.
+ */
+export function useColegio(tema: { gradoId: string; areaId: string } | null): [Colegio, (c: Partial<Colegio>) => void] {
+  const datos = useDatosDocumento(tema)
+  const [cambios, setCambios] = useState<Partial<Colegio>>(() => ({ seccion: seccionGuardada() }))
+  const cambiar = useCallback((nuevos: Partial<Colegio>) => {
+    setCambios((antes) => ({ ...antes, ...nuevos }))
+    if (nuevos.seccion !== undefined)
       try {
-        localStorage.setItem(CLAVE, JSON.stringify(nuevo))
+        localStorage.setItem(CLAVE_SECCION, nuevos.seccion)
       } catch {
-        // Sin almacenamiento, el encabezado dura solo esta visita.
+        // Sin almacenamiento, la sección dura solo esta visita.
       }
-      return nuevo
-    })
   }, [])
+  const c: Colegio = {
+    colegio: cambios.colegio ?? datos.institucion,
+    docente: cambios.docente ?? datos.docente,
+    seccion: cambios.seccion ?? '',
+    logo: datos.logo,
+    lema: datos.lema,
+  }
   return [c, cambiar]
 }

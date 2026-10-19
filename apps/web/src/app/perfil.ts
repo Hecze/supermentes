@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react'
 import { CURSOS_PRIVADOS, GRADOS_DOCENTE, cursosDe, nivelDe, type TipoColegio } from '../curriculo/catalogo'
 import { tokenDeCuenta, useCuenta } from './cuenta'
 
-/** Un colegio donde enseña. En un privado puede tener cursos que parten un área (Álgebra, Geometría…). */
-export type Colegio = { nombre: string; tipo: TipoColegio; grados: string[]; cursos: string[] }
+/**
+ * Un colegio donde enseña. En un privado puede tener cursos que parten un área (Álgebra, Geometría…). `numero` es el
+ * N.º de la I.E. (2048), `lema` va al pie de sus hojas y `logo` es la imagen cuadrada del encabezado (ver documento.ts).
+ */
+export type Colegio = { nombre: string; numero?: string; lema?: string; logo?: string; tipo: TipoColegio; grados: string[]; cursos: string[] }
 
 export type Perfil = { nombre: string; colegio?: string; grado: string; grados?: string[]; cursos?: string[]; colegios?: Colegio[] }
 
@@ -40,10 +43,16 @@ export function ensenanzaValida(e: Partial<Ensenanza> | null | undefined, tipo: 
   return { grados, cursos: cursosValidos(grados, tipo).filter((id) => e?.cursos?.includes(id)) }
 }
 
+const LOGO = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/
+
 export function colegioValido(c: Partial<Colegio> | null | undefined): Colegio | null {
   const tipo = c?.tipo === 'privado' ? 'privado' : 'publico'
   const e = ensenanzaValida(c, tipo)
-  return e && { nombre: (c?.nombre ?? '').trim().slice(0, 120), tipo, ...e }
+  if (!e) return null
+  const numero = (c?.numero ?? '').replace(/^\s*(n\.?\s*[º°o]?\.?\s*)/i, '').trim().slice(0, 12)
+  const logo = c?.logo && c.logo.length <= 300_000 && LOGO.test(c.logo) ? c.logo : undefined
+  const lema = (c?.lema ?? '').trim().replace(/^["“«]|["”»]$/g, '').slice(0, 120)
+  return { nombre: (c?.nombre ?? '').trim().slice(0, 120), ...(numero && { numero }), ...(lema && { lema }), ...(logo && { logo }), tipo, ...e }
 }
 
 const validos = (cs: unknown) => (Array.isArray(cs) ? cs.map(colegioValido).filter((c): c is Colegio => !!c).slice(0, 6) : [])

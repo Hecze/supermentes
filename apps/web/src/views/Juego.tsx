@@ -641,7 +641,7 @@ export function Juego() {
           alSalir={() => setElegido(null)}
           className="h-[min(78svh,680px)] min-h-[460px] w-full rounded-3xl shadow-[0_18px_40px_-24px_rgb(0_0_0/0.5)] print:hidden"
         />
-        {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} />}
+        {enJuego.def.id === 'pupiletras' && <HojaPupiletras titulo={ficha.titulo} grado={ficha.grado} palabras={enJuego.contenido.palabras} tema={ficha} />}
         <Ventana abierta={compartir && deCelular} cerrar={() => setCompartir(false)} titulo="Manda el juego a las familias">
           {compartir && deCelular && (
             <Compartir

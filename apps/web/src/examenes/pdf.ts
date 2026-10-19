@@ -83,6 +83,10 @@ export type DatosPdf = {
   grado: string
   colegio: string
   docente: string
+  /** El logo del colegio (de "Mi perfil"), cuadrado. */
+  logo?: { url: string; ancho: number; alto: number } | null
+  /** El lema del colegio, al pie de cada página junto a su nombre. */
+  lema?: string
   temas: { tema: string; teoria: Teoria | null }[]
   /** Con subtítulo por tema: en la miscelánea. */
   subtitulos: boolean
@@ -104,7 +108,7 @@ function medidas(d: Dibujo, maxW = W - 8, maxH = 75) {
   return { w, h }
 }
 
-type Ctx = { doc: JsPDF; y: number; imagenes: Map<string, string>; pie: string }
+type Ctx = { doc: JsPDF; y: number; imagenes: Map<string, string>; pie: string; colegio: string; lema: string }
 
 function nuevaPagina(c: Ctx) {
   pie(c)
@@ -112,13 +116,33 @@ function nuevaPagina(c: Ctx) {
   c.y = ARRIBA
 }
 
+/** El pie y el marco de cada página: el colegio a la izquierda y su lema a la derecha, dentro del marco. */
 function pie(c: Ctx) {
   const { doc } = c
+  doc.setDrawColor(0)
+  doc.setLineWidth(0.35)
+  doc.rect(8.5, 8.5, ANCHO - 17, ALTO - 17, 'S')
+  doc.setLineWidth(0.2)
+  const y = ALTO - 11.5
+  if (c.colegio || c.lema) {
+    doc.setTextColor(0)
+    doc.setFontSize(7.5)
+    doc.setFont('courier', 'bold')
+    if (c.colegio) doc.text(limpiar(may(c.colegio)), 12, y, { charSpace: 0.3 })
+    doc.setFont('helvetica', 'normal')
+    if (c.lema) doc.text(limpiar(`"${may(c.lema)}"`), ANCHO - 12, y, { align: 'right' })
+  } else {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(110)
+    doc.text('Hecho con Supermentes · supermentes.app', 12, y)
+  }
+  // La versión y la página, chiquitas y fuera del marco.
   doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
-  doc.setTextColor(110)
-  doc.text(c.pie, MARGEN, ALTO - 9)
-  doc.text(`Página ${doc.getNumberOfPages()}`, ANCHO - MARGEN, ALTO - 9, { align: 'right' })
+  doc.setFontSize(6.5)
+  doc.setTextColor(140)
+  doc.text(c.pie, 8.5, ALTO - 5)
+  doc.text(`Página ${doc.getNumberOfPages()}`, ANCHO - 8.5, ALTO - 5, { align: 'right' })
   doc.setTextColor(0)
 }
 
@@ -153,47 +177,124 @@ function campo(doc: JsPDF, texto: string, x: number, y: number, largo: number) {
   return x0 + largo
 }
 
-/** El encabezado: el colegio, el curso, el grado y el docente; la nota (en el examen), el título y el nombre. */
+/** Una línea punteada para escribir a mano, de `x0` a `x1`. */
+function punteada(doc: JsPDF, x0: number, x1: number, y: number) {
+  doc.setDrawColor(90)
+  doc.setLineDashPattern([0.3, 0.7], 0)
+  doc.line(x0, y, x1, y)
+  doc.setLineDashPattern([], 0)
+}
+
+const CLASE: Record<Clase, string> = { examen: 'Examen', practica: 'Práctica', balotario: 'Balotario' }
+const may = (t: string) => t.toLocaleUpperCase('es-PE')
+
+/**
+ * El encabezado, como el de las hojas de los colegios: el logo a la izquierda y el título (letra con serifa, en
+ * mayúsculas) en la misma fila; el recuadro punteado de la nota arriba a la derecha (en el examen); debajo, apellidos y
+ * nombres, grado, tema, fecha, profesor y «¡Ten presente!»; y una raya gruesa. El colegio y su lema van al pie.
+ */
 function encabezado(c: Ctx, d: DatosPdf, v: Version, clave: boolean) {
   const { doc } = c
   const y0 = c.y
   const conNota = d.clase === 'examen' && !clave
-  const ancho = conNota ? W - 28 : W - 40
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.setTextColor(90)
-  doc.text([v.fila, `Versión ${v.codigo}`].filter(Boolean).join(' · '), ANCHO - MARGEN, c.y, { baseline: 'top', align: 'right' })
+  const LOGO = 25
+  const xL = MARGEN + (d.logo ? LOGO + 3 : 0)
+  const xR = ANCHO - MARGEN - (conNota ? 26 : 0)
+
+  if (d.logo) {
+    try {
+      doc.addImage(d.logo.url, d.logo.url.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG', MARGEN - 1, y0 - 2, LOGO, LOGO)
+    } catch {
+      // Un logo que no se puede leer no impide bajar la hoja.
+    }
+  }
   if (conNota) {
-    doc.text('Nota', ANCHO - MARGEN - 10, y0 + 6, { baseline: 'top', align: 'center' })
-    doc.setDrawColor(30)
-    doc.setLineWidth(0.5)
-    doc.roundedRect(ANCHO - MARGEN - 20, y0 + 11, 20, 20, 2, 2, 'S')
+    doc.setDrawColor(0)
+    doc.setLineWidth(0.4)
+    doc.setLineDashPattern([1.4, 0.9], 0)
+    doc.rect(ANCHO - MARGEN - 21, y0, 21, 23, 'S')
+    doc.setLineDashPattern([], 0)
     doc.setLineWidth(0.2)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(7.5)
+    doc.setTextColor(40)
+    doc.text('N O T A', ANCHO - MARGEN - 10.5, y0 + 27, { align: 'center' })
   }
+
+  // El título: «EXAMEN DE MATEMÁTICA», en la fila del logo y centrado entre el logo y la nota.
   doc.setTextColor(0)
-  if (d.colegio.trim()) {
-    escribir(c, lineas(doc, d.colegio, 12.5, ancho, 'bold'), 12.5, MARGEN, 'bold')
+  const titulo = may(clave ? `Clave del ${CLASE[d.clase].toLowerCase()} de ${d.curso}` : `${CLASE[d.clase]} de ${d.curso}`)
+  doc.setFont('times', 'bold')
+  doc.setFontSize(20)
+  const ls = doc.splitTextToSize(titulo, xR - xL) as string[]
+  let y = y0 + Math.max(0, (21 - ls.length * alto(20, 1.1)) / 2)
+  for (const l of ls) {
+    doc.text(l, (xL + xR) / 2, y, { baseline: 'top', align: 'center' })
+    y += alto(20, 1.1)
   }
-  doc.setTextColor(70)
-  escribir(c, lineas(doc, [d.curso, d.grado, d.docente.trim() && `Docente: ${d.docente.trim()}`].filter(Boolean).join(' · '), 10.5, ancho), 10.5)
+
+  // Los datos, debajo del logo: letra chica, como en el ejemplo.
+  const x = MARGEN + (d.logo ? 13 : 0)
+  y = Math.max(y + 3, y0 + (d.logo || conNota ? 30 : 6))
+  const PTD = 9.5
+  const paso = alto(PTD, 1.35)
+  doc.setFontSize(PTD)
+  doc.setTextColor(20)
+  const fila = (partes: [string, 'bold' | 'normal'][]) => {
+    let xi = x
+    for (const [t, estilo] of partes) {
+      doc.setFont('helvetica', estilo)
+      doc.text(t, xi, y, { baseline: 'bottom' })
+      xi += doc.getTextWidth(t)
+    }
+    return xi
+  }
+  if (!clave) {
+    const fin = fila([['Apellidos y Nombres', 'bold'], [': ', 'normal']])
+    punteada(doc, fin, ANCHO - MARGEN - 26, y)
+    y += paso
+  }
+  const finGrado = fila([['Grado: ', 'normal'], [d.grado, 'normal']])
+  if (!clave) {
+    const xf = Math.max(finGrado + 14, x + 70)
+    doc.setFont('helvetica', 'normal')
+    const etiqueta = d.clase === 'balotario' ? 'Para el examen del:' : 'Fecha:'
+    doc.text(etiqueta, xf, y, { baseline: 'bottom' })
+    doc.text('______ / ______ / ________', xf + doc.getTextWidth(etiqueta) + 3, y, { baseline: 'bottom' })
+  }
+  if (v.fila) {
+    doc.setFont('helvetica', 'bold')
+    doc.text(v.fila, ANCHO - MARGEN, y, { baseline: 'bottom', align: 'right' })
+  }
+  y += paso
+  const temas = d.temas.map((t) => t.tema)
+  if (temas.length <= 2) {
+    doc.setFont('helvetica', 'normal')
+    for (const l of (doc.splitTextToSize(`Tema: ${temas.join(' · ')}`, ANCHO - MARGEN - x) as string[]).slice(0, 2)) {
+      doc.text(l, x, y, { baseline: 'bottom' })
+      y += paso
+    }
+  }
+  if (d.docente.trim()) {
+    fila([['Profesor(a): ', 'normal'], [may(d.docente.trim()), 'normal']])
+    y += paso
+  }
+  if (!clave) {
+    fila([['¡TEN PRESENTE! ', 'bold'], ['Lee atentamente las indicaciones que ofrece cada pregunta.', 'normal']])
+    y += paso
+  } else {
+    fila([['Solo para el docente.', 'bold']])
+    y += paso
+  }
+
+  // La raya gruesa que separa el encabezado de las preguntas.
+  y += 1.5
+  doc.setDrawColor(0)
+  doc.setLineWidth(0.7)
+  doc.line(MARGEN + 2, y, ANCHO - MARGEN - 2, y)
+  doc.setLineWidth(0.2)
   doc.setTextColor(0)
-  c.y += 2
-  escribir(c, lineas(doc, clave ? `Clave: ${d.titulo}` : d.titulo, 18, ancho, 'bold'), 18, MARGEN, 'bold')
-  c.y += 2
-  if (clave) {
-    escribir(c, ['Solo para el docente.'], PT)
-    c.y += 4
-    return
-  }
-  c.y = Math.max(c.y + 5, conNota ? y0 + 37 : 0)
-  const fecha = d.clase === 'balotario' ? 'Para el examen del:' : 'Fecha:'
-  const largoFecha = d.clase === 'balotario' ? 24 : 30
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(PT)
-  const largoNombre = W - doc.getTextWidth('Apellidos y nombres:') - doc.getTextWidth(fecha) - 3 - 8 - largoFecha
-  const fin = campo(doc, 'Apellidos y nombres:', MARGEN, c.y, largoNombre)
-  campo(doc, fecha, fin + 8, c.y, largoFecha)
-  c.y += 8
+  c.y = y + 7
 }
 
 /** Ancho de cada alternativa si caben todas en una fila, o null. */
@@ -482,14 +583,14 @@ export async function pdfHoja(d: DatosPdf, { clave: conClave = false } = {}): Pr
     const dibujos = [...new Map(d.versiones.flatMap((v) => v.items.flatMap((it) => (it.dibujo ? [[it.dibujo.svg, it.dibujo] as const] : [])))).values()]
     await Promise.all(dibujos.map(async (x) => imagenes.set(x.svg, await aPng(x))))
   }
-  const c: Ctx = { doc, y: ARRIBA, imagenes, pie: '' }
+  const c: Ctx = { doc, y: ARRIBA, imagenes, pie: '', colegio: d.colegio.trim(), lema: d.lema?.trim() ?? '' }
   d.versiones.forEach((v, nv) => {
     if (nv > 0) {
       pie(c)
       doc.addPage()
       c.y = ARRIBA
     }
-    c.pie = limpiar(`Hecho con Supermentes · supermentes.app · ${[v.fila, `Versión ${v.codigo}`].filter(Boolean).join(' · ')}`)
+    c.pie = limpiar([v.fila, `Versión ${v.codigo}`].filter(Boolean).join(' · '))
     if (conClave) return clave(c, d, v)
     encabezado(c, d, v, false)
     let n = 0
