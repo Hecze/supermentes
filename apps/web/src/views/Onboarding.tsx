@@ -1,14 +1,15 @@
 // Onboarding (flujo "entrar y primer tema" en pen): solo la primera vez que entra con su cuenta.
-// 1 · cómo la llaman, 2 · su grado, 3 · el tema de mañana. Termina con su primera clase lista.
+// 1 · cómo la llaman, 2 · qué enseña (grados y cursos), 3 · el tema de mañana. Termina con su primera clase lista.
 import { ArrowRight, Search } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useCuenta } from '../app/cuenta'
-import { guardarPerfil } from '../app/perfil'
+import { ENSENANZA_INICIAL, guardarPerfil, type Ensenanza } from '../app/perfil'
 import { useStore } from '../app/store'
 import { tieneBanco } from '../banco/banco'
+import { ElegirCursos, ElegirGrados } from '../components/GradosCursos'
 import { Logo } from '../components/Logo'
-import { sugerenciasDelGrado } from '../components/NuevoTema'
 import { cx } from '../components/ui'
+import { sugerenciasPara } from '../curriculo/buscar'
 import { GRADOS_CURRICULO, nivelDe } from '../curriculo/catalogo'
 import { useCurriculo } from '../curriculo/cargar'
 
@@ -58,14 +59,15 @@ export function Onboarding() {
   const [paso, setPaso] = useState(1)
   const [nombre, setNombre] = useState(cuenta.nombre ? `Profe ${cuenta.nombre}` : '')
   const [colegio, setColegio] = useState('')
-  const [grado, setGrado] = useState('primaria-4')
-  const [otros, setOtros] = useState(false)
+  const [ensenanza, setEnsenanza] = useState<Ensenanza>(ENSENANZA_INICIAL)
+  // Los temas del paso 3 salen de su primer grado (y de sus cursos).
+  const grado = ensenanza.grados[0] ?? 'primaria-4'
   const cur = useCurriculo(nivelDe(grado), grado)
-  const temas = cur.estado === 'listo' ? sugerenciasDelGrado(cur.grado).filter((_, i) => i % 2 === 0) : []
   const corto = GRADOS_CURRICULO.find((g) => g.id === grado)?.corto ?? ''
+  const temas = cur.estado === 'listo' ? sugerenciasPara([cur.grado], ensenanza.cursos, { [grado]: corto }, 4) : []
 
   function terminar(previo: Parameters<typeof abrirNuevoTema>[0]) {
-    guardarPerfil({ nombre: nombre.trim(), colegio: colegio.trim() || undefined, grado })
+    guardarPerfil({ nombre: nombre.trim(), colegio: colegio.trim() || undefined, grado, grados: ensenanza.grados, cursos: ensenanza.cursos })
     abrirNuevoTema(previo)
   }
 
@@ -111,43 +113,28 @@ export function Onboarding() {
   }
 
   if (paso === 2) {
-    const grados = GRADOS_CURRICULO.filter((g) => otros || g.nivel === 'primaria')
     return (
       <Paso n={2}>
         <p className="text-lg text-ink-soft">Hola, {nombre.trim()} 👋</p>
-        <h1 className={titulo}>¿Qué grado enseñas?</h1>
-        <p className="text-lg text-ink-soft">Así te mostramos los temas del Currículo Nacional de tu grado, listos para usar.</p>
+        <h1 className={titulo}>¿Qué enseñas?</h1>
+        <p className="text-lg text-ink-soft">Así te mostramos primero los temas del Currículo Nacional de tus grados y cursos.</p>
         <form
-          className="flex w-full flex-col items-center gap-6"
+          className="flex w-full flex-col items-center gap-6 text-left"
           onSubmit={(e) => {
             e.preventDefault()
-            setPaso(3)
+            if (ensenanza.grados.length) setPaso(3)
           }}
         >
-          <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3" role="group" aria-label="Tu grado">
-            {grados.map((g) => (
-              <button
-                key={g.id}
-                type="button"
-                aria-pressed={g.id === grado}
-                onClick={() => setGrado(g.id)}
-                className={cx(
-                  'flex h-24 flex-col items-center justify-center rounded-2xl border-2 transition',
-                  g.id === grado ? 'border-ink bg-ink text-surface' : 'border-line bg-surface hover:border-ink-soft',
-                )}
-              >
-                <span className="font-display text-3xl font-bold">{g.corto.split(' ')[0]}</span>
-                <span className={cx('text-sm', g.id === grado ? 'opacity-80' : 'text-ink-soft')}>{g.corto.split(' ').slice(1).join(' ')}</span>
-              </button>
-            ))}
+          <div className="flex w-full flex-col gap-3">
+            <p className="font-semibold">Tus grados (todos los que quieras)</p>
+            <ElegirGrados valor={ensenanza.grados} onChange={(grados) => setEnsenanza({ ...ensenanza, grados })} />
           </div>
-          {!otros && (
-            <button type="button" onClick={() => setOtros(true)} className="font-semibold underline-offset-4 hover:underline">
-              Enseño en inicial o secundaria
-            </button>
-          )}
-          <Seguir>Seguir</Seguir>
-          <p className="text-sm text-ink-soft">Puedes cambiarlo cuando quieras en el inicio.</p>
+          <div className="flex w-full flex-col gap-3">
+            <p className="font-semibold">Tus cursos</p>
+            <ElegirCursos grados={ensenanza.grados} valor={ensenanza.cursos} onChange={(cursos) => setEnsenanza({ ...ensenanza, cursos })} />
+          </div>
+          <Seguir disabled={!ensenanza.grados.length}>Seguir</Seguir>
+          <p className="text-sm text-ink-soft">Puedes cambiarlo cuando quieras en «Mi perfil».</p>
         </form>
       </Paso>
     )
