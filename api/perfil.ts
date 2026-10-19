@@ -1,4 +1,4 @@
-// Perfil de la docente, del onboarding (tabla docentes de D1).
+// Perfil de la docente, del onboarding (tabla docentes; ver api/_db.ts).
 //
 //   GET  /api/perfil  Authorization: Bearer <token de Clerk>               → { perfil: { nombre, colegio?, grado } | null }
 //   POST /api/perfil  Authorization: Bearer …  { nombre, colegio?, grado }  → { perfil }

@@ -1,5 +1,6 @@
 // Supermentes en Cloudflare: la app estática (apps/web/dist) y las funciones de api/ en un solo Worker.
 // Las mismas rutas que vercel.json.
+import { D1_GLOBAL } from '../api/_db.js'
 import * as audio from '../api/audio.js'
 import * as cancion from '../api/cancion.js'
 import * as entrarDemo from '../api/entrar-demo.js'
@@ -55,6 +56,8 @@ async function api(request: Request, nombre: string, ctx: ExecutionContext) {
 
 export default {
   async fetch(request, env, ctx) {
+    // api/_db.ts usa D1 si lo encuentra aquí; en Vercel, sin esto, usa Postgres (Neon).
+    ;(globalThis as Record<string, unknown>)[D1_GLOBAL] ??= (env as { DB?: unknown }).DB
     const url = new URL(request.url)
     const nombre = /^\/api\/([\w-]+)\/?$/.exec(url.pathname)?.[1]
     if (nombre) return api(request, nombre, ctx)

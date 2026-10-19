@@ -1,4 +1,4 @@
-// Salones de la docente: grado, sección y la lista de nombres que pegó (tablas salones y alumnos de D1).
+// Salones de la docente: grado, sección y la lista de nombres que pegó (tablas salones y alumnos; ver api/_db.ts).
 //
 //   GET  /api/salones  Authorization: Bearer <token de Clerk>                         → { salones: [{ id, grado, seccion, alumnos }] }
 //   POST /api/salones  Authorization: Bearer …  { grado, seccion, alumnos: string[] }  → { salon }
@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const id = await docente(request)
   if (!id) return json({ error: 'Entra con tu cuenta.' }, 401)
   const { results } = await db()
-    .prepare('SELECT s.id, s.grado, s.seccion, COUNT(a.id) AS alumnos FROM salones s LEFT JOIN alumnos a ON a.salon = s.id WHERE s.docente = ? GROUP BY s.id ORDER BY s.creado DESC')
+    .prepare('SELECT s.id, s.grado, s.seccion, CAST(COUNT(a.id) AS INTEGER) AS alumnos FROM salones s LEFT JOIN alumnos a ON a.salon = s.id WHERE s.docente = ? GROUP BY s.id ORDER BY s.creado DESC')
     .bind(id)
     .all<Salon>()
   return json({ salones: results })

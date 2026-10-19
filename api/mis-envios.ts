@@ -2,7 +2,7 @@
 //
 //   POST /api/mis-envios  Authorization: Bearer <token de Clerk>  { envios: Enviado[] }  → { envios: Enviado[] }
 //
-// El navegador manda los envíos que conoce y recibe la unión con los que ya estaban en su cuenta (tabla envios de D1).
+// El navegador manda los envíos que conoce y recibe la unión con los que ya estaban en su cuenta (tabla envios; ver api/_db.ts).
 // Necesita CLERK_SECRET_KEY.
 import { docente } from './_cuenta.js'
 import { db } from './_db.js'
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
     return json({ error: 'No pudimos leer tus juegos.' }, 400)
   }
   try {
-    // INSERT OR IGNORE: un envío no cambia después de mandarse; lo que ya estaba se respeta.
+    // ON CONFLICT DO NOTHING: un envío no cambia después de mandarse; lo que ya estaba se respeta.
     const insertar = db().prepare(
-      'INSERT OR IGNORE INTO envios (docente, codigo, clave, juego, tema, grado, practica, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO envios (docente, codigo, clave, juego, tema, grado, practica, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING',
     )
     if (nuevos.length) await db().batch(nuevos.map((e) => insertar.bind(id, e.codigo, e.clave, e.juego, e.tema, e.grado ?? null, e.practica ?? null, e.fecha)))
     const { results } = await db()

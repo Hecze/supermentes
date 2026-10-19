@@ -54,7 +54,8 @@ export async function POST(request: Request) {
         .run()
       return json({ codigo })
     } catch (e) {
-      if (!/UNIQUE/.test(String(e))) throw e
+      // D1 dice "UNIQUE constraint failed"; Postgres, "duplicate key … unique constraint".
+      if (!/unique/i.test(String(e))) throw e
     }
   }
   return json({ error: 'No pudimos crear la tarea. Intenta de nuevo.' }, 500)
