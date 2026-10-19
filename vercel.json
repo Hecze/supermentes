@@ -4,6 +4,13 @@
   "installCommand": "npm install",
   "buildCommand": "turbo run build",
   "outputDirectory": "apps/web/dist",
+  "ignoreCommand": "sh scripts/vercel-saltar.sh",
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "**": false
+    }
+  },
   "rewrites": [
     {
       "source": "/api/:ruta(entrar-demo|intentos|mis-envios|perfil|salones|tareas)",
