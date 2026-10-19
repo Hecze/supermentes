@@ -1,4 +1,4 @@
-import { NIVELES, cursoPorId } from './catalogo'
+import { NIVELES, areasDe, cursoPorId } from './catalogo'
 import { cargarNivel, type AreaCurriculo, type GradoCurriculo } from './cargar'
 
 // Búsqueda de temas dentro del currículo: el docente solo elige temas que el currículo respalda.
@@ -43,6 +43,12 @@ function puntaje(busqueda: string[], texto: string) {
 }
 
 const consulta = (q: string) => palabras(q).filter((p) => !VACIAS.has(p)).map(raiz)
+
+/** ¿El texto tiene todas las palabras buscadas (o palabras que empiezan con ellas)? */
+export function coincide(q: string, texto: string) {
+  const b = consulta(q)
+  return b.length > 0 && puntaje(b, texto) === b.length
+}
 
 /** Con varias palabras, basta con la mitad para que cuente como "parecido". */
 const parecido = (n: number, b: string[]) => b.length > 1 && n >= Math.ceil(b.length / 2)
@@ -125,26 +131,39 @@ export function esDelCurso(grado: GradoCurriculo | undefined, r: Resultado, curs
   return i === d.competencia
 }
 
+/** Los temas de un curso en un grado: todos los del área o, si es un curso de colegio privado, los de su competencia. */
+export type TemasDelCurso = { gradoId: string; grado: string; cursoId: string; curso: string; temas: Resultado[] }
+
+/** Cada curso que enseña en cada grado, con sus temas del currículo. Sin cursos elegidos, todos los del grado. */
+export function temasPorCurso(grados: GradoCurriculo[], cursos: string[], nombres: Record<string, string>): TemasDelCurso[] {
+  return grados.flatMap((g) =>
+    (cursos.length ? cursos : areasDe(g.id).map((a) => a.id)).flatMap((cursoId) => {
+      const d = areaDelCurso(g, cursoId)
+      if (!d) return []
+      const grado = nombres[g.id] ?? g.id
+      const temas = temasDe(d.area)
+        .filter((t) => d.competencia === undefined || t.indiceCompetencia === d.competencia)
+        .map((t) => ({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: g.id, grado, areaId: d.area.id, area: d.area.nombre }))
+      return temas.length ? [{ gradoId: g.id, grado, cursoId, curso: cursoPorId(cursoId)?.nombre ?? d.area.nombre, temas }] : []
+    }),
+  )
+}
+
 /**
  * Sin escribir nada: los primeros temas de cada grado y curso que enseña, turnándose (un tema de cada uno y luego
  * el siguiente), para empezar con un clic. Con "todos los cursos" se usan los principales del nivel.
  */
 export function sugerenciasPara(grados: GradoCurriculo[], cursos: string[], nombres: Record<string, string>, maximo = 8): Resultado[] {
-  const pares = grados.flatMap((g) =>
-    (cursos.length ? cursos : PRINCIPALES)
-      .map((id) => areaDelCurso(g, id))
-      .filter((x): x is NonNullable<typeof x> => !!x)
-      .map(({ area: a, competencia }) => ({ g, a, temas: temasDe(a).filter((t) => competencia === undefined || t.indiceCompetencia === competencia) })),
-  )
+  const grupos = temasPorCurso(grados, cursos.length ? cursos : PRINCIPALES, nombres)
   const res: Resultado[] = []
   const vistos = new Set<string>()
-  for (let i = 0; res.length < maximo && pares.some((p) => p.temas[i]); i++)
-    for (const { g, a, temas } of pares) {
+  for (let i = 0; res.length < maximo && grupos.some((c) => c.temas[i]); i++)
+    for (const { temas } of grupos) {
       const t = temas[i]
-      const k = `${g.id}|${a.id}|${t?.tema}`
+      const k = t && `${t.gradoId}|${t.areaId}|${t.tema}`
       if (!t || res.length >= maximo || vistos.has(k)) continue
       vistos.add(k)
-      res.push({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: g.id, grado: nombres[g.id] ?? g.id, areaId: a.id, area: a.nombre })
+      res.push(t)
     }
   return res
 }

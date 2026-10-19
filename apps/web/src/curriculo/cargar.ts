@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import type { Nivel } from './catalogo'
+import { useEffect, useMemo, useState } from 'react'
+import { nivelDe, type Nivel } from './catalogo'
 
 // Datos del currículo oficial (MINEDU). Ver packages/curriculo/README.md.
 
@@ -64,4 +64,25 @@ export function useCurriculo(nivel: Nivel, gradoId: string, areaId?: string): Es
     }
   }, [nivel, gradoId, areaId])
   return res
+}
+
+/** El currículo de esos grados, en ese orden (cada nivel se descarga una vez); null mientras carga. */
+export function useGrados(ids: string[]): GradoCurriculo[] | null {
+  const [porId, setPorId] = useState<Record<string, GradoCurriculo>>({})
+  const niveles = [...new Set(ids.map(nivelDe))].sort().join(',')
+  useEffect(() => {
+    let vivo = true
+    void Promise.all((niveles ? (niveles.split(',') as Nivel[]) : []).map(cargarNivel)).then((datos) => {
+      if (vivo) setPorId(Object.fromEntries(datos.flatMap((d) => d?.grados ?? []).map((g) => [g.id, g])))
+    })
+    return () => {
+      vivo = false
+    }
+  }, [niveles])
+  const lista = ids.join(',')
+  return useMemo(() => {
+    const xs = lista ? lista.split(',') : []
+    const grados = xs.map((id) => porId[id]).filter(Boolean)
+    return grados.length === xs.length ? grados : null
+  }, [porId, lista])
 }

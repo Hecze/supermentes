@@ -1,33 +1,16 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import { useAbrirTema } from '../app/abrirTema'
 import { colegioActivo, colegiosGuardados, elegirColegioActivo, ensenanzaGuardada, ensenanzaValida } from '../app/perfil'
 import { useStore, type Vista } from '../app/store'
-import { fichaDeResultado } from '../app/temaInstantaneo'
 import { buscarEnGrado, buscarEnTodos, esDelCurso, normalizar, sugerenciasPara, type Resultado } from '../curriculo/buscar'
-import { GRADOS_DOCENTE, areaPorId, nivelDe, nombreCursos, nombreGrados, type Nivel } from '../curriculo/catalogo'
-import { cargarNivel, type GradoCurriculo } from '../curriculo/cargar'
+import { GRADOS_DOCENTE, areaPorId, nombreCursos, nombreGrados } from '../curriculo/catalogo'
+import { useGrados } from '../curriculo/cargar'
 import { FiltroCursos, FiltroGrados } from './GradosCursos'
 import { cx } from './ui'
 
 const NOMBRES = Object.fromEntries(GRADOS_DOCENTE.map((g) => [g.id, g.corto]))
 const MAXIMO = 8
-
-/** El currículo de los grados elegidos (cada nivel se descarga una vez). */
-function useGrados(ids: string[]): GradoCurriculo[] | null {
-  const [porId, setPorId] = useState<Record<string, GradoCurriculo>>({})
-  const niveles = [...new Set(ids.map(nivelDe))].sort().join(',')
-  useEffect(() => {
-    let vivo = true
-    void Promise.all((niveles ? (niveles.split(',') as Nivel[]) : []).map(cargarNivel)).then((datos) => {
-      if (vivo) setPorId(Object.fromEntries(datos.flatMap((d) => d?.grados ?? []).map((g) => [g.id, g])))
-    })
-    return () => {
-      vivo = false
-    }
-  }, [niveles])
-  const grados = ids.map((id) => porId[id]).filter(Boolean)
-  return grados.length === ids.length ? grados : null
-}
 
 /** Con varios grados, los resultados se turnan (el mejor de cada grado primero) para que ninguno quede tapado. */
 function turnar(rs: Resultado[]): Resultado[] {
@@ -62,7 +45,8 @@ function Resaltado({ texto, q }: { texto: string; q: string }) {
  * filtros son para los imprevistos (suplir a otro profe) y no cambian el perfil.
  */
 export function NuevoTema() {
-  const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, setFicha, completarFicha, ir } = useStore()
+  const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, ir } = useStore()
+  const abrirTema = useAbrirTema()
   const dialogo = useRef<HTMLDialogElement>(null)
   const buscador = useRef<HTMLInputElement>(null)
   const [filtro, setFiltro] = useState(ensenanzaGuardada)
@@ -90,12 +74,8 @@ export function NuevoTema() {
   }
 
   async function crear(r: Resultado, destino: Vista = 'ficha') {
-    const nueva = await fichaDeResultado(r)
-    if (!nueva) return
-    setFicha(nueva)
+    await abrirTema(r, destino)
     cerrarNuevoTema()
-    ir(destino)
-    completarFicha(nueva)
   }
 
   useEffect(() => {
