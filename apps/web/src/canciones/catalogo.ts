@@ -31,7 +31,8 @@ export function cargarCanciones() {
   return cache
 }
 
-const raices = (t: string) =>
+/** Raíces de las palabras (5 letras) para comparar nombres de temas sin importar plurales ni tildes. */
+export const raices = (t: string) =>
   new Set(
     normalizar(t)
       .split(/[^a-z0-9]+/)

@@ -103,4 +103,4 @@ No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 
 
 1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo) y juego.
 2. Canciones del canal de YouTube de Supermentes en la app (`obsidian/CANCIONES.md`).
-3. Persistencia: biblioteca y guardar lo que el docente corrige en la hoja.
+3. Persistencia: guardar lo que el docente corrige en la hoja.

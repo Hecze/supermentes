@@ -3,11 +3,18 @@
 import { readFile } from 'node:fs/promises'
 
 const recursos = JSON.parse(await readFile(new URL('../src/recursos/recursos.json', import.meta.url), 'utf8'))
-const enlaces = recursos.flatMap((r) => [r.url, r.pdf].filter(Boolean).map((url) => ({ url, titulo: r.titulo })))
+const enlaces = [
+  ...new Map(recursos.flatMap((r) => [r.url, r.pdf, ...(r.partes ?? []).map((p) => p.url)].filter(Boolean).map((url) => [url, { url, titulo: r.titulo }]))).values(),
+]
 
 async function abre(url) {
   try {
-    const res = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(30_000), headers: { 'User-Agent': 'Mozilla/5.0 (Supermentes; revisión de enlaces)' } })
+    const res = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: AbortSignal.timeout(30_000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (Supermentes; revisión de enlaces)' },
+    })
     await res.body?.cancel()
     return res.ok ? null : `HTTP ${res.status}`
   } catch (e) {
