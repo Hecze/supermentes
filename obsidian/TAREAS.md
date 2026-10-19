@@ -1,5 +1,5 @@
 ---
-actualizado: 2026-10-18
+actualizado: 2026-10-19
 estado: aprobado por Harold (18-oct), flujo y prototipo; listo para implementar después de cuentas y salones
 ---
 
@@ -28,10 +28,10 @@ corrige solo y el docente lo ve **revisado por desempeño**, con el paso siguien
 
 ## 2. Para quién
 
-- **Docente de primaria** que no sabe de tecnología, usa laptop y no lee instrucciones. Ya manda cosas al grupo de
+- **Docente de primaria o secundaria** que no sabe de tecnología, usa laptop y no lee instrucciones. Ya manda cosas al grupo de
   WhatsApp de las familias.
-- **Alumno de 1.º a 6.º** en el celular de su papá o mamá, muchas veces dentro de WhatsApp. Los de 1.º y 2.º recién
-  leen.
+- **Alumno de primaria o secundaria**, muchas veces en el celular de su papá o mamá y dentro de WhatsApp. Los de 1.º
+  y 2.º de primaria recién leen.
 - **Papás:** si solo ven "juegos", dicen que "el profesor solamente los manda a jugar". El mensaje dice que **es la
   tarea**.
 

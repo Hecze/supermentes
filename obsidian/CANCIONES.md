@@ -82,8 +82,10 @@ Reglas del diseño:
 - Un script interno, no la app, hace el recorrido completo: letra → Lyria (canción completa) → video con la letra (ffmpeg: fondo y letra que avanza) → subida por la API ya vinculada a su tema.
 - **Costo único:** unos US$ 0,08 por canción completa (Lyria 3 Pro vía OpenRouter, precio del 17-oct).
   - 4.º primaria (768 canciones): unos US$ 61.
-  - Toda primaria (unas 4 400 canciones, 2 por tema): unos US$ 350, una sola vez. Después es gratis para todos.
-- **Ritmo de subida:** 100 por día, o sea unos 45 días para toda primaria (o pedir más cupo).
+  - Toda primaria (2 199 temas, unas 4 400 canciones, 2 por tema): unos US$ 350, una sola vez.
+  - Toda secundaria (1 983 temas, unas 4 000 canciones): unos US$ 320, una sola vez.
+  - Las dos (unas 8 400 canciones): unos US$ 670. Después es gratis para todos. Ningún nivel va primero.
+- **Ritmo de subida:** 100 por día, o sea unos 84 días para primaria y secundaria (o pedir más cupo).
 - **Antes de publicar, revisar:**
   - los términos de Lyria y de OpenRouter para publicar y monetizar;
   - la etiqueta de «contenido alterado o sintético» que pide YouTube.

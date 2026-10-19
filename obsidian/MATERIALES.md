@@ -1,5 +1,5 @@
 ---
-actualizado: 2026-10-18
+actualizado: 2026-10-19
 ---
 
 # Materiales del docente: cómo son y cómo deben verse
@@ -257,5 +257,5 @@ del mismo tema.
 ayudar al docente", 1:32:43): 1) clave con procedimiento, 2) encabezado del colegio y fijar o editar preguntas,
 3) hoja de práctica (material extra), 4) balotario con "armar el examen", 5) miscelánea y niveles.
 
-**Nota:** Lucho enseña sobre todo en secundaria, pero el balotario lo hacía en primaria, y casi todo esto vale igual
-para primaria, que es nuestro foco.
+**Nota:** Lucho enseña sobre todo en secundaria y el balotario lo hacía en primaria: casi todo esto vale para los dos
+niveles, y abarcamos los dos por igual.

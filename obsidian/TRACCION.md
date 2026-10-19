@@ -1,5 +1,5 @@
 ---
-actualizado: 2026-10-17
+actualizado: 2026-10-19
 ---
 
 # Tracción: docentes reales antes de la entrega
@@ -89,7 +89,7 @@ Si les parece útil, pásenlo a otros profes. ¡Gracias! 😊
 ```
 
 ### 3. Publicación en grupos de Facebook de docentes
-Busca en Facebook "docentes Perú", "maestros primaria Perú", "educación inicial Perú", "sesiones de aprendizaje" y "materiales educativos". Elige grupos con más de 50 mil miembros y publicaciones de hoy. Publica desde tu perfil personal, con una captura o el video del crucigrama. Si el grupo no permite enlaces, ponlo en el primer comentario o pide que comenten "QUIERO" y responde a cada uno.
+Busca en Facebook "docentes Perú", "maestros primaria Perú", "docentes de secundaria Perú", "sesiones de aprendizaje" y "materiales educativos". Elige grupos con más de 50 mil miembros y publicaciones de hoy. Publica desde tu perfil personal, con una captura o el video del crucigrama. Si el grupo no permite enlaces, ponlo en el primer comentario o pide que comenten "QUIERO" y responde a cada uno.
 
 ```
 Hola, colegas 👋 Soy [tu nombre]. Con un amigo estamos en una competencia de 30 horas en Lima (Hack the Andes) construyendo una herramienta para docentes del Perú, y queremos la opinión de profes de verdad.
@@ -128,7 +128,7 @@ Se crea desde una página de Facebook de Supermentes (si no existe, créala: 5 m
 
 - **Objetivo:** Tráfico → sitio web → maximizar clics en el enlace.
 - **Presupuesto:** total S/50, desde ahora hasta el domingo 8:00 a. m.
-- **Público:** Perú, 23–60 años. Intereses: docente, profesor, educación primaria, educación infantil, pedagogía, Ministerio de Educación del Perú.
+- **Público:** Perú, 23–60 años. Intereses: docente, profesor, educación primaria, educación secundaria, pedagogía, Ministerio de Educación del Perú.
 - **Ubicaciones manuales:** feed y Reels de Facebook e Instagram, historias. **Quita Audience Network y Messenger**: ahí llegan clics por error y de bots.
 - **Creativo:** el video vertical del crucigrama (mejor) o `apps/web/public/og.png`.
 - **Enlace:** `https://www.supermentes.app/?utm_source=facebook_ads&utm_medium=pago`
@@ -153,7 +153,7 @@ Graba la pantalla de la laptop con el celular o con la grabadora de pantalla. Fo
 | 12–17 | Botón Imprimir o Descargar | "…y listo para imprimir" |
 | 17–22 | Logo y dirección grande | "Gratis · supermentes.app" |
 
-Descripción: `Crucigrama para tu clase en 20 segundos 📝 Únete en supermentes.app #docentesperu #profesperu #maestrosdelperu #recursoseducativos #educacionprimaria #cneb`
+Descripción: `Crucigrama para tu clase en 20 segundos 📝 Únete en supermentes.app #docentesperu #profesperu #maestrosdelperu #recursoseducativos #educacionprimaria #educacionsecundaria #cneb`
 
 ### Video B: la cumbia de las fracciones (más viral, más trabajo)
 Genera la canción con ElevenLabs Music (tenemos el perk) o Suno, ritmo cumbia, con este coro. Pon en pantalla **"Así sonarán las canciones de Supermentes (demo)"**: la canción todavía no sale de la app.
