@@ -21,7 +21,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     id: 'sesion',
     pedido: 'Mi sesión de aprendizaje',
     nombre: 'Sesión de aprendizaje',
-    descripcion: 'Lista para presentar, en el formato del MINEDU.',
+    descripcion: 'En construcción: todavía no la uses.',
     icono: ClipboardList,
     color: 'var(--sesion)',
   },
