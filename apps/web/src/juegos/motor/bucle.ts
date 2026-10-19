@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
 /**
- * Llama a `paso(dt)` en cada cuadro mientras `activo` sea true. `dt` va en segundos y se limita a 0,1
- * para que nada salte al volver de otra pestaña.
+ * Llama a `paso(dt, real)` en cada cuadro mientras `activo` sea true. `dt` va en segundos y se limita a 0,1
+ * para que nada salte al volver de otra pestaña. `real` es el tiempo de verdad desde el cuadro anterior: el
+ * navegador no dibuja con la pestaña oculta, así que un reloj que cuente con `real` descuenta al volver lo que
+ * el alumno estuvo fuera (por ejemplo, buscando la respuesta en ChatGPT).
  */
-export function useBucle(paso: (dt: number) => void, activo = true) {
+export function useBucle(paso: (dt: number, real: number) => void, activo = true) {
   const ultimo = useRef(paso)
   ultimo.current = paso
   useEffect(() => {
@@ -12,14 +14,26 @@ export function useBucle(paso: (dt: number) => void, activo = true) {
     let id = 0
     let antes = performance.now()
     const cuadro = (ahora: number) => {
-      const dt = Math.min(0.1, (ahora - antes) / 1000)
+      const real = Math.max(0, (ahora - antes) / 1000)
       antes = ahora
-      ultimo.current(dt)
+      ultimo.current(Math.min(0.1, real), real)
       id = requestAnimationFrame(cuadro)
     }
     id = requestAnimationFrame(cuadro)
     return () => cancelAnimationFrame(id)
   }, [activo])
+}
+
+/** Cuántas veces el jugador salió del juego (otra pestaña u otra aplicación) mientras `activo` sea true. */
+export function useSalidas(activo = true) {
+  const salidas = useRef(0)
+  useEffect(() => {
+    if (!activo) return
+    const f = () => document.visibilityState === 'hidden' && salidas.current++
+    document.addEventListener('visibilitychange', f)
+    return () => document.removeEventListener('visibilitychange', f)
+  }, [activo])
+  return salidas
 }
 
 /** Ancho y alto de un elemento, actualizados al cambiar de tamaño (pantalla completa, girar el celular). */

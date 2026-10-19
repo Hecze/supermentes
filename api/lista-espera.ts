@@ -1,14 +1,24 @@
 // Lista de espera: guarda cada registro como un archivo privado en Vercel Blob.
 //
-//   GET  /api/lista-espera                         → { total }  (contador público, cacheado)
-//   POST /api/lista-espera  { correo, nombre, … }  → { ok, nuevo, codigo, total }
+//   GET  /api/lista-espera                         → { total }  (contador público, cacheado una hora)
+//   POST /api/lista-espera  { correo, nombre, … }  → { ok, nuevo, codigo, total: null }
 //   GET  /api/lista-espera?formato=csv&clave=…     → CSV con todos los registros (requiere LISTA_CLAVE)
 //   DELETE /api/lista-espera?correo=…&clave=…      → borra un registro (pruebas o spam; requiere LISTA_CLAVE)
+//
+// Límite del plan Hobby de Vercel: 2.000 operaciones avanzadas (put, list) al mes; si se pasan, Blob se bloquea
+// 30 días. Por eso cada inscripción hace un solo put, el contador se cachea una hora y hay un tope por conexión.
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { del, get, list, put } from '@vercel/blob'
 
 const PREFIJO = 'lista-espera/'
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+/** Celular peruano: 9 dígitos que empiezan con 9, con o sin +51 y espacios. Devuelve +51…, '' si no hay o null si no es válido. */
+function celularDe(v: unknown): string | null {
+  const d = typeof v === 'string' ? v.replace(/\D/g, '').replace(/^51(?=9\d{8}$)/, '') : ''
+  if (!d) return ''
+  return /^9\d{8}$/.test(d) ? `+51${d}` : null
+}
 
 type Registro = {
   correo: string
@@ -16,6 +26,8 @@ type Registro = {
   rol: string
   region: string
   colegio: string
+  /** WhatsApp en formato +51XXXXXXXXX (opcional): por ahí se le manda su material, como hace ACET. */
+  celular: string
   /** Código para invitar a otros: supermentes.app/?ref=CODIGO */
   codigo: string
   /** Código de quien invitó a esta persona. */
@@ -52,6 +64,22 @@ async function contar() {
   return total
 }
 
+// Tope por conexión, en la memoria de cada instancia: frena a un bot sin gastar operaciones de Blob.
+// Es holgado porque en un colegio o una capacitación muchos docentes comparten la misma red.
+const intentos = new Map<string, number[]>()
+const VENTANA = 10 * 60_000
+const MAXIMO_POR_VENTANA = 30
+
+function demasiados(request: Request) {
+  const ip = (request.headers.get('x-vercel-forwarded-for') ?? request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'sin-ip'
+  const ahora = Date.now()
+  const recientes = (intentos.get(ip) ?? []).filter((t) => ahora - t < VENTANA)
+  recientes.push(ahora)
+  if (intentos.size > 10_000) intentos.clear()
+  intentos.set(ip, recientes)
+  return recientes.length > MAXIMO_POR_VENTANA
+}
+
 async function leer(ruta: string): Promise<Registro | null> {
   const r = await get(ruta, { access: 'private', useCache: false })
   if (!r || r.statusCode !== 200 || !r.stream) return null
@@ -62,8 +90,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   if (url.searchParams.get('formato') === 'csv') return exportar(request, url)
   try {
-    // El contador se cachea en la CDN para no listar la tienda en cada visita.
-    return json({ total: await contar() }, 200, { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600' })
+    // El contador se cachea una hora en la CDN: cada list() cuenta contra el límite de operaciones de Blob.
+    return json({ total: await contar() }, 200, { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' })
   } catch (e) {
     console.error('No se pudo contar la lista de espera', e)
     return json({ total: null })
@@ -80,9 +108,12 @@ export async function POST(request: Request) {
 
   // Campo trampa: las personas no lo ven, los bots lo llenan.
   if (texto(datos.sitio)) return json({ ok: true, nuevo: true, codigo: null, total: null })
+  if (demasiados(request)) return json({ error: 'Recibimos muchos registros desde tu conexión. Espera unos minutos y vuelve a intentarlo.' }, 429)
 
   const correo = texto(datos.correo, 254).toLowerCase()
   if (!CORREO.test(correo)) return json({ error: 'Revisa tu correo: parece que le falta algo.' }, 400)
+  const celular = celularDe(datos.celular)
+  if (celular === null) return json({ error: 'Revisa tu WhatsApp: son 9 números y empiezan con 9.' }, 400)
 
   try {
     const h = huella(correo)
@@ -98,6 +129,7 @@ export async function POST(request: Request) {
       rol: texto(datos.rol, 60) || previo?.rol || '',
       region: texto(datos.region, 60) || previo?.region || '',
       colegio: texto(datos.colegio) || previo?.colegio || '',
+      celular: celular || previo?.celular || '',
       codigo,
       invitadoPor: previo ? previo.invitadoPor : invitadoPor && invitadoPor !== codigo ? invitadoPor : null,
       fuente: previo ? previo.fuente : texto(datos.fuente, 60) || null,
@@ -107,14 +139,19 @@ export async function POST(request: Request) {
       actualizado: ahora,
     }
 
-    await put(ruta, JSON.stringify(registro), {
-      access: 'private',
-      contentType: 'application/json',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    })
+    // Si ya estaba y no cambió nada, no se vuelve a escribir.
+    const cambio = !previo || (['nombre', 'rol', 'region', 'colegio', 'celular'] as const).some((k) => registro[k] !== previo[k])
+    if (cambio) {
+      await put(ruta, JSON.stringify(registro), {
+        access: 'private',
+        contentType: 'application/json',
+        addRandomSuffix: false,
+        allowOverwrite: true,
+      })
+    }
 
-    return json({ ok: true, nuevo: !previo, codigo, total: await contar() })
+    // Sin total: contar la tienda en cada inscripción gastaría otra operación avanzada.
+    return json({ ok: true, nuevo: !previo, codigo, total: null })
   } catch (e) {
     console.error('No se pudo guardar el registro', e)
     return json({ error: 'No pudimos guardar tus datos. Intenta de nuevo en un momento.' }, 500)
@@ -171,9 +208,9 @@ async function exportar(request: Request, url: URL) {
   const invitados = new Map<string, number>()
   for (const r of registros) if (r.invitadoPor) invitados.set(r.invitadoPor, (invitados.get(r.invitadoPor) ?? 0) + 1)
 
-  const columnas = ['creado', 'correo', 'nombre', 'rol', 'region', 'colegio', 'codigo', 'invitadoPor', 'invitados', 'fuente', 'medio', 'campana']
+  const columnas = ['creado', 'correo', 'celular', 'nombre', 'rol', 'region', 'colegio', 'codigo', 'invitadoPor', 'invitados', 'fuente', 'medio', 'campana']
   const filas = registros.map((r) =>
-    [r.creado, r.correo, r.nombre, r.rol, r.region, r.colegio, r.codigo, r.invitadoPor, invitados.get(r.codigo) ?? 0, r.fuente, r.medio, r.campana]
+    [r.creado, r.correo, r.celular ?? '', r.nombre, r.rol, r.region, r.colegio, r.codigo, r.invitadoPor, invitados.get(r.codigo) ?? 0, r.fuente, r.medio, r.campana]
       .map(celda)
       .join(','),
   )

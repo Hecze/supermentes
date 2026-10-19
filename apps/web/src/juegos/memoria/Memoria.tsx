@@ -1,6 +1,7 @@
 // Memoria: voltear cartas de a dos hasta encontrar todas las parejas (3/4 y su dibujo, 7 × 8 y 56).
 import { Check } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
+import { paresDePartida } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useTamano, useTemporizadores } from '../motor/bucle'
 import { PALETA, TextoMat, VisualDe } from '../motor/piezas'
@@ -9,15 +10,19 @@ import type { Lado, PropsJuego } from '../tipos'
 
 type Carta = { id: number; par: number; lado: Lado }
 
-/** Columnas que dan las cartas más grandes (proporción 3:4) en el espacio disponible. */
+/**
+ * Columnas que dan las cartas más grandes (proporción 3:4) en el espacio disponible. Una última fila a medias
+ * (6, 6 y 4) se ve desordenada: solo gana si sus cartas son bastante más grandes que las de una grilla pareja.
+ */
 function mejorGrilla(n: number, ancho: number, alto: number, hueco: number) {
-  let mejor = { cols: 4, lado: 0 }
+  let mejor = { cols: 4, lado: 0, puntos: 0 }
   for (let cols = 2; cols <= 8; cols++) {
     const filas = Math.ceil(n / cols)
     const w = (ancho - hueco * (cols - 1)) / cols
     const h = (alto - hueco * (filas - 1)) / filas
     const lado = Math.min(w, h * 0.75)
-    if (lado > mejor.lado) mejor = { cols, lado }
+    const puntos = n % cols === 0 ? lado : lado * 0.8
+    if (puntos > mejor.puntos) mejor = { cols, lado, puntos }
   }
   return mejor
 }
@@ -27,11 +32,14 @@ function tamTexto(t: string) {
   return n <= 3 ? 1 : n <= 6 ? 0.74 : n <= 10 ? 0.56 : 0.46
 }
 
+const masLargo = (textos: string[]) => textos.reduce((a, t) => ([...t].length > [...a].length ? t : a), '')
+
 export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJuego) {
   const azar = useMemo(() => crearAzar(semilla), [semilla])
-  const cuantas = Math.min(contenido.pares.length, [0, 6, 8, 10][ritmo])
+  const disponibles = useMemo(() => paresDePartida(contenido, azar), [contenido, azar])
+  const cuantas = Math.min(disponibles.length, [0, 6, 8, 10][ritmo])
   const cartas = useMemo<Carta[]>(() => {
-    const pares = barajar(azar, contenido.pares).slice(0, cuantas)
+    const pares = barajar(azar, disponibles).slice(0, cuantas)
     return barajar(
       azar,
       pares.flatMap((p, i) => [
@@ -39,7 +47,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
         { id: i * 2 + 1, par: i, lado: p.b },
       ]),
     )
-  }, [azar, contenido, cuantas])
+  }, [azar, disponibles, cuantas])
 
   const tablero = useRef<HTMLDivElement>(null)
   const { ancho, alto } = useTamano(tablero)
@@ -51,6 +59,8 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
 
   const hueco = Math.max(6, Math.min(ancho, alto) * 0.02)
   const { cols, lado } = mejorGrilla(cartas.length, ancho, alto, hueco)
+  // Todas las cartas con la misma letra, la que le cabe al texto más largo, y nunca menos de 18 px.
+  const letra = `max(18px, calc(30cqi * ${tamTexto(masLargo(cartas.map((c) => c.lado.texto)))}))`
 
   function tocar(c: Carta) {
     if (abiertas.length === 2 || abiertas.includes(c.id) || encontradas.has(c.par)) return
@@ -76,6 +86,8 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
               estrellas,
               titulo: '¡Encontraron todas!',
               detalle: `${cuantas} parejas en ${total} intentos.${estrellas < 3 ? ` Con ${cuantas + 2} o menos son tres estrellas.` : ''}`,
+              // 1000 sin errores; cada intento de más resta 50.
+              puntaje: Math.max(0, 1000 - (total - cuantas) * 50),
             }),
           900,
         )
@@ -137,7 +149,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
                     >
                       {c.lado.visual && <VisualDe visual={c.lado.visual} tam="66cqi" />}
                       {c.lado.texto && (
-                        <span style={{ fontSize: `calc(30cqi * ${tamTexto(c.lado.texto)})` }}>
+                        <span style={{ fontSize: letra }}>
                           <TextoMat texto={c.lado.texto} />
                         </span>
                       )}

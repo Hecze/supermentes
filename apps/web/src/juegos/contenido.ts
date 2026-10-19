@@ -36,7 +36,11 @@ export function contenidoMatematica(p: Practica, semilla = 1): Contenido | null 
     retos.push(r)
   }
 
-  // Parejas pregunta ↔ respuesta sin respuestas repetidas, para que cada carta tenga una sola pareja.
+  return { titulo: nombrePractica(p), retos, pares: paresDeRetos(retos), palabras: [], generar: nivel.generar }
+}
+
+/** Parejas pregunta ↔ respuesta sin respuestas repetidas, para que cada carta tenga una sola pareja. */
+export function paresDeRetos(retos: Reto[]): Par[] {
   const pares: Par[] = []
   const respuestas = new Set<string>()
   for (const r of retos) {
@@ -44,8 +48,15 @@ export function contenidoMatematica(p: Practica, semilla = 1): Contenido | null 
     respuestas.add(r.respuesta)
     pares.push({ a: { texto: sinIgual(r.pregunta), visual: r.visual }, b: { texto: r.respuesta } })
   }
+  return pares
+}
 
-  return { titulo: nombrePractica(p), retos, pares, palabras: [], generar: nivel.generar }
+/** Parejas nuevas en cada partida cuando el contenido se genera: al repetir el juego no salen las mismas. */
+export function paresDePartida(c: Contenido, azar: () => number): Par[] {
+  if (!c.generar) return c.pares
+  // Como en el catálogo: cada lado tiene que caber en una carta.
+  const cabe = (l: Par['a']) => !!l.visual || (largo(l.texto) > 0 && largo(l.texto) <= 16)
+  return paresDeRetos(Array.from({ length: 40 }, () => c.generar!(azar))).filter((p) => cabe(p.a) && cabe(p.b))
 }
 
 /** Palabras del tema: las del juego creado y las de la ficha, sin repetir. */
@@ -80,6 +91,7 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
       visual: p.b.visual,
       respuesta: p.a.texto,
       distractores: pares.filter((_, j) => j !== i).map((x) => x.a.texto),
+      distractoresAlAzar: true as const,
     })),
     // Y cada palabra clave: se lee la pista y se busca la palabra.
     ...palabras.map((p, i) => ({
@@ -87,6 +99,7 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
       pregunta: p.pista,
       respuesta: p.palabra,
       distractores: palabras.filter((_, j) => j !== i).map((x) => x.palabra),
+      distractoresAlAzar: true as const,
     })),
   ].filter((r) => r.respuesta && r.distractores.length > 0)
 
@@ -95,7 +108,9 @@ export function contenidoDelTema(ficha: Ficha, juego?: Juego): Contenido {
 
 /** Respuesta correcta y hasta n − 1 distractores, en orden al azar. */
 export function opcionesDe(reto: Reto, n: number, azar: () => number) {
-  return barajar(azar, [reto.respuesta, ...reto.distractores.slice(0, Math.max(1, n - 1))])
+  // Sin barajar, las palabras del tema salían siempre las mismas y la nueva delataba la respuesta.
+  const distractores = reto.distractoresAlAzar ? barajar(azar, [...reto.distractores]) : reto.distractores
+  return barajar(azar, [reto.respuesta, ...distractores.slice(0, Math.max(1, n - 1))])
 }
 
 /** Fuente de retos para una partida: sin fin si se generan, o la lista barajada que vuelve a empezar. */

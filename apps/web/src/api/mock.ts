@@ -8,10 +8,8 @@ import {
   JUEGO_AGUA,
   JUEGO_EJEMPLO,
   JUEGO_SUSTANTIVOS,
-  adaptacionEjemplo,
-  cancionEjemplo,
-  examenEjemplo,
   juegoDesdeVocabulario,
+  sesionEjemplo,
 } from './ejemplos'
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -19,14 +17,8 @@ const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
 export const mockApi: Api = {
   async prepararFicha(entrada) {
     await esperar(1800)
-    const fuente =
-      entrada.tipo === 'foto'
-        ? 'Foto del libro de Matemática, pág. 48'
-        : entrada.tipo === 'archivo'
-          ? `Archivo: ${entrada.archivo?.name ?? 'Sesión 12 - Fracciones.pdf'}`
-          : `Currículo Nacional: ${entrada.area}, ${entrada.grado}`
     // Elige el ejemplo que más se parece al tema elegido.
-    const t = (entrada.texto ?? '').toLowerCase()
+    const t = entrada.texto.toLowerCase()
     const base =
       /agua|lluvia|nube/.test(t) || entrada.areaId === 'ciencia-y-tecnologia'
         ? FICHA_AGUA
@@ -36,44 +28,34 @@ export const mockApi: Api = {
     return {
       ...base,
       id: `ficha-${Date.now()}`,
-      titulo: entrada.texto ?? base.titulo,
-      curriculo: entrada.competencia ? { competencia: entrada.competencia, capacidad: entrada.capacidad ?? '' } : base.curriculo,
+      titulo: entrada.texto,
+      curriculo: entrada.competencia
+        ? { competencia: entrada.competencia, capacidad: entrada.capacidad ?? '', desempenos: entrada.desempenos }
+        : base.curriculo,
       fecha: new Date().toISOString(),
       gradoId: entrada.gradoId,
       areaId: entrada.areaId,
       grado: entrada.grado,
       area: entrada.area,
       duracion: entrada.duracion ?? base.duracion,
-      fuente,
+      fuente: `Currículo Nacional: ${entrada.area}, ${entrada.grado}`,
     }
-  },
-  async generarCancion(_ficha, opciones) {
-    await esperar(1200)
-    return cancionEjemplo(opciones)
-  },
-  async generarAudio() {
-    await esperar(2200)
-    return { url: null, duracionSeg: 102 }
-  },
-  async generarExamen(_ficha, { examenPropio: _, ...opciones }) {
-    await esperar(1300)
-    return examenEjemplo(opciones)
-  },
-  async generarIlustraciones(examen) {
-    await esperar(1800)
-    return { ...examen, preguntas: examen.preguntas.map((p) => ({ ...p, ilustracion: 'ejemplo' })) }
   },
   async generarJuego(ficha) {
     await esperar(1200)
     const t = ficha.titulo.toLowerCase()
     return /fracci/.test(t) ? JUEGO_EJEMPLO : /agua|lluvia|nube/.test(t) ? JUEGO_AGUA : /sustantiv/.test(t) ? JUEGO_SUSTANTIVOS : juegoDesdeVocabulario(ficha)
   },
-  async adaptar(_ficha, necesidades) {
-    await esperar(1200)
-    return adaptacionEjemplo(necesidades)
+  async generarSesion(_ficha, opciones) {
+    await esperar(2500)
+    return sesionEjemplo(opciones)
   },
   async biblioteca() {
     await esperar(300)
     return BIBLIOTECA_EJEMPLO
+  },
+  // ponytail: sin ejemplos; la sección se oculta si no hay recursos.
+  async buscarRecursos() {
+    return []
   },
 }

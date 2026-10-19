@@ -3,11 +3,12 @@ import type { CSSProperties, ReactNode } from 'react'
 import type { Reto, Visual } from '../tipos'
 
 /** Colores de globos, cartas y botones, con el color de texto que se lee bien encima. */
+// Sin verde ni rojo: son los colores de "bien" y "mal", y un botón no debe parecer respondido antes de tocarlo.
 export const PALETA: { c: string; t: string }[] = [
-  { c: '#ff5d73', t: '#ffffff' },
+  { c: '#ff6fb5', t: '#ffffff' },
   { c: '#ff9636', t: '#ffffff' },
   { c: '#ffc93c', t: '#5a3a00' },
-  { c: '#2fc46f', t: '#ffffff' },
+  { c: '#11a3a3', t: '#ffffff' },
   { c: '#2fb2ff', t: '#ffffff' },
   { c: '#4f6dff', t: '#ffffff' },
   { c: '#9f63ff', t: '#ffffff' },
@@ -15,6 +16,17 @@ export const PALETA: { c: string; t: string }[] = [
 ]
 
 export const colorBoton = (i: number) => ({ '--c': PALETA[i % PALETA.length].c, '--t': PALETA[i % PALETA.length].t }) as CSSProperties
+
+/**
+ * Un solo tamaño de letra para todas las opciones de una ronda: lo decide la palabra más larga, así ninguna
+ * respuesta se delata por verse más grande o más chica. `ancho` es el espacio de una opción (en unidades CSS);
+ * la letra crece hasta `max` y no baja de `min`, la regla del celular (ver el README de juegos).
+ */
+export function letraOpciones(textos: string[], ancho: string, max: string, min = 20) {
+  // Solo los espacios comunes parten una palabra: los de "35 970" no se cortan.
+  const n = Math.max(2, ...textos.flatMap((t) => t.split(/ +/)).map((p) => [...p.replace(FRAC, 'a/b')].length))
+  return `max(${min}px, min(${max}, calc(${ancho} / ${(n * 0.62).toFixed(2)})))`
+}
 
 const FRAC = /(\?|\d+)\/(\?|\d+)/g
 
@@ -93,14 +105,14 @@ export function Enunciado({ reto, tam = 'clamp(22px, 7cqmin, 64px)', className }
   return (
     <div className={`flex flex-col items-center gap-[0.4em] text-center ${className ?? ''}`}>
       {reto.consigna && (
-        <p className="font-medium text-[var(--j-tinta-suave)]" style={{ fontSize: `max(14px, calc(${tam} * 0.42))` }}>
+        <p className="font-medium text-[var(--j-tinta-suave)]" style={{ fontSize: `max(15px, calc(${tam} * 0.42))` }}>
           {reto.consigna}
         </p>
       )}
       {/* Las cosas para contar van en filas de cinco: necesitan más ancho que una fracción. */}
       {reto.visual && <VisualDe visual={reto.visual} tam={`calc(${tam} * ${reto.visual.tipo === 'contar' ? 4.4 : 2.6})`} />}
       {reto.pregunta && (
-        <p className="font-semibold leading-tight text-balance" style={{ fontSize: `max(17px, calc(${tam} * ${escala}))` }}>
+        <p className="font-semibold leading-tight text-balance" style={{ fontSize: `max(${largo > 60 ? 20 : 22}px, calc(${tam} * ${escala}))` }}>
           <TextoMat texto={reto.pregunta} />
         </p>
       )}

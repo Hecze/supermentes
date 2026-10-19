@@ -131,7 +131,7 @@ export function Biblioteca() {
     <>
       <header className="flex flex-col gap-4 print:hidden">
         <h1 className="font-display text-4xl font-bold">Biblioteca</h1>
-        <div className="flex gap-1 self-start rounded-2xl bg-surface-2 p-1" role="tablist" aria-label="Biblioteca">
+        <div className="flex max-w-full gap-1 self-start overflow-x-auto rounded-2xl bg-surface-2 p-1" role="tablist" aria-label="Biblioteca">
           {PESTANAS.map((p) => (
             <button
               key={p.id}
@@ -140,7 +140,7 @@ export function Biblioteca() {
               aria-selected={pestanaBiblioteca === p.id}
               onClick={() => setPestanaBiblioteca(p.id)}
               className={cx(
-                'inline-flex h-11 items-center gap-2 rounded-xl px-4 transition',
+                'inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 transition',
                 pestanaBiblioteca === p.id ? 'bg-surface font-semibold shadow-sm' : 'text-ink-soft hover:text-ink',
               )}
             >

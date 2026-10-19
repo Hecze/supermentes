@@ -1,11 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type AudioCancion, type Adaptacion, type Cancion, type Examen, type Ficha, type Juego } from '../api'
-import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES, examenEjemplo } from '../api/ejemplos'
+import { MODO_EJEMPLO, type Cancion, type Ficha, type Juego, type Sesion } from '../api'
+import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
+import type { Clase, ConfigHoja } from '../examenes/tipos'
+import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
-export const VISTAS = ['ficha', 'cancion', 'examen', 'juego', 'crucigrama', 'adaptar', 'biblioteca'] as const
+export const VISTAS = ['inicio', 'ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
+export type PestanaBiblioteca = 'curriculo' | 'materiales'
 export type Aviso = { id: number; texto: string; tono: Tono }
 type Tema = 'light' | 'dark'
 
@@ -14,17 +17,27 @@ export type FilaCrucigrama = { id: number; palabra: string; pista: string }
 export type Resultados = {
   /** Palabras y pistas que eligió el docente. */
   crucigrama?: { filas: FilaCrucigrama[] }
+  sesion?: Sesion
   cancion?: Cancion
-  audio?: AudioCancion
-  examen?: Examen
+  /** Las hojas listas del tema (examenes/): examen, práctica y balotario, para volver a la misma versión. */
+  hojas?: Partial<Record<Clase, ConfigHoja>>
+  /** La hoja que el docente vio por última vez en este tema. */
+  hojaAbierta?: Clase
   juego?: Juego
   /** Con qué se juega este tema: sus palabras y preguntas, o una habilidad de cálculo (src/juegos). */
   juegos?: { fuente: 'tema' } | { fuente: 'calculo'; habilidad: string; nivel: number }
-  adaptacion?: Adaptacion
 }
 
 /** Lo que la ventana de "Nuevo tema" trae ya escrito (por ejemplo, desde un tema del currículo). */
-export type PrevioTema = { texto?: string; gradoId?: string; areaId?: string; /** Índice de la competencia del tema, si se conoce. */ indiceCompetencia?: number }
+export type PrevioTema = {
+  texto?: string
+  gradoId?: string
+  areaId?: string
+  /** Índice de la competencia del tema, si se conoce. */
+  indiceCompetencia?: number
+  /** A dónde ir apenas se crea (por defecto, la ficha del tema). */
+  destino?: Vista
+}
 
 type Store = {
   vista: Vista
@@ -33,21 +46,23 @@ type Store = {
   temas: Ficha[]
   ficha: Ficha | null
   setFicha: (f: Ficha) => void
+  /** Cambia una ficha sin elegirla (por ejemplo, cuando la IA termina de completarla). */
+  actualizarFicha: (id: string, cambios: Partial<Ficha>) => void
+  /** Fichas que la IA está completando o que no pudo completar (ver app/temaInstantaneo.ts). */
+  completando: Record<string, EstadoCompletar>
+  completarFicha: (f: Ficha) => void
   elegirTema: (id: string) => void
   nuevoTemaAbierto: boolean
   previoTema: PrevioTema | null
   abrirNuevoTema: (previo?: PrevioTema) => void
   cerrarNuevoTema: () => void
   /** Pestaña de la Biblioteca y documento del currículo que está abierto. */
-  pestanaBiblioteca: 'curriculo' | 'materiales'
-  setPestanaBiblioteca: (p: 'curriculo' | 'materiales') => void
+  pestanaBiblioteca: PestanaBiblioteca
+  setPestanaBiblioteca: (p: PestanaBiblioteca) => void
   curriculoAbierto: { gradoId: string; areaId: string } | null
   verCurriculo: (gradoId: string, areaId: string) => void
   resultados: Resultados
   guardar: <K extends keyof Resultados>(clave: K, valor: Resultados[K]) => void
-  creditos: number
-  gastar: (n: number) => boolean
-  devolver: (n: number) => void
   avisos: Aviso[]
   avisar: (texto: string, tono?: Tono) => void
   tema: Tema
@@ -59,9 +74,9 @@ const Ctx = createContext<Store | null>(null)
 function vistaDelHash(): Vista {
   try {
     const h = window.location.hash.replace('#', '')
-    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'ficha'
+    return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'inicio'
   } catch {
-    return 'ficha'
+    return 'inicio'
   }
 }
 
@@ -84,21 +99,45 @@ function temaActual(): Tema {
   }
 }
 
-// En modo ejemplo la docente ya tiene tres temas; en el de fracciones, el examen y el juego están listos.
+// En modo ejemplo la docente ya tiene tres temas; en el de fracciones, el juego está listo.
 const RESULTADOS_INICIALES: Record<string, Resultados> = MODO_EJEMPLO
-  ? { [FICHA_EJEMPLO.id]: { examen: examenEjemplo({ interes: 'Fútbol', formato: 'mision' }), juego: JUEGO_EJEMPLO } }
+  ? { [FICHA_EJEMPLO.id]: { juego: JUEGO_EJEMPLO } }
   : {}
+
+// Los temas de la docente sobreviven a recargar la página (en este navegador). Lo generado con IA no se guarda:
+// el banco lo vuelve a dar al instante y lo demás se vuelve a pedir.
+const CLAVE_TEMAS = 'supermentes-temas'
+const MAX_TEMAS = 20
+
+function temasGuardados(): { temas: Ficha[]; fichaId: string | null } {
+  try {
+    const g = JSON.parse(localStorage.getItem(CLAVE_TEMAS) ?? 'null') as { temas?: Ficha[]; fichaId?: string | null } | null
+    const temas = Array.isArray(g?.temas) ? g.temas.filter((t) => t?.id && t.titulo) : []
+    return { temas, fichaId: temas.some((t) => t.id === g?.fichaId) ? (g?.fichaId ?? null) : (temas[0]?.id ?? null) }
+  } catch {
+    return { temas: [], fichaId: null }
+  }
+}
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [vista, setVista] = useState<Vista>(vistaDelHash)
-  const [temas, setTemas] = useState<Ficha[]>(MODO_EJEMPLO ? TEMAS_INICIALES : [])
-  const [fichaId, setFichaId] = useState<string | null>(MODO_EJEMPLO ? FICHA_EJEMPLO.id : null)
+  const [guardados] = useState(() => (MODO_EJEMPLO ? null : temasGuardados()))
+  const [temas, setTemas] = useState<Ficha[]>(guardados?.temas ?? TEMAS_INICIALES)
+  const [fichaId, setFichaId] = useState<string | null>(guardados ? guardados.fichaId : FICHA_EJEMPLO.id)
+
+  useEffect(() => {
+    if (MODO_EJEMPLO) return
+    try {
+      localStorage.setItem(CLAVE_TEMAS, JSON.stringify({ temas: temas.slice(0, MAX_TEMAS), fichaId }))
+    } catch {
+      // Sin almacenamiento los temas duran esta visita.
+    }
+  }, [temas, fichaId])
   const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
   const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
   const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)
-  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<'curriculo' | 'materiales'>('curriculo')
+  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<PestanaBiblioteca>('curriculo')
   const [curriculoAbierto, setCurriculoAbierto] = useState<{ gradoId: string; areaId: string } | null>(null)
-  const [creditos, setCreditos] = useState(MODO_EJEMPLO ? 18 : CREDITOS_MENSUALES)
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [tema, setTema] = useState<Tema>(() => {
     const guardado = temaGuardado()
@@ -131,6 +170,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setFichaId(f.id)
   }, [])
 
+  const actualizarFicha = useCallback((id: string, cambios: Partial<Ficha>) => {
+    setTemas((lista) => lista.map((t) => (t.id === id ? { ...t, ...cambios } : t)))
+  }, [])
+
+  const [completando, setCompletando] = useState<Record<string, EstadoCompletar>>({})
+  const completarFicha = useCallback(
+    (f: Ficha) =>
+      void completarConIA(f, actualizarFicha, (id, e) =>
+        setCompletando((c) => {
+          const { [id]: _, ...resto } = c
+          return e ? { ...resto, [id]: e } : resto
+        }),
+      ),
+    [actualizarFicha],
+  )
+
   const elegirTema = useCallback(
     (id: string) => {
       setFichaId(id)
@@ -152,21 +207,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setAvisos((a) => [...a, { id, texto, tono }])
     setTimeout(() => setAvisos((a) => a.filter((x) => x.id !== id)), 3600)
   }, [])
-
-  const gastar = useCallback(
-    (n: number) => {
-      if (n === 0) return true
-      if (creditos < n) {
-        avisar(`Te faltan créditos: esto cuesta ${n} y te quedan ${creditos}.`, 'error')
-        return false
-      }
-      setCreditos((c) => c - n)
-      return true
-    },
-    [creditos, avisar],
-  )
-
-  const devolver = useCallback((n: number) => setCreditos((c) => c + n), [])
 
   const cambiarTema = useCallback(() => {
     const siguiente: Tema = temaActual() === 'dark' ? 'light' : 'dark'
@@ -198,6 +238,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         temas,
         ficha,
         setFicha,
+        actualizarFicha,
+        completando,
+        completarFicha,
         elegirTema,
         nuevoTemaAbierto,
         previoTema,
@@ -212,9 +255,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         verCurriculo,
         resultados: (fichaId && porTema[fichaId]) || {},
         guardar,
-        creditos,
-        gastar,
-        devolver,
         avisos,
         avisar,
         tema,

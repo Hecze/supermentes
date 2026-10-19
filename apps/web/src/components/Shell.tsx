@@ -1,27 +1,15 @@
-import { CircleAlert, CircleCheck, Coins, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
+import { CircleAlert, CircleCheck, House, Info, Library, Menu, Moon, Search, Sun, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { CREDITOS_MENSUALES, MODO_EJEMPLO, type HerramientaId } from '../api'
+import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
+import { useCuenta } from '../app/cuenta'
+import { usePerfil } from '../app/perfil'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { Logo } from './Logo'
 import { NuevoTema } from './NuevoTema'
 import { SelectorTema } from './SelectorTema'
 import { Boton, IconoHerramienta, cx } from './ui'
-
-function Creditos() {
-  const { creditos } = useStore()
-  return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-warn/12 px-3 py-1 text-sm font-medium text-warn tabular-nums"
-      title={`Te quedan ${creditos} de ${CREDITOS_MENSUALES} créditos este mes`}
-    >
-      <Coins className="size-4" aria-hidden />
-      {creditos}
-      <span className="sr-only"> créditos</span>
-    </span>
-  )
-}
 
 function BotonTema() {
   const { tema, cambiarTema } = useStore()
@@ -34,6 +22,53 @@ function BotonTema() {
       aria-label={oscuro ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
     >
       {oscuro ? <Sun className="size-5" /> : <Moon className="size-5" />}
+    </button>
+  )
+}
+
+function Docente() {
+  const { entro, nombre, salir } = useCuenta()
+  const { perfil } = usePerfil()
+  if (!entro) {
+    return (
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
+        <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">{perfil?.nombre ?? nombre ?? ''}</p>
+        {perfil?.colegio && <p className="truncate text-xs text-ink-soft">{perfil.colegio}</p>}
+      </div>
+      <button type="button" onClick={salir} className="text-xs text-ink-soft underline-offset-4 hover:underline">
+        Salir
+      </button>
+    </div>
+  )
+}
+
+const HERRAMIENTAS_LATERAL = ORDEN_HERRAMIENTAS.filter((h) => h !== 'crucigrama')
+
+function ItemHerramienta({ id }: { id: HerramientaId }) {
+  const { ir, vista } = useStore()
+  const h = HERRAMIENTAS[id]
+  const Icono = h.icono
+  const activo = vista === id || (id === 'juego' && vista === 'resultados')
+  return (
+    <button
+      type="button"
+      onClick={() => ir(id)}
+      aria-current={activo ? 'page' : undefined}
+      className={cx(
+        'flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm transition',
+        activo ? 'bg-surface-2 font-semibold text-ink' : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
+      )}
+    >
+      <Icono className="size-4 shrink-0" style={{ color: h.color }} aria-hidden />
+      <span className="truncate">{h.nombre}</span>
     </button>
   )
 }
@@ -62,18 +97,20 @@ function ContenidoLateral() {
   const { ir } = useStore()
   return (
     <>
-      <button type="button" onClick={() => ir('ficha')} className="self-start rounded-lg">
+      <button type="button" onClick={() => ir('inicio')} className="self-start rounded-lg">
         <Logo />
       </button>
+
+      <ItemNav vista="inicio" icono={<House className="size-5" />}>
+        Inicio
+      </ItemNav>
 
       <SelectorTema />
 
       <nav className="flex flex-col gap-1" aria-label="Herramientas">
-        <p className="px-3 pb-1 text-sm text-ink-soft">Herramientas</p>
-        {ORDEN_HERRAMIENTAS.map((id: HerramientaId) => (
-          <ItemNav key={id} vista={id} icono={<IconoHerramienta id={id} tam="sm" />}>
-            {HERRAMIENTAS[id].nombre}
-          </ItemNav>
+        <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">HERRAMIENTAS</p>
+        {HERRAMIENTAS_LATERAL.map((id) => (
+          <ItemHerramienta key={id} id={id} />
         ))}
       </nav>
 
@@ -84,13 +121,11 @@ function ContenidoLateral() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
-        <div className="flex items-center justify-between">
-          <Creditos />
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <Docente />
+          </div>
           <BotonTema />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">Prof. {DOCENTE.nombre}</p>
-          <p className="truncate text-xs text-ink-soft">{DOCENTE.colegio}</p>
         </div>
         {MODO_EJEMPLO && (
           <p className="flex items-start gap-1.5 text-xs text-ink-soft">
@@ -119,7 +154,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <ContenidoLateral />
       </aside>
 
-      {/* Barra superior (celular): menú, tema actual y créditos */}
+      {/* Barra superior (celular): menú y tema actual */}
       <header
         className="gutter sticky z-30 flex h-14 items-center gap-1 border-b border-line bg-surface lg:hidden print:hidden"
         style={{ top: 'env(safe-area-inset-top, 0px)' }}
@@ -135,7 +170,6 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="min-w-0 flex-1">
           <SelectorTema compacto />
         </div>
-        <Creditos />
       </header>
 
       {menu && (
@@ -154,7 +188,19 @@ export function Shell({ children }: { children: ReactNode }) {
       )}
 
       <main className="gutter pb-16 pt-6 lg:pt-10 print:p-0">
-        <div className="mx-auto flex max-w-7xl flex-col gap-7">{children}</div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-7">
+          {/* Publicada sin VITE_API=real, la app solo muestra ejemplos: se avisa a la vista, nunca en silencio. */}
+          {MODO_EJEMPLO && import.meta.env.PROD && (
+            <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
+              <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
+              <span>
+                <strong>Versión de prueba:</strong> la IA no está conectada, así que ves ejemplos
+                {import.meta.env.MODE !== 'artifact' && ' (falta VITE_API=real al publicar)'}.
+              </span>
+            </p>
+          )}
+          {children}
+        </div>
       </main>
 
       <NuevoTema />
@@ -174,7 +220,7 @@ function Avisos() {
       {avisos.map((a) => (
         <div
           key={a.id}
-          className="aviso-entra pointer-events-auto flex max-w-sm items-start gap-2 rounded-xl bg-primary px-4 py-3 text-sm text-primary-ink shadow-lg"
+          className="aviso-entra pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-xl bg-primary px-4 py-3 text-sm text-primary-ink shadow-lg"
         >
           {a.tono === 'error' ? (
             <CircleAlert className="mt-px size-4 shrink-0" aria-hidden />
@@ -191,13 +237,14 @@ function Avisos() {
 }
 
 /** Encabezado común de cada herramienta: qué herramienta es y de qué tema y currículo parte. */
-export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
+/** Título de la herramienta; `accion` va arriba a la derecha (en el celular, debajo). */
+export function EncabezadoHerramienta({ id, accion }: { id: HerramientaId; accion?: ReactNode }) {
   const { ficha, verCurriculo } = useStore()
   const h = HERRAMIENTAS[id]
   return (
-    <header className="flex items-center gap-4 print:hidden">
+    <header className="flex flex-wrap items-center gap-x-4 gap-y-3 print:hidden">
       <IconoHerramienta id={id} tam="lg" />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1 basis-64">
         <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{h.nombre}</h1>
         {ficha && (
           <p className="text-ink-soft">
@@ -208,6 +255,7 @@ export function EncabezadoHerramienta({ id }: { id: HerramientaId }) {
           </p>
         )}
       </div>
+      {accion && <div className="flex shrink-0 flex-wrap items-center gap-2">{accion}</div>}
     </header>
   )
 }

@@ -1,5 +1,5 @@
-// Los colores de las cinco herramientas, en el mismo orden que la barra lateral.
-const PLUMONES = ['var(--cancion)', 'var(--examen)', 'var(--juego)', 'var(--crucigrama)', 'var(--adaptar)']
+// Los colores del logo: uno por herramienta (el último, de la sesión de aprendizaje).
+const PLUMONES = ['var(--cancion)', 'var(--examen)', 'var(--juego)', 'var(--crucigrama)', 'var(--sesion)']
 const ALTOS = [18, 14, 20, 12, 16]
 
 /** Cinco plumones en su estuche: uno por herramienta. */

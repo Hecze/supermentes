@@ -1,6 +1,6 @@
-import { FileText, Gamepad2, Grid3x3, HeartHandshake, Music, type LucideProps } from 'lucide-react'
+import { ClipboardList, FileText, Gamepad2, Grid3x3, Music, type LucideProps } from 'lucide-react'
 import type { ComponentType } from 'react'
-import { COSTOS, textoCosto, type HerramientaId } from '../api'
+import type { HerramientaId } from '../api'
 
 export type Herramienta = {
   id: HerramientaId
@@ -10,12 +10,19 @@ export type Herramienta = {
   descripcion: string
   icono: ComponentType<LucideProps>
   color: string
-  costo: string
 }
 
-export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['cancion', 'examen', 'juego', 'crucigrama', 'adaptar']
+export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['sesion', 'cancion', 'examen', 'juego', 'crucigrama']
 
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
+  sesion: {
+    id: 'sesion',
+    pedido: 'Mi sesión de aprendizaje',
+    nombre: 'Sesión de aprendizaje',
+    descripcion: 'Lista para presentar, en el formato del MINEDU.',
+    icono: ClipboardList,
+    color: 'var(--sesion)',
+  },
   cancion: {
     id: 'cancion',
     pedido: 'Una canción',
@@ -23,16 +30,14 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Para que memoricen el tema cantando.',
     icono: Music,
     color: 'var(--cancion)',
-    costo: `Letra ${textoCosto(COSTOS.letra)} · audio ${textoCosto(COSTOS.audio)}`,
   },
   examen: {
     id: 'examen',
-    pedido: 'Un examen divertido',
-    nombre: 'Examen gamificado',
-    descripcion: 'Tu evaluación con lo que le gusta a tu clase.',
+    pedido: 'Un examen',
+    nombre: 'Examen',
+    descripcion: 'Examen, práctica y balotario listos para imprimir, con su clave.',
     icono: FileText,
     color: 'var(--examen)',
-    costo: `${textoCosto(COSTOS.examen)} · ilustraciones aparte`,
   },
   juego: {
     id: 'juego',
@@ -41,7 +46,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Lo juegan en el celular o proyectado en clase.',
     icono: Gamepad2,
     color: 'var(--juego)',
-    costo: textoCosto(COSTOS.juego),
   },
   crucigrama: {
     id: 'crucigrama',
@@ -50,16 +54,6 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     descripcion: 'Con las palabras que tú elijas, listo para imprimir.',
     icono: Grid3x3,
     color: 'var(--crucigrama)',
-    costo: textoCosto(COSTOS.crucigrama),
-  },
-  adaptar: {
-    id: 'adaptar',
-    pedido: 'Adaptar para un estudiante',
-    nombre: 'Adaptar para inclusión',
-    descripcion: 'Una versión para quien aprende distinto.',
-    icono: HeartHandshake,
-    color: 'var(--adaptar)',
-    costo: textoCosto(COSTOS.adaptacion),
   },
 }
 
@@ -80,9 +74,5 @@ export const GRADOS = [
 export const AREAS = ['Matemática', 'Comunicación', 'Ciencia y Tecnología', 'Personal Social', 'Arte y Cultura', 'Inglés']
 
 export const DURACIONES = ['30 min', '45 min', '90 min']
-
-export const RITMOS = ['Cumbia', 'Huayno', 'Festejo', 'Rap', 'Balada']
-
-export const MELODIAS = ['Los pollitos dicen', 'Arroz con leche', 'Pin Pon']
 
 export const INTERESES = ['Fútbol', 'Animales', 'Cocina']

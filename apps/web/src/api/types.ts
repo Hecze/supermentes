@@ -1,12 +1,12 @@
 // Contratos de datos entre la UI y el backend.
 // Los datos de ejemplo (mock.ts) y el backend real (real.ts) devuelven exactamente estos tipos.
 
-export type HerramientaId = 'cancion' | 'examen' | 'juego' | 'crucigrama' | 'adaptar'
+export type HerramientaId = 'sesion' | 'cancion' | 'examen' | 'juego' | 'crucigrama'
 
+/** El tema elegido en el Currículo Nacional: con esto la IA completa la ficha (ideas clave, vocabulario…). */
 export type EntradaTema = {
-  tipo: 'texto' | 'foto' | 'archivo'
-  texto?: string
-  archivo?: File
+  /** El tema tal como figura en el currículo ("Fracciones: partes de un todo"). */
+  texto: string
   /** Grado y área (curso) del Currículo Nacional: ids de packages/curriculo. */
   gradoId: string
   areaId: string
@@ -37,7 +37,12 @@ export type Ficha = {
   fuente: string
   proposito: string
   /** Alineación al Currículo Nacional de Educación Básica (CNEB) del Perú. */
-  curriculo: { competencia: string; capacidad: string }
+  curriculo: {
+    competencia: string
+    capacidad: string
+    /** Desempeños oficiales del grado de los que parte el tema, copiados tal cual de packages/curriculo. */
+    desempenos?: string[]
+  }
   conceptos: string[]
   /** Se reutiliza en el crucigrama y en "Adivina la palabra" sin volver a llamar a la IA. */
   vocabulario: { palabra: string; definicion: string }[]
@@ -50,42 +55,14 @@ export type OpcionesCancion = {
   modo: 'ritmo' | 'melodia'
   ritmo: string
   melodia: string
+  /** Cómo se oye, para el generador de música (las canciones del banco lo traen). */
+  estilo?: string
 }
 
 export type Cancion = {
   titulo: string
   opciones: OpcionesCancion
   partes: { etiqueta: string; lineas: string[] }[]
-}
-
-export type AudioCancion = {
-  /** null mientras no haya backend: el prototipo no reproduce sonido. */
-  url: string | null
-  duracionSeg: number
-}
-
-export type OpcionesExamen = {
-  interes: string
-  formato: 'mision' | 'contextualizado'
-  /** Examen propio del docente para transformarlo; si no hay, se crea desde la ficha. */
-  examenPropio?: File
-}
-
-export type PreguntaExamen = {
-  original: string
-  texto: string
-  respuesta: string
-  fraccion?: Fraccion
-  /** URL de la ilustración generada; vacía hasta que el docente pida ilustraciones. */
-  ilustracion?: string | null
-}
-
-export type Examen = {
-  opciones: OpcionesExamen
-  titulo: string
-  intro: string
-  etiquetaPaso: string
-  preguntas: PreguntaExamen[]
 }
 
 export type Carta = { texto: string; fraccion?: Fraccion }
@@ -97,22 +74,47 @@ export type Juego = {
   palabras: { palabra: string; pista: string }[]
 }
 
-export type Necesidad = 'tdah' | 'dislexia' | 'tea' | 'facil'
-
-export type PasoAdaptado = {
-  /** Clave del pictograma (leer, escribir, dibujar, comparar…). En producción se resuelve con ARASAAC. */
-  picto: string
-  texto: string
-  textoFacil: string
+export type OpcionesSesion = {
+  /** Minutos de la clase. */
+  duracion: 45 | 90
+  /** Lo que le gusta al salón, para la motivación. */
+  interes?: string
 }
 
-export type Adaptacion = {
-  necesidades: Necesidad[]
-  material: string
-  original: string
-  agenda: { picto: string; texto: string }[]
-  pasos: PasoAdaptado[]
-  consejos: Record<Necesidad, string[]>
+/** Un criterio de evaluación con el desempeño oficial que trabaja y la parte exacta que cita. */
+export type CriterioSesion = {
+  texto: string
+  /** Desempeño oficial del grado, copiado tal cual de packages/curriculo. */
+  desempeno?: string
+  /** Fragmento del desempeño, letra por letra (el backend descarta las citas que no aparecen). */
+  cita?: string
+}
+
+/** Un subtítulo de un momento de la sesión y lo que se hace en él. */
+export type PasoSesion = { titulo: string; pasos: string[] }
+
+/** Sesión de aprendizaje en el formato que el docente entrega al director (CNEB, MINEDU). */
+export type Sesion = {
+  opciones: OpcionesSesion
+  titulo: string
+  grado: string
+  area: string
+  /** Competencia y capacidades oficiales (texto del currículo). */
+  competencia: string
+  capacidades: string[]
+  criterios: CriterioSesion[]
+  evidencia: string
+  instrumento: string
+  enfoque: { nombre: string; valor: string; actitudes: string }
+  materiales: { antes: string[]; recursos: string[] }
+  proposito: string
+  /** Minutos de cada momento; suman la duración de la clase. */
+  minutos: { inicio: number; desarrollo: number; cierre: number }
+  inicio: { motivacion: string[]; saberesPrevios: string[]; conflicto: string[]; normas: string[] }
+  desarrollo: PasoSesion[]
+  cierre: { sistematizacion: string[]; metacognicion: string[]; tarea: string[] }
+  /** Ficha de aplicación para el alumno. */
+  ficha: { titulo: string; actividades: { consigna: string; lineas: number }[] }
 }
 
 export type Material = {
@@ -127,13 +129,21 @@ export type Material = {
   esMio?: boolean
 }
 
+/** Un video o una ficha que ya existe en internet para el tema (api/recursos.ts, buscado con Exa). */
+export type Recurso = {
+  tipo: 'video' | 'ficha'
+  titulo: string
+  url: string
+  /** "YouTube" o el dominio de la página. */
+  fuente: string
+  imagen?: string
+}
+
 export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
-  generarCancion(ficha: Ficha, opciones: OpcionesCancion): Promise<Cancion>
-  generarAudio(cancion: Cancion): Promise<AudioCancion>
-  generarExamen(ficha: Ficha, opciones: OpcionesExamen): Promise<Examen>
-  generarIlustraciones(examen: Examen): Promise<Examen>
   generarJuego(ficha: Ficha): Promise<Juego>
-  adaptar(ficha: Ficha, necesidades: Necesidad[]): Promise<Adaptacion>
+  generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   biblioteca(): Promise<Material[]>
+  /** Videos y fichas de internet para el tema. */
+  buscarRecursos(ficha: Ficha): Promise<Recurso[]>
 }

@@ -1,7 +1,7 @@
 // Qué habilidades de cálculo practica un tema de matemática, a partir de su título y propósito.
 // Funciona igual con las fichas de ejemplo y con las que arme la IA, sin pedirle nada más al backend.
 import type { Ficha } from '../../api'
-import { HABILIDADES, nivelPara } from './habilidades'
+import { HABILIDADES, nivelPara, type Habilidad } from './habilidades'
 
 export type Practica = { habilidad: string; nivel: number }
 
@@ -14,6 +14,9 @@ const plano = (t: string) =>
 /** Los nombres específicos ganan a los generales: "fracciones equivalentes" antes que "fracciones". */
 const GENERALES = new Set(['fracciones-reconocer'])
 
+/** Solo cuenta lo que el currículo pide en ese grado: un nivel con cita del desempeño del grado. */
+const delGrado = (h: Habilidad, gradoId: string) => h.niveles.some((n) => n.grados.includes(gradoId))
+
 export function esMatematica(ficha: Pick<Ficha, 'areaId' | 'area'>) {
   return ficha.areaId === 'matematica' || plano(ficha.area).startsWith('matematica')
 }
@@ -23,7 +26,9 @@ export function habilidadesDelTema(ficha: Ficha): Practica[] {
   if (!esMatematica(ficha)) return []
   const titulo = plano(ficha.titulo)
   const resto = plano([ficha.proposito, ...ficha.conceptos].join(' '))
-  const hallazgos = HABILIDADES.map((h) => ({ h, enTitulo: h.claves.test(titulo), enResto: h.claves.test(resto) })).filter((x) => x.enTitulo || x.enResto)
+  const hallazgos = HABILIDADES.filter((h) => delGrado(h, ficha.gradoId))
+    .map((h) => ({ h, enTitulo: h.claves.test(titulo), enResto: h.claves.test(resto) }))
+    .filter((x) => x.enTitulo || x.enResto)
   // Si el título ya dice de qué grupo es el tema ("Fracciones…"), lo que solo aparece en el resto tiene que ser del
   // mismo grupo: "un entero se divide en partes" no convierte un tema de fracciones en uno de división.
   const gruposDelTitulo = new Set(hallazgos.filter((x) => x.enTitulo).map((x) => x.h.grupo))
@@ -35,16 +40,16 @@ export function habilidadesDelTema(ficha: Ficha): Practica[] {
 }
 
 /** Lo típico del grado cuando el tema no dice qué calcular (por ejemplo, geometría): un repaso de operaciones. */
-export function practicaDelGrado(gradoId: string): Practica {
-  const id = /^inicial/.test(gradoId)
-    ? 'contar'
+export function practicaDelGrado(gradoId: string): Practica | null {
+  const candidatas = /^inicial/.test(gradoId)
+    ? ['contar', 'sumar']
     : /^primaria-[12]$/.test(gradoId)
-      ? 'sumar'
+      ? ['sumar']
       : /^primaria-[34]$/.test(gradoId)
-        ? 'tablas'
+        ? ['tablas']
         : /^primaria/.test(gradoId)
-          ? 'fracciones-operar'
-          : 'enteros'
-  const h = HABILIDADES.find((x) => x.id === id)!
-  return { habilidad: id, nivel: nivelPara(h, gradoId) }
+          ? ['fracciones-operar', 'decimales']
+          : ['enteros', 'ecuaciones']
+  const h = candidatas.map((id) => HABILIDADES.find((x) => x.id === id)!).find((x) => delGrado(x, gradoId))
+  return h ? { habilidad: h.id, nivel: nivelPara(h, gradoId) } : null
 }

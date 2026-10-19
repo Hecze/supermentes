@@ -31,10 +31,10 @@ actualizado: 2026-10-17
 ## Entrega (`andes project submit`)
 Se puede entregar temprano y corregir después; cualquier integrante la actualiza.
 1. **URL del despliegue** funcionando: https://www.supermentes.app
-2. **URL de la presentación** (Canva, Google Slides o hecha con código).
+2. **URL de la presentación:** https://claude.ai/artifact/Vbx4ZRLX8eDRKFCyLz6UiV (copia en `presentacion/`; compartirla por link antes de entregar).
 3. **URL del repo:** https://github.com/Hecze/supermentes
 4. **Descripción en Markdown:** problema, para quién, cómo funciona y **limitaciones**
-   (`--file ./proyecto.md`).
+   (`sh submit/enviar.sh --enviar`, lee `submit/`).
 
 Probar app y presentación en una **ventana privada**, sin sesión iniciada ni archivos locales.
 La descripción y los avances se hacen públicos: nada de claves, tokens ni datos de usuarios.
@@ -72,6 +72,6 @@ Los **códigos** no van en el repo: pídelos a Hector (están en su Notion, pág
 ### Para qué nos pueden servir (sin probar)
 - **ElevenLabs:** audio de las canciones y lectura en voz alta de la versión accesible.
 - **Exa / Tavily:** buscar recursos educativos y estrategias DUA con fuentes.
-- **AtomicMemory:** guardar el perfil de cada clase (intereses, adaptaciones).
+- **AtomicMemory:** guardar el perfil de cada clase (intereses).
 - **Grok:** quizá imágenes para ilustrar exámenes (verificar si incluye API).
 - Qatom, Zavu y Maritime: revisar qué ofrecen antes de planear con ellos.

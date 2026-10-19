@@ -11,6 +11,8 @@ export type Publicado = {
   ritmo: Ritmo
   /** Título del tema, para saludar al alumno. */
   tema: string
+  /** Grado del tema: ordena los juegos por edad cuando el alumno elige "Otro juego". */
+  grado?: string
   /** El cálculo se guarda como habilidad y nivel: el celular del alumno genera los ejercicios. */
   fuente: { tipo: 'calculo'; habilidad: string; nivel: number } | { tipo: 'tema'; contenido: ContenidoGuardado }
 }
@@ -38,16 +40,17 @@ export function origen() {
 
 export const enlaceConCodigo = (codigo: string) => `${origen()}/j/${codigo}`
 
-export async function publicar(p: Publicado): Promise<string> {
+/** Publica el juego. La clave es solo del docente: con ella ve los resultados de sus alumnos. */
+export async function publicar(p: Publicado): Promise<{ codigo: string; clave: string }> {
   const res = await fetch('/api/juegos-compartidos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(p),
   })
   if (!res.ok) throw new Error(`El servidor respondió ${res.status}`)
-  const { codigo } = (await res.json()) as { codigo?: string }
-  if (!codigo || !codigoValido(codigo)) throw new Error('Respuesta sin código')
-  return codigo
+  const { codigo, clave } = (await res.json()) as { codigo?: string; clave?: string }
+  if (!codigo || !codigoValido(codigo) || !clave) throw new Error('Respuesta sin código')
+  return { codigo, clave }
 }
 
 export async function cargar(codigo: string): Promise<Publicado> {

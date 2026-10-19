@@ -21,14 +21,13 @@ actualizado: 2026-10-17
 - Las herramientas que existen (SchoolHub, MagicSchool) están pensadas para otros países o en inglés. Ninguna parte del Currículo Nacional (CNEB).
 
 ## Cómo funciona
-1. **Busca tu tema** en el Currículo Nacional: grado, curso y tema. Si quiere, el docente suma una foto del libro o su sesión de clase.
+1. **Busca tu tema** en el Currículo Nacional, como en un buscador: escribe y elige. El tema se crea al instante; no hace falta subir fotos ni archivos.
 2. Se arma la **ficha del tema**: competencia y desempeños del currículo, ideas clave, vocabulario y un ejemplo.
 3. El docente elige **solo lo que va a usar**:
-   - **Canción** pegajosa con ritmo peruano (cumbia, huayno, festejo…) o con una melodía que ya conocen.
-   - **Examen gamificado**, ambientado en lo que le gusta a su clase.
+   - **Canción** pegajosa con ritmo peruano (cumbia, huayno, festejo…), de nuestro canal de YouTube: una por tema, lista para proyectar o mandar a las familias.
+   - **Examen, práctica y balotario** generados desde cero para el tema, listos para imprimir con su clave (ver `MATERIALES.md`).
    - **Juego web** proyectado o en el celular, con QR o WhatsApp y sin cuenta para el alumno.
    - **Crucigrama** con sus propias palabras y pistas, para imprimir o descargar como imagen.
-   - **Adaptación para inclusión**: una versión para quien aprende distinto (TDAH, dislexia, TEA, lectura fácil).
 4. **Biblioteca**: el currículo de cada grado y curso, y los materiales que crearon otros profes.
 
 ## Principios
@@ -36,8 +35,8 @@ actualizado: 2026-10-17
 - **No es un chatbot.** Se elige y se toca, no se conversa.
 - **Todo parte del currículo.** No hay temas sin respaldo: así lo que se genera es correcto para el grado.
 - **El docente decide.** Sugerimos; no asumimos (por ejemplo, las palabras del crucigrama son suyas).
-- **A pedido.** No generamos lo que no va a usar: cuida su tiempo y nuestro costo de IA. Lo caro (audio, imágenes) va después de una vista previa barata.
-- **Palabras del aula.** "Le cuesta concentrarse" antes que "TDAH". La inclusión es adaptar materiales (DUA), nunca diagnosticar.
+- **A pedido.** No generamos lo que no va a usar: cuida su tiempo y nuestro costo de IA. Lo caro (imágenes) va después de una vista previa barata, y lo que sirve a todos (canciones, banco) se hace una vez por tema.
+- **Palabras del aula.** "Balotario" y "clave", como dicen los profes; nada de jerga técnica.
 - **Funciona en el aula real.** Imprimible, QR sin cuenta, WhatsApp, buena conexión no garantizada.
 
 ## Lo que nos diferencia
@@ -58,6 +57,6 @@ actualizado: 2026-10-17
 
 ## Hacia dónde va
 - Generación real con IA, siempre a partir de los desempeños del tema.
-- Audio de las canciones (ElevenLabs) y pictogramas (ARASAAC).
-- Juegos publicados con link y QR reales; biblioteca y créditos guardados en el servidor.
-- Perfil de cada clase (intereses, adaptaciones) para que todo salga a la medida.
+- Canciones de cada tema en nuestro canal de YouTube (`CANCIONES.md`) y pictogramas (ARASAAC).
+- Juegos publicados con link y QR reales; biblioteca guardada en el servidor.
+- Perfil de cada clase (intereses) para que todo salga a la medida.

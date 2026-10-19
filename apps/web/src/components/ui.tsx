@@ -1,6 +1,6 @@
-import { ChevronDown, LoaderCircle } from 'lucide-react'
-import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from 'react'
-import { textoCosto, type Fraccion, type HerramientaId } from '../api'
+import { ChevronDown, LoaderCircle, X } from 'lucide-react'
+import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react'
+import type { Fraccion, HerramientaId } from '../api'
 import { HERRAMIENTAS } from '../app/herramientas'
 
 export function cx(...c: (string | false | null | undefined)[]) {
@@ -99,16 +99,6 @@ export function Boton({ variante = 'primario', herramienta, tam = 'md', cargando
   )
 }
 
-/** Línea discreta bajo un botón que gasta créditos. */
-export function NotaCreditos({ n, quedan }: { n: number; quedan: number }) {
-  if (n === 0) return <p className="text-sm text-ink-soft">No gasta créditos.</p>
-  return (
-    <p className="text-sm text-ink-soft tabular-nums">
-      Usa {textoCosto(n)} de tus {quedan}.
-    </p>
-  )
-}
-
 export function Tarjeta({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
   return (
     <section className={cx('rounded-2xl border border-line bg-surface p-4 sm:p-5', className)} style={style}>
@@ -134,6 +124,49 @@ export function Hoja({ children, className }: { children: ReactNode; className?:
 /** Fila de acciones debajo de la hoja. No se imprime. */
 export function Acciones({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-center gap-2 print:hidden">{children}</div>
+}
+
+/**
+ * Las acciones de una hoja (descargar, imprimir, otra versión…), justo encima de ella y pegadas arriba al bajar:
+ * se ven siempre y lo que cambian queda a la vista. Si no entran: en el celular se deslizan de lado y en pantallas
+ * más anchas pasan a una segunda fila.
+ */
+export function BarraHoja({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky top-14 z-20 -mx-2 flex items-center gap-2 overflow-x-auto rounded-2xl bg-bg/90 px-2 py-2 backdrop-blur-md sm:flex-wrap lg:top-0 print:hidden [&>*]:shrink-0">
+      {children}
+    </div>
+  )
+}
+
+/** Ventana encima de la pantalla (cerrar con la X, Escape o tocando afuera). */
+export function Ventana({ abierta, cerrar, titulo, children }: { abierta: boolean; cerrar: () => void; titulo: string; children: ReactNode }) {
+  const dialogo = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const d = dialogo.current
+    if (!d) return
+    if (abierta && !d.open) d.showModal()
+    if (!abierta && d.open) d.close()
+  }, [abierta])
+  return (
+    <dialog
+      ref={dialogo}
+      onClose={cerrar}
+      onClick={(e) => e.target === dialogo.current && cerrar()}
+      aria-label={titulo}
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(38rem,calc(100vw-2rem))] overflow-y-auto rounded-3xl border border-line bg-surface p-0 text-ink shadow-2xl backdrop:bg-black/45"
+    >
+      <div className="flex flex-col gap-5 p-5 sm:p-7">
+        <header className="flex items-start justify-between gap-3">
+          <h2 className="font-display text-2xl font-bold">{titulo}</h2>
+          <button type="button" onClick={cerrar} className="rounded-lg p-1.5 text-ink-soft hover:bg-surface-2" aria-label="Cerrar">
+            <X className="size-5" />
+          </button>
+        </header>
+        {children}
+      </div>
+    </dialog>
+  )
 }
 
 /** Pregunta simple con su respuesta debajo (chips, opciones…). */

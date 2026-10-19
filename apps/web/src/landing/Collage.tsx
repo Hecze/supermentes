@@ -127,7 +127,7 @@ export function Collage() {
               <Play className="ml-0.5 size-4" aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="font-display text-[15px] font-bold leading-tight">La cumbia de las fracciones</p>
+              <p className="font-display text-[15px] font-bold leading-tight">El rap del sistema digestivo</p>
               <div className="mt-1 flex h-4 items-center gap-[2px]">
                 {[5, 9, 13, 7, 15, 10, 6, 12, 16, 8, 11, 14, 6, 9, 13, 7, 10, 15, 8, 12].map((h, i) => (
                   <span key={i} className="w-[3px] rounded-full" style={{ height: h, background: i < 8 ? 'var(--cancion)' : 'color-mix(in oklab, var(--cancion) 30%, transparent)' }} />
@@ -136,9 +136,9 @@ export function Collage() {
             </div>
           </div>
           <p className="font-display text-[13px] leading-snug">
-            Arriba el numerador, cuántas partes tomo yo,
+            Mastico y el estómago va a mezclar,
             <br />
-            abajo el denominador, en cuántas se partió.
+            ¡nutrientes a la sangre van a pasar!
           </p>
         </Hoja>
 

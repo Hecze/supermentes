@@ -6,11 +6,19 @@
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     {
+      "source": "/api/:ruta(entrar-demo|intentos|mis-envios|perfil|salones|tareas)",
+      "destination": "/api/cuentas?ruta=:ruta"
+    },
+    {
       "source": "/app",
       "destination": "/app/index.html"
     },
     {
       "source": "/j/:codigo",
+      "destination": "/j/index.html"
+    },
+    {
+      "source": "/t/:codigo",
       "destination": "/j/index.html"
     }
   ]

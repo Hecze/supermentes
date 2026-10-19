@@ -2,10 +2,10 @@ import {
   ArrowRight,
   BookMarked,
   Camera,
+  CircleCheck,
   FileText,
   Gamepad2,
   Grid3x3,
-  HeartHandshake,
   Laptop,
   Music,
   PenLine,
@@ -33,12 +33,12 @@ function Titulo({ children, className }: { children: ReactNode; className?: stri
 const PASOS = [
   {
     titulo: 'Crea tu tema',
-    texto: 'Escribe qué vas a enseñar y el grado. Si quieres, súmale una foto de la página del libro.',
+    texto: 'Búscalo en el Currículo Nacional: el grado y el curso vienen con él.',
     color: 'var(--examen)',
   },
   {
     titulo: 'Elige lo que necesitas',
-    texto: 'Una canción, un juego, un crucigrama, un examen o una adaptación. Solo lo que vas a usar.',
+    texto: 'Un examen, una práctica, un balotario, una canción, un juego o un crucigrama. Solo lo que vas a usar.',
     color: 'var(--cancion)',
   },
   {
@@ -50,8 +50,8 @@ const PASOS = [
 
 const HERRAMIENTAS: { nombre: string; texto: string; color: string; icono: ComponentType<LucideProps>; ancho?: boolean }[] = [
   {
-    nombre: 'Examen divertido',
-    texto: 'Tu misma evaluación, contada con lo que le gusta a tu clase: fútbol, animales, cocina. Evalúa exactamente lo mismo.',
+    nombre: 'Examen, práctica y balotario',
+    texto: 'Listos para imprimir apenas abres tu tema, con su clave: la respuesta y los pasos de cada pregunta. Otra versión con otros números cuando quieras, y Fila A y B para que no se copien.',
     color: 'var(--examen)',
     icono: FileText,
     ancho: true,
@@ -74,19 +74,13 @@ const HERRAMIENTAS: { nombre: string; texto: string; color: string; icono: Compo
     color: 'var(--crucigrama)',
     icono: Grid3x3,
   },
-  {
-    nombre: 'Adaptar para inclusión',
-    texto: 'Versiones para quien le cuesta concentrarse, leer o necesita apoyos visuales, con consejos para el aula.',
-    color: 'var(--adaptar)',
-    icono: HeartHandshake,
-  },
 ]
 
 const AULA: { titulo: string; texto: string; icono: ComponentType<LucideProps> }[] = [
   { titulo: 'Alineado al CNEB', texto: 'Cada tema se conecta con las competencias y capacidades del Currículo Nacional.', icono: BookMarked },
   { titulo: 'Sin un equipo por alumno', texto: 'Todo se imprime en blanco y negro. Los juegos se proyectan o se abren con un QR.', icono: Printer },
   { titulo: 'Tú decides el contenido', texto: 'La app sugiere; tú eliges las palabras, las preguntas y el tono.', icono: SlidersHorizontal },
-  { titulo: 'Inclusión sin diagnósticos', texto: 'Adaptaciones prácticas para el aula, para coordinar con el SAANEE y la familia.', icono: HeartHandshake },
+  { titulo: 'Con su clave', texto: 'Cada hoja trae su clave con la respuesta y los pasos de cada pregunta, para corregir rápido.', icono: CircleCheck },
   { titulo: 'Los alumnos entran sin cuenta', texto: 'Escanean el QR o abren el enlace que mandas por WhatsApp. Nada que instalar.', icono: QrCode },
   { titulo: 'Hecho para tu laptop', texto: 'Pensado para preparar la clase con calma en la computadora y llevarla impresa o proyectada.', icono: Laptop },
 ]
@@ -166,6 +160,9 @@ export function Landing() {
             </a>
             <a href="#herramientas" className="hidden rounded-lg px-3 py-2 text-ink-soft hover:text-ink md:inline">
               Herramientas
+            </a>
+            <a href="/app/" className="inline-flex h-10 items-center rounded-xl border border-line px-4 font-semibold hover:bg-surface">
+              Entrar
             </a>
             <a href="#unirme" className="inline-flex h-10 items-center rounded-xl bg-primary px-4 font-semibold text-primary-ink hover:opacity-90">
               Unirme
@@ -262,7 +259,7 @@ export function Landing() {
       <section id="herramientas" className="scroll-mt-20 py-20 sm:py-28">
         <Contenedor className="flex flex-col gap-12">
           <div className="flex max-w-2xl flex-col gap-4">
-            <Titulo>Cinco herramientas. Una sola idea: que aprendan con ganas.</Titulo>
+            <Titulo>Cuatro herramientas. Una sola idea: que aprendan con ganas.</Titulo>
             <p className="text-lg text-ink-soft">Todas parten de tu tema, así que no tienes que explicar nada dos veces.</p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">

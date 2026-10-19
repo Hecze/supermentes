@@ -1,15 +1,10 @@
 // Datos de ejemplo para el prototipo. Tienen la misma forma que devolverá el backend real.
 import type {
-  Adaptacion,
-  Cancion,
-  Examen,
   Ficha,
   Juego,
   Material,
-  Necesidad,
-  OpcionesCancion,
-  OpcionesExamen,
-  PreguntaExamen,
+  OpcionesSesion,
+  Sesion,
 } from './types'
 
 export const DOCENTE = {
@@ -35,6 +30,7 @@ export const FICHA_EJEMPLO: Ficha = {
   curriculo: {
     competencia: 'Resuelve problemas de cantidad',
     capacidad: 'Comunica su comprensión sobre los números y las operaciones',
+    desempenos: ['Expresa con diversas representaciones y lenguaje numérico (números, signos y expresiones verbales) su comprensión de: La unidad de millar como unidad del sistema de numeración decimal, sus equivalencias entre unidades menores, el valor posicional de un dígito en números de cuatro cifras y la comparación y el orden de números. La multiplicación y división con números naturales, así como las propiedades conmutativa y asociativa de la multiplicación. La fracción como parte-todo (cantidad discreta o continua), así como equivalencias y operaciones de adición y sustracción entre fracciones usuales usando fracciones equivalentes.'],
   },
   conceptos: [
     'Un entero se divide en partes iguales.',
@@ -54,7 +50,7 @@ export const FICHA_EJEMPLO: Ficha = {
   ],
   ejemplo: 'Si un queque se corta en 8 tajadas iguales y te comes 3, te comiste 3/8 del queque.',
   errorFrecuente: 'Confunden el numerador con el denominador: creen que el número más grande siempre va arriba.',
-  coincidenciasBiblioteca: 3,
+  coincidenciasBiblioteca: 2,
 }
 
 export const FICHA_AGUA: Ficha = {
@@ -71,6 +67,7 @@ export const FICHA_AGUA: Ficha = {
   curriculo: {
     competencia: 'Explica el mundo físico basándose en conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
     capacidad: 'Comprende y usa conocimientos sobre los seres vivos, materia y energía, biodiversidad, Tierra y universo',
+    desempenos: ['Describe que los objetos pueden sufrir cambios reversibles e irreversibles por acción de la energía. Ejemplo: El estudiante describe por qué un cubo de hielo se disuelve por acción del calor del ambiente y por qué puede volver a ser un cubo de hielo al colocar el líquido en un refrigerador.'],
   },
   conceptos: [
     'El sol calienta el agua de mares, ríos y lagos, y se evapora.',
@@ -106,6 +103,7 @@ export const FICHA_SUSTANTIVOS: Ficha = {
   curriculo: {
     competencia: 'Escribe diversos tipos de textos en su lengua materna',
     capacidad: 'Utiliza convenciones del lenguaje escrito de forma pertinente',
+    desempenos: ['Utiliza recursos gramaticales y ortográficos (por ejemplo, el punto seguido y las comas enumerativas) que contribuyen a dar sentido a su texto, e incorpora algunos recursos textuales (por ejemplo, el tamaño de la letra) para reforzar dicho sentido. Emplea comparaciones y adjetivaciones para caracterizar personas, personajes y escenarios, y elabora rimas y juegos verbales apelando al ritmo y la musicalidad de las palabras, con el fin de expresar sus experiencias y emociones.', 'Explica el efecto de su texto en los lectores considerando su propósito al momento de escribirlo. Asimismo, explica la importancia de los aspectos gramaticales y ortográficos más comunes.'],
   },
   conceptos: [
     'Los sustantivos nombran personas, animales, cosas y lugares.',
@@ -128,151 +126,6 @@ export const FICHA_SUSTANTIVOS: Ficha = {
 
 /** Temas que la docente ya preparó, del más reciente al más antiguo. */
 export const TEMAS_INICIALES: Ficha[] = [FICHA_EJEMPLO, FICHA_AGUA, FICHA_SUSTANTIVOS]
-
-// ---------- Canción ----------
-
-const ARTICULO_RITMO: Record<string, string> = {
-  Cumbia: 'La cumbia',
-  Huayno: 'El huayno',
-  Festejo: 'El festejo',
-  Rap: 'El rap',
-  Balada: 'La balada',
-}
-
-export function cancionEjemplo(opciones: OpcionesCancion): Cancion {
-  if (opciones.modo === 'melodia') {
-    return {
-      titulo: 'Las fracciones dicen',
-      opciones,
-      partes: [
-        {
-          etiqueta: 'Estrofa',
-          lineas: [
-            'Las fracciones dicen',
-            'parte, parte, parte,',
-            'cuando el entero',
-            'se va a repartir.',
-          ],
-        },
-        {
-          etiqueta: 'Estrofa',
-          lineas: [
-            'Arriba las que tomo,',
-            'abajo en cuántas parto,',
-            'y así aprendo yo',
-            'a compartir.',
-          ],
-        },
-      ],
-    }
-  }
-  return {
-    titulo: `${ARTICULO_RITMO[opciones.ritmo] ?? 'La canción'} de las fracciones`,
-    opciones,
-    partes: [
-      {
-        etiqueta: 'Verso 1',
-        lineas: [
-          'Tengo una pizza redonda y entera,',
-          'la corto en ocho, ¡qué rica manera!',
-          'Me como tres y te cuento el secreto:',
-          'tres octavos me comí, ¡eso es correcto!',
-        ],
-      },
-      {
-        etiqueta: 'Coro',
-        lineas: [
-          'Arriba el numerador, cuántas partes tomo yo,',
-          'abajo el denominador, en cuántas se partió.',
-          '¡Fracción, fracción, partes iguales son!',
-        ],
-      },
-      {
-        etiqueta: 'Verso 2',
-        lineas: [
-          'Si parto un queque en cuatro pedazos',
-          'y le doy uno a mi abuela con un abrazo,',
-          'un cuarto se fue, me quedan tres cuartos,',
-          '¡las fracciones están en todos lados!',
-        ],
-      },
-      {
-        etiqueta: 'Coro',
-        lineas: [
-          'Arriba el numerador, cuántas partes tomo yo,',
-          'abajo el denominador, en cuántas se partió.',
-          '¡Fracción, fracción, partes iguales son!',
-        ],
-      },
-    ],
-  }
-}
-
-// ---------- Examen ----------
-
-const ORIGINALES = [
-  { original: 'Escribe la fracción que representa 3 partes de 4.', respuesta: '3/4' },
-  { original: '¿Cuál es el denominador en 5/8? ¿Qué indica?', respuesta: '8: el entero se dividió en 8 partes iguales.' },
-  { original: '¿Qué fracción es mayor: 1/2 o 1/4?', respuesta: '1/2' },
-  { original: 'Completa: 1/2 = ▢/4', respuesta: '2/4' },
-]
-
-const FRACCIONES: [number, number][] = [
-  [3, 4],
-  [5, 8],
-  [1, 2],
-  [2, 4],
-]
-
-const TEMAS_EXAMEN: Record<string, { titulo: string; intro: string; etiquetaPaso: string; textos: string[] }> = {
-  Fútbol: {
-    titulo: 'Misión: ¡la final del campeonato!',
-    intro: 'Tu equipo llegó a la final. Resuelve cada jugada para levantar la copa.',
-    etiquetaPaso: 'Jugada',
-    textos: [
-      'Tu equipo patea 4 penales y mete 3. ¿Qué fracción de los penales terminó en gol?',
-      'La pelota está cosida con 8 parches y 5 son blancos: 5/8. ¿Cuál es el denominador y qué indica?',
-      'En la tribuna, Sofía toma 1/2 jarra de chicha morada y Luis toma 1/4. ¿Quién tomó más?',
-      'El entrenador divide la práctica en 4 partes iguales y la mitad es calentamiento. ¿Cuántos cuartos son de calentamiento?',
-    ],
-  },
-  Animales: {
-    titulo: 'Misión: rescate en la Amazonía',
-    intro: 'Los animales del bosque necesitan tu ayuda. Cada respuesta correcta libera a uno.',
-    etiquetaPaso: 'Rescate',
-    textos: [
-      'Un grupo de 4 delfines rosados nada en el río y 3 saltan fuera del agua. ¿Qué fracción del grupo saltó?',
-      'Un guacamayo tiene 8 plumas en la cola y 5 son rojas: 5/8. ¿Cuál es el denominador y qué indica?',
-      'Un perezoso come 1/2 hoja y un mono come 1/4 de otra hoja igual. ¿Quién comió más?',
-      'El río tiene 4 tramos iguales y la mitad tiene pirañas. ¿Cuántos cuartos del río tienen pirañas?',
-    ],
-  },
-  Cocina: {
-    titulo: 'Misión: chef por un día',
-    intro: 'Hoy cocinas para todo el salón. Cada receta resuelta suma una estrella.',
-    etiquetaPaso: 'Receta',
-    textos: [
-      'Horneaste 4 panes y ya se vendieron 3. ¿Qué fracción de los panes se vendió?',
-      'Cortaste una pizza en 8 tajadas y 5 tienen aceitunas: 5/8. ¿Cuál es el denominador y qué indica?',
-      'Para el queque, Ana usa 1/2 taza de azúcar y Pedro 1/4 de taza. ¿Quién usó más azúcar?',
-      'La receta tiene 4 pasos iguales y ya hiciste la mitad. ¿Cuántos cuartos de la receta terminaste?',
-    ],
-  },
-}
-
-export function examenEjemplo(opciones: OpcionesExamen): Examen {
-  const tema = TEMAS_EXAMEN[opciones.interes] ?? TEMAS_EXAMEN.Fútbol
-  const preguntas: PreguntaExamen[] = ORIGINALES.map((o, i) => ({
-    ...o,
-    texto: tema.textos[i],
-    fraccion: FRACCIONES[i],
-    ilustracion: null,
-  }))
-  if (opciones.formato === 'contextualizado') {
-    return { opciones, titulo: `Evaluación: fracciones (${opciones.interes.toLowerCase()})`, intro: 'Resuelve cada problema.', etiquetaPaso: 'Pregunta', preguntas }
-  }
-  return { opciones, titulo: tema.titulo, intro: tema.intro, etiquetaPaso: tema.etiquetaPaso, preguntas }
-}
 
 // ---------- Juego ----------
 
@@ -368,64 +221,123 @@ export function juegoDesdeVocabulario(ficha: Ficha): Juego {
   }
 }
 
-// ---------- Adaptación ----------
-
-const CONSEJOS: Record<Necesidad, string[]> = {
-  tdah: [
-    'Da una consigna a la vez y verifica que se entendió antes de pasar a la siguiente.',
-    'Ofrece pausas activas cortas cada 10 a 15 minutos.',
-    'Usa un temporizador visible para cada paso.',
-  ],
-  dislexia: [
-    'Lee las consignas en voz alta además de escribirlas en la pizarra.',
-    'Cuando puedas, evalúa la comprensión de forma oral.',
-    'Da más tiempo para leer y escribir, sin penalizar la ortografía en este tema.',
-  ],
-  tea: [
-    'Anticipa la actividad con la agenda visual al empezar la clase.',
-    'Usa lenguaje literal y evita frases con doble sentido.',
-    'Avisa unos minutos antes de cambiar de actividad.',
-  ],
-  facil: [
-    'Una idea por frase.',
-    'Usa ejemplos de la vida diaria del estudiante.',
-    'Acompaña el texto con imágenes.',
-  ],
-}
-
-export function adaptacionEjemplo(necesidades: Necesidad[]): Adaptacion {
-  return {
-    necesidades,
-    material: 'Examen: Misión ¡la final del campeonato!',
-    original:
-      'Lee atentamente cada situación problemática y resuelve en tu cuaderno. Escribe la fracción que representa cada caso, luego compara las fracciones obtenidas y ordénalas de menor a mayor, justificando tu respuesta con un gráfico.',
-    agenda: [
-      { picto: 'saludar', texto: 'Saludo' },
-      { picto: 'leer', texto: 'Leer' },
-      { picto: 'escribir', texto: 'Resolver' },
-      { picto: 'pausa', texto: 'Pausa' },
-      { picto: 'compartir', texto: 'Compartir' },
-    ],
-    pasos: [
-      { picto: 'leer', texto: 'Lee la situación 1 en voz baja.', textoFacil: 'Lee el problema 1.' },
-      { picto: 'escribir', texto: 'Escribe en tu cuaderno la fracción que representa la situación.', textoFacil: 'Escribe el número de arriba y el de abajo.' },
-      { picto: 'dibujar', texto: 'Dibuja un círculo y pinta las partes que indica la fracción.', textoFacil: 'Pinta las partes en el círculo.' },
-      { picto: 'comparar', texto: 'Compara tus fracciones: ¿cuál es más grande?', textoFacil: 'Mira: ¿cuál tiene más parte pintada?' },
-    ],
-    consejos: CONSEJOS,
-  }
-}
-
 // ---------- Biblioteca ----------
 
 export const BIBLIOTECA_EJEMPLO: Material[] = [
-  { id: 'm1', titulo: 'La cumbia de las fracciones', tipo: 'cancion', grado: '4.º primaria', area: 'Matemática', autor: 'Carmen Huamán', lugar: 'Arequipa', usos: 214 },
+  { id: 'm1', titulo: 'El rap del sistema digestivo', tipo: 'cancion', grado: '4.º primaria', area: 'Ciencia y Tecnología', autor: 'Carmen Huamán', lugar: 'Arequipa', usos: 214 },
   { id: 'm2', titulo: 'Memoria de fracciones con pizzas', tipo: 'juego', grado: '4.º primaria', area: 'Matemática', autor: 'Jorge Mamani', lugar: 'Puno', usos: 156 },
   { id: 'm3', titulo: 'Misión: fracciones en la cocina', tipo: 'examen', grado: '4.º primaria', area: 'Matemática', autor: 'Diana Flores', lugar: 'Piura', usos: 120 },
   { id: 'm4', titulo: 'Trivia: animales de la Amazonía', tipo: 'juego', grado: '2.º primaria', area: 'Ciencia y Tecnología', autor: 'Miguel Vargas', lugar: 'Iquitos', usos: 133 },
   { id: 'm5', titulo: 'Misión: el ciclo del agua', tipo: 'examen', grado: '5.º primaria', area: 'Ciencia y Tecnología', autor: 'Lucía Torres', lugar: 'Trujillo', usos: 98 },
   { id: 'm6', titulo: 'Crucigrama de sustantivos y adjetivos', tipo: 'crucigrama', grado: '3.º primaria', area: 'Comunicación', autor: 'Ana Rojas', lugar: 'Cusco', usos: 77 },
-  { id: 'm7', titulo: 'Tablas de multiplicar en lectura fácil', tipo: 'adaptar', grado: '3.º primaria', area: 'Matemática', autor: 'Elena Castro', lugar: 'Lima', usos: 61 },
+  { id: 'm7', titulo: 'Examen de tablas de multiplicar en lectura fácil', tipo: 'examen', grado: '3.º primaria', area: 'Matemática', autor: 'Elena Castro', lugar: 'Lima', usos: 61 },
   { id: 'm8', titulo: 'Adivina la palabra: la Independencia', tipo: 'juego', grado: '6.º primaria', area: 'Personal Social', autor: 'Pedro Salas', lugar: 'Ica', usos: 88 },
   { id: 'm9', titulo: 'El huayno de las regiones del Perú', tipo: 'cancion', grado: '4.º primaria', area: 'Personal Social', autor: 'Rosa Quispe', lugar: 'Lima', usos: 45, esMio: true },
 ]
+
+// ---------- Sesión de aprendizaje ----------
+
+// Desempeños oficiales de 4.º primaria, Matemática (competencia 1), copiados tal cual de packages/curriculo.
+const DESEMPENO_PARTIR =
+  'Establece relaciones entre datos y acciones de partir una unidad o una colección de objetos en partes iguales y las transforma en expresiones numéricas (modelo) de fracciones usuales, adición y sustracción de estas.'
+const DESEMPENO_EXPRESA = FICHA_EJEMPLO.curriculo.desempenos![0]
+const DESEMPENO_AFIRMA =
+  'Realiza afirmaciones sobre las equivalencias entre fracciones y las explica con ejemplos concretos. Asimismo, explica la comparación entre fracciones, así como su proceso de resolución y los resultados obtenidos.'
+
+export function sesionEjemplo(opciones: OpcionesSesion): Sesion {
+  const largo = opciones.duracion === 90
+  const gusto = opciones.interes?.toLowerCase()
+  return {
+    opciones,
+    titulo: 'Repartimos en partes iguales: las fracciones',
+    grado: FICHA_EJEMPLO.grado,
+    area: FICHA_EJEMPLO.area,
+    competencia: 'Resuelve problemas de cantidad',
+    capacidades: [
+      'Traduce cantidades a expresiones numéricas',
+      'Comunica su comprensión sobre los números y las operaciones',
+      'Usa estrategias y procedimientos de estimación y cálculo',
+      'Argumenta afirmaciones sobre las relaciones numéricas y las operaciones',
+    ],
+    criterios: [
+      {
+        texto: 'Parte un entero o un grupo de objetos en partes iguales y escribe la fracción que representa.',
+        desempeno: DESEMPENO_PARTIR,
+        cita: 'partir una unidad o una colección de objetos en partes iguales',
+      },
+      {
+        texto: 'Representa fracciones con dibujos, material concreto y números, y dice qué indican el numerador y el denominador.',
+        desempeno: DESEMPENO_EXPRESA,
+        cita: 'La fracción como parte-todo (cantidad discreta o continua)',
+      },
+      {
+        texto: 'Explica con ejemplos concretos cuándo dos fracciones valen lo mismo.',
+        desempeno: DESEMPENO_AFIRMA,
+        cita: 'Realiza afirmaciones sobre las equivalencias entre fracciones y las explica con ejemplos concretos',
+      },
+    ],
+    evidencia: 'Ficha de aplicación resuelta con fracciones representadas en dibujos y números.',
+    instrumento: 'Escala de valoración',
+    enfoque: {
+      nombre: 'Enfoque de orientación al bien común',
+      valor: 'Equidad y justicia',
+      actitudes: 'Los estudiantes reparten materiales y turnos en partes iguales y explican por qué un reparto es justo.',
+    },
+    materiales: {
+      antes: ['Recortar círculos y tiras de papel del mismo tamaño.', 'Preparar el papelógrafo con el problema de la motivación.', 'Imprimir la ficha de aplicación y la escala de valoración.'],
+      recursos: ['Círculos y tiras de papel', 'Tijeras y colores', 'Papelógrafo y plumones', 'Ficha de aplicación'],
+    },
+    proposito: 'Hoy aprenderemos a representar fracciones partiendo un entero en partes iguales.',
+    minutos: largo ? { inicio: 15, desarrollo: 60, cierre: 15 } : { inicio: 10, desarrollo: 25, cierre: 10 },
+    inicio: {
+      motivacion: [
+        gusto
+          ? `El docente cuenta que el salón ganó un premio y lo celebrará con algo de ${gusto}: una pizza para cuatro amigos.`
+          : 'El docente cuenta que Rosa y sus tres amigos compraron una pizza para compartir en el recreo.',
+        'Muestra un círculo de papel cortado en 4 partes de distinto tamaño y pregunta: «¿Es justo este reparto? ¿Por qué?».',
+      ],
+      saberesPrevios: ['Pregunta: «¿Qué significa repartir en partes iguales?», «¿Dónde han visto una mitad?».', 'Anota las respuestas en la pizarra.'],
+      conflicto: ['Pregunta: «Si la pizza se corta en 8 partes iguales y Rosa come 3, ¿cómo escribimos con números lo que comió?».'],
+      normas: ['Levantamos la mano para hablar.', 'Compartimos los materiales.', 'Escuchamos a quien habla.'],
+    },
+    desarrollo: [
+      {
+        titulo: 'PARTIMOS EN PARTES IGUALES',
+        pasos: [
+          'En grupos, los estudiantes doblan un círculo de papel en 2, 4 y 8 partes iguales.',
+          'Pintan algunas partes y dicen cuántas pintaron y en cuántas partes dividieron el círculo.',
+        ],
+      },
+      {
+        titulo: 'ESCRIBIMOS LA FRACCIÓN',
+        pasos: [
+          'El docente escribe en la pizarra 3/8 y explica: el denominador dice en cuántas partes iguales se dividió el entero; el numerador, cuántas tomamos.',
+          'Cada grupo escribe con números la fracción que pintó y la lee en voz alta.',
+        ],
+      },
+      {
+        titulo: 'FRACCIONES DE UN GRUPO',
+        pasos: ['Con 12 chapitas, los grupos forman 3 grupos iguales y dicen qué fracción es cada grupo (1/3).', 'Comparan sus respuestas con otro grupo.'],
+      },
+      {
+        titulo: 'PRACTICAMOS',
+        pasos: ['Los estudiantes resuelven la ficha de aplicación de forma individual.', 'El docente acompaña a quienes confunden el numerador con el denominador.'],
+      },
+    ],
+    cierre: {
+      sistematizacion: ['Entre todos completan en el papelógrafo: «Una fracción representa partes iguales de un todo».'],
+      metacognicion: ['¿Qué aprendimos hoy?', '¿Qué fue lo más difícil?', '¿Dónde usamos las fracciones en casa?'],
+      tarea: ['Dibuja algo que se reparta en casa (una torta, un pan) y escribe la fracción que le toca a cada uno.'],
+    },
+    ficha: {
+      titulo: 'Practicamos con fracciones',
+      actividades: [
+        { consigna: 'Dibuja un rectángulo, divídelo en 4 partes iguales y pinta 3. Escribe la fracción pintada.', lineas: 1 },
+        { consigna: 'Un queque se cortó en 8 tajadas iguales y Luis comió 3. ¿Qué fracción del queque comió? ¿Cuál es el numerador?', lineas: 2 },
+        { consigna: 'En una bolsa hay 10 caramelos y 4 son de fresa. ¿Qué fracción de los caramelos son de fresa?', lineas: 1 },
+        { consigna: 'Dibuja dos tiras iguales: en una pinta 1/2 y en la otra 2/4. ¿Valen lo mismo? Explica por qué.', lineas: 3 },
+        { consigna: 'Carla dice que si una torta se corta en 4 pedazos de distinto tamaño, cada uno es 1/4. ¿Tiene razón? ¿Por qué?', lineas: 3 },
+      ],
+    },
+  }
+}

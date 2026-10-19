@@ -1,26 +1,36 @@
+import { useCuenta } from './app/cuenta'
+import { usePerfil } from './app/perfil'
 import { StoreProvider, useStore } from './app/store'
 import { Shell } from './components/Shell'
-import { Adaptar } from './views/Adaptar'
 import { Biblioteca } from './views/Biblioteca'
 import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
+import { Inicio } from './views/Inicio'
 import { Juego } from './views/Juego'
+import { Onboarding } from './views/Onboarding'
+import { Sesion } from './views/Sesion'
 
 const VISTAS = {
+  inicio: Inicio,
   ficha: Ficha,
+  sesion: Sesion,
   cancion: Cancion,
   examen: Examen,
   juego: Juego,
   crucigrama: Crucigrama,
-  adaptar: Adaptar,
   biblioteca: Biblioteca,
+  resultados: Juego,
 }
 
 function Pantalla() {
   const { vista, ficha } = useStore()
+  const { entro } = useCuenta()
+  const { perfil, cargando } = usePerfil()
   const Vista = VISTAS[vista]
+  // Con cuenta y sin perfil: el onboarding, una sola vez.
+  if (entro && !perfil) return cargando ? null : <Onboarding />
   return (
     <Shell>
       <Vista key={`${vista}-${ficha?.id}`} />

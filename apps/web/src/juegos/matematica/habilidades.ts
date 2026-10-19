@@ -1,14 +1,16 @@
 // Habilidades de cálculo que se generan con algoritmos, sin IA: son gratis, no se acaban y siempre están bien.
-// Cada nivel indica en qué grados se suele trabajar (Currículo Nacional) y arma retos cuyos distractores
-// empiezan por los errores más frecuentes de los estudiantes.
+// Cada nivel se ofrece solo en los grados donde lo pide el Currículo Nacional, con la cita textual del desempeño
+// (curriculo.ts), y arma retos cuyos distractores empiezan por los errores más frecuentes de los estudiantes.
 import type { Reto } from '../tipos'
 import { elegir, entero } from '../motor/azar'
+import { CITAS as C, de, type Citas } from './curriculo'
 import { distractores, exponente, frac, fracSimple, num, soloIncorrectas, valor } from './formato'
 
 type Azar = () => number
 type Generador = (azar: Azar) => Reto
 
-export type Nivel = { nombre: string; grados: string[]; generar: Generador }
+/** Un nivel de práctica. `citas`: por grado, el fragmento del desempeño oficial que lo pide; `grados` sale de ahí. */
+export type Nivel = { nombre: string; grados: string[]; citas: Citas; generar: Generador }
 
 export type GrupoHabilidad = 'Números' | 'Operaciones' | 'Fracciones' | 'Decimales y porcentajes' | 'Álgebra y enteros' | 'Medidas'
 
@@ -24,6 +26,9 @@ export type Habilidad = {
 const I = (...n: number[]) => n.map((x) => `inicial-${x}`)
 const P = (...n: number[]) => n.map((x) => `primaria-${x}`)
 const S = (...n: number[]) => n.map((x) => `secundaria-${x}`)
+
+/** Los grados del nivel salen de sus citas: sin cita del currículo, el nivel no se ofrece en ese grado. */
+const nivel = (nombre: string, citas: Citas, generar: Generador): Nivel => ({ nombre, grados: Object.keys(citas), citas, generar })
 
 /** Número entre paréntesis si es negativo: 5 + (−3). */
 const conSigno = (n: number) => (n < 0 ? `(${num(n)})` : num(n))
@@ -106,7 +111,8 @@ const valorPosicional =
     const ds = Array.from({ length: cifras }, (_, i) => (i === cifras - 1 ? entero(azar, 1, 9) : azar() < 0.2 ? 0 : entero(azar, 1, 9)))
     const n = ds.reduce((s, d, i) => s + d * 10 ** i, 0)
     const partes = ds
-      .map((d, i) => (d === 0 ? null : `${d} ${nombres[i]}`))
+      // Espacios que no se cortan: en una carta angosta «6 C» no queda partido en dos renglones.
+      .map((d, i) => (d === 0 ? null : `${d}\u00a0${nombres[i]}`))
       .filter(Boolean)
       .reverse()
     const sinCeros = Number(ds.filter((d) => d !== 0).reverse().join(''))
@@ -114,7 +120,7 @@ const valorPosicional =
     const sumaCifras = ds.reduce((s, d) => s + d, 0)
     return {
       consigna: '¿Qué número es?',
-      pregunta: partes.join(' + '),
+      pregunta: partes.join('\u00a0+ '),
       respuesta: num(n),
       distractores: distractores(n, [sinCeros, volteado, sumaCifras, n * 10, n + 10, n - 10, n + 1], { min: 1 }),
     }
@@ -523,7 +529,7 @@ const enteros =
 // ---------- Medidas ----------
 
 const convertir =
-  (tipo: 'longitud' | 'masa' | 'tiempo' | 'capacidad'): Generador =>
+  (tipo: 'longitud' | 'masa' | 'tiempo'): Generador =>
   (azar) => {
     if (tipo === 'tiempo') {
       if (azar() < 0.5) {
@@ -536,7 +542,7 @@ const convertir =
       const r = h * 60 + m
       return { pregunta: `${h} h ${m} min = ? min`, respuesta: num(r), distractores: distractores(r, [h * 100 + m, h + m, r + 60, r - 60, h * 60, r + 10], { paso: 5, min: 5 }) }
     }
-    const [grande, chica, f] = { longitud: ['m', 'cm', 100], masa: ['kg', 'g', 1000], capacidad: ['L', 'mL', 1000] }[tipo] as [string, string, number]
+    const [grande, chica, f] = { longitud: ['m', 'cm', 100], masa: ['kg', 'g', 1000] }[tipo] as [string, string, number]
     const n = entero(azar, 2, 9)
     if (azar() < 0.6) {
       const r = n * f
@@ -544,6 +550,18 @@ const convertir =
     }
     return { pregunta: `${num(n * f)} ${chica} = ? ${grande}`, respuesta: num(n), distractores: distractores(n, [n * 10, n * f, n * 100, n + 1, n - 1, n * 1000], { min: 1 }) }
   }
+
+/** Cuántas veces se llena un recipiente con otro (4.º): vasos de medio o cuarto de litro para llenar una jarra. */
+const llenar: Generador = (azar) => {
+  const [vaso, porLitro] = elegir(azar, [['1/2', 2], ['1/4', 4]] as const)
+  const litros = entero(azar, 1, 5)
+  const r = litros * porLitro
+  return {
+    pregunta: `¿Cuántos vasos de ${vaso} L llenan ${litros} L?`,
+    respuesta: num(r),
+    distractores: distractores(r, [litros, litros * (6 - porLitro), r + porLitro, r - porLitro, porLitro], { min: 1 }),
+  }
+}
 
 // ---------- Catálogo ----------
 
@@ -554,9 +572,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(contar|conteo|cuantos hay|cuantificar)\b/,
     niveles: [
-      { nombre: 'Hasta 5', grados: I(3, 4), generar: contar(1, 5) },
-      { nombre: 'Hasta 10', grados: [...I(5), ...P(1)], generar: contar(3, 10) },
-      { nombre: 'Hasta 20', grados: P(1, 2), generar: contar(8, 20) },
+      nivel('Hasta 5', de(C.conteo, ...I(4)), contar(1, 5)),
+      nivel('Hasta 10', de(C.conteo, ...I(5), ...P(1)), contar(3, 10)),
+      nivel('Hasta 20', de(C.conteo, ...P(1)), contar(8, 20)),
     ],
   },
   {
@@ -565,10 +583,11 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(compar\w*|mayor que|menor que|ordena\w* numeros)\b/,
     niveles: [
-      { nombre: 'Hasta 20', grados: P(1), generar: comparar(20) },
-      { nombre: 'Hasta 100', grados: P(1, 2), generar: comparar(100, 10) },
-      { nombre: 'Hasta 1000', grados: P(2, 3), generar: comparar(1000, 100) },
-      { nombre: 'Hasta 100 000', grados: P(3, 4, 5), generar: comparar(100_000, 1000) },
+      nivel('Hasta 20', de(C.comparar, ...P(1)), comparar(20)),
+      nivel('Hasta 100', de(C.comparar, ...P(2)), comparar(100, 10)),
+      nivel('Hasta 1000', de(C.comparar, ...P(3)), comparar(1000, 100)),
+      nivel('Hasta 10 000', de(C.comparar, ...P(4)), comparar(10_000, 1000)),
+      nivel('Hasta 100 000', de(C.comparar, ...P(5)), comparar(100_000, 1000)),
     ],
   },
   {
@@ -577,9 +596,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(valor posicional|decenas?|centenas?|millar\w*|descompo\w*|tablero posicional)\b/,
     niveles: [
-      { nombre: 'Decenas y unidades', grados: P(1, 2), generar: valorPosicional(2) },
-      { nombre: 'Centenas', grados: P(2, 3), generar: valorPosicional(3) },
-      { nombre: 'Millares', grados: P(3, 4), generar: valorPosicional(4) },
+      nivel('Decenas y unidades', de(C.valorPosicional, ...P(1, 2)), valorPosicional(2)),
+      nivel('Centenas', de(C.valorPosicional, ...P(3)), valorPosicional(3)),
+      nivel('Millares', de(C.valorPosicional, ...P(4)), valorPosicional(4)),
     ],
   },
   {
@@ -588,9 +607,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(redonde\w*|aproxima\w*|estima\w*)\b/,
     niveles: [
-      { nombre: 'A la decena', grados: P(3, 4), generar: redondear(10) },
-      { nombre: 'A la centena', grados: P(4, 5), generar: redondear(100) },
-      { nombre: 'Al millar', grados: P(5, 6), generar: redondear(1000) },
+      nivel('A la decena', de(C.redondeo, ...P(3, 4)), redondear(10)),
+      nivel('A la centena', de(C.redondeo, ...P(4)), redondear(100)),
+      nivel('Al millar', de(C.redondeo, ...P(4)), redondear(1000)),
     ],
   },
   {
@@ -599,9 +618,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(secuencia\w*|patron\w*|sucesion\w*|regularidad\w*|serie\w* numerica\w*)\b/,
     niveles: [
-      { nombre: 'De 2 en 2, de 5 en 5, de 10 en 10', grados: P(1, 2), generar: secuencia('saltos') },
-      { nombre: 'Sumando o restando', grados: P(2, 3, 4), generar: secuencia('sumar') },
-      { nombre: 'Multiplicando', grados: P(4, 5, 6), generar: secuencia('multiplicar') },
+      nivel('De 2 en 2, de 5 en 5, de 10 en 10', de(C.patrones, ...P(1, 2)), secuencia('saltos')),
+      nivel('Sumando o restando', de(C.patrones, ...P(2, 3, 4)), secuencia('sumar')),
+      nivel('Multiplicando', de(C.patrones, ...P(4, 6)), secuencia('multiplicar')),
     ],
   },
   {
@@ -610,11 +629,12 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(suma\w*|adicion\w*|agregar|juntar)\b/,
     niveles: [
-      { nombre: 'Hasta 10', grados: [...I(5), ...P(1)], generar: sumar(1, 9, 10) },
-      { nombre: 'Hasta 20', grados: P(1, 2), generar: sumar(3, 15, 20) },
-      { nombre: 'Hasta 100', grados: P(2, 3), generar: sumar(11, 85, 99) },
-      { nombre: 'Hasta 1000', grados: P(3, 4), generar: sumar(100, 850, 999) },
-      { nombre: 'Hasta 10 000', grados: P(4, 5, 6), generar: sumar(1000, 8500, 9999) },
+      nivel('Hasta 5', de(C.sumarRestar, ...I(5)), sumar(1, 4, 5)),
+      nivel('Hasta 10', de(C.sumarRestar, ...P(1)), sumar(1, 9, 10)),
+      nivel('Hasta 20', de(C.sumarRestar, ...P(1, 2)), sumar(3, 15, 20)),
+      nivel('Hasta 100', de(C.sumarRestar, ...P(2, 3)), sumar(11, 85, 99)),
+      nivel('Hasta 1000', de(C.sumarRestar, ...P(3, 4)), sumar(100, 850, 999)),
+      nivel('Hasta 10 000', de(C.sumarRestar, ...P(4, 5, 6)), sumar(1000, 8500, 9999)),
     ],
   },
   {
@@ -623,11 +643,12 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(resta\w*|sustraccion\w*|quitar)\b/,
     niveles: [
-      { nombre: 'Hasta 10', grados: [...I(5), ...P(1)], generar: restar(3, 10) },
-      { nombre: 'Hasta 20', grados: P(1, 2), generar: restar(11, 20) },
-      { nombre: 'Hasta 100', grados: P(2, 3), generar: restar(30, 99) },
-      { nombre: 'Hasta 1000', grados: P(3, 4), generar: restar(200, 999) },
-      { nombre: 'Hasta 10 000', grados: P(4, 5, 6), generar: restar(2000, 9999) },
+      nivel('Hasta 5', de(C.sumarRestar, ...I(5)), restar(2, 5)),
+      nivel('Hasta 10', de(C.sumarRestar, ...P(1)), restar(3, 10)),
+      nivel('Hasta 20', de(C.sumarRestar, ...P(1, 2)), restar(11, 20)),
+      nivel('Hasta 100', de(C.sumarRestar, ...P(2, 3)), restar(30, 99)),
+      nivel('Hasta 1000', de(C.sumarRestar, ...P(3, 4)), restar(200, 999)),
+      nivel('Hasta 10 000', de(C.sumarRestar, ...P(4, 5, 6)), restar(2000, 9999)),
     ],
   },
   {
@@ -636,10 +657,10 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(multiplica\w*|tablas?|producto\w*|veces)\b/,
     niveles: [
-      ...[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ nombre: `Del ${n}`, grados: n <= 5 || n === 10 ? P(2, 3) : P(3, 4), generar: tabla([n]) })),
-      { nombre: 'Del 2 al 5', grados: P(2, 3), generar: tabla([2, 3, 4, 5]) },
-      { nombre: 'Del 6 al 9', grados: P(3, 4), generar: tabla([6, 7, 8, 9]) },
-      { nombre: 'Todas', grados: P(4, 5, 6), generar: tabla([2, 3, 4, 5, 6, 7, 8, 9, 10]) },
+      ...[2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => nivel(`Del ${n}`, de(C.multiplicarDividir, ...P(3, 4)), tabla([n]))),
+      nivel('Del 2 al 5', de(C.multiplicarDividir, ...P(3)), tabla([2, 3, 4, 5])),
+      nivel('Del 6 al 9', de(C.multiplicarDividir, ...P(3, 4)), tabla([6, 7, 8, 9])),
+      nivel('Todas', de(C.multiplicarDividir, ...P(4, 5, 6)), tabla([2, 3, 4, 5, 6, 7, 8, 9, 10])),
     ],
   },
   {
@@ -648,9 +669,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(divisi\w*|dividir|divide\w*|reparto\w*|repartir|cociente\w*)\b/,
     niveles: [
-      { nombre: 'Entre 2, 3, 4 y 5', grados: P(3), generar: dividir([2, 3, 4, 5]) },
-      { nombre: 'Entre 6, 7, 8 y 9', grados: P(3, 4), generar: dividir([6, 7, 8, 9]) },
-      { nombre: 'Todas', grados: P(4, 5, 6), generar: dividir([2, 3, 4, 5, 6, 7, 8, 9]) },
+      nivel('Entre 2, 3, 4 y 5', de(C.multiplicarDividir, ...P(3)), dividir([2, 3, 4, 5])),
+      nivel('Entre 6, 7, 8 y 9', de(C.multiplicarDividir, ...P(3, 4)), dividir([6, 7, 8, 9])),
+      nivel('Todas', de(C.multiplicarDividir, ...P(4, 5, 6)), dividir([2, 3, 4, 5, 6, 7, 8, 9])),
     ],
   },
   {
@@ -659,9 +680,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(dobles?|mitad\w*|triples?)\b/,
     niveles: [
-      { nombre: 'Dobles hasta 10', grados: P(1, 2), generar: doblesMitades('dobles', 10) },
-      { nombre: 'Mitades hasta 20', grados: P(1, 2), generar: doblesMitades('mitades', 20) },
-      { nombre: 'Dobles y mitades hasta 100', grados: P(2, 3), generar: doblesMitades('ambos', 50) },
+      nivel('Dobles hasta 10', de(C.doblesMitades, ...P(1, 2)), doblesMitades('dobles', 10)),
+      nivel('Mitades hasta 20', de(C.doblesMitades, ...P(2)), doblesMitades('mitades', 20)),
+      nivel('Dobles y mitades hasta 100', de(C.doblesMitades, ...P(2, 3, 4)), doblesMitades('ambos', 50)),
     ],
   },
   {
@@ -670,8 +691,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(operaciones combinadas|jerarquia|signos de agrupacion)\b/,
     niveles: [
-      { nombre: 'Sin paréntesis', grados: P(5, 6), generar: combinadas(false) },
-      { nombre: 'Con paréntesis', grados: [...P(6), ...S(1)], generar: combinadas(true) },
+      nivel('Sin paréntesis', de(C.combinadas, ...P(5, 6)), combinadas(false)),
+      nivel('Con paréntesis', de(C.combinadas, ...P(6), ...S(1)), combinadas(true)),
     ],
   },
   {
@@ -680,9 +701,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Fracciones',
     claves: /\bfraccion\w*\b/,
     niveles: [
-      { nombre: 'Medios, tercios y cuartos', grados: P(2, 3), generar: fraccionPintada([2, 3, 4]) },
-      { nombre: 'Hasta octavos', grados: P(3, 4), generar: fraccionPintada([2, 3, 4, 5, 6, 8]) },
-      { nombre: 'Hasta doceavos', grados: P(5, 6), generar: fraccionPintada([5, 6, 7, 8, 9, 10, 12]) },
+      nivel('Medios, tercios y cuartos', de(C.fraccionParteTodo, ...P(4)), fraccionPintada([2, 3, 4])),
+      nivel('Hasta octavos', de(C.fraccionParteTodo, ...P(4)), fraccionPintada([2, 3, 4, 5, 6, 8])),
+      nivel('Hasta doceavos', de(C.fraccionParteTodo, ...P(5, 6)), fraccionPintada([5, 6, 7, 8, 9, 10, 12])),
     ],
   },
   {
@@ -691,8 +712,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Fracciones',
     claves: /\b(equivalen\w*|amplifica\w*|simplifica\w*|valen lo mismo|valer lo mismo)\b/,
     niveles: [
-      { nombre: 'Medios, tercios y cuartos', grados: P(3, 4), generar: equivalentes([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]]) },
-      { nombre: 'Cualquier fracción', grados: P(4, 5, 6), generar: equivalentes(null) },
+      nivel('Medios, tercios y cuartos', de(C.fraccionesEquivalentes, ...P(4)), equivalentes([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4]])),
+      nivel('Cualquier fracción', de(C.fraccionesEquivalentes, ...P(4, 5, 6)), equivalentes(null)),
     ],
   },
   {
@@ -701,8 +722,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Fracciones',
     claves: /\b(fraccion de (un|una)|parte de una cantidad|fraccion de una coleccion)\b/,
     niveles: [
-      { nombre: 'Mitad, tercio y cuarto', grados: P(3, 4), generar: fraccionDe(true) },
-      { nombre: 'Cualquier fracción', grados: P(5, 6), generar: fraccionDe(false) },
+      nivel('Mitad, tercio y cuarto', de(C.fraccionOperador, ...P(4)), fraccionDe(true)),
+      nivel('Cualquier fracción', de(C.fraccionOperador, ...P(5, 6)), fraccionDe(false)),
     ],
   },
   {
@@ -711,8 +732,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Fracciones',
     claves: /\b((suma\w*|resta\w*|adicion\w*|sustraccion\w*|operaciones) (de|con) fracciones|fracciones homogeneas|fracciones heterogeneas)\b/,
     niveles: [
-      { nombre: 'Igual denominador', grados: P(4, 5), generar: operarFracciones(true) },
-      { nombre: 'Distinto denominador', grados: [...P(6), ...S(1)], generar: operarFracciones(false) },
+      nivel('Igual denominador', de(C.operarFracciones, ...P(4, 5)), operarFracciones(true)),
+      nivel('Distinto denominador', de(C.operarFracciones, ...P(5, 6), ...S(1)), operarFracciones(false)),
     ],
   },
   {
@@ -721,9 +742,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Decimales y porcentajes',
     claves: /\bdecimal\w*\b/,
     niveles: [
-      { nombre: 'Sumar décimos', grados: P(4, 5), generar: sumarDecimos },
-      { nombre: 'Sumar con centésimos', grados: P(5, 6), generar: sumarCentesimos },
-      { nombre: 'Por 10, 100 y 1000', grados: [...P(5, 6), ...S(1)], generar: porPotenciaDe10 },
+      nivel('Sumar décimos', de(C.decimales, ...P(5, 6)), sumarDecimos),
+      nivel('Sumar con centésimos', de(C.decimales, ...P(6)), sumarCentesimos),
+      nivel('Por 10, 100 y 1000', de(C.decimales, ...P(6), ...S(1)), porPotenciaDe10),
     ],
   },
   {
@@ -732,8 +753,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Decimales y porcentajes',
     claves: /\b(porcentaje\w*|por ciento|tanto por ciento)\b/,
     niveles: [
-      { nombre: '50 %, 25 % y 10 %', grados: [...P(6), ...S(1)], generar: porcentaje(true) },
-      { nombre: 'Cualquier porcentaje', grados: S(1, 2, 3), generar: porcentaje(false) },
+      nivel('50 %, 25 % y 10 %', de(C.porcentajes, ...P(6), ...S(1)), porcentaje(true)),
+      nivel('Cualquier porcentaje', de(C.porcentajes, ...S(1, 2)), porcentaje(false)),
     ],
   },
   {
@@ -742,8 +763,8 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Álgebra y enteros',
     claves: /\b(potencia\w*|exponente\w*|al cuadrado|al cubo|potenciacion)\b/,
     niveles: [
-      { nombre: 'Cuadrados', grados: P(5, 6), generar: potencia(true) },
-      { nombre: 'Cualquier exponente', grados: [...P(6), ...S(1, 2)], generar: potencia(false) },
+      nivel('Cuadrados', de(C.potencias, ...P(6)), potencia(true)),
+      nivel('Cualquier exponente', de(C.potencias, ...S(1, 2)), potencia(false)),
     ],
   },
   {
@@ -751,7 +772,7 @@ export const HABILIDADES: Habilidad[] = [
     nombre: 'Raíz cuadrada',
     grupo: 'Álgebra y enteros',
     claves: /\b(raiz|raices|radicacion)\b/,
-    niveles: [{ nombre: 'Exactas hasta 225', grados: [...P(6), ...S(1, 2)], generar: raiz }],
+    niveles: [nivel('Exactas hasta 225', de(C.raices, ...S(1, 2)), raiz)],
   },
   {
     id: 'ecuaciones',
@@ -759,9 +780,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Álgebra y enteros',
     claves: /\b(ecuacion\w*|incognita\w*|valor desconocido|igualdad\w*)\b/,
     niveles: [
-      { nombre: 'x + a = b', grados: P(5, 6), generar: ecuacion('suma') },
-      { nombre: 'ax = b', grados: [...P(6), ...S(1)], generar: ecuacion('producto') },
-      { nombre: 'ax + b = c', grados: S(1, 2, 3), generar: ecuacion('dos-pasos') },
+      nivel('x + a = b', de(C.ecuaciones, ...P(4, 5, 6)), ecuacion('suma')),
+      nivel('ax = b', de(C.ecuaciones, ...P(6), ...S(1)), ecuacion('producto')),
+      nivel('ax + b = c', de(C.ecuaciones, ...S(1, 2)), ecuacion('dos-pasos')),
     ],
   },
   {
@@ -770,9 +791,9 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Álgebra y enteros',
     claves: /\b(numeros enteros|negativ\w*|enteros negativos)\b/,
     niveles: [
-      { nombre: 'Sumar', grados: S(1), generar: enteros('sumar') },
-      { nombre: 'Sumar y restar', grados: S(1, 2), generar: enteros('sumar-restar') },
-      { nombre: 'Multiplicar y dividir', grados: S(1, 2), generar: enteros('multiplicar') },
+      nivel('Sumar', de(C.enteros, ...S(1)), enteros('sumar')),
+      nivel('Sumar y restar', de(C.enteros, ...S(1, 2)), enteros('sumar-restar')),
+      nivel('Multiplicar y dividir', de(C.enteros, ...S(1, 2)), enteros('multiplicar')),
     ],
   },
   {
@@ -781,10 +802,10 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Medidas',
     claves: /\b(medida\w*|longitud\w*|metros?|centimetros?|masa|kilogramos?|gramos?|capacidad|litros?|mililitros?|horas?|minutos?)\b/,
     niveles: [
-      { nombre: 'Horas y minutos', grados: P(3, 4), generar: convertir('tiempo') },
-      { nombre: 'Metros y centímetros', grados: P(3, 4), generar: convertir('longitud') },
-      { nombre: 'Kilos y gramos', grados: P(4, 5), generar: convertir('masa') },
-      { nombre: 'Litros y mililitros', grados: P(4, 5), generar: convertir('capacidad') },
+      nivel('Metros y centímetros', de(C.longitud, ...P(3, 4, 5, 6)), convertir('longitud')),
+      nivel('Horas y minutos', de(C.tiempo, ...P(4, 5, 6)), convertir('tiempo')),
+      nivel('Kilos y gramos', de(C.masa, ...P(4, 5, 6)), convertir('masa')),
+      nivel('Medio y cuarto de litro', de(C.capacidad, ...P(4, 5)), llenar),
     ],
   },
 ]
@@ -794,6 +815,9 @@ export const GRUPOS_HABILIDAD: GrupoHabilidad[] = ['Números', 'Operaciones', 'F
 export const habilidadPorId = (id: string) => HABILIDADES.find((h) => h.id === id)
 
 const ORDEN_GRADOS = [...I(3, 4, 5), ...P(1, 2, 3, 4, 5, 6), ...S(1, 2, 3, 4, 5)]
+
+/** Posición del grado de inicial a secundaria (−1 si no se conoce). */
+export const indiceGrado = (gradoId: string) => ORDEN_GRADOS.indexOf(gradoId)
 
 /** El nivel que se suele trabajar en ese grado: el más avanzado de los que lo incluyen, o el más cercano. */
 export function nivelPara(h: Habilidad, gradoId: string): number {

@@ -1,10 +1,10 @@
 // Globos: suben globos con respuestas y hay que reventar el correcto antes de que se escape.
 // Inspirado en los "balloon pop" de matemática. Sirve para cualquier reto con respuestas cortas.
 import { useEffect, useId, useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { fuenteDeRetos, opcionesDe } from '../contenido'
+import { fuenteDeRetos, largo, opcionesDe } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTemporizadores } from '../motor/bucle'
-import { Enunciado, Flotante, PALETA, TextoMat, Vidas, elogio } from '../motor/piezas'
+import { Enunciado, Flotante, PALETA, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -24,13 +24,6 @@ type Globo = {
 }
 
 type Efecto = { id: number; x: number; y: number; color: string; texto?: string }
-
-function tamTexto(t: string) {
-  const n = [...t].length
-  // Una fracción ocupa dos renglones: se achica para que quepa en el globo.
-  const fraccion = t.includes('/') ? 0.78 : 1
-  return fraccion * (n <= 2 ? 1 : n <= 4 ? 0.82 : n <= 6 ? 0.64 : n <= 9 ? 0.5 : 0.42)
-}
 
 export function DibujoGlobo({ color, gradiente }: { color: string; gradiente: string }) {
   return (
@@ -115,9 +108,12 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
   const [efectos, setEfectos] = useState<Efecto[]>([])
   const [terminado, setTerminado] = useState(false)
   const bloqueado = useRef(false)
+  const cabecera = useRef<HTMLDivElement>(null)
 
   function lanzar(r: Reto, aciertosAhora: number) {
-    const opciones = opcionesDe(r, opcionesPorReto, azar)
+    let opciones = opcionesDe(r, opcionesPorReto, azar)
+    // En un celular, cuatro globos con palabras largas no dejan letra legible: salen tres, más anchos.
+    if (opciones.length > 3 && (escena.current?.clientWidth ?? ancho) < 560 && Math.max(...opciones.map(largo)) > 7) opciones = opcionesDe(r, 3, azar)
     const carriles = barajar(azar, opciones.map((_, i) => i))
     const vel = velocidadBase * (1 + aciertosAhora * 0.04)
     const colores = barajar(azar, PALETA.map((_, i) => i))
@@ -181,6 +177,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
               estrellas: vidas,
               titulo: '¡Reventaste todos!',
               detalle: vidas === VIDAS ? `${meta} respuestas correctas sin ningún error.` : `${meta} respuestas correctas y ${VIDAS - vidas} ${VIDAS - vidas === 1 ? 'error' : 'errores'}.`,
+              puntaje: meta * 100 + vidas * 100,
             }),
           900,
         )
@@ -204,6 +201,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
             estrellas: aciertos >= meta / 2 ? 1 : 0,
             titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
             detalle: `Reventaste ${aciertos} de ${meta}. La respuesta era ${reto?.respuesta}. ¡Otra vez!`,
+            puntaje: aciertos * 100,
           }),
         1000,
       )
@@ -214,11 +212,13 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
     tiempo.current += dt
     if (!ancho || !alto) return
     let salieron = false
+    // Debajo de la pregunta no se puede tocar un globo: llega hasta ahí, se desvanece y vuelve a salir por abajo.
+    const techo = cabecera.current ? (cabecera.current.offsetTop + cabecera.current.offsetHeight) / alto + 0.06 : 0
     for (const g of globos.current) {
       if (g.estado === 'vuela') {
         g.y -= g.vel * dt
         // Al escaparse por arriba vuelve a salir por abajo: la respuesta siempre está en juego.
-        if (g.y < -0.22) {
+        if (g.y < techo) {
           g.y = 1.2 + azar() * 0.1
           g.x = Math.min(0.9, Math.max(0.1, g.x + (azar() - 0.5) * 0.1))
         }
@@ -234,6 +234,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
       const vaiven = Math.sin(tiempo.current * 1.4 + g.fase) * 0.012
       el.style.transform = `translate3d(${(g.x + vaiven) * ancho}px, ${g.y * alto}px, 0) translate(-50%, -38%) rotate(${vaiven * 140}deg)`
       if (g.estado === 'escapa') el.style.opacity = String(Math.max(0, Math.min(1, (g.y + 0.3) * 2)))
+      else if (g.estado === 'vuela') el.style.opacity = String(Math.max(0, Math.min(1, (g.y - techo) / 0.1)))
     }
     if (salieron) {
       globos.current = globos.current.filter((g) => g.estado !== 'fuera')
@@ -258,6 +259,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
 
       {globos.current.map((g) => {
         const p = PALETA[g.color]
+        const ronda = globos.current.filter((o) => o.estado !== 'escapa' && o.estado !== 'fuera').map((o) => o.texto)
         return (
           <button
             key={g.id}
@@ -269,16 +271,16 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
             onClick={(e) => e.detail === 0 && tocar(g)}
             disabled={g.estado !== 'vuela'}
             aria-label={g.texto}
-            className="absolute left-0 top-0 z-10 aspect-[100/150] w-[clamp(78px,19cqmin,150px)] will-change-transform"
-            style={{ transform: 'translate3d(-200px, -200px, 0)' }}
+            className="absolute left-0 top-0 z-10 aspect-[100/150] w-[var(--ancho)] will-change-transform"
+            style={{ transform: 'translate3d(-200px, -200px, 0)', '--ancho': ronda.length <= 3 ? 'clamp(96px, 26cqmin, 170px)' : 'clamp(84px, 21cqmin, 150px)' } as CSSProperties}
           >
             <span className={`absolute inset-0 ${g.estado === 'revienta' ? 'reventar' : ''} ${g.estado === 'mal' ? 'temblar grayscale' : ''}`}>
               <DibujoGlobo color={p.c} gradiente={`${prefijo}-g${g.color}`} />
               <span
-                className="absolute inset-x-[6%] top-[8%] grid h-[62%] place-items-center text-center font-bold leading-none"
+                className="absolute inset-x-[5%] top-[8%] grid h-[62%] place-items-center text-center font-bold leading-[1.05]"
                 style={{
                   color: p.t,
-                  fontSize: `max(17px, calc(clamp(28px, 7cqmin, 56px) * ${tamTexto(g.texto)}))`,
+                  fontSize: letraOpciones(ronda, 'calc(var(--ancho) * 0.9)', 'clamp(28px, 7cqmin, 56px)', 18),
                   textShadow: p.t === '#ffffff' ? '0 2px 0 rgb(40 20 90 / 0.35)' : undefined,
                 }}
               >
@@ -311,7 +313,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
       <Colinas />
 
       {/* Lo que hay que buscar */}
-      <div className="absolute inset-x-0 top-0 z-30 flex flex-col items-center gap-[1.5cqmin] px-[3cqmin] pt-[2.2cqmin]">
+      <div ref={cabecera} className="absolute inset-x-0 top-0 z-30 flex flex-col items-center gap-[1.5cqmin] px-[3cqmin] pt-[2.2cqmin]">
         <div className="flex w-full items-center gap-[1.5cqmin] pr-[17cqmin]">
           <span className="rounded-full bg-white/85 px-[1.4cqmin] py-[0.6cqmin] shadow-sm">
             <Vidas quedan={vidas} total={VIDAS} />
@@ -322,7 +324,7 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
         </div>
         {reto && (
           <div key={aciertos} className="tarjeta-juego entrar px-[3.5cqmin] py-[1.6cqmin]" style={{ maxWidth: 'min(86cqw, 720px)' }}>
-            <Enunciado reto={reto} tam="clamp(22px, 6cqmin, 52px)" />
+            <Enunciado reto={reto} tam="clamp(26px, 6cqmin, 52px)" />
           </div>
         )}
       </div>

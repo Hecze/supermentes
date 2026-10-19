@@ -86,6 +86,26 @@ export async function contarLista(): Promise<number | null> {
   }
 }
 
+// WhatsApp de Supermentes (el de Harold por ahora). Como ACET: el profe escribe con el mensaje ya armado.
+const WHATSAPP = '51997542849'
+const PEDIDO = 'Hola, vengo de supermentes.app y quiero el juego de mi tema.\nGrado: \nCurso: \nTema: '
+export const enlacePedido = () => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(PEDIDO)}`
+
+/** Botón "Pídeme el juego de tu tema": abre WhatsApp con el pedido ya escrito. */
+export function PedirPorWhatsapp({ className }: { className?: string }) {
+  return (
+    <a
+      href={enlacePedido()}
+      target="_blank"
+      rel="noreferrer"
+      className={cx('inline-flex h-12 items-center justify-center gap-2 rounded-xl px-5 font-semibold text-on-tool hover:opacity-90', className)}
+      style={{ background: 'var(--juego)' }}
+    >
+      <MessageCircle className="size-5" aria-hidden /> Pídeme el juego de tu tema por WhatsApp
+    </a>
+  )
+}
+
 const enlaceDe = (codigo: string) => `${window.location.origin}/?ref=${codigo}`
 
 // ---------- Formularios ----------
@@ -165,6 +185,9 @@ export function FormularioCorreo({ origen, alUnirse }: { origen: Origen; alUnirs
           {error}
         </p>
       )}
+      <a href={enlacePedido()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink hover:underline">
+        <MessageCircle className="size-4" aria-hidden /> ¿Prefieres WhatsApp? Pídeme el juego de tu tema
+      </a>
     </form>
   )
 }
@@ -200,7 +223,13 @@ export function FormularioCompleto({ origen, alUnirse }: { origen: Origen; alUni
           ))}
         </select>
       </label>
-      <label htmlFor="lista-colegio" className="flex flex-col gap-1.5 sm:col-span-2">
+      <label htmlFor="lista-celular" className="flex flex-col gap-1.5">
+        <span className="text-sm font-medium">
+          Tu WhatsApp <span className="font-normal text-ink-soft">(te mandamos tu juego ahí)</span>
+        </span>
+        <input id="lista-celular" name="celular" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="987 654 321" className={campo} />
+      </label>
+      <label htmlFor="lista-colegio" className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">
           Colegio <span className="font-normal text-ink-soft">(opcional)</span>
         </span>
@@ -216,7 +245,7 @@ export function FormularioCompleto({ origen, alUnirse }: { origen: Origen; alUni
             {error}
           </p>
         )}
-        <p className="text-center text-sm text-ink-soft">Solo usamos tu correo para avisarte cuando abramos.</p>
+        <p className="text-center text-sm text-ink-soft">Solo usamos tu correo y tu WhatsApp para avisarte y mandarte tu material.</p>
       </div>
     </form>
   )
@@ -298,17 +327,27 @@ export function Bienvenida({
         </div>
       </div>
 
+      <div className="flex flex-col gap-2 rounded-xl bg-surface-2 p-4">
+        <p className="font-semibold">¿Quieres tu juego ya?</p>
+        <p className="text-sm text-ink-soft">Escríbenos tu grado, curso y tema, y te mandamos tu juego listo para la clase.</p>
+        <PedirPorWhatsapp className="self-start" />
+      </div>
+
       {!registro.perfil && (
         <form onSubmit={(e) => enviarFormulario(e, true)} className="relative flex flex-col gap-3 border-t border-line pt-4">
           <p className="font-semibold">
             Cuéntanos de ti <span className="font-normal text-ink-soft">(opcional, nos ayuda a priorizar)</span>
           </p>
           <input type="hidden" name="correo" value={registro.correo} />
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2">
             <label htmlFor="perfil-nombre" className="sr-only">
               Tu nombre
             </label>
             <input id="perfil-nombre" name="nombre" placeholder="Tu nombre" autoComplete="given-name" className={campo} />
+            <label htmlFor="perfil-celular" className="sr-only">
+              Tu WhatsApp
+            </label>
+            <input id="perfil-celular" name="celular" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="Tu WhatsApp" className={campo} />
             <label htmlFor="perfil-rol" className="sr-only">
               ¿Qué haces?
             </label>

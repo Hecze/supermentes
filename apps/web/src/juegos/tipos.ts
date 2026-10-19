@@ -18,6 +18,8 @@ export type Reto = {
   visual?: Visual
   respuesta: string
   distractores: string[]
+  /** Los distractores son otras palabras o parejas del tema, sin orden: se toman al azar en cada partida. */
+  distractoresAlAzar?: true
 }
 
 export type Lado = { texto: string; visual?: Visual }
@@ -38,6 +40,15 @@ export type Contenido = {
   generar?: (azar: () => number) => Reto
 }
 
+/** Lo que una miniatura muestra del contenido elegido, para que el dibujo se parezca al tema (ver muestraDe). */
+export type Muestra = {
+  /** Una pregunta corta y sus opciones; la correcta va en `opciones[1]`. */
+  reto?: { pregunta: string; visual?: Visual; opciones: string[] }
+  par?: Par
+  /** Palabras del tema en mayúsculas, de la más corta a la más larga. */
+  palabras: string[]
+}
+
 /** Velocidad del juego según la edad: 1 lento (inicial y 1.º–2.º), 3 rápido (5.º primaria en adelante). */
 export type Ritmo = 1 | 2 | 3
 
@@ -48,17 +59,23 @@ export type Resultado = {
   detalle: string
   /** Para guardar el récord del juego en este dispositivo. */
   puntaje?: number
+  /** Solo en una tarea: cada pregunta, lo que eligió y la correcta, para que el docente la vea revisada. */
+  respuestas?: Respuesta[]
 }
+
+export type Respuesta = { pregunta: string; elegida: string; correcta: string }
 
 export type PropsJuego = {
   contenido: Contenido
   ritmo: Ritmo
   /** Cambia en cada partida para que el orden no se repita. */
   semilla: number
+  /** Tarea para la casa (solo el Concurso): 10 preguntas, este reloj por pregunta y no se pausa. */
+  tarea?: { segundos: number }
   terminar: (r: Resultado) => void
 }
 
-export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta'
+export type JuegoId = 'globos' | 'rapido' | 'soga' | 'memoria' | 'carrera' | 'palabra' | 'pupiletras' | 'topo' | 'ruleta' | 'duelo' | 'invasion' | 'concurso' | 'verdad' | 'une' | 'condor' | 'carriles' | 'michi'
 
 /** Dónde se juega mejor: en el celular de cada alumno o proyectado para toda la clase. */
 export type Donde = 'celular' | 'clase'
@@ -68,6 +85,8 @@ export type DefinicionJuego = {
   nombre: string
   /** Una línea para el docente: de qué se trata. */
   lema: string
+  /** Qué hacen los alumnos al jugar, para el sustento curricular: "eligen la respuesta correcta entre varias…". */
+  accion: string
   /** Cómo se juega, para la portada. */
   instrucciones: string
   donde: Donde[]
@@ -75,8 +94,16 @@ export type DefinicionJuego = {
   color: string
   /** El juego viral en el que se inspira (referencia interna). */
   inspirado: string
+  /**
+   * Infantil (llamas, globos, colores) o juvenil (oscuro, neón, arcade). En 5.º y 6.º de primaria y en secundaria
+   * los juveniles aparecen primero: a los más grandes lo "de niños" los aleja.
+   */
+  estilo: 'infantil' | 'juvenil' | 'neutro'
+  /** Desde qué grado se ofrece (por ejemplo, el de terror suave no se muestra a los más chicos). */
+  desde?: string
   /** Prepara el contenido que usa el juego, o null si con este contenido no se puede jugar. */
   preparar: (c: Contenido) => Contenido | null
-  Miniatura: ComponentType
+  /** Dibujo del juego; con `muestra`, usa el contenido elegido (ver miniaturas.tsx). */
+  Miniatura: ComponentType<{ muestra?: Muestra }>
   Componente: ComponentType<PropsJuego>
 }

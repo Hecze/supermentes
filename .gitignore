@@ -6,3 +6,6 @@ dist-preview
 .DS_Store
 obsidian/.obsidian/workspace*.json
 .vercel
+.dev.vars
+.wrangler
+apps/web/public/presentacion
