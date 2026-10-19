@@ -1,7 +1,6 @@
 // Implementación de ejemplo de la API: responde con datos fijos y una pequeña espera.
 import type { Api } from './types'
 import {
-  BIBLIOTECA_EJEMPLO,
   FICHA_AGUA,
   FICHA_EJEMPLO,
   FICHA_SUSTANTIVOS,
@@ -49,10 +48,6 @@ export const mockApi: Api = {
   async generarSesion(_ficha, opciones) {
     await esperar(2500)
     return sesionEjemplo(opciones)
-  },
-  async biblioteca() {
-    await esperar(300)
-    return BIBLIOTECA_EJEMPLO
   },
   // ponytail: sin ejemplos; la sección se oculta si no hay recursos.
   async buscarRecursos() {

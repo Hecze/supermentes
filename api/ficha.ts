@@ -66,7 +66,6 @@ export async function POST(request: Request) {
       vocabulario: f.vocabulario,
       ejemplo: f.ejemplo,
       errorFrecuente: f.errorFrecuente,
-      coincidenciasBiblioteca: 0,
     })
   } catch (e) {
     return fallo(e)

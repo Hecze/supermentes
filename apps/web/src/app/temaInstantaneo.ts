@@ -29,7 +29,6 @@ export function fichaDesdeCurriculo(r: Resultado & Fundamento): Ficha {
     vocabulario: [],
     ejemplo: '',
     errorFrecuente: '',
-    coincidenciasBiblioteca: 0,
   }
 }
 

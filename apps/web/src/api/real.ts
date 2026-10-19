@@ -34,9 +34,6 @@ export const realApi: Api = {
   generarJuego: (ficha) => post('juego', { ficha }),
   // La sesión es el texto más largo que se genera: tiene un poco más de tiempo.
   generarSesion: (ficha, opciones) => post('sesion', { ficha, opciones }, 150_000),
-  async biblioteca() {
-    return pedir('biblioteca', {})
-  },
   buscarRecursos: (ficha) =>
     pedir(`recursos?${new URLSearchParams({ tema: ficha.titulo, grado: ficha.grado, area: ficha.area })}`, {}, 20_000),
 }

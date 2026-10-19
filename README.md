@@ -19,7 +19,7 @@ Proyecto para Hack the Andes 2026.
 
 `packages/curriculo/data/*.json` tiene el currículo oficial del MINEDU por nivel, grado y área (competencias, capacidades, estándares y desempeños). En la app:
 
-- **Biblioteca → Currículo nacional:** el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
+- **Currículo nacional** (primero en el menú): el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
 - **Busca tu tema:** no hay temas libres, ni fotos ni archivos: el Currículo Nacional alcanza. Es un solo buscador, como el de YouTube: mientras el docente escribe aparecen temas del currículo de su grado (y de otros grados si no está), con lo escrito en negrita. Con un clic el tema queda creado al instante, con su competencia y desempeños (`apps/web/src/components/NuevoTema.tsx`, `apps/web/src/curriculo/buscar.ts`). La IA completa después ideas clave, vocabulario y ejemplo, sin hacer esperar al docente (`apps/web/src/app/temaInstantaneo.ts`); si no responde, la ficha muestra "Reintentar".
 - **Ficha del tema y herramientas:** muestran en qué currículo se basa todo lo que se genera. El backend debe usar `gradoId` y `areaId` de la ficha para incluir esas competencias y desempeños en cada generación.
 
@@ -94,7 +94,6 @@ Cada uno devuelve el tipo indicado de `src/api/types.ts`.
 | --- | --- | --- |
 | `POST /api/ficha` | JSON `EntradaTema`: `texto` (tema del currículo), `gradoId`, `areaId`, `grado`, `area`, `competencia`, `capacidad`, `desempenos`, `duracion` | `Ficha` (la app la usa para completar la ficha en segundo plano) |
 | `POST /api/juego` | `{ ficha }` | `Juego` |
-| `GET /api/biblioteca` | | `Material[]` |
 
 ## Costos
 

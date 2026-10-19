@@ -2,24 +2,26 @@ import { useCuenta } from './app/cuenta'
 import { usePerfil } from './app/perfil'
 import { StoreProvider, useStore } from './app/store'
 import { Shell } from './components/Shell'
-import { Biblioteca } from './views/Biblioteca'
 import { Cancion } from './views/Cancion'
 import { Crucigrama } from './views/Crucigrama'
+import { CurriculoNacional } from './views/Curriculo'
 import { Examen } from './views/Examen'
 import { Ficha } from './views/Ficha'
 import { Juego } from './views/Juego'
 import { Onboarding } from './views/Onboarding'
 import { Perfil } from './views/Perfil'
+import { Recursos } from './views/Recursos'
 import { Sesion } from './views/Sesion'
 
 const VISTAS = {
   ficha: Ficha,
+  curriculo: CurriculoNacional,
   sesion: Sesion,
+  ejercicios: Examen,
   cancion: Cancion,
-  examen: Examen,
+  recursos: Recursos,
   juego: Juego,
   crucigrama: Crucigrama,
-  biblioteca: Biblioteca,
   resultados: Juego,
   perfil: Perfil,
 }

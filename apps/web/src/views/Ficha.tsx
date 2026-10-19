@@ -1,9 +1,8 @@
-import { BookMarked, Check, ChevronRight, Library, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { BookMarked, Check, ChevronRight, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { SinTema } from '../components/Shell'
 import { Desplegable, Editable, tinte } from '../components/ui'
-import { RecursosDelTema } from './RecursosDelTema'
 
 export function Ficha() {
   const { ficha, ir, resultados, verCurriculo, completando, completarFicha } = useStore()
@@ -12,7 +11,7 @@ export function Ficha() {
 
   const listos: Partial<Record<string, boolean>> = {
     sesion: !!resultados.sesion,
-    examen: !!resultados.hojas,
+    ejercicios: !!resultados.hojas,
     juego: !!resultados.juego,
     crucigrama: !!resultados.crucigrama?.filas.some((f) => f.palabra.trim().length > 1),
   }
@@ -80,16 +79,6 @@ export function Ficha() {
           })}
         </div>
       </section>
-
-      <RecursosDelTema ficha={ficha} />
-
-      {ficha.coincidenciasBiblioteca > 0 && (
-        <button type="button" onClick={() => ir('biblioteca')} className="flex items-center gap-2 self-start rounded-lg text-ink-soft hover:text-ink">
-          <Library className="size-5" aria-hidden />
-          Otros profes ya hicieron {ficha.coincidenciasBiblioteca} materiales de este tema. Usarlos es gratis.
-          <ChevronRight className="size-4" aria-hidden />
-        </button>
-      )}
 
       {/* El tema se crea al instante; la IA completa esto en segundo plano (app/temaInstantaneo.ts). */}
       {completando[ficha.id] === 'cargando' && (

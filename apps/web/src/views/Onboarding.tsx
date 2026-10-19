@@ -167,7 +167,7 @@ export function Onboarding() {
                   {t.area}
                 </span>
                 <span className="font-display text-xl font-bold leading-tight">{t.tema}</span>
-                <span className="mt-auto text-sm text-ink-soft">{tieneBanco(t.gradoId, t.areaId) ? 'Juego · canción · examen ✓' : 'Listo en segundos'}</span>
+                <span className="mt-auto text-sm text-ink-soft">{tieneBanco(t.gradoId, t.areaId) ? 'Juegos · ejercicios ✓' : 'Listo en segundos'}</span>
               </button>
             ))}
           </div>

@@ -1,7 +1,7 @@
 // Contratos de datos entre la UI y el backend.
 // Los datos de ejemplo (mock.ts) y el backend real (real.ts) devuelven exactamente estos tipos.
 
-export type HerramientaId = 'sesion' | 'cancion' | 'examen' | 'juego' | 'crucigrama'
+export type HerramientaId = 'sesion' | 'cancion' | 'ejercicios' | 'juego' | 'crucigrama'
 
 /** El tema elegido en el Currículo Nacional: con esto la IA completa la ficha (ideas clave, vocabulario…). */
 export type EntradaTema = {
@@ -48,7 +48,6 @@ export type Ficha = {
   vocabulario: { palabra: string; definicion: string }[]
   ejemplo: string
   errorFrecuente: string
-  coincidenciasBiblioteca: number
 }
 
 export type Carta = { texto: string; fraccion?: Fraccion }
@@ -103,18 +102,6 @@ export type Sesion = {
   ficha: { titulo: string; actividades: { consigna: string; lineas: number }[] }
 }
 
-export type Material = {
-  id: string
-  titulo: string
-  tipo: HerramientaId
-  grado: string
-  area: string
-  autor: string
-  lugar: string
-  usos: number
-  esMio?: boolean
-}
-
 /** Un video o una ficha que ya existe en internet para el tema (api/recursos.ts, buscado con Exa). */
 export type Recurso = {
   tipo: 'video' | 'ficha'
@@ -129,7 +116,6 @@ export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
   generarJuego(ficha: Ficha): Promise<Juego>
   generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
-  biblioteca(): Promise<Material[]>
   /** Videos y fichas de internet para el tema. */
   buscarRecursos(ficha: Ficha): Promise<Recurso[]>
 }

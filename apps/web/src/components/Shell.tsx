@@ -1,10 +1,10 @@
-import { CircleAlert, CircleCheck, Info, Library, LoaderCircle, Menu, Moon, Search, Sun, UserRound, X } from 'lucide-react'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { BookMarked, CircleAlert, CircleCheck, Info, Library, LoaderCircle, Menu, Moon, Search, Sun, UserRound, X, type LucideProps } from 'lucide-react'
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
 import { useEnsenanza, usePerfil } from '../app/perfil'
-import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
+import { HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
 import { temaPorDefecto } from '../app/temaInstantaneo'
 import { nombreCursos, nombreGrados } from '../curriculo/catalogo'
@@ -52,25 +52,34 @@ function Docente() {
   )
 }
 
-const HERRAMIENTAS_LATERAL = ORDEN_HERRAMIENTAS.filter((h) => h !== 'crucigrama')
+type Seccion = { vista: Vista; nombre: string; icono: ComponentType<LucideProps>; color: string }
+const herramienta = (id: HerramientaId): Seccion => ({ vista: id, ...HERRAMIENTAS[id] })
 
-function ItemHerramienta({ id }: { id: HerramientaId }) {
+/** El menú, en este orden. Juego web y crucigrama no van aquí: se abren desde la ficha del tema. */
+const MENU: Seccion[] = [
+  { vista: 'curriculo', nombre: 'Currículo nacional', icono: BookMarked, color: 'var(--ink)' },
+  herramienta('sesion'),
+  herramienta('ejercicios'),
+  herramienta('cancion'),
+  { vista: 'recursos', nombre: 'Más recursos', icono: Library, color: 'var(--ink)' },
+]
+
+function ItemMenu({ s }: { s: Seccion }) {
   const { ir, vista } = useStore()
-  const h = HERRAMIENTAS[id]
-  const Icono = h.icono
-  const activo = vista === id || (id === 'juego' && vista === 'resultados')
+  const Icono = s.icono
+  const activo = vista === s.vista
   return (
     <button
       type="button"
-      onClick={() => ir(id)}
+      onClick={() => ir(s.vista)}
       aria-current={activo ? 'page' : undefined}
       className={cx(
         'flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm transition',
         activo ? 'bg-surface-2 font-semibold text-ink' : 'text-ink-soft hover:bg-surface-2 hover:text-ink',
       )}
     >
-      <Icono className="size-4 shrink-0" style={{ color: h.color }} aria-hidden />
-      <span className="truncate">{h.nombre}</span>
+      <Icono className="size-4 shrink-0" style={{ color: s.color }} aria-hidden />
+      <span className="truncate">{s.nombre}</span>
     </button>
   )
 }
@@ -107,15 +116,12 @@ function ContenidoLateral() {
 
       <nav className="flex flex-col gap-1" aria-label="Herramientas">
         <p className="px-3 pb-1 text-xs font-bold tracking-wider text-ink-soft">HERRAMIENTAS</p>
-        {HERRAMIENTAS_LATERAL.map((id) => (
-          <ItemHerramienta key={id} id={id} />
+        {MENU.map((s) => (
+          <ItemMenu key={s.vista} s={s} />
         ))}
       </nav>
 
       <nav className="flex flex-col gap-1 border-t border-line pt-4" aria-label="Más">
-        <ItemNav vista="biblioteca" icono={<Library className="size-5" />}>
-          Biblioteca
-        </ItemNav>
         <ItemNav vista="perfil" icono={<UserRound className="size-5" />}>
           <span className="flex min-w-0 flex-col">
             Mi perfil
@@ -292,6 +298,21 @@ export function EncabezadoHerramienta({ id, accion }: { id: HerramientaId; accio
         )}
       </div>
       {accion && <div className="flex shrink-0 flex-wrap items-center gap-2">{accion}</div>}
+    </header>
+  )
+}
+
+/** Encabezado de las secciones que no son una herramienta del tema (Currículo nacional, Más recursos). */
+export function EncabezadoSeccion({ icono: Icono, titulo, children }: { icono: ComponentType<LucideProps>; titulo: string; children?: ReactNode }) {
+  return (
+    <header className="flex flex-wrap items-center gap-x-4 gap-y-3 print:hidden">
+      <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-surface-2">
+        <Icono className="size-7" aria-hidden />
+      </span>
+      <div className="min-w-0 flex-1 basis-64">
+        <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">{titulo}</h1>
+        {children && <p className="text-ink-soft">{children}</p>}
+      </div>
     </header>
   )
 }
