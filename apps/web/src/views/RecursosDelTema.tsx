@@ -1,6 +1,6 @@
 // Videos y fichas que ya existen en internet para el tema (api/recursos.ts, buscados con Exa).
 // No traen cita del currículo: se presentan como material para revisar, no como material verificado.
-import { ExternalLink, FileText, LoaderCircle, Play, TriangleAlert } from 'lucide-react'
+import { ExternalLink, FileText, Play, TriangleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api, type Ficha, type Recurso } from '../api'
 
@@ -20,7 +20,8 @@ export function RecursosDelTema({ ficha }: { ficha: Ficha }) {
     }
   }, [ficha.titulo, ficha.grado, ficha.area, intento]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (Array.isArray(recursos) && recursos.length === 0) return null
+  // Solo aparece cuando trae videos o fichas: mientras busca no se muestra nada, para que nada aparezca y se vaya.
+  if (recursos === 'cargando' || (Array.isArray(recursos) && recursos.length === 0)) return null
 
   return (
     <section className="flex flex-col gap-4">
@@ -28,12 +29,6 @@ export function RecursosDelTema({ ficha }: { ficha: Ficha }) {
         <h2 className="font-display text-2xl font-bold sm:text-3xl">Videos y fichas de tu tema</h2>
         <p className="text-ink-soft">Los encontramos en internet para {ficha.grado}. Míralos antes de usarlos en clase.</p>
       </div>
-      {recursos === 'cargando' && (
-        <p className="flex items-center gap-2 text-ink-soft" role="status">
-          <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden />
-          Buscando videos y fichas de «{ficha.titulo}»…
-        </p>
-      )}
       {recursos === 'error' && (
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-soft" role="status">
           <TriangleAlert className="size-4 shrink-0 text-warn" aria-hidden />
