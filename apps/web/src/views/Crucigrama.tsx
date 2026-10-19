@@ -4,6 +4,7 @@ import { mejorCrucigrama, normalizar } from '../lib/crucigrama'
 import { imagenCrucigrama } from '../lib/imagenCrucigrama'
 import { useStore, type FilaCrucigrama } from '../app/store'
 import { useBanco } from '../banco/banco'
+import { Membrete } from '../components/Membrete'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
 import { BarraHoja, Boton, Chip, Hoja, descargar, imprimir, tinte } from '../components/ui'
 
@@ -239,6 +240,7 @@ export function Crucigrama() {
 
               <Hoja>
                 <header className="flex flex-col gap-1">
+                  <Membrete tema={ficha} />
                   <h2 className="font-display text-2xl font-bold sm:text-3xl">Crucigrama: {ficha.titulo.split(':')[0]}</h2>
                   <p className="text-ink-soft">Nombre: ______________________ · {ficha.grado}</p>
                 </header>

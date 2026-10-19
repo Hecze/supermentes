@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { MODO_EJEMPLO, type HerramientaId } from '../api'
 import { DOCENTE } from '../api/ejemplos'
 import { useCuenta } from '../app/cuenta'
+import { rotuloColegio } from '../app/documento'
 import { useColegios, useEnsenanza, usePerfil } from '../app/perfil'
 import { HERRAMIENTAS, ORDEN_HERRAMIENTAS } from '../app/herramientas'
 import { useStore, type Vista } from '../app/store'
@@ -31,11 +32,12 @@ function BotonTema() {
 function Docente() {
   const { entro, nombre, salir } = useCuenta()
   const { perfil } = usePerfil()
+  const [colegio] = useColegios()
   if (!entro) {
     return (
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold">{perfil?.nombre ?? `Prof. ${DOCENTE.nombre}`}</p>
-        <p className="truncate text-xs text-ink-soft">{perfil ? perfil.colegio : DOCENTE.colegio}</p>
+        <p className="truncate text-xs text-ink-soft">{perfil ? rotuloColegio(colegio) : DOCENTE.colegio}</p>
       </div>
     )
   }
@@ -43,7 +45,7 @@ function Docente() {
     <div className="flex items-center justify-between gap-2">
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold">{perfil?.nombre ?? nombre ?? ''}</p>
-        {perfil?.colegio && <p className="truncate text-xs text-ink-soft">{perfil.colegio}</p>}
+        {rotuloColegio(colegio) && <p className="truncate text-xs text-ink-soft">{rotuloColegio(colegio)}</p>}
       </div>
       <button type="button" onClick={salir} className="text-xs text-ink-soft underline-offset-4 hover:underline">
         Salir

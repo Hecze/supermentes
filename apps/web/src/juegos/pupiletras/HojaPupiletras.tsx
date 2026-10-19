@@ -1,12 +1,24 @@
 // El pupiletras en una hoja para imprimir: grilla, palabras y sus pistas. En pantalla no se ve.
 import { useMemo } from 'react'
 import { normalizar } from '../../lib/crucigrama'
+import { Membrete } from '../../components/Membrete'
 import { Hoja } from '../../components/ui'
 import { crearAzar } from '../motor/azar'
 import type { Palabra } from '../tipos'
 import { armarSopa, direcciones } from './sopa'
 
-export function HojaPupiletras({ titulo, grado, palabras }: { titulo: string; grado: string; palabras: Palabra[] }) {
+export function HojaPupiletras({
+  titulo,
+  grado,
+  palabras,
+  tema,
+}: {
+  titulo: string
+  grado: string
+  palabras: Palabra[]
+  /** Grado y curso del tema: con eso sale el colegio del membrete. */
+  tema?: { gradoId: string; areaId: string }
+}) {
   const { letras, lista } = useMemo(() => {
     const vistas = new Set<string>()
     const elegidas = palabras.filter((p) => {
@@ -23,6 +35,7 @@ export function HojaPupiletras({ titulo, grado, palabras }: { titulo: string; gr
   return (
     <Hoja className="hidden print:flex">
       <header className="flex flex-col gap-1">
+        <Membrete tema={tema ?? null} />
         <h2 className="font-display text-3xl font-bold">Pupiletras: {titulo}</h2>
         <p className="text-ink-soft">
           {grado} · Nombre: ______________________________

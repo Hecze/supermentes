@@ -6,6 +6,7 @@
 import { BadgeCheck, CircleCheck, Columns2, Dices, Download, Eye, FileStack, Minus, Pin, Plus, Printer, RefreshCw, RotateCcw, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { Ficha } from '../api'
+import { medirImagen } from '../app/documento'
 import { useStore } from '../app/store'
 import { BarraHoja, Boton, Desplegable, Hoja, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
 import { normalizar } from '../curriculo/buscar'
@@ -477,6 +478,7 @@ function VistaHoja({
       <Hoja className="gap-6">
         <header className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-4">
+            {colegio.logo && <img src={colegio.logo} alt="" className="size-16 shrink-0 object-contain" />}
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <Campo valor={colegio.colegio} cambiar={(x) => cambiarColegio({ colegio: x })} placeholder="Nombre del colegio" className="text-lg font-semibold" />
               <p className="flex flex-wrap items-center gap-x-1.5 text-lg text-ink-soft">
@@ -675,7 +677,7 @@ function Chip({ children, quitar }: { children: string; quitar?: () => void }) {
 /** Las hojas del tema abierto: examen, práctica y balotario, con sus temas, sus preguntas y sus dos PDF. */
 export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
   const { resultados, guardar, avisar } = useStore()
-  const [colegio, cambiarColegio] = useColegio()
+  const [colegio, cambiarColegio] = useColegio(ficha)
   const [clase, setClase] = useState<Clase>(resultados.hojaAbierta ?? 'examen')
   const [hojas, setHojas] = useState<Partial<Record<Clase, ConfigHoja>>>(() => resultados.hojas ?? {})
   const [fila, setFila] = useState(0)
@@ -728,6 +730,7 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
           grado: colegio.seccion || ficha.grado,
           colegio: colegio.colegio,
           docente: colegio.docente,
+          logo: colegio.logo ? await medirImagen(colegio.logo) : null,
           temas: config.temas.map((t) => ({ tema: t, teoria: fuentes.get(t)?.problemas?.teoria ?? null })),
           subtitulos: config.temas.length > 1,
           versiones,

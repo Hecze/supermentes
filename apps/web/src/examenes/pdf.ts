@@ -83,6 +83,8 @@ export type DatosPdf = {
   grado: string
   colegio: string
   docente: string
+  /** El logo del colegio (de "Mi perfil"), con su tamaño para no deformarlo. */
+  logo?: { url: string; ancho: number; alto: number } | null
   temas: { tema: string; teoria: Teoria | null }[]
   /** Con subtítulo por tema: en la miscelánea. */
   subtitulos: boolean
@@ -153,12 +155,25 @@ function campo(doc: JsPDF, texto: string, x: number, y: number, largo: number) {
   return x0 + largo
 }
 
-/** El encabezado: el colegio, el curso, el grado y el docente; la nota (en el examen), el título y el nombre. */
+/** El encabezado: el logo, el colegio, el curso, el grado y el docente; la nota (en el examen), el título y el nombre. */
 function encabezado(c: Ctx, d: DatosPdf, v: Version, clave: boolean) {
   const { doc } = c
   const y0 = c.y
   const conNota = d.clase === 'examen' && !clave
-  const ancho = conNota ? W - 28 : W - 40
+  // El logo va a la izquierda, de 16 mm de alto (sin pasar 24 mm de ancho); el texto, a su derecha.
+  const logo = d.logo && (() => {
+    const h = Math.min(16, (24 * d.logo.alto) / d.logo.ancho)
+    return { ...d.logo, w: (h * d.logo.ancho) / d.logo.alto, h }
+  })()
+  const x = logo ? MARGEN + logo.w + 4 : MARGEN
+  const ancho = (conNota ? W - 28 : W - 40) - (logo ? logo.w + 4 : 0)
+  if (logo) {
+    try {
+      doc.addImage(logo.url, logo.url.startsWith('data:image/jpeg') ? 'JPEG' : 'PNG', MARGEN, y0, logo.w, logo.h)
+    } catch {
+      // Un logo que no se puede leer no impide bajar la hoja.
+    }
+  }
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(90)
@@ -172,11 +187,12 @@ function encabezado(c: Ctx, d: DatosPdf, v: Version, clave: boolean) {
   }
   doc.setTextColor(0)
   if (d.colegio.trim()) {
-    escribir(c, lineas(doc, d.colegio, 12.5, ancho, 'bold'), 12.5, MARGEN, 'bold')
+    escribir(c, lineas(doc, d.colegio, 12.5, ancho, 'bold'), 12.5, x, 'bold')
   }
   doc.setTextColor(70)
-  escribir(c, lineas(doc, [d.curso, d.grado, d.docente.trim() && `Docente: ${d.docente.trim()}`].filter(Boolean).join(' · '), 10.5, ancho), 10.5)
+  escribir(c, lineas(doc, [d.curso, d.grado, d.docente.trim() && `Docente: ${d.docente.trim()}`].filter(Boolean).join(' · '), 10.5, ancho), 10.5, x)
   doc.setTextColor(0)
+  if (logo) c.y = Math.max(c.y, y0 + logo.h)
   c.y += 2
   escribir(c, lineas(doc, clave ? `Clave: ${d.titulo}` : d.titulo, 18, ancho, 'bold'), 18, MARGEN, 'bold')
   c.y += 2
