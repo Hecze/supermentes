@@ -75,6 +75,50 @@ export function cursosDe(grados: string[]): AreaCatalogo[] {
     .filter((a) => !vistos.has(a.id) && vistos.add(a.id))
 }
 
+export type TipoColegio = 'publico' | 'privado'
+
+/**
+ * Cursos de los colegios privados, que parten un área del currículo (Matemática en Álgebra, Geometría…). No son del
+ * currículo: cada uno apunta a su área y, cuando la tiene, a la competencia oficial que trabaja (comienzo de su nombre
+ * tal cual en packages/curriculo). Así sus temas siguen saliendo del Currículo Nacional.
+ */
+export type CursoPrivado = { id: string; nombre: string; areas: string[]; competencia?: string; niveles: Nivel[] }
+
+const AMBOS: Nivel[] = ['primaria', 'secundaria']
+const SOCIALES = ['personal-social', 'ciencias-sociales']
+
+export const CURSOS_PRIVADOS: CursoPrivado[] = [
+  { id: 'aritmetica', nombre: 'Aritmética', areas: ['matematica'], competencia: 'Resuelve problemas de cantidad', niveles: AMBOS },
+  { id: 'algebra', nombre: 'Álgebra', areas: ['matematica'], competencia: 'Resuelve problemas de regularidad, equivalencia y cambio', niveles: AMBOS },
+  { id: 'geometria', nombre: 'Geometría', areas: ['matematica'], competencia: 'Resuelve problemas de forma, movimiento y localización', niveles: AMBOS },
+  { id: 'trigonometria', nombre: 'Trigonometría', areas: ['matematica'], competencia: 'Resuelve problemas de forma, movimiento y localización', niveles: ['secundaria'] },
+  { id: 'estadistica', nombre: 'Estadística', areas: ['matematica'], competencia: 'Resuelve problemas de gestión de datos e incertidumbre', niveles: AMBOS },
+  { id: 'razonamiento-matematico', nombre: 'Razonamiento matemático', areas: ['matematica'], niveles: AMBOS },
+  { id: 'lenguaje', nombre: 'Lenguaje', areas: ['comunicacion'], competencia: 'Escribe diversos tipos de textos', niveles: AMBOS },
+  { id: 'literatura', nombre: 'Literatura', areas: ['comunicacion'], competencia: 'Lee diversos tipos de textos', niveles: AMBOS },
+  { id: 'razonamiento-verbal', nombre: 'Razonamiento verbal', areas: ['comunicacion'], competencia: 'Lee diversos tipos de textos', niveles: AMBOS },
+  { id: 'fisica', nombre: 'Física', areas: ['ciencia-y-tecnologia'], competencia: 'Explica el mundo físico', niveles: ['secundaria'] },
+  { id: 'quimica', nombre: 'Química', areas: ['ciencia-y-tecnologia'], competencia: 'Explica el mundo físico', niveles: ['secundaria'] },
+  { id: 'biologia', nombre: 'Biología', areas: ['ciencia-y-tecnologia'], competencia: 'Explica el mundo físico', niveles: ['secundaria'] },
+  { id: 'historia', nombre: 'Historia', areas: SOCIALES, competencia: 'Construye interpretaciones históricas', niveles: AMBOS },
+  { id: 'geografia', nombre: 'Geografía', areas: SOCIALES, competencia: 'Gestiona responsablemente el espacio y el ambiente', niveles: AMBOS },
+  { id: 'economia', nombre: 'Economía', areas: SOCIALES, competencia: 'Gestiona responsablemente los recursos económicos', niveles: AMBOS },
+]
+
+/** Los cursos de colegio privado de un área, para los niveles de esos grados. */
+export function cursosPrivadosDe(areaId: string, grados: string[]): CursoPrivado[] {
+  const niveles = new Set(grados.map(nivelDe))
+  return CURSOS_PRIVADOS.filter((c) => c.areas.includes(areaId) && c.niveles.some((n) => niveles.has(n)))
+}
+
+/** Un curso, del currículo (área) o de colegio privado: a qué áreas apunta y, si es de una competencia, cuál. */
+export function cursoPorId(id: string): { nombre: string; areas: string[]; competencia?: string } | null {
+  const privado = CURSOS_PRIVADOS.find((c) => c.id === id)
+  if (privado) return privado
+  const area = cursosDe(['primaria-1', 'secundaria-1']).find((a) => a.id === id)
+  return area ? { nombre: area.nombre, areas: [area.id] } : null
+}
+
 /** "a", "a y b", "a, b y c". */
 export const enLista = (xs: string[]) => (xs.length < 2 ? (xs[0] ?? '') : `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`)
 
@@ -93,6 +137,6 @@ export function nombreGrados(ids: string[]): string {
 /** "Todos los cursos", "Matemática", "Matemática y Comunicación", "3 cursos". */
 export function nombreCursos(ids: string[]): string {
   if (!ids.length) return 'Todos los cursos'
-  const nombres = ids.map((id) => cursosDe(['primaria-1', 'secundaria-1']).find((a) => a.id === id)?.nombre ?? id)
+  const nombres = ids.map((id) => cursoPorId(id)?.nombre ?? id)
   return nombres.length > 2 ? `${nombres.length} cursos` : enLista(nombres)
 }

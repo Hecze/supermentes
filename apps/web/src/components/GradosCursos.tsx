@@ -1,8 +1,9 @@
 // Elegir grados y cursos: en "Mi perfil", en el onboarding y como filtro del buscador de temas.
 // Lo común se hace con un clic: "Toda primaria" (la docente de aula) o un curso en varios grados (secundaria).
+// En un colegio privado aparecen además sus cursos propios (Álgebra, Geometría…), cada uno dentro de su área.
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { GRADOS_DOCENTE, NIVELES_DOCENTE, cursosDe, nombreCursos, nombreGrados } from '../curriculo/catalogo'
+import { GRADOS_DOCENTE, NIVELES_DOCENTE, cursosDe, cursosPrivadosDe, nombreCursos, nombreGrados, type TipoColegio } from '../curriculo/catalogo'
 import { cx } from './ui'
 
 function Opcion({ activo, onClick, children, ancho }: { activo: boolean; onClick: () => void; children: ReactNode; ancho?: boolean }) {
@@ -12,7 +13,7 @@ function Opcion({ activo, onClick, children, ancho }: { activo: boolean; onClick
       onClick={onClick}
       aria-pressed={activo}
       className={cx(
-        'inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border-2 font-semibold transition',
+        'inline-flex h-11 cursor-pointer items-center justify-center gap-1.5 rounded-xl border-2 font-semibold transition',
         ancho ? 'px-4' : 'px-3',
         activo ? 'border-primary bg-primary text-primary-ink' : 'border-line bg-surface text-ink hover:border-ink-soft',
       )}
@@ -58,26 +59,80 @@ export function ElegirGrados({ valor, onChange }: { valor: string[]; onChange: (
   )
 }
 
-/** "Todos los cursos" o los que elija; los cursos que se ofrecen son los de los niveles de sus grados. */
-export function ElegirCursos({ grados, valor, onChange }: { grados: string[]; valor: string[]; onChange: (cursos: string[]) => void }) {
-  const cursos = cursosDe(grados)
+/** Público o privado: en un privado los cursos se parten (Álgebra, Geometría…). */
+export function ElegirTipo({ valor, onChange }: { valor: TipoColegio; onChange: (tipo: TipoColegio) => void }) {
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Cursos">
-      <Opcion ancho activo={!valor.length} onClick={() => onChange([])}>
-        Todos los cursos
-      </Opcion>
-      {cursos.map((a) => {
-        const activo = valor.includes(a.id)
-        return (
-          <Opcion
-            key={a.id}
-            activo={activo}
-            onClick={() => onChange(activo ? valor.filter((id) => id !== a.id) : cursos.filter((c) => c.id === a.id || valor.includes(c.id)).map((c) => c.id))}
-          >
-            {a.nombre}
-          </Opcion>
-        )
-      })}
+    <div className="inline-flex rounded-xl border-2 border-line bg-surface p-1" role="group" aria-label="Tipo de colegio">
+      {(
+        [
+          ['publico', 'Público'],
+          ['privado', 'Privado'],
+        ] as const
+      ).map(([id, nombre]) => (
+        <button
+          key={id}
+          type="button"
+          onClick={() => onChange(id)}
+          aria-pressed={valor === id}
+          className={cx(
+            'h-9 cursor-pointer rounded-lg px-4 font-semibold transition',
+            valor === id ? 'bg-primary text-primary-ink' : 'text-ink-soft hover:text-ink',
+          )}
+        >
+          {nombre}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * "Todos los cursos" o los que elija, de los niveles de sus grados. En un privado, las áreas que se parten van en su
+ * propia fila con sus cursos (Matemática: Aritmética, Álgebra…).
+ */
+export function ElegirCursos({
+  grados,
+  valor,
+  onChange,
+  tipo = 'publico',
+}: {
+  grados: string[]
+  valor: string[]
+  onChange: (cursos: string[]) => void
+  tipo?: TipoColegio
+}) {
+  const areas = cursosDe(grados)
+  const filas = areas.map((a) => ({ area: a, propios: tipo === 'privado' ? cursosPrivadosDe(a.id, grados) : [] }))
+  const orden = filas.flatMap((f) => [f.area, ...f.propios]).map((c) => c.id)
+  const alternar = (id: string) => onChange(valor.includes(id) ? valor.filter((x) => x !== id) : orden.filter((x) => x === id || valor.includes(x)))
+  const chip = (c: { id: string; nombre: string }) => (
+    <Opcion key={c.id} activo={valor.includes(c.id)} onClick={() => alternar(c.id)}>
+      {c.nombre}
+    </Opcion>
+  )
+  const partidas = filas.filter((f) => f.propios.length)
+  const enteras = filas.filter((f) => !f.propios.length)
+
+  return (
+    <div className="flex flex-col gap-3" role="group" aria-label="Cursos">
+      <div className="flex flex-wrap gap-2">
+        <Opcion ancho activo={!valor.length} onClick={() => onChange([])}>
+          Todos los cursos
+        </Opcion>
+        {!partidas.length && enteras.map((f) => chip(f.area))}
+      </div>
+      {partidas.map((f) => (
+        <div key={f.area.id} className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-ink-soft">{f.area.nombre}</p>
+          <div className="flex flex-wrap gap-2">{[f.area, ...f.propios].map(chip)}</div>
+        </div>
+      ))}
+      {partidas.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-sm font-semibold text-ink-soft">Otros cursos</p>
+          <div className="flex flex-wrap gap-2">{enteras.map((f) => chip(f.area))}</div>
+        </div>
+      )}
     </div>
   )
 }
@@ -112,7 +167,7 @@ function Filtro({ etiqueta, resumen, children }: { etiqueta: string; resumen: st
         onClick={() => setAbierto(!abierto)}
         aria-expanded={abierto}
         className={cx(
-          'flex h-11 max-w-full items-center gap-2 rounded-xl border-2 px-3 text-left transition',
+          'flex h-11 max-w-full cursor-pointer items-center gap-2 rounded-xl border-2 px-3 text-left transition',
           abierto ? 'border-ink' : 'border-line hover:border-ink-soft',
         )}
       >
@@ -121,10 +176,10 @@ function Filtro({ etiqueta, resumen, children }: { etiqueta: string; resumen: st
         <ChevronDown className={cx('size-4 shrink-0 text-ink-soft transition', abierto && 'rotate-180')} aria-hidden />
       </button>
       {abierto && (
-        <div className="absolute left-0 z-50 mt-2 w-[min(37rem,calc(100vw-2.5rem))] rounded-2xl border border-line bg-surface p-4 shadow-xl">
+        <div className="absolute left-0 z-50 mt-2 max-h-[65dvh] w-[min(37rem,calc(100vw-2.5rem))] overflow-y-auto rounded-2xl border border-line bg-surface p-4 shadow-xl">
           {children}
           <div className="mt-4 flex justify-end">
-            <button type="button" onClick={() => setAbierto(false)} className="h-10 rounded-xl bg-primary px-4 font-semibold text-primary-ink hover:opacity-90">
+            <button type="button" onClick={() => setAbierto(false)} className="h-10 cursor-pointer rounded-xl bg-primary px-4 font-semibold text-primary-ink hover:opacity-90">
               Listo
             </button>
           </div>
@@ -142,10 +197,10 @@ export function FiltroGrados({ valor, onChange }: { valor: string[]; onChange: (
   )
 }
 
-export function FiltroCursos({ grados, valor, onChange }: { grados: string[]; valor: string[]; onChange: (cursos: string[]) => void }) {
+export function FiltroCursos({ grados, valor, onChange, tipo }: { grados: string[]; valor: string[]; onChange: (cursos: string[]) => void; tipo?: TipoColegio }) {
   return (
     <Filtro etiqueta="Cursos" resumen={nombreCursos(valor)}>
-      <ElegirCursos grados={grados} valor={valor} onChange={onChange} />
+      <ElegirCursos grados={grados} valor={valor} onChange={onChange} tipo={tipo} />
     </Filtro>
   )
 }

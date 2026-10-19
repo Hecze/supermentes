@@ -256,3 +256,14 @@ h3 {
     padding: 0;
   }
 }
+
+/* Todo lo que se puede tocar muestra la manito (Tailwind 4 ya no la pone en los botones). */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select,
+  summary,
+  label:has(> input[type="checkbox"], > input[type="radio"]) {
+    cursor: pointer;
+  }
+}

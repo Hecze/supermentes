@@ -1,9 +1,9 @@
 import { Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { ensenanzaGuardada, ensenanzaValida } from '../app/perfil'
+import { colegioActivo, colegiosGuardados, elegirColegioActivo, ensenanzaGuardada, ensenanzaValida } from '../app/perfil'
 import { useStore, type Vista } from '../app/store'
 import { fichaDeResultado } from '../app/temaInstantaneo'
-import { buscarEnGrado, buscarEnTodos, normalizar, sugerenciasPara, type Resultado } from '../curriculo/buscar'
+import { buscarEnGrado, buscarEnTodos, esDelCurso, normalizar, sugerenciasPara, type Resultado } from '../curriculo/buscar'
 import { GRADOS_DOCENTE, areaPorId, nivelDe, nombreCursos, nombreGrados, type Nivel } from '../curriculo/catalogo'
 import { cargarNivel, type GradoCurriculo } from '../curriculo/cargar'
 import { FiltroCursos, FiltroGrados } from './GradosCursos'
@@ -58,8 +58,8 @@ function Resaltado({ texto, q }: { texto: string; q: string }) {
 /**
  * Buscar un tema: un solo buscador, como el de YouTube. Mientras se escribe aparecen temas del Currículo Nacional
  * y con un clic el tema queda creado. No hay que esperar a la IA: la ficha se completa después (temaInstantaneo.ts).
- * Busca en los grados y cursos de "Mi perfil"; los filtros son para los imprevistos (suplir a otro profe) y no
- * cambian el perfil.
+ * Busca en los grados y cursos de su colegio (de "Mi perfil"; si enseña en varios, elige el colegio con un clic). Los
+ * filtros son para los imprevistos (suplir a otro profe) y no cambian el perfil.
  */
 export function NuevoTema() {
   const { nuevoTemaAbierto, previoTema, cerrarNuevoTema, setFicha, completarFicha, ir } = useStore()
@@ -70,9 +70,24 @@ export function NuevoTema() {
   const [activo, setActivo] = useState(0)
   const [otros, setOtros] = useState<Resultado[]>([])
 
+  const [colegios, setColegios] = useState(colegiosGuardados)
+  const [colegio, setColegio] = useState<number | null>(colegioActivo)
+
   const grados = useGrados(filtro.grados)
-  const enFiltro = (r: Resultado) => filtro.grados.includes(r.gradoId) && (!filtro.cursos.length || filtro.cursos.includes(r.areaId))
+  const porId = Object.fromEntries((grados ?? []).map((g) => [g.id, g]))
+  const enFiltro = (r: Resultado) =>
+    filtro.grados.includes(r.gradoId) && (!filtro.cursos.length || filtro.cursos.some((c) => esDelCurso(porId[r.gradoId], r, c)))
   const variosGrados = filtro.grados.length > 1
+  // Los cursos propios de un privado se ofrecen si el colegio es privado (o, filtrando a mano, si tiene alguno privado).
+  const tipo = (colegio !== null ? colegios[colegio]?.tipo : colegios.some((c) => c.tipo === 'privado') ? 'privado' : 'publico') ?? 'publico'
+
+  function usarColegio(i: number) {
+    const c = colegios[i]
+    if (!c) return
+    setColegio(i)
+    setFiltro({ grados: c.grados, cursos: c.cursos })
+    elegirColegioActivo(i)
+  }
 
   async function crear(r: Resultado, destino: Vista = 'ficha') {
     const nueva = await fichaDeResultado(r)
@@ -100,10 +115,13 @@ export function NuevoTema() {
       return
     }
     if (nuevoTemaAbierto && !d.open) {
-      // Cada vez abre con lo que enseña; si viene de otro grado (p. ej. del currículo), con ese grado.
+      // Cada vez abre con lo que enseña en su colegio; si viene de otro grado (p. ej. del currículo), con ese grado.
       const perfil = ensenanzaGuardada()
       const g = previoTema?.gradoId
-      setFiltro(g && !perfil.grados.includes(g) ? (ensenanzaValida({ grados: [g], cursos: [] }) ?? perfil) : perfil)
+      const otroGrado = g && !perfil.grados.includes(g) ? ensenanzaValida({ grados: [g], cursos: [] }) : null
+      setColegios(colegiosGuardados())
+      setColegio(otroGrado ? null : colegioActivo())
+      setFiltro(otroGrado ?? perfil)
       setQ('')
       setActivo(0)
       d.showModal()
@@ -114,7 +132,10 @@ export function NuevoTema() {
   }, [nuevoTemaAbierto, previoTema])
 
   const propios = useMemo(
-    () => (grados && q.trim() ? grados.flatMap((g) => buscarEnGrado(g, NOMBRES[g.id] ?? g.id, q)).filter(enFiltro) : []),
+    () =>
+      grados && q.trim()
+        ? grados.flatMap((g) => buscarEnGrado(g, NOMBRES[g.id] ?? g.id, q).filter((r) => !filtro.cursos.length || filtro.cursos.some((c) => esDelCurso(g, r, c))))
+        : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [grados, filtro, q],
   )
@@ -150,8 +171,8 @@ export function NuevoTema() {
 
   useEffect(() => setActivo(0), [q, filtro])
 
-  const perfil = ensenanzaGuardada()
-  const esPerfil = perfil.grados.join() === filtro.grados.join() && perfil.cursos.join() === filtro.cursos.join()
+  const perfil = colegio !== null ? colegios[colegio] : undefined
+  const esPerfil = !!perfil && perfil.grados.join() === filtro.grados.join() && perfil.cursos.join() === filtro.cursos.join()
 
   function teclas(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
@@ -204,9 +225,43 @@ export function NuevoTema() {
           />
         </label>
 
+        {colegios.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Colegio">
+            {colegios.map((c, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => usarColegio(i)}
+                aria-pressed={colegio === i}
+                className={cx(
+                  'h-10 max-w-full cursor-pointer truncate rounded-full border-2 px-4 text-sm font-semibold transition',
+                  colegio === i ? 'border-primary bg-primary text-primary-ink' : 'border-line bg-surface hover:border-ink-soft',
+                )}
+              >
+                {c.nombre || `Colegio ${i + 1}`}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-2">
-          <FiltroGrados valor={filtro.grados} onChange={(g) => g.length && setFiltro(ensenanzaValida({ grados: g, cursos: filtro.cursos }) ?? filtro)} />
-          <FiltroCursos grados={filtro.grados} valor={filtro.cursos} onChange={(c) => setFiltro({ ...filtro, cursos: c })} />
+          <FiltroGrados
+            valor={filtro.grados}
+            onChange={(g) => {
+              if (!g.length) return
+              setColegio(null)
+              setFiltro(ensenanzaValida({ grados: g, cursos: filtro.cursos }) ?? filtro)
+            }}
+          />
+          <FiltroCursos
+            grados={filtro.grados}
+            tipo={tipo}
+            valor={filtro.cursos}
+            onChange={(c) => {
+              setColegio(null)
+              setFiltro({ ...filtro, cursos: c })
+            }}
+          />
           {esPerfil ? (
             <button
               type="button"
@@ -214,12 +269,12 @@ export function NuevoTema() {
                 cerrarNuevoTema()
                 ir('perfil')
               }}
-              className="px-1 text-sm text-ink-soft underline-offset-4 hover:text-ink hover:underline"
+              className="cursor-pointer px-1 text-sm text-ink-soft underline-offset-4 hover:text-ink hover:underline"
             >
               Cambiar en Mi perfil
             </button>
           ) : (
-            <button type="button" onClick={() => setFiltro(perfil)} className="px-1 text-sm font-semibold underline-offset-4 hover:underline">
+            <button type="button" onClick={() => usarColegio(colegioActivo())} className="cursor-pointer px-1 text-sm font-semibold underline-offset-4 hover:underline">
               Volver a lo que enseño
             </button>
           )}

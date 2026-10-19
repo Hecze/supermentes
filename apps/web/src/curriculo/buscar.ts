@@ -1,4 +1,4 @@
-import { NIVELES } from './catalogo'
+import { NIVELES, cursoPorId } from './catalogo'
 import { cargarNivel, type AreaCurriculo, type GradoCurriculo } from './cargar'
 
 // Búsqueda de temas dentro del currículo: el docente solo elige temas que el currículo respalda.
@@ -104,6 +104,27 @@ export function buscarEnGrado(grado: GradoCurriculo, nombreGrado: string, q: str
 /** Cursos con los que se empieza cuando la docente enseña "todos los cursos". */
 const PRINCIPALES = ['matematica', 'comunicacion', 'ciencia-y-tecnologia', 'personal-social', 'ciencias-sociales']
 
+/** El área del grado que cubre el curso y, si el curso es de una competencia (curso de colegio privado), su índice. */
+export function areaDelCurso(grado: GradoCurriculo, cursoId: string): { area: AreaCurriculo; competencia?: number } | null {
+  const c = cursoPorId(cursoId)
+  const area = c && grado.areas.find((a) => c.areas.includes(a.id))
+  if (!c || !area) return null
+  if (!c.competencia) return { area }
+  const i = area.competencias.findIndex((x) => x.nombre.startsWith(c.competencia!))
+  return i < 0 ? null : { area, competencia: i }
+}
+
+/** ¿El resultado es de ese curso? Para un curso de colegio privado, además, de su competencia. */
+export function esDelCurso(grado: GradoCurriculo | undefined, r: Resultado, cursoId: string): boolean {
+  const c = cursoPorId(cursoId)
+  if (!c?.areas.includes(r.areaId)) return false
+  if (!c.competencia || !grado) return true
+  const d = areaDelCurso(grado, cursoId)
+  if (!d || d.area.id !== r.areaId) return false
+  const i = r.indiceCompetencia ?? (r.cita ? d.area.competencias.findIndex((x) => x.desempenos.includes(r.cita!)) : -1)
+  return i === d.competencia
+}
+
 /**
  * Sin escribir nada: los primeros temas de cada grado y curso que enseña, turnándose (un tema de cada uno y luego
  * el siguiente), para empezar con un clic. Con "todos los cursos" se usan los principales del nivel.
@@ -111,15 +132,19 @@ const PRINCIPALES = ['matematica', 'comunicacion', 'ciencia-y-tecnologia', 'pers
 export function sugerenciasPara(grados: GradoCurriculo[], cursos: string[], nombres: Record<string, string>, maximo = 8): Resultado[] {
   const pares = grados.flatMap((g) =>
     (cursos.length ? cursos : PRINCIPALES)
-      .map((id) => g.areas.find((a) => a.id === id))
-      .filter((a): a is AreaCurriculo => !!a)
-      .map((a) => ({ g, a, temas: temasDe(a) })),
+      .map((id) => areaDelCurso(g, id))
+      .filter((x): x is NonNullable<typeof x> => !!x)
+      .map(({ area: a, competencia }) => ({ g, a, temas: temasDe(a).filter((t) => competencia === undefined || t.indiceCompetencia === competencia) })),
   )
   const res: Resultado[] = []
+  const vistos = new Set<string>()
   for (let i = 0; res.length < maximo && pares.some((p) => p.temas[i]); i++)
     for (const { g, a, temas } of pares) {
       const t = temas[i]
-      if (t && res.length < maximo) res.push({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: g.id, grado: nombres[g.id] ?? g.id, areaId: a.id, area: a.nombre })
+      const k = `${g.id}|${a.id}|${t?.tema}`
+      if (!t || res.length >= maximo || vistos.has(k)) continue
+      vistos.add(k)
+      res.push({ tema: t.tema, indiceCompetencia: t.indiceCompetencia, gradoId: g.id, grado: nombres[g.id] ?? g.id, areaId: a.id, area: a.nombre })
     }
   return res
 }
