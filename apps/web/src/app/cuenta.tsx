@@ -9,7 +9,7 @@ import { Entrar } from '../views/Entrar'
 
 const CLAVE_CLERK = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
 const CLAVE_SIN_CUENTA = 'supermentes-sin-cuenta'
-// Los pasos de Clerk (vuelta de Google, código del correo…) viven bajo /app/…; cloudflare/worker.ts sirve la app ahí.
+// Los pasos de Clerk (vuelta de Google, código del correo…) viven bajo /app/…; vercel.json sirve la app ahí.
 const callbackUrl = () => `${location.origin}/app/sso-callback`
 const enPasoDeClerk = () => /^\/app\/[\w-]+/.test(location.pathname)
 

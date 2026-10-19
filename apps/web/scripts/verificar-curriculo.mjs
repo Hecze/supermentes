@@ -1,5 +1,5 @@
 // Comprueba que cada práctica de cálculo, cada canción y cada tema del banco cite, letra por letra, un desempeño oficial
-// del grado donde se ofrece, y que en los grados con banco cada tema tenga al menos 2 juegos y 2 canciones.
+// del grado donde se ofrece, y que en los grados con banco cada tema tenga al menos 2 juegos.
 // También que cada tema de esos grados tenga examen listo y que sus versiones al azar no salgan rotas.
 // Ver src/juegos/matematica/verificar.ts, src/banco/verificar.ts y src/examenes/verificar.ts. Falla (código 1) si algo no cuadra.
 import { fileURLToPath } from 'node:url'
@@ -30,7 +30,7 @@ try {
     console.error(`✗ Banco de contenido: ${banco.errores.length} problemas:\n- ${banco.errores.slice(0, 40).join('\n- ')}${banco.errores.length > 40 ? '\n…' : ''}`)
     process.exitCode = 1
   } else if (banco.grados.length) {
-    console.log(`✓ Banco (${banco.grados.join(', ')}): ${banco.citas} citas tal cual; los ${banco.temas} temas tienen al menos ${MINIMO} juegos y ${MINIMO} canciones.`)
+    console.log(`✓ Banco (${banco.grados.join(', ')}): ${banco.citas} citas tal cual; los ${banco.temas} temas tienen al menos ${MINIMO} juegos.`)
   }
   const { verificarExamenes } = await vite.ssrLoadModule('/src/examenes/verificar.ts')
   const examenes = verificarExamenes()

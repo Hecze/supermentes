@@ -16,7 +16,7 @@ actualizado: 2026-10-19
 ## Cómo crear el canal
 
 1. **Cuenta de Google del proyecto**, no personal, con verificación en 2 pasos (mejor un correo de supermentes.app).
-2. youtube.com → **Crear un canal** → con nombre personalizado «Supermentes». Así queda como *cuenta de marca*: en Configuración → Permisos se agrega a Harold y al equipo como administradores, sin compartir la contraseña.
+2. youtube.com → **Crear un canal** → con nombre personalizado «Supermentes». Así queda como *cuenta de marca*: en Configuración → Permisos se agrega al equipo como administradores, sin compartir la contraseña.
 3. **Verificar el canal por teléfono** (youtube.com/verify): permite videos de más de 15 min, miniaturas propias y subir más videos por día.
 4. Configuración → Canal → Configuración avanzada → Público: **«Sí, es contenido creado para niños»**. YouTube lo exige para música infantil (ley COPPA). Efectos: sin comentarios ni campanita, anuncios solo "contextuales"; el video se puede insertar en la app igual.
 5. Identificador **@supermentes**, foto, banner y descripción con el enlace a supermentes.app.
@@ -48,8 +48,6 @@ Una **página oculta «Canal»**. Que la URL sea secreta no basta: solo entran l
    - Al terminar, guarda el vínculo tema ↔ video con su cita verificada contra `packages/curriculo`.
 4. Un video puede servir a varios temas y grados (por ejemplo, una canción de multiplicar sirve en 3.º y 4.º), cada uno con su propia cita.
 
-Es una pantalla nueva: **primero el mockup en pen.dev y que Harold lo apruebe** (regla de CLAUDE.md).
-
 **Límites de la API de YouTube** (documentación oficial, consultada el 19-oct):
 
 | Operación | Costo |
@@ -80,7 +78,7 @@ Reglas del diseño:
 
 ## La fábrica: producir miles de canciones
 
-- Ya hay **768 letras** (2 por tema de 4.º, en `apps/web/src/banco`), con la cita del desempeño y su ritmo.
+- La app solo muestra canciones que ya están en YouTube. Las **768 letras** que se generaron para 4.º (2 por tema, con cita y ritmo) se quitaron del banco el 19-oct; si sirven para la fábrica, están en git: `git show 4fe872e:apps/web/src/banco/primaria-4/<área>.json`, campo `canciones`.
 - Un script interno, no la app, hace el recorrido completo: letra → Lyria (canción completa) → video con la letra (ffmpeg: fondo y letra que avanza) → subida por la API ya vinculada a su tema.
 - **Costo único:** unos US$ 0,08 por canción completa (Lyria 3 Pro vía OpenRouter, precio del 17-oct).
   - 4.º primaria (768 canciones): unos US$ 61.
@@ -104,10 +102,10 @@ Reglas del diseño:
 
 ## Fases
 
-0. **Ya (19-oct):** la app deja de crear canciones. Se van «Crear canción», la música con IA y los endpoints `/api/cancion` y `/api/audio`. Quedan las letras del banco (para cantar e imprimir) y las canciones que ya existen en YouTube.
+0. **Ya (19-oct):** la app deja de crear canciones. Se van «Crear canción», la música con IA y los endpoints `/api/cancion` y `/api/audio`. Después, también las letras del banco: **solo se muestran canciones que están en YouTube**, en una sola lista.
 1. **Con el canal creado:**
    - las tablas, el JSON por grado y la revisión diaria;
-   - en la pantalla Canción, los videos del canal entran en la misma lista, primero (no se separan de los de otros canales: el nombre del canal ya lo dice) y reemplazan la tarjeta de su letra;
-   - el mockup de la página Canal y, después, su código: vincular videos ya subidos.
+   - en la pantalla Canción, los videos del canal entran en la misma lista, primero (no se separan de los de otros canales: el nombre del canal ya lo dice);
+   - la página Canal: vincular videos ya subidos.
 2. **Subida desde la página Canal**, con título, descripción, lista y cita armados solos.
 3. **La fábrica:** el script que produce y sube las canciones del banco, grado por grado.

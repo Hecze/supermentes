@@ -51,20 +51,6 @@ export type Ficha = {
   coincidenciasBiblioteca: number
 }
 
-export type OpcionesCancion = {
-  modo: 'ritmo' | 'melodia'
-  ritmo: string
-  melodia: string
-  /** Cómo se oye, para el generador de música (las canciones del banco lo traen). */
-  estilo?: string
-}
-
-export type Cancion = {
-  titulo: string
-  opciones: OpcionesCancion
-  partes: { etiqueta: string; lineas: string[] }[]
-}
-
 export type Carta = { texto: string; fraccion?: Fraccion }
 
 export type Juego = {

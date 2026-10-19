@@ -14,6 +14,10 @@
       "destination": "/app/index.html"
     },
     {
+      "source": "/app/:paso+",
+      "destination": "/app/index.html"
+    },
+    {
       "source": "/j/:codigo",
       "destination": "/j/index.html"
     },

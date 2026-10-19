@@ -7,7 +7,7 @@ import { Logo } from '../components/Logo'
 
 const LO_QUE_TRAE = [
   { icono: Gamepad2, color: 'text-juego', texto: 'Juegos para el celular que mandas al WhatsApp de las familias' },
-  { icono: Music, color: 'text-cancion', texto: 'Canciones con ritmos del Perú para cantar en clase' },
+  { icono: Music, color: 'text-cancion', texto: 'Canciones de cada tema para cantar en clase' },
   { icono: FileCheck, color: 'text-examen', texto: 'Exámenes listos para imprimir, con Fila A y B' },
 ]
 

@@ -4,7 +4,7 @@
 //   POST /api/perfil  Authorization: Bearer …  { nombre, colegio?, grado?, grados?, cursos? }  → { perfil }
 //
 // `grados` y `cursos` son lo que enseña (cursos vacío = todos); `grado` es el primero de sus grados. Si la base aún
-// no tiene esas columnas (falta la migración 0002 / 0004), se guarda solo `grado`, como antes.
+// no tiene esas columnas (falta migrations-postgres/0002), se guarda solo `grado`, como antes.
 import { docente } from './_cuenta.js'
 import { db } from './_db.js'
 import { json, objeto, texto } from './_juegos.js'

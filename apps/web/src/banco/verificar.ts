@@ -1,5 +1,5 @@
 // Verificador del banco: cada cita tiene que aparecer letra por letra en un desempeño de su área y grado, y en los
-// grados con banco todos los temas del currículo tienen que tener al menos 2 juegos y 2 canciones apenas se crean.
+// grados con banco todos los temas del currículo tienen que tener al menos 2 juegos apenas se crean.
 // Lo corre `npm run verificar:curriculo`; no lo importa la app.
 import type { Ficha } from '../api'
 import { cancionesDelTema, type CancionExistente } from '../canciones/catalogo'
@@ -17,13 +17,13 @@ const archivos = import.meta.glob<TemaBanco[]>('./*/*.json', { import: 'default'
 
 export const MINIMO = 2
 
-/** Juegos y canciones que tiene un tema apenas se crea, como lo ve el docente (views/Juego.tsx y views/Cancion.tsx). */
+/** Juegos y canciones (de YouTube) que tiene un tema apenas se crea, como lo ve el docente (views/Juego.tsx y views/Cancion.tsx). */
 export function cuantos(ficha: Ficha, t: TemaBanco | null) {
   const p = habilidadesDelTema(ficha)[0]
   const contenido = p ? contenidoMatematica(p) : contenidoDelTema(ficha, t ? juegoDelBanco(t) : undefined)
   return {
     juegos: contenido ? juegosCompatibles(contenido, ficha.gradoId).length : 0,
-    canciones: (t?.canciones.length ?? 0) + cancionesDelTema(canciones as CancionExistente[], ficha).delTema.length,
+    canciones: cancionesDelTema(canciones as CancionExistente[], ficha).delTema.length,
   }
 }
 
@@ -78,7 +78,7 @@ export function verificarBanco() {
     }
   }
 
-  // En los grados con banco, ningún tema se queda sin juegos ni canciones.
+  // En los grados con banco, ningún tema se queda sin juegos.
   for (const gradoId of conBanco) {
     const g = grados.get(gradoId)
     if (!g) continue
@@ -89,7 +89,7 @@ export function verificarBanco() {
         const t = banco?.find((x) => normalizar(x.tema) === normalizar(tema)) ?? null
         const n = cuantos(fichaDe(gradoId, g.nombre, a.id, a.nombre, tema), t)
         if (!t) errores.push(`Banco ${gradoId} · ${a.nombre}: falta el tema «${tema}».`)
-        if (n.juegos < MINIMO || n.canciones < MINIMO) errores.push(`Banco ${gradoId} · «${tema}»: ${n.juegos} juegos y ${n.canciones} canciones (mínimo ${MINIMO} de cada uno).`)
+        if (n.juegos < MINIMO) errores.push(`Banco ${gradoId} · «${tema}»: ${n.juegos} juegos (mínimo ${MINIMO}).`)
       }
     }
   }
