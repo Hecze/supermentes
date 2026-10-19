@@ -7,12 +7,18 @@
 import { barajar, elegir, entero } from '../../juegos/motor/azar'
 import { distractores, num } from '../../juegos/matematica/formato'
 import { CLARO, GRIS, TINTA, anchoTexto, circulo, el, elipse, esc, grupo, linea, poligono, rect, ruta, svg, texto } from '../dibujos'
-import type { Azar, Dibujo, Generado, Grupo, TipoPregunta } from '../tipos'
+import type { Azar, Dibujo, Generado, Grupo, Nivel, TipoPregunta } from '../tipos'
 import { alternativas, nombre } from '../util'
 import { hasta } from './numeros'
 
 const P4 = 'primaria-4'
 const BASE = { area: 'matematica', competencia: 3, cambia: 'numeros' } as const
+
+/**
+ * Lo que toca según la dificultad: más fácil (1), el de siempre (2) o más difícil (3). Con el nivel 2 cada tipo arma
+ * exactamente la pregunta de antes para la misma semilla (los mismos rangos y el azar en el mismo orden).
+ */
+const segun = <T,>(nivel: Nivel, facil: T, normal: T, dificil: T): T => (nivel === 1 ? facil : nivel === 3 ? dificil : normal)
 
 /** Rellenos que se ven en una fotocopia en blanco y negro (el color solo ayuda en la pantalla). */
 const PINTA = '#bdbdbd'
@@ -210,6 +216,9 @@ function trama(x0: number, y0: number, cols: number, filas: number, lado: number
 
 const NOMBRE_POLIGONO: Record<number, string> = { 3: 'triángulo', 4: 'cuadrilátero', 5: 'pentágono', 6: 'hexágono', 7: 'heptágono', 8: 'octágono' }
 const nombresCerca = (n: number) => [n + 1, n - 1, n + 2, n - 2].filter((m) => m >= 3 && m <= 8).map((m) => NOMBRE_POLIGONO[m])
+/** Nombres de polígonos con 2 lados o más de diferencia: más fácil de descartar. */
+const nombresLejos = (n: number) => [n + 2, n - 2, n + 3, n - 3, n + 4, n - 4].filter((m) => m >= 3 && m <= 8).map((m) => NOMBRE_POLIGONO[m])
+const nombresOtros = (n: number, nivel: Nivel) => (nivel === 1 ? nombresLejos(n) : nombresCerca(n))
 
 /** Un polígono convexo de n lados (regular o no), con vértices que se ven bien: ni muy planos ni muy juntos. */
 function poligonoConvexo(azar: Azar, n: number, regular: boolean): Pt[] {
@@ -260,9 +269,17 @@ function plantitas(pts: Pt[], azar: Azar, cuantas: number) {
 /** `cuenta`: qué se cuenta en el dibujo para saber cuántos lados tiene ("Lados de la señal"). */
 type ConForma = { n: number; clave: string; enunciado: string; pregunta: string; dibujo: Dibujo; cuenta: string }
 
+type CosaForma = 'pare' | 'ceda' | 'cometa' | 'panal' | 'casa' | 'banderines' | 'chacra'
+/** Fácil: de 3 a 6 lados. Difícil: de 6 a 8 lados (la señal PARE, el panal, la chacra de 6 a 8 postes). */
+const COSAS_FORMA: Record<Nivel, CosaForma[]> = {
+  1: ['ceda', 'cometa', 'panal', 'casa', 'banderines'],
+  2: ['pare', 'ceda', 'cometa', 'panal', 'casa', 'banderines', 'chacra', 'chacra'],
+  3: ['pare', 'panal', 'chacra', 'chacra'],
+}
+
 /** Cosas del entorno que tienen forma de polígono: la señal PARE, los banderines, el panal, la chacra… */
-function cosaConForma(azar: Azar, quien: string): ConForma {
-  const cosa = elegir(azar, ['pare', 'ceda', 'cometa', 'panal', 'casa', 'banderines', 'chacra', 'chacra'] as const)
+function cosaConForma(azar: Azar, quien: string, nivel: Nivel = 2): ConForma {
+  const cosa = elegir(azar, COSAS_FORMA[nivel])
   if (cosa === 'pare') {
     const oct = (r: number) => rango(8).map((i): Pt => [130 + r * Math.cos(Math.PI / 8 + (i * Math.PI) / 4), 96 + r * Math.sin(Math.PI / 8 + (i * Math.PI) / 4)])
     const cuerpo = rect(123, 160, 14, 84, { relleno: CLARO, grosor: 1.6 }) + poligono(oct(84), { relleno: ROSA, grosor: 2.8 }) + poligono(oct(73), { grosor: 1.4 }) + texto(130, 97, 'PARE', { tam: 38, peso: 700 })
@@ -341,7 +358,7 @@ function cosaConForma(azar: Azar, quien: string): ConForma {
         .join('')
     return { n: 3, cuenta: 'Lados de cada banderín', clave: 'banderines', enunciado: `Para la fiesta patronal, ${quien} ayudó a colgar estos banderines.`, pregunta: '¿Qué forma tiene cada banderín?', dibujo: svg(320, 110, cuerpo, 'Una fila de 5 banderines iguales de 3 lados') }
   }
-  const n = entero(azar, 5, 7)
+  const n = nivel === 3 ? entero(azar, 6, 8) : entero(azar, 5, 7)
   const pts = encajar(poligonoConvexo(azar, n, false), 24, 20, 252, 196)
   // Un poste del cerco en cada esquina.
   const cuerpo = poligono(pts, { relleno: VERDE, grosor: 3 }) + plantitas(pts, azar, 6) + pts.map(([x, y]) => rect(x - 4.5, y - 4.5, 9, 9, { relleno: '#8a6b45', grosor: 1.4 })).join('')
@@ -387,36 +404,51 @@ export const nombrePoligono: TipoPregunta = {
   queHacen: 'Reconocen polígonos en objetos del entorno (señales, banderines, terrenos) y los nombran según su número de lados.',
   citas: { [P4]: 'los asocia y representa con formas bidimensionales (polígonos) y sus elementos' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: de 3 a 6 lados, regulares y con nombres lejanos para descartar. Difícil: de 6 a 8 lados, polígonos con
+  // entrantes (también son polígonos) y nombres vecinos.
+  generar({ azar, nivel = 2 }) {
     const modo = azar()
     if (modo < 0.55) {
-      const c = cosaConForma(azar, nombre(azar))
-      return opciones(`nombre:${c.clave}`, c.enunciado, c.dibujo, c.pregunta, alternativas(azar, NOMBRE_POLIGONO[c.n], nombresCerca(c.n), 4), [`${c.cuenta}: ${num(c.n)}`, `Un polígono de ${num(c.n)} lados se llama ${NOMBRE_POLIGONO[c.n]}`])
+      const c = cosaConForma(azar, nombre(azar), nivel)
+      return opciones(`nombre:${c.clave}`, c.enunciado, c.dibujo, c.pregunta, alternativas(azar, NOMBRE_POLIGONO[c.n], nombresOtros(c.n, nivel), 4), [`${c.cuenta}: ${num(c.n)}`, `Un polígono de ${num(c.n)} lados se llama ${NOMBRE_POLIGONO[c.n]}`])
     }
     if (modo < 0.75) {
-      const n = entero(azar, 3, 8)
-      const regular = azar() < 0.4
-      const pts = encajar(poligonoConvexo(azar, n, regular), 30, 20, 220, 180)
-      const dibujo = svg(280, 220, poligono(pts, { relleno: SUAVE, grosor: 2.8 }) + puntos(pts), `Un polígono de ${n} lados con sus vértices marcados`)
-      return opciones(`nombre:dibujo:${n}:${regular}`, 'Observa el polígono.', dibujo, '¿Cómo se llama?', alternativas(azar, NOMBRE_POLIGONO[n], nombresCerca(n), 4), [
-        `Lados del polígono, de vértice a vértice: ${num(n)}`,
-        `Un polígono de ${num(n)} lados se llama ${NOMBRE_POLIGONO[n]}`,
-      ])
+      // Difícil: muchas veces con una parte que entra (la forma no "parece" la del nombre, pero se cuentan sus lados).
+      const concava = nivel === 3 && azar() < 0.6
+      const n = concava ? 0 : nivel === 3 ? entero(azar, 7, 8) : entero(azar, 3, segun(nivel, 6, 8, 8))
+      const regular = !concava && azar() < segun(nivel, 0.8, 0.4, 0)
+      const pts = concava ? encajar(transformar(azar, elegir(azar, CONCAVAS)), 30, 20, 220, 180) : encajar(poligonoConvexo(azar, n, regular), 30, 20, 220, 180)
+      const lados = pts.length
+      const dibujo = svg(280, 220, poligono(pts, { relleno: SUAVE, grosor: 2.8 }) + puntos(pts), `Un polígono de ${lados} lados con sus vértices marcados`)
+      return opciones(
+        concava ? `nombre:concava:${pts.map((p) => p.map(Math.round).join(',')).join(' ')}` : `nombre:dibujo:${n}:${regular}`,
+        'Observa el polígono.',
+        dibujo,
+        '¿Cómo se llama?',
+        alternativas(azar, NOMBRE_POLIGONO[lados], nombresOtros(lados, nivel), 4),
+        [
+          concava ? `Lados del polígono, de vértice a vértice (también los de la parte que entra): ${num(lados)}` : `Lados del polígono, de vértice a vértice: ${num(lados)}`,
+          `Un polígono de ${num(lados)} lados se llama ${NOMBRE_POLIGONO[lados]}`,
+        ],
+      )
     }
     // ¿Cuál es (o no es) un polígono? Uno tiene un lado curvo o está abierto.
     const W = 170
     const H = 140
-    const no = azar() < 0.5
+    // Difícil: casi siempre "¿Cuál NO es?" y uno de los polígonos tiene una parte que entra (el error: creer que no es polígono).
+    const no = azar() < segun(nivel, 0.5, 0.5, 0.7)
     const figura = () => {
-      const pts = encajar(poligonoConvexo(azar, entero(azar, 3, 6), azar() < 0.4), 18, 16, W - 36, H - 32)
+      const pts = encajar(poligonoConvexo(azar, entero(azar, 3, segun(nivel, 4, 6, 6)), azar() < segun(nivel, 0.9, 0.4, 0.4)), 18, 16, W - 36, H - 32)
       return poligono(pts, { relleno: SUAVE, grosor: 2.8 })
     }
+    const conEntrante = () => poligono(encajar(transformar(azar, elegir(azar, CONCAVAS)), 18, 16, W - 36, H - 32), { relleno: SUAVE, grosor: 2.8 })
     const malas = no ? [noPoligono(azar, W, H)] : [noPoligono(azar, W, H), noPoligono(azar, W, H)]
     if (!no && malas[0].tipo === malas[1].tipo) malas[1] = hasta(() => {
       const m = noPoligono(azar, W, H)
       return m.tipo !== malas[0].tipo ? m : null
     })
-    const piezas = no ? [figura(), figura(), malas[0].cuerpo] : [figura(), malas[0].cuerpo, malas[1].cuerpo]
+    const piezas = nivel === 3 ? (no ? [figura(), conEntrante(), malas[0].cuerpo] : [conEntrante(), malas[0].cuerpo, malas[1].cuerpo]) : no ? [figura(), figura(), malas[0].cuerpo] : [figura(), malas[0].cuerpo, malas[1].cuerpo]
     // La que se busca va primero en `piezas`: el polígono, o la figura que no lo es.
     const buscada = no ? 2 : 0
     const orden = barajar(azar, [0, 1, 2])
@@ -429,11 +461,12 @@ export const nombrePoligono: TipoPregunta = {
     // La letra de cada pieza en el dibujo y por qué una figura no es polígono.
     const letraDe = (i: number) => `Figura ${LETRAS[orden.indexOf(i)]}`
     const porQue = (m: (typeof malas)[number]) => (m.tipo === 'curva' ? 'tiene un lado curvo' : 'está abierta, no se cierra')
+    const entra = nivel === 3 ? ', aunque una tenga una parte que entra' : ''
     const pasos = no
-      ? [`${letraDe(2)}: ${porQue(malas[0])}`, `${lista([letraDe(0), letraDe(1)].sort())}: cerradas y con solo lados rectos`, `No es un polígono: ${letraDe(2)}`]
+      ? [`${letraDe(2)}: ${porQue(malas[0])}`, `${lista([letraDe(0), letraDe(1)].sort())}: cerradas y con solo lados rectos${entra}`, `No es un polígono: ${letraDe(2)}`]
       : [
           ...[1, 2].sort((p, q) => orden.indexOf(p) - orden.indexOf(q)).map((i) => `${letraDe(i)}: ${porQue(malas[i - 1])}`),
-          `Cerrada y con solo lados rectos: ${letraDe(0)}`,
+          `Cerrada y con solo lados rectos${nivel === 3 ? ', aunque tenga una parte que entra' : ''}: ${letraDe(0)}`,
         ]
     return opciones(
       `es-poligono:${no}:${orden.join('')}:${malas.map((m) => m.tipo).join('')}`,
@@ -512,11 +545,15 @@ export const ladosVertices: TipoPregunta = {
   queHacen: 'Cuentan los lados y los vértices de polígonos (también con entrantes) y dibujan un polígono con el número de lados pedido.',
   citas: { [P4]: 'su comprensión sobre los elementos de los polígonos: ángulos rectos, número de lados y vértices' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: polígonos sin entrantes de 3 a 6 lados (y dibujar un triángulo o un cuadrilátero). Difícil: casi siempre con
+  // entrantes o de 7 y 8 lados; al sumar, una de las dos figuras tiene entrantes; dibujar de 6 a 8 lados.
+  generar({ azar, nivel = 2 }) {
     const modo = azar()
     if (modo < 0.5) {
-      const concava = azar() < 0.45
-      const pts = concava ? transformar(azar, elegir(azar, CONCAVAS)).map(([x, y]): Pt => [x * 44, y * 44]) : poligonoConvexo(azar, entero(azar, 5, 8), azar() < 0.3)
+      const concava = azar() < segun(nivel, 0, 0.45, 0.75)
+      // Difícil: las figuras con entrantes de 7 u 8 lados.
+      const pts = concava ? transformar(azar, elegir(azar, nivel === 3 ? CONCAVAS.filter((f) => f.length >= 7) : CONCAVAS)).map(([x, y]): Pt => [x * 44, y * 44]) : poligonoConvexo(azar, entero(azar, segun(nivel, 3, 5, 7), segun(nivel, 6, 8, 8)), azar() < segun(nivel, 0.7, 0.3, 0.2))
       const n = pts.length
       const q = encajar(pts, 30, 22, 220, 176)
       const que = azar() < 0.5 ? 'lados' : 'vértices'
@@ -528,24 +565,29 @@ export const ladosVertices: TipoPregunta = {
       ])
     }
     if (modo < 0.75) {
-      const [n1, n2] = hasta(() => {
-        const a = entero(azar, 3, 8)
-        const b = entero(azar, 3, 8)
-        return a !== b ? [a, b] : null
-      })
+      // Difícil: la figura de la derecha tiene entrantes.
+      const conEntrante = nivel === 3
+      const [n1, n2] = conEntrante
+        ? [entero(azar, 5, 8), 0]
+        : hasta(() => {
+            const a = entero(azar, 3, segun(nivel, 6, 8, 8))
+            const b = entero(azar, 3, segun(nivel, 6, 8, 8))
+            return a !== b ? [a, b] : null
+          })
       const q1 = encajar(poligonoConvexo(azar, n1, azar() < 0.5), 22, 18, 150, 150)
-      const q2 = encajar(poligonoConvexo(azar, n2, azar() < 0.5), 216, 18, 150, 150)
+      const q2 = conEntrante ? encajar(transformar(azar, elegir(azar, CONCAVAS)), 216, 18, 150, 150) : encajar(poligonoConvexo(azar, n2, azar() < 0.5), 216, 18, 150, 150)
+      const m2 = q2.length
       const quien = nombre(azar)
       const que = azar() < 0.5 ? 'lados' : 'vértices'
-      const dibujo = svg(390, 186, poligono(q1, { relleno: AZUL, grosor: 2.8 }) + puntos(q1) + poligono(q2, { relleno: ARENA, grosor: 2.8 }) + puntos(q2), `Dos polígonos: uno de ${n1} lados y otro de ${n2} lados`)
-      const t = n1 + n2
-      return opciones(`lados-dos:${que}:${n1}-${n2}`, `${quien} recortó estas dos figuras de cartulina.`, dibujo, `¿Cuántos ${que} tienen entre las dos?`, altNum(azar, t, [t - 1, t + 1, Math.max(n1, n2), t + 2, t - 2], 4, 3), [
-        `Figura de la izquierda: ${num(n1)} ${que}; de la derecha: ${num(n2)} ${que}`,
-        `Entre las dos: ${num(n1)} + ${num(n2)} = ${num(t)}`,
+      const dibujo = svg(390, 186, poligono(q1, { relleno: AZUL, grosor: 2.8 }) + puntos(q1) + poligono(q2, { relleno: ARENA, grosor: 2.8 }) + puntos(q2), `Dos polígonos: uno de ${n1} lados y otro de ${m2} lados`)
+      const t = n1 + m2
+      return opciones(`lados-dos:${que}:${n1}-${m2}`, `${quien} recortó estas dos figuras de cartulina.`, dibujo, `¿Cuántos ${que} tienen entre las dos?`, altNum(azar, t, [t - 1, t + 1, Math.max(n1, m2), t + 2, t - 2], 4, 3), [
+        `Figura de la izquierda: ${num(n1)} ${que}; de la derecha: ${num(m2)} ${que}${conEntrante ? ' (también cuentan los de la parte que entra)' : ''}`,
+        `Entre las dos: ${num(n1)} + ${num(m2)} = ${num(t)}`,
       ])
     }
     // Dibuja un polígono uniendo puntos de la trama.
-    const n = entero(azar, 3, 6)
+    const n = entero(azar, segun(nivel, 3, 3, 6), segun(nivel, 4, 6, 8))
     const cuerpo = rect(4, 4, 8 * 36 + 32, 5 * 36 + 32, { relleno: '#ffffff', trazo: GRIS, grosor: 1.4, redondeo: 8 }) + trama(20, 20, 8, 5, 36)
     return {
       forma: 'abierta',
@@ -611,14 +653,19 @@ export const anguloRecto: TipoPregunta = {
   queHacen: 'Comparan ángulos con el ángulo recto (con la esquina de una hoja) y eligen el recto, el menor o el mayor; también en las agujas del reloj.',
   citas: { [P4]: 'la medida de los ángulos respecto al ángulo recto' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: el menor y el mayor, muy lejos del recto (de 30° a 45° y de 135° a 150°) y con un lado acostado o parado.
+  // Difícil: muy cerca del recto (de 70° a 80° y de 100° a 110°), girados de cualquier forma.
+  generar({ azar, nivel = 2 }) {
     const que = elegir(azar, ['recto', 'recto', 'menor', 'mayor'] as const)
     const quien = nombre(azar)
     if (azar() < 0.62) {
       // Tres ángulos: uno recto, uno agudo y uno obtuso, girados de distintas formas.
-      const medidas = { recto: 90, menor: entero(azar, 7, 12) * 5, mayor: entero(azar, 24, 30) * 5 }
+      const [me0, me1] = segun(nivel, [6, 9], [7, 12], [14, 16])
+      const [ma0, ma1] = segun(nivel, [27, 30], [24, 30], [20, 22])
+      const medidas = { recto: 90, menor: entero(azar, me0, me1) * 5, mayor: entero(azar, ma0, ma1) * 5 }
       const orden = barajar(azar, ['recto', 'menor', 'mayor'] as const)
-      const dirs = orden.map(() => entero(azar, 0, 23) * 15)
+      const dirs = orden.map(() => (nivel === 1 ? entero(azar, 0, 3) * 90 : entero(azar, 0, 23) * 15))
       const W = 176
       const H = 150
       const dibujo = enFila(
@@ -633,8 +680,9 @@ export const anguloRecto: TipoPregunta = {
         `${QUE_ANGULO[que].es}: Ángulo ${LETRAS[orden.indexOf(que)]}`,
       ])
     }
-    // Relojes: las agujas a las 3 o a las 9 forman un ángulo recto.
-    const horas = { recto: elegir(azar, [3, 9]), menor: elegir(azar, [1, 2, 10, 11]), mayor: elegir(azar, [4, 5, 7, 8]) }
+    // Relojes: las agujas a las 3 o a las 9 forman un ángulo recto. Fácil: el menor y el mayor, bien lejos del recto
+    // (a la 1, las 11, las 5 o las 7); difícil: cerca (a las 2, las 10, las 4 o las 8).
+    const horas = { recto: elegir(azar, [3, 9]), menor: elegir(azar, segun(nivel, [1, 11], [1, 2, 10, 11], [2, 10])), mayor: elegir(azar, segun(nivel, [5, 7], [4, 5, 7, 8], [4, 8])) }
     const orden = barajar(azar, ['recto', 'menor', 'mayor'] as const)
     const W = 160
     const H = 146
@@ -833,9 +881,20 @@ export const angulosRectosFigura: TipoPregunta = {
   queHacen: 'Cuentan cuántos ángulos rectos tiene un polígono dibujado en la trama, comprobándolo con la esquina de una hoja.',
   citas: { [P4]: 'su comprensión sobre los elementos de los polígonos: ángulos rectos, número de lados y vértices' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: triángulos y cuadriláteros sin entrantes; entre tres, "¿cuál tiene más?". Difícil: figuras con esquinas que
+  // entran (la L, la T, la casita); entre tres, "¿cuál tiene exactamente…?", que obliga a contar todas.
+  generar({ azar, nivel = 2 }) {
     if (azar() < 0.6) {
-      const tipo = elegir(azar, ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide', 'casita', 'ele', 'ele', 'te'])
+      const tipo = elegir(
+        azar,
+        segun(
+          nivel,
+          ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo'],
+          ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide', 'casita', 'ele', 'ele', 'te'],
+          ['ele', 'ele', 'te', 'te', 'casita', 'romboide'],
+        ),
+      )
       const pts = deLaTrama(azar, tipo)
       const k = angulosRectos(pts)
       const n = pts.length
@@ -851,7 +910,15 @@ export const angulosRectosFigura: TipoPregunta = {
     }
     // Tres figuras: ¿cuál tiene más ángulos rectos? o ¿cuál tiene exactamente k?
     const figuras = hasta(() => {
-      const tipos = barajar(azar, ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide', 'casita', 'trapecioIsosceles']).slice(0, 3)
+      const tipos = barajar(
+        azar,
+        segun(
+          nivel,
+          ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide'],
+          ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide', 'casita', 'trapecioIsosceles'],
+          ['rectangulo', 'trapecioRectangulo', 'trianguloRectangulo', 'triangulo', 'romboide', 'casita', 'trapecioIsosceles', 'ele', 'te'],
+        ),
+      ).slice(0, 3)
       // Más anchas que altas y de 5 × 4 cuadros como mucho, para que se vean grandes en su recuadro.
       const fs = tipos.map((t) => {
         const f = deLaTrama(azar, t)
@@ -870,7 +937,7 @@ export const angulosRectosFigura: TipoPregunta = {
       `Tres polígonos en la trama: ${figuras.fs.map((f, i) => `${LETRAS[i]} de ${f.length} lados`).join(', ')}`,
     )
     const conteo = ['Se pone la esquina de una hoja en cada vértice de las tres figuras', `Ángulos rectos: ${lista(figuras.ks.map((k, i) => `${LETRAS[i]} tiene ${num(k)}`))}`]
-    if (azar() < 0.5) {
+    if (azar() < segun(nivel, 1, 0.5, 0)) {
       const max = Math.max(...figuras.ks)
       return opciones(`rectos-tres:mas:${figuras.fs.map((f) => f.map((p) => p.join(',')).join(' ')).join('|')}`, 'Observa las figuras. Puedes comprobar con la esquina de una hoja.', dibujo, '¿Cuál tiene más ángulos rectos?', cual('Figura', 3, figuras.ks.indexOf(max)), [
         ...conteo,
@@ -902,9 +969,12 @@ const COMO_RECTAS: Record<ParTipo, string> = {
   secantes: 'se cruzan, pero sin formar un ángulo recto',
 }
 
-/** Dos rectas de la clase pedida, giradas al azar y centradas en w × h. */
-function parDeRectas(azar: Azar, tipo: ParTipo, w: number, h: number) {
-  const g = (entero(azar, 0, 11) * 15 * Math.PI) / 180
+/**
+ * Dos rectas de la clase pedida, giradas al azar y centradas en w × h. Fácil: acostadas o paradas, y las que se cruzan
+ * sin ángulo recto, bien inclinadas. Difícil: las que "casi" son paralelas o perpendiculares, más cerca de serlo.
+ */
+function parDeRectas(azar: Azar, tipo: ParTipo, w: number, h: number, nivel: Nivel = 2) {
+  const g = ((nivel === 1 ? entero(azar, 0, 1) * 90 : entero(azar, 0, 11) * 15) * Math.PI) / 180
   const u: Pt = [Math.cos(g), Math.sin(g)]
   const nn: Pt = [-u[1], u[0]]
   const giro = (d: Pt, grados: number): Pt => {
@@ -923,14 +993,15 @@ function parDeRectas(azar: Azar, tipo: ParTipo, w: number, h: number) {
     pts = [...seg(mas(-sep / 2, nn), u, -66, 66), ...seg(mas(sep / 2, nn), u, -66 + corre, 66 + corre)]
   } else if (tipo === 'casi') {
     const sep = 50
-    const t = elegir(azar, [8, 10, -8, -10])
+    const t = elegir(azar, nivel === 3 ? [6, 7, -6, -7] : [8, 10, -8, -10])
     pts = [...seg(mas(-sep / 2, nn), giro(u, t), -66, 66), ...seg(mas(sep / 2, nn), giro(u, -t), -66, 66)]
   } else if (tipo === 'perpendiculares') {
     const forma = elegir(azar, ['cruz', 'te', 'ele'] as const)
     const t0 = forma === 'ele' ? -66 : forma === 'te' ? entero(azar, -30, 30) : entero(azar, -25, 25)
     pts = [...seg([0, 0], u, -66, 66), ...seg(mas(t0, u), nn, forma === 'cruz' ? -55 : 0, forma === 'cruz' ? 55 : elegir(azar, [100, -100]))]
   } else {
-    const a = elegir(azar, [entero(azar, 35, 58), entero(azar, 122, 145)])
+    const [a0, a1, b0, b1] = segun(nivel, [30, 45, 135, 150], [35, 58, 122, 145], [68, 78, 102, 112])
+    const a = elegir(azar, [entero(azar, a0, a1), entero(azar, b0, b1)])
     pts = [...seg([0, 0], u, -66, 66), ...seg(mas(entero(azar, -25, 25), u), giro(u, a), -60, 60)]
   }
   const q = encajar(pts, 16, 16, w - 32, h - 32, 1)
@@ -1001,15 +1072,29 @@ export const rectasParalelas: TipoPregunta = {
   queHacen: 'Reconocen rectas paralelas y perpendiculares en dibujos y en las calles de un croquis.',
   citas: { [P4]: 'así como su comprensión sobre líneas perpendiculares y paralelas usando lenguaje geométrico' },
   ...BASE,
-  generar({ azar }) {
-    if (azar() < 0.5) {
+  niveles: true,
+  // Fácil: solo los pares de rectas, acostadas o paradas, sin las que "casi" son paralelas. Difícil: las otras dos casi
+  // son paralelas (o casi perpendiculares); en el croquis, la calle que no es paralela ni perpendicular.
+  generar({ azar, nivel = 2 }) {
+    if (azar() < 0.5 || nivel === 1) {
       const que = azar() < 0.5 ? 'paralelas' : 'perpendiculares'
-      const tipos: ParTipo[] = que === 'paralelas' ? ['paralelas', 'casi', elegir(azar, ['perpendiculares', 'secantes'] as const)] : ['perpendiculares', 'secantes', elegir(azar, ['paralelas', 'casi'] as const)]
+      const tipos: ParTipo[] =
+        nivel === 1
+          ? que === 'paralelas'
+            ? ['paralelas', 'perpendiculares', 'secantes']
+            : ['perpendiculares', 'paralelas', 'secantes']
+          : nivel === 3
+            ? que === 'paralelas'
+              ? ['paralelas', 'casi', 'casi']
+              : ['perpendiculares', 'secantes', 'secantes']
+            : que === 'paralelas'
+              ? ['paralelas', 'casi', elegir(azar, ['perpendiculares', 'secantes'] as const)]
+              : ['perpendiculares', 'secantes', elegir(azar, ['paralelas', 'casi'] as const)]
       const orden = barajar(azar, [0, 1, 2])
       const W = 176
       const H = 150
       const dibujo = enFila(
-        orden.map((i) => parDeRectas(azar, tipos[i], W, H)),
+        orden.map((i) => parDeRectas(azar, tipos[i], W, H, nivel)),
         W,
         H,
         `Tres pares de rectas: ${orden.map((i, k) => `${LETRAS[k]} ${tipos[i] === 'casi' ? 'que se van juntando' : tipos[i]}`).join(', ')}`,
@@ -1027,6 +1112,22 @@ export const rectasParalelas: TipoPregunta = {
     const otras = calles.filter((c) => c !== ref && c.nombre !== correcta).map((c) => c.nombre)
     const otraPar = par.find((c) => c !== ref)!.nombre
     const diagonal = calles.find((c) => c.rol === 'diagonal')!.nombre
+    if (nivel === 3) {
+      // Se revisa cada calle: una es paralela, otra perpendicular y la que queda no es ninguna de las dos.
+      const sola = calles.find((c) => c.rol === 'sola')!.nombre
+      return opciones(
+        `calles:ninguna:${calles.map((c) => `${c.nombre}@${c.a.join(',')}`).join('|')}`,
+        'Observa el croquis de las calles del barrio.',
+        dibujo,
+        `¿Qué calle no es paralela ni perpendicular ${aLaCalle(ref.nombre)}?`,
+        alternativas(azar, diagonal, [otraPar, sola], 3),
+        [
+          `${otraPar} es paralela ${aLaCalle(ref.nombre)}: van en la misma dirección y nunca se juntan`,
+          `${sola} es perpendicular ${aLaCalle(ref.nombre)}: la cruza formando un ángulo recto`,
+          `No es paralela ni perpendicular, va inclinada: ${diagonal}`,
+        ],
+      )
+    }
     const pasos = paralela
       ? [`${ref.nombre} y ${correcta} van en la misma dirección y nunca se juntan`, `Es paralela ${aLaCalle(ref.nombre)}: ${correcta}`]
       : [
@@ -1071,9 +1172,15 @@ export const ladosParalelos: TipoPregunta = {
   queHacen: 'Nombran con letras los lados de un polígono que son paralelos o perpendiculares a otro y cuentan sus pares de lados paralelos.',
   citas: { [P4]: 'así como su comprensión sobre líneas perpendiculares y paralelas usando lenguaje geométrico' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: triángulos y cuadriláteros (pocos lados para revisar). Difícil: figuras de 5 a 8 lados (la casita, el
+  // hexágono, la L y la T), con más lados que confunden.
+  generar({ azar, nivel = 2 }) {
     const modo = elegir(azar, ['paralelo', 'paralelo', 'perpendicular', 'pares'] as const)
-    const tipos = modo === 'pares' ? ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trapecioIsosceles', 'romboide', 'triangulo', 'casita', 'hexagono'] : ['rectangulo', 'trapecioRectangulo', 'trapecioIsosceles', 'romboide', 'casita', 'hexagono', 'ele', 'te']
+    const tipos =
+      modo === 'pares'
+        ? segun(nivel, ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trapecioIsosceles', 'triangulo'], ['rectangulo', 'cuadrado', 'trapecioRectangulo', 'trapecioIsosceles', 'romboide', 'triangulo', 'casita', 'hexagono'], ['hexagono', 'hexagono', 'casita', 'casita', 'romboide', 'trapecioIsosceles'])
+        : segun(nivel, ['rectangulo', 'trapecioRectangulo', 'trapecioIsosceles', 'romboide', 'trapecioRectangulo'], ['rectangulo', 'trapecioRectangulo', 'trapecioIsosceles', 'romboide', 'casita', 'hexagono', 'ele', 'te'], ['casita', 'hexagono', 'ele', 'te', 'ele', 'te'])
     const caso = hasta(() => {
       const tipo = elegir(azar, tipos)
       const pts = deLaTrama(azar, tipo)
@@ -1247,11 +1354,16 @@ export const cuerpoElementos: TipoPregunta = {
   queHacen: 'Cuentan las caras, aristas y vértices de cubos y prismas de base cuadrangular del entorno (dado, caja de leche), también de varias cajas juntas.',
   citas: { [P4]: 'su comprensión sobre los elementos de cubos y prismas de base cuadrangular: caras, vértices, aristas' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: cubos (dado, regalo), caras o vértices de uno solo, o cuántas caras no se ven. Difícil: aristas y vértices,
+  // las caras que son cuadrados según sus medidas (nunca un cubo) y 3 o 4 cajas juntas.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
-    const c = elegir(azar, CUERPOS)
-    const que = elegir(azar, ['caras', 'aristas', 'vertices'] as const)
-    const modo = azar()
+    const c = elegir(azar, nivel === 1 ? CUERPOS.filter((x) => x.cubo) : CUERPOS)
+    const que = elegir(azar, segun<(keyof typeof ELEMENTOS)[]>(nivel, ['caras', 'vertices'], ['caras', 'aristas', 'vertices'], ['aristas', 'vertices', 'aristas']))
+    const r = azar()
+    // Qué se pregunta: uno solo, cuántas caras son cuadrados, varias cajas o las caras que no se ven.
+    const modo = segun(nivel, r < 0.6 ? 0 : 0.95, r, r < 0.25 ? 0 : r < 0.6 ? 0.5 : 0.7)
     if (modo < 0.45) {
       const u = tamCuerpo(c)
       const { cuerpo, caja } = dibujarCuerpo(c, 0, 0, u)
@@ -1262,11 +1374,12 @@ export const cuerpoElementos: TipoPregunta = {
     }
     if (modo < 0.65) {
       // ¿Cuántas caras son cuadrados? Se sabe por las medidas, no por cómo se ve el dibujo.
-      const forma = elegir(azar, ['cubo', 'base', 'frente', 'distintas'] as const)
+      // Difícil: nunca un cubo (todo igual se ve rápido) y a veces son los costados.
+      const forma = elegir(azar, segun<('cubo' | 'base' | 'frente' | 'lados' | 'distintas')[]>(nivel, ['cubo', 'base', 'frente', 'distintas'], ['cubo', 'base', 'frente', 'distintas'], ['base', 'frente', 'lados', 'distintas']))
       const [w, h, d] = hasta((): [number, number, number] | null => {
         const v = () => entero(azar, 2, 8) * 5
         const [s, t, r] = [v(), v(), v()]
-        const dims: [number, number, number] = forma === 'cubo' ? [s, s, s] : forma === 'base' ? [s, t, s] : forma === 'frente' ? [s, s, t] : [s, t, r]
+        const dims: [number, number, number] = forma === 'cubo' ? [s, s, s] : forma === 'base' ? [s, t, s] : forma === 'frente' ? [s, s, t] : forma === 'lados' ? [s, t, t] : [s, t, r]
         if (new Set(dims).size !== (forma === 'cubo' ? 1 : forma === 'distintas' ? 3 : 2)) return null
         return Math.max(...dims) / Math.min(...dims) > 2.5 ? null : dims
       })
@@ -1303,7 +1416,7 @@ export const cuerpoElementos: TipoPregunta = {
     }
     if (modo < 0.9) {
       // Varias cajas en fila: tantas como entren sin que cada una quede muy chica.
-      let k = entero(azar, 2, 4)
+      let k = entero(azar, nivel === 3 ? 3 : 2, 4)
       const ancho = c.w + c.d * 0.6
       while (k > 2 && (540 / k - 18) / ancho < 62) k--
       const u = Math.min(120 / ancho, 130 / (c.h + c.d * 0.45), (540 / k - 18) / ancho)
@@ -1367,17 +1480,34 @@ export const esqueleto: TipoPregunta = {
   queHacen: 'Arman (en el dibujo) el esqueleto de un cubo o un prisma con palitos y bolitas de plastilina: cuentan aristas y vértices, y cuántos palitos faltan.',
   citas: { [P4]: 'su comprensión sobre los elementos de cubos y prismas de base cuadrangular: caras, vértices, aristas' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: un solo esqueleto y le faltan pocas piezas (de 1 a 4). Difícil: un paso más: palitos y bolitas juntos, o
+  // para 2 esqueletos.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const modo = azar()
-    if (modo < 0.68) {
+    // Hasta dónde va cada pregunta: cuántos palitos o bolitas, cuántos faltan y, después, los palitos largos y cortos.
+    const [hastaCuantos, hastaFaltan] = segun(nivel, [0.6, 1], [0.4, 0.68], [0.4, 0.68])
+    if (modo < hastaFaltan) {
       const cubo = azar() < 0.5
       const [w, h, d] = cubo ? [1, 1, 1] : elegir(azar, [[0.8, 1.5, 0.8], [1.5, 0.75, 1.5], [1.7, 0.8, 1]] as [number, number, number][])
       const u = 150 / Math.max(w + d * 0.6, h + d * 0.45)
       const caja = cajaEn(30, 24, w * u, h * u, d * u)
       const cuerpo = cubo ? 'cubo' : 'prisma de base cuadrangular'
-      if (modo < 0.4) {
-        const k = entero(azar, 1, 4)
+      if (modo < hastaCuantos && nivel === 3) {
+        // Palitos y bolitas juntos: 12 + 8 = 20 piezas por esqueleto.
+        const k = entero(azar, 1, 3)
+        const t = 20 * k
+        const dibujo = svg(caja.ancho + 60, caja.alto + 48, dibujoEsqueleto(caja, Array(12).fill(true), null), `Esqueleto de un ${cuerpo} hecho con palitos y bolitas de plastilina`)
+        const enunciado = k === 1 ? `${quien} arma el esqueleto de un ${cuerpo} con palitos y bolitas de plastilina, como en el dibujo.` : `${quien} quiere armar ${k} esqueletos de ${cuerpo} como este, con palitos y bolitas de plastilina.`
+        return opciones(`esqueleto-piezas:${cubo}:${w}:${k}`, enunciado, dibujo, '¿Cuántas piezas necesita en total, entre palitos y bolitas?', altNum(azar, t, [12 * k, 8 * k, 26 * k, 20, t + k, t - k]), [
+          'Cada palito es una arista y cada bolita, un vértice',
+          `Un ${cuerpo} tiene 12 aristas y 8 vértices: 12 + 8 = 20 piezas`,
+          ...(k > 1 ? [`Para ${num(k)} esqueletos: ${num(k)} × 20 = ${num(t)}`] : []),
+        ])
+      }
+      if (modo < hastaCuantos) {
+        const k = nivel === 1 ? 1 : entero(azar, 1, 4)
         const bolitas = azar() < 0.4
         const dibujo = svg(caja.ancho + 60, caja.alto + 48, dibujoEsqueleto(caja, Array(12).fill(true), null), `Esqueleto de un ${cuerpo} hecho con palitos y bolitas de plastilina`)
         const t = (bolitas ? 8 : 12) * k
@@ -1391,14 +1521,29 @@ export const esqueleto: TipoPregunta = {
         ])
       }
       // El esqueleto terminado es el modelo; ya usó algunos palitos (o bolitas): ¿cuántos le faltan?
-      const bolitas = azar() < 0.35
-      const usados = bolitas ? entero(azar, 2, 6) : entero(azar, 3, 10)
-      const total = bolitas ? 8 : 12
+      // Fácil: le faltan pocos. Difícil: quiere armar 2 esqueletos como el del dibujo.
+      const bolitas = azar() < segun(nivel, 0.5, 0.35, 0.35)
+      const veces = nivel === 3 ? 2 : 1
+      const cada = bolitas ? 8 : 12
+      const total = veces * cada
+      const usados = bolitas ? entero(azar, ...segun<[number, number]>(nivel, [4, 7], [2, 6], [3, 13])) : entero(azar, ...segun<[number, number]>(nivel, [8, 11], [3, 10], [5, 20]))
       const f = total - usados
       const dibujo = svg(caja.ancho + 60, caja.alto + 48, dibujoEsqueleto(caja, Array(12).fill(true), null), `Esqueleto terminado de un ${cuerpo} hecho con palitos y bolitas de plastilina`)
+      const yaTiene = bolitas ? `hizo ${plural(usados, 'bolita', 'bolitas')} de plastilina` : `cortó ${plural(usados, 'palito', 'palitos')}`
+      const piezas = bolitas ? 'bolitas' : 'palitos'
+      if (veces > 1)
+        return opciones(
+          `faltan-dos:${cubo}:${w}:${bolitas}:${usados}`,
+          `${quien} quiere armar 2 esqueletos de ${cuerpo} como el del dibujo. Ya ${yaTiene}.`,
+          dibujo,
+          bolitas ? '¿Cuántas bolitas más necesita?' : '¿Cuántos palitos más necesita?',
+          altNum(azar, f, [cada - usados, usados, f + 1, f - 1, 2 * (bolitas ? 12 : 8) - usados, total], 4, 1),
+          [`Cada esqueleto tiene ${num(cada)} ${bolitas ? 'bolitas, una en cada vértice' : 'palitos, uno en cada arista'}`, `Para 2 esqueletos: 2 × ${num(cada)} = ${num(total)} ${piezas}`, `Le faltan: ${num(total)} − ${num(usados)} = ${num(f)}`],
+          `Dos esqueletos llevan 2 × ${cada} = ${total} ${piezas}: ${total} − ${usados} = ${f}.`,
+        )
       return opciones(
         `faltan:${cubo}:${w}:${bolitas}:${usados}`,
-        `${quien} quiere armar el esqueleto de un ${cuerpo} como el del dibujo. Ya ${bolitas ? `hizo ${plural(usados, 'bolita', 'bolitas')} de plastilina` : `cortó ${plural(usados, 'palito', 'palitos')}`}.`,
+        `${quien} quiere armar el esqueleto de un ${cuerpo} como el del dibujo. Ya ${yaTiene}.`,
         dibujo,
         bolitas ? '¿Cuántas bolitas más necesita?' : '¿Cuántos palitos más necesita?',
         altNum(azar, f, bolitas ? [12 - usados, usados, f + 1, f - 1, 8] : [8 - usados, usados, f + 1, f - 1, 12], 4, 1),
@@ -1416,6 +1561,22 @@ export const esqueleto: TipoPregunta = {
     const nLargos = alto ? 4 : 8
     const r = pide === 'largos' ? nLargos : 12 - nLargos
     const dibujo = svg(caja.ancho + 60, caja.alto + 48, dibujoEsqueleto(caja, Array(12).fill(true), largas), `Esqueleto de un prisma de base cuadrada con palitos largos (oscuros) y cortos (claros)`)
+    if (nivel === 3)
+      // Un paso más: para 2 esqueletos iguales.
+      return opciones(
+        `largos-dos:${alto}:${pide}`,
+        `${quien} arma 2 esqueletos iguales de un prisma de base cuadrangular como este. Su base es un cuadrado. Usa palitos ${alto ? 'cortos para las bases y largos para la altura' : 'largos para las bases y cortos para la altura'}.`,
+        dibujo,
+        `¿Cuántos palitos ${pide} usa en los 2 esqueletos?`,
+        altNum(azar, 2 * r, [r, 2 * (12 - r), 12, 24, 2 * r + 4]),
+        [
+          `Las 2 bases cuadradas: 4 + 4 = 8 palitos ${alto ? 'cortos' : 'largos'}`,
+          `Las aristas de la altura: 4 palitos ${alto ? 'largos' : 'cortos'}`,
+          `Palitos ${pide} en un esqueleto: ${num(r)}`,
+          `En los 2 esqueletos: 2 × ${num(r)} = ${num(2 * r)}`,
+        ],
+        `Cada esqueleto lleva ${r} palitos ${pide}; los 2 juntos, 2 × ${r} = ${2 * r}.`,
+      )
     return opciones(
       `largos:${alto}:${pide}`,
       `${quien} arma el esqueleto de un prisma de base cuadrangular. Su base es un cuadrado. Usa palitos ${alto ? 'cortos para las bases y largos para la altura' : 'largos para las bases y cortos para la altura'}.`,
@@ -1463,11 +1624,15 @@ export const cubitosCaja: TipoPregunta = {
   queHacen: 'Cuentan los cubitos que forman un prisma (también los que no se ven) o cuántos cubitos caben en una caja.',
   citas: { [P4]: 'y con formas tridimensionales (cubos y prismas de base cuadrangular), sus elementos y su capacidad' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: prismas chicos, muchas veces de un cubito de fondo (se ven todos). Difícil: más largo, más fondo y más alto
+  // (de 24 a 60 cubitos), con muchos cubitos que no se ven.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
+    const [l0, l1, f0, f1, a0, a1, menos, mas] = segun(nivel, [2, 3, 1, 2, 2, 3, 4, 18], [2, 4, 2, 3, 2, 3, 8, 36], [3, 5, 2, 4, 2, 4, 24, 60])
     const [a, b, c] = hasta((): [number, number, number] | null => {
-      const x = [entero(azar, 2, 4), entero(azar, 2, 3), entero(azar, 2, 3)] as [number, number, number]
-      return x[0] * x[1] * x[2] >= 8 && x[0] * x[1] * x[2] <= 36 ? x : null
+      const x = [entero(azar, l0, l1), entero(azar, f0, f1), entero(azar, a0, a1)] as [number, number, number]
+      return x[0] * x[1] * x[2] >= menos && x[0] * x[1] * x[2] <= mas ? x : null
     })
     const u = 40
     const dx = u * 0.5
@@ -1596,9 +1761,19 @@ const tieneBloque = (cs: Celda[]) => {
   const s = conjunto(cs)
   return cs.some(([x, y]) => s.has(kc(x + 1, y)) && s.has(kc(x, y + 1)) && s.has(kc(x + 1, y + 1)))
 }
-const filaLarga = (cs: Celda[]) => {
+/** ¿Tiene `largo` cuadrados seguidos en una fila o en una columna? */
+const enFilaDe = (cs: Celda[], largo: number) => {
   const s = conjunto(cs)
-  return cs.some(([x, y]) => rango(5).every((k) => s.has(kc(x + k, y))) || rango(5).every((k) => s.has(kc(x, y + k))))
+  return cs.some(([x, y]) => rango(largo).every((k) => s.has(kc(x + k, y))) || rango(largo).every((k) => s.has(kc(x, y + k))))
+}
+const filaLarga = (cs: Celda[]) => enFilaDe(cs, 5)
+/**
+ * Las plantillas del cubo según la dificultad. Fácil: las que tienen 4 cuadrados en fila (la "cruz" y sus parecidas),
+ * donde se ve qué cara queda frente a cuál. Difícil: las que no los tienen (en escalera, de 2 y 3…).
+ */
+const plantillasDelCubo = (nivel: Nivel) => {
+  const buenas = hexominos().filter((cs) => carasDelCubo(cs))
+  return nivel === 1 ? buenas.filter((cs) => enFilaDe(cs, 4)) : nivel === 3 ? buenas.filter((cs) => !enFilaDe(cs, 4)) : buenas
 }
 
 /** Una plantilla girada o volteada al azar, más ancha que alta. */
@@ -1630,13 +1805,17 @@ export const plantillaCubo: TipoPregunta = {
   queHacen: 'Imaginan cómo se dobla cada plantilla de 6 cuadrados y eligen la que sí (o la que no) arma un cubo.',
   citas: { [P4]: 'Hace afirmaciones sobre algunas relaciones entre elementos de las formas y su desarrollo en el plano' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: las que no arman tienen 4 cuadrados en bloque o 5 en fila (se ve a simple vista) y las que arman son de la
+  // familia de la cruz. Difícil: las que no arman siempre engañan y las que arman no tienen 4 en fila.
+  generar({ azar, nivel = 2 }) {
     const todas = hexominos()
-    const buenas = todas.filter((cs) => carasDelCubo(cs))
+    const buenas = plantillasDelCubo(nivel)
     const malas = todas.filter((cs) => !carasDelCubo(cs))
     // Las que engañan: sin un bloque de 2 × 2 ni una fila de 5 (esas se descartan a simple vista).
     const enganosas = malas.filter((cs) => !tieneBloque(cs) && !filaLarga(cs))
-    const mala = () => (azar() < 0.8 ? elegir(azar, enganosas) : elegir(azar, malas))
+    const obvias = malas.filter((cs) => tieneBloque(cs) || filaLarga(cs))
+    const mala = () => (nivel === 1 ? elegir(azar, obvias) : nivel === 3 ? elegir(azar, enganosas) : azar() < 0.8 ? elegir(azar, enganosas) : elegir(azar, malas))
     const no = azar() < 0.35
     const piezas = no ? [mala(), ...barajar(azar, buenas).slice(0, 2)] : [elegir(azar, buenas), ...hasta(() => {
       const [p, q] = [mala(), mala()]
@@ -1676,8 +1855,11 @@ export const caraOpuesta: TipoPregunta = {
   queHacen: 'Imaginan cómo se arma el cubo con su plantilla para saber qué cara queda frente a otra, como en un dado.',
   citas: { [P4]: 'Hace afirmaciones sobre algunas relaciones entre elementos de las formas y su desarrollo en el plano' },
   ...BASE,
-  generar({ azar }) {
-    const cs = orientar(azar, elegir(azar, hexominos().filter((p) => carasDelCubo(p))))
+  niveles: true,
+  // Fácil: plantillas con 4 cuadrados en fila, la cara pedida en línea con su opuesta y sin la pregunta de escribir
+  // tres. Difícil: plantillas sin 4 en fila, la opuesta lejos (hay que imaginar el doblez) y más veces las tres caras.
+  generar({ azar, nivel = 2 }) {
+    const cs = orientar(azar, elegir(azar, plantillasDelCubo(nivel)))
     const caras = carasDelCubo(cs)!
     const opuesta = (i: number) => caras.indexOf(caras[i] ^ 1)
     const cols = Math.max(...cs.map((c) => c[0])) + 1
@@ -1691,10 +1873,18 @@ export const caraOpuesta: TipoPregunta = {
       const recta = (a[0] === b[0] && Math.abs(a[1] - b[1]) === 2) || (a[1] === b[1] && Math.abs(a[0] - b[0]) === 2)
       return recta && cs.some(([x, y]) => 2 * x === a[0] + b[0] && 2 * y === a[1] + b[1])
     }
-    const modo = azar()
+    // Fácil: la cara con su opuesta en línea, con un cuadrado en medio. Difícil: la opuesta en otra fila (si se puede).
+    const segunLinea = (ks: number[]) => {
+      const enL = ks.filter((k) => enLinea(k, opuesta(k)))
+      const lejos = ks.filter((k) => !enLinea(k, opuesta(k)))
+      return nivel === 1 && enL.length ? enL : nivel === 3 && lejos.length ? lejos : ks
+    }
+    const r = azar()
+    // Qué se pregunta: el número opuesto, el número del dado que falta o las tres caras del dado.
+    const modo = segun(nivel, r < 0.5 ? r : 0.6, r, r < 0.35 ? 0.2 : r < 0.6 ? 0.6 : 0.9)
     if (modo < 0.5) {
       const numeros = barajar(azar, [1, 2, 3, 4, 5, 6])
-      const i = entero(azar, 0, 5)
+      const i = nivel === 2 ? entero(azar, 0, 5) : elegir(azar, segunLinea(rango(6)))
       const j = opuesta(i)
       const dibujo = svg(W, H, dibujoPlantilla(cs, W, H, L, numeros.map(String)), `Plantilla de cubo con los números ${numeros.join(', ')}`)
       // Los errores: elegir una cara vecina en la plantilla (las que tocan al número).
@@ -1729,7 +1919,7 @@ export const caraOpuesta: TipoPregunta = {
     for (let par = 0; par < 3; par++) visibles.add(caras.indexOf(2 * par + (azar() < 0.5 ? 0 : 1)))
     const vacias = rango(6).filter((k) => !visibles.has(k))
     if (modo < 0.8) {
-      const i = elegir(azar, vacias)
+      const i = elegir(azar, nivel === 2 ? vacias : segunLinea(vacias))
       const textos = rango(6).map((k) => (visibles.has(k) ? String(valor[k]) : k === i ? '?' : null))
       const dibujo = svg(W, H, dibujoPlantilla(cs, W, H, L, textos), 'Plantilla de un dado con tres números y tres caras vacías, una con un signo de pregunta')
       return opciones(
@@ -1809,18 +1999,22 @@ export const perimetro: TipoPregunta = {
   queHacen: 'Calculan cuántos metros de alambre se necesitan para cercar un terreno (su perímetro), aunque solo tenga escritas algunas medidas.',
   citas: { [P4]: 'la longitud, el perímetro (metro y centímetro)' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: 3 o 4 lados con medidas chicas, o el rectángulo y el cuadrado con sus 4 medidas escritas. Difícil: 5 o 6
+  // lados con medidas más grandes, el rectángulo con 2 medidas, y al revés: el lado del cuadrado o el ancho del
+  // rectángulo sabiendo cuánto alambre se usó.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const terreno = elegir(azar, TERRENOS)
     const W = 420
     const H = 270
     const modo = azar()
     const conM = (alt: ReturnType<typeof altNum>) => conUnidad(alt, 'm')
-    if (modo < 0.4) {
-      const n = entero(azar, 3, 6)
+    if (modo < segun(nivel, 0.5, 0.4, 0.3)) {
+      const n = entero(azar, ...segun<[number, number]>(nivel, [3, 4], [3, 6], [5, 6]))
       const q = encajar(poligonoConvexo(azar, n, false), 70, 36, W - 140, H - 72)
       const largos = q.map((a, i) => dist(a, q[(i + 1) % n]))
-      const escala = Math.max(...largos) / entero(azar, 18, 42)
+      const escala = Math.max(...largos) / entero(azar, ...segun<[number, number]>(nivel, [8, 20], [18, 42], [35, 75]))
       const m = largos.map((l) => Math.max(4, Math.round(l / escala)))
       const P = m.reduce((s, x) => s + x, 0)
       const dibujo = svg(W, H, poligono(q, { relleno: VERDE, grosor: 3 }) + (terreno.plantas ? plantitas(q, azar, 5) : '') + medidasLados(q, m.map((x) => `${x} m`)), `Terreno de ${n} lados que miden ${m.join(', ')} metros`)
@@ -1829,13 +2023,15 @@ export const perimetro: TipoPregunta = {
         `${m.map(num).join(' + ')} = ${num(P)} m`,
       ])
     }
-    // Rectángulo o cuadrado: solo están escritas algunas medidas.
-    const cuadrado = modo >= 0.68
+    // Rectángulo o cuadrado: solo están escritas algunas medidas (en el fácil, las 4).
+    const caso = nivel === 1 ? (modo < 0.8 ? 'rect4' : 'cuad4') : nivel === 3 ? (modo < 0.55 ? 'rect' : modo < 0.75 ? 'inverso' : 'rectInverso') : modo < 0.68 ? 'rect' : modo < 0.84 ? 'cuad' : 'inverso'
+    const cuadrado = caso === 'cuad' || caso === 'cuad4' || caso === 'inverso'
+    const [c0, c1, x0r, x1r, y0r, y1r] = segun(nivel, [4, 15, 6, 20, 3, 12], [6, 30, 12, 40, 5, 25], [8, 40, 20, 60, 10, 40])
     const [l, a] = cuadrado
-      ? [entero(azar, 6, 30), 0]
+      ? [entero(azar, c0, c1), 0]
       : hasta((): [number, number] | null => {
-          const x = entero(azar, 12, 40)
-          const y = entero(azar, 5, 25)
+          const x = entero(azar, x0r, x1r)
+          const y = entero(azar, y0r, y1r)
           return y < x && x / y <= 3.2 ? [x, y] : null
         })
     const alto = cuadrado ? l : a
@@ -1850,6 +2046,34 @@ export const perimetro: TipoPregunta = {
       [x0, y0 + h],
     ]
     const base = poligono(q, { relleno: VERDE, grosor: 3 }) + esquinasRectas(q) + (terreno.plantas ? plantitas(q, azar, 5) : '')
+    if (caso === 'rect4' || caso === 'cuad4') {
+      // Las 4 medidas escritas: solo hay que sumarlas.
+      const lados = cuadrado ? [l, l, l, l] : [l, a, l, a]
+      const P = lados.reduce((s, x) => s + x, 0)
+      const dibujo = svg(W, H, base + medidasLados(q, lados.map((x) => `${x} m`)), cuadrado ? `Terreno cuadrado de ${l} m de lado, con sus 4 medidas` : `Terreno rectangular de ${l} m de largo y ${a} m de ancho, con sus 4 medidas`)
+      return opciones(
+        `perimetro-4:${lados.join('-')}`,
+        `${quien} quiere cercar ${terreno.cosa}. Tiene forma de ${cuadrado ? 'cuadrado' : 'rectángulo'} y están escritas las medidas de sus 4 lados.`,
+        dibujo,
+        '¿Cuántos metros de alambre necesita para dar una vuelta completa?',
+        conM(altNum(azar, P, cuadrado ? [l, 2 * l, 3 * l, P + 10, P - 10] : [l + a, 2 * l + a, l + 2 * a, P + 10, P - 10])),
+        ['Una vuelta completa es el perímetro: se suman sus 4 lados', `${lados.map(num).join(' + ')} = ${num(P)} m`],
+      )
+    }
+    if (caso === 'rectInverso') {
+      // Al revés: se sabe cuánto alambre se usó y el largo; falta el ancho.
+      const P = 2 * (l + a)
+      const dibujo = svg(W, H, base + medidasLados(q, [null, '? m', `${l} m`, null]), `Terreno rectangular de ${l} m de largo, con el ancho por averiguar`)
+      return opciones(
+        `perimetro-rect-inverso:${l}-${a}`,
+        `Para cercar ${terreno.cosa}, que tiene forma de rectángulo, ${quien} usó ${P} m de alambre en una vuelta. El largo mide ${l} m.`,
+        dibujo,
+        '¿Cuánto mide el ancho?',
+        conM(altNum(azar, a, [P - 2 * l, P - l, P / 2 - l + 2, l, a + 2, P / 4], 4, 1)),
+        [`Los dos largos: ${num(l)} + ${num(l)} = ${num(2 * l)} m`, `Para los dos anchos quedan: ${num(P)} − ${num(2 * l)} = ${num(P - 2 * l)} m`, `Cada ancho: ${num(P - 2 * l)} ÷ 2 = ${num(a)} m`],
+        `Los lados opuestos miden lo mismo: ${l} + ${a} + ${l} + ${a} = ${P}.`,
+      )
+    }
     if (!cuadrado) {
       const P = 2 * (l + a)
       const dibujo = svg(W, H, base + medidasLados(q, [null, `${a} m`, `${l} m`, null]), `Terreno rectangular de ${l} m de largo y ${a} m de ancho`)
@@ -1863,7 +2087,7 @@ export const perimetro: TipoPregunta = {
         `Los lados opuestos del rectángulo miden lo mismo: ${l} + ${a} + ${l} + ${a} = ${P}.`,
       )
     }
-    if (modo < 0.84) {
+    if (caso === 'cuad') {
       const P = 4 * l
       const dibujo = svg(W, H, base + medidasLados(q, [null, null, `${l} m`, null]), `Terreno cuadrado de ${l} m de lado`)
       return opciones(
@@ -1891,10 +2115,14 @@ export const perimetroCuadricula: TipoPregunta = {
   queHacen: 'Cuentan los lados de cuadradito del borde de figuras en la cuadrícula para hallar su perímetro, las comparan o dibujan una con el perímetro pedido.',
   citas: { [P4]: 'Expresa con material concreto o gráficos su comprensión sobre el perímetro' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: figuras de 3 a 6 cuadraditos; comparar solo dos; dibujar un rectángulo de 8 a 12 cm. Difícil: de 11 a 15
+  // cuadraditos; tres figuras con perímetros seguidos (de 2 en 2); dibujar un rectángulo con el perímetro y el ancho
+  // pedidos (un paso más: hallar el largo).
+  generar({ azar, nivel = 2 }) {
     const modo = azar()
     if (modo < 0.45) {
-      const n = entero(azar, 6, 12)
+      const n = entero(azar, ...segun<[number, number]>(nivel, [3, 6], [6, 12], [11, 15]))
       const cs = poliomino(azar, n, 8, 5).map(([x, y]): Celda => [x + 1, y + 1])
       const P = perimetroCeldas(cs)
       const L = 30
@@ -1919,12 +2147,14 @@ export const perimetroCuadricula: TipoPregunta = {
     }
     if (modo < 0.8) {
       // Tres figuras con los mismos cuadraditos y distinto perímetro.
-      // Con 6 a 8 cuadraditos hay al menos tres perímetros posibles (con 5, solo dos).
-      const n = entero(azar, 6, 8)
+      // Con 6 a 8 cuadraditos hay al menos tres perímetros posibles (con 5, solo dos). Fácil: solo dos figuras.
+      const cuantas = nivel === 1 ? 2 : 3
+      const n = entero(azar, ...segun<[number, number]>(nivel, [4, 6], [6, 8], [8, 10]))
       const figuras = intentar(200, () => {
-        const fs = rango(3).map(() => poliomino(azar, n, 5, 4))
+        const fs = rango(cuantas).map(() => poliomino(azar, n, 5, 4))
         const ps = fs.map(perimetroCeldas)
-        return new Set(ps).size === 3 ? { fs, ps } : null
+        // Difícil: perímetros seguidos, que se diferencian en 2 cm.
+        return new Set(ps).size === cuantas && (nivel !== 3 || Math.max(...ps) - Math.min(...ps) === 4) ? { fs, ps } : null
       })
       if (!figuras) return null
       const L = 24
@@ -1943,14 +2173,14 @@ export const perimetroCuadricula: TipoPregunta = {
         }),
         W,
         H,
-        `Tres figuras de ${n} cuadraditos cada una, con perímetros ${figuras.ps.join(', ')}`,
+        `${cuantas === 2 ? 'Dos' : 'Tres'} figuras de ${n} cuadraditos cada una, con perímetros ${figuras.ps.join(', ')}`,
       )
       return opciones(
         `perim-tres:${mayor}:${figuras.fs.map(firmaCeldas).join('|')}`,
-        `Las tres figuras tienen ${n} cuadraditos. Cada lado de un cuadradito mide 1 cm.`,
+        `Las ${cuantas === 2 ? 'dos' : 'tres'} figuras tienen ${n} cuadraditos. Cada lado de un cuadradito mide 1 cm.`,
         dibujo,
         mayor ? '¿Cuál tiene el mayor perímetro?' : '¿Cuál tiene el menor perímetro?',
-        cual('Figura', 3, figuras.ps.indexOf(busca)),
+        cual('Figura', cuantas, figuras.ps.indexOf(busca)),
         [
           'En cada figura se cuentan los lados de cuadradito del borde',
           `Perímetro ${figuras.ps.map((p, i) => `de ${LETRAS[i]}: ${num(p)} cm`).join('; ')}`,
@@ -1959,8 +2189,26 @@ export const perimetroCuadricula: TipoPregunta = {
         `Perímetros: ${figuras.ps.map((p, i) => `${LETRAS[i]} = ${p} cm`).join(', ')}.`,
       )
     }
-    const P = elegir(azar, [10, 12, 14, 16, 18])
+    const P = elegir(azar, segun(nivel, [8, 10, 12], [10, 12, 14, 16, 18], [14, 16, 18, 20, 22]))
     const L = 28
+    if (nivel === 3) {
+      // Con el ancho pedido, el rectángulo es uno solo: largo = la mitad del perímetro − el ancho.
+      const ancho = entero(azar, 2, Math.min(4, Math.ceil(P / 4) - 1))
+      const largo = P / 2 - ancho
+      return {
+        forma: 'abierta',
+        clave: `dibuja-perimetro-ancho:${P}:${ancho}`,
+        enunciado: `Cada lado de un cuadradito mide 1 cm. Dibuja en la cuadrícula un rectángulo de ${P} cm de perímetro que tenga ${ancho} cm de ancho.`,
+        dibujo: svg(12 * L + 8, 7 * L + 8, rejilla(4, 4, 12, 7, L), 'Una cuadrícula vacía'),
+        respuesta: `Un rectángulo de ${largo} cuadraditos de largo y ${ancho} de ancho.`,
+        espacio: 'dibujo',
+        pasos: [
+          `Perímetro: largo + ancho + largo + ancho = ${num(P)} cm`,
+          `Entonces largo + ancho = ${num(P)} ÷ 2 = ${num(P / 2)} cuadraditos`,
+          `Largo: ${num(P / 2)} − ${num(ancho)} = ${num(largo)}; comprobación: ${num(largo)} + ${num(ancho)} + ${num(largo)} + ${num(ancho)} = ${num(P)}`,
+        ],
+      }
+    }
     const medidas = rango(P / 2 - 1)
       .map((i) => [i + 1, P / 2 - i - 1])
       .filter(([x, y]) => x <= y && y <= 11)
@@ -2022,13 +2270,16 @@ export const superficieContar: TipoPregunta = {
   queHacen: 'Miden la superficie de figuras y pisos contando unidades cuadradas (cuadraditos o losetas), también con mitades.',
   citas: { [P4]: 'la superficie (unidades patrón)' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: de 4 a 8 cuadraditos enteros, sin mitades; un piso chico y solo cuántas losetas lleva. Difícil: de 9 a 14
+  // cuadraditos siempre con mitades; un piso más grande y cuántas losetas faltan (un paso más).
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     if (azar() < 0.55) {
-      const n = entero(azar, 6, 13)
+      const n = entero(azar, ...segun<[number, number]>(nivel, [4, 8], [6, 13], [9, 14]))
       const cs = poliomino(azar, n, 7, 4).map(([x, y]): Celda => [x + 2, y + 2])
       const s = conjunto(cs)
-      const k = azar() < 0.45 ? elegir(azar, [2, 2, 4]) : 0
+      const k = nivel === 1 ? 0 : nivel === 3 ? elegir(azar, [2, 4]) : azar() < 0.45 ? elegir(azar, [2, 2, 4]) : 0
       const mitades: Mitad[] = []
       const usadas = new Set<string>()
       for (let intento = 0; intento < 200 && mitades.length < k; intento++) {
@@ -2063,10 +2314,10 @@ export const superficieContar: TipoPregunta = {
       )
     }
     // El piso de la sala con losetas: ya se puso una fila y una columna.
-    const a = entero(azar, 6, 9)
-    const b = entero(azar, 4, 6)
+    const a = entero(azar, ...segun<[number, number]>(nivel, [4, 6], [6, 9], [7, 10]))
+    const b = entero(azar, ...segun<[number, number]>(nivel, [3, 4], [4, 6], [5, 7]))
     const L = 34
-    const extra = entero(azar, 0, a - 3)
+    const extra = nivel === 1 ? 0 : entero(azar, 0, a - 3)
     const puestas: Celda[] = [...rango(a).map((x): Celda => [x, 0]), ...rango(b - 1).map((y): Celda => [0, y + 1]), ...rango(extra).map((x): Celda => [x + 1, 1])]
     const x0 = 24
     const y0 = 20
@@ -2074,7 +2325,7 @@ export const superficieContar: TipoPregunta = {
     const dibujo = svg(a * L + 2 * x0, b * L + 2 * y0, cuerpo, `Piso de ${a} por ${b} losetas con ${puestas.length} losetas puestas`)
     const t = a * b
     const filaYColumna = [`La fila completa tiene ${num(a)} losetas y la columna, ${num(b)}`, `Todo el piso tiene ${num(b)} filas de ${num(a)}: ${num(a)} × ${num(b)} = ${num(t)}`]
-    if (azar() < 0.5) {
+    if (azar() < segun(nivel, 1, 0.5, 0)) {
       return opciones(`losetas-total:${a}x${b}:${extra}`, `En la sala de ${quien} están poniendo losetas cuadradas iguales. Ya pusieron una fila y una columna completas.`, dibujo, '¿Cuántas losetas tendrá el piso cuando esté completo?', altNum(azar, t, [a + b, puestas.length, 2 * (a + b), t - puestas.length, a * (b - 1)]), filaYColumna)
     }
     const f = t - puestas.length
@@ -2101,7 +2352,8 @@ export const masExtenso: TipoPregunta = {
   queHacen: 'Comparan la superficie de figuras en la cuadrícula ("es más extensa que", "es menos extensa que") y ven que con las mismas piezas la superficie se conserva.',
   citas: { [P4]: 'estableciendo “es más extenso que”, “es menos extenso que” (superficie asociada a la noción de extensión) y su conservación' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
     const centrar = (cs: Celda[], cols: number, filas: number) => {
       const mx = Math.min(...cs.map((c) => c[0]))
       const my = Math.min(...cs.map((c) => c[1]))
@@ -2110,8 +2362,10 @@ export const masExtenso: TipoPregunta = {
       return cs.map(([x, y]): Celda => [x - mx + Math.floor((cols - w) / 2), y - my + Math.floor((filas - h) / 2)])
     }
     if (azar() < 0.58) {
-      const k = entero(azar, 6, 9)
-      const ns = barajar(azar, [k, k + 1, k + elegir(azar, [2, 3])])
+      // Fácil: se diferencian en 3 cuadraditos o más (se nota a simple vista). Difícil: más grandes y de 1 en 1 (hay
+      // que contar con cuidado).
+      const k = entero(azar, ...segun<[number, number]>(nivel, [3, 5], [6, 9], [9, 11]))
+      const ns = barajar(azar, nivel === 1 ? [k, k + 3, k + 6] : nivel === 3 ? [k, k + 1, k + 2] : [k, k + 1, k + elegir(azar, [2, 3])])
       const fs = ns.map((n) => centrar(poliomino(azar, n, 5, 4), 6, 5))
       const L = 24
       const mas = azar() < 0.6
@@ -2136,12 +2390,13 @@ export const masExtenso: TipoPregunta = {
         `Cuadraditos: ${ns.map((n, i) => `${LETRAS[i]} = ${n}`).join(', ')}.`,
       )
     }
-    // Conservación: las mismas piezas en otra forma ocupan lo mismo.
-    const n = entero(azar, 6, 10)
+    // Conservación: las mismas piezas en otra forma ocupan lo mismo. Fácil: si no son iguales, se diferencian en 2 o 3
+    // cuadraditos. Difícil: figuras más grandes.
+    const n = entero(azar, ...segun<[number, number]>(nivel, [4, 7], [6, 10], [10, 13]))
     const iguales = azar() < 0.55
     const [f1, f2] = hasta(() => {
       const a = poliomino(azar, n, 6, 4)
-      const b = poliomino(azar, iguales ? n : n + elegir(azar, [1, -1]), 6, 4)
+      const b = poliomino(azar, iguales ? n : n + elegir(azar, nivel === 1 ? [2, 3, -2] : [1, -1]), 6, 4)
       return firmaCeldas(a) !== firmaCeldas(b) ? [centrar(a, 7, 5), centrar(b, 7, 5)] : null
     })
     const L = 26
@@ -2239,20 +2494,23 @@ export const vasosJarra: TipoPregunta = {
   queHacen: 'Calculan cuántas veces se llena un vaso de 1/2 L o de 1/4 L con una jarra o una botella, y al revés.',
   citas: { [P4]: 'la medida de capacidad de los recipientes para determinar cuántas veces se puede llenar uno con el otro' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: una jarra o botella de 1 L o 2 L y vasos de 1/2 L (2 por litro); al revés, con pocos vasos de 1/2 L.
+  // Difícil: 2 o 3 recipientes y vasos de 1/4 L (4 por litro); al revés, con 8 o 12 vasos de 1/4 L.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const bebida = elegir(azar, BEBIDAS)
     const modo = azar()
     const piso = 168
-    if (modo < 0.72) {
-      const varios = modo >= 0.48
+    if (modo < segun(nivel, 0.72, 0.72, 0.6)) {
+      const varios = nivel === 3 || (nivel === 2 && modo >= 0.48)
       const g = elegir(
         azar,
-        GRANDES.filter((r) => !varios || r.cap <= 2),
+        GRANDES.filter((r) => (nivel === 2 ? !varios || r.cap <= 2 : r.cap >= 1 && r.cap <= 2)),
       )
       const v = elegir(
         azar,
-        VASOS.filter((x) => x.cap < g.cap),
+        VASOS.filter((x) => (nivel === 2 ? x.cap < g.cap : x.cap === segun(nivel, 0.5, 0.5, 0.25))),
       )
       const k = varios ? entero(azar, 2, g.cosa === 'jarra' ? 2 : 3) : 1
       const n = (k * g.cap) / v.cap
@@ -2286,8 +2544,8 @@ export const vasosJarra: TipoPregunta = {
       )
     }
     // Al revés: con n vasos se llenó la jarra. ¿Cuántos litros tiene?
-    const v = elegir(azar, VASOS)
-    const litros = entero(azar, 1, 3)
+    const v = nivel === 2 ? elegir(azar, VASOS) : VASOS[nivel === 1 ? 0 : 1]
+    const litros = entero(azar, ...segun<[number, number]>(nivel, [1, 2], [1, 3], [2, 3]))
     const n = litros / v.cap
     const partes = [jarra(32, piso - 130, 80, 130), texto(72, piso + 18, '? L', { tam: 16, peso: 700 })]
     const porFila = 6
@@ -2345,8 +2603,11 @@ function pasosBotellas(k1: number, k2: number, k4: number): string[] {
   return pasos
 }
 
-/** Jarra medidora de 1 L: rayitas en cada cuarto de litro, solo con "1/2 L" y "1 L" escritos. */
-function jarraMedidora(nivel: number, relleno: string) {
+/**
+ * Jarra medidora de 1 L: rayitas en cada cuarto de litro, solo con "1/2 L" y "1 L" escritos (`rotulos` 'mitad'). Con
+ * 'todos', cada rayita con su medida (más fácil); con 'litro', solo "1 L" (hay que contar las rayitas).
+ */
+function jarraMedidora(nivel: number, relleno: string, rotulos: 'todos' | 'mitad' | 'litro' = 'mitad') {
   const [x, y, w, h] = [130, 26, 112, 204]
   const arriba = y + 22
   const abajo = y + h - 4
@@ -2368,7 +2629,7 @@ function jarraMedidora(nivel: number, relleno: string) {
   for (const f of [0.25, 0.5, 0.75, 1]) {
     const larga = f === 0.5 || f === 1
     partes.push(linea(x, yDe(f), x + (larga ? 34 : 20), yDe(f), { grosor: 2.4 }))
-    if (larga) partes.push(texto(x - 10, yDe(f), f === 1 ? '1 L' : '1/2 L', { tam: 16, peso: 700, ancla: 'end' }))
+    if (rotulos === 'todos' || (larga && (rotulos === 'mitad' || f === 1))) partes.push(texto(x - 10, yDe(f), FRACCIONES_LITRO[f * 4 - 1], { tam: 16, peso: 700, ancla: 'end' }))
   }
   return svg(320, 250, partes.join(''), `Jarra medidora de 1 litro llena hasta la marca de ${FRACCIONES_LITRO[nivel * 4 - 1]}`)
 }
@@ -2379,14 +2640,17 @@ export const capacidadLitro: TipoPregunta = {
   queHacen: 'Leen cuánto hay en una jarra medidora (1/4, 1/2 o 3/4 de litro) y suman botellas de 1 L, 1/2 L y 1/4 L.',
   citas: { [P4]: 'la capacidad (en litro y con fracciones)' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: la jarra con cada rayita escrita y solo "¿cuánto hay?"; botellas de 1 L y 1/2 L. Difícil: solo está escrito
+  // "1 L" (se cuentan las rayitas) y siempre "¿cuánto falta?"; botellas de 1 L, 1/2 L y 1/4 L juntas.
+  generar({ azar, nivel: dificultad = 2 }) {
     const quien = nombre(azar)
     const bebida = elegir(azar, BEBIDAS)
     const modo = azar()
     if (modo < 0.55) {
       const nivel = elegir(azar, [0.25, 0.5, 0.75])
-      const falta = modo >= 0.33
-      const dibujo = jarraMedidora(nivel, elegir(azar, [AZUL, LILA, ARENA]))
+      const falta = segun(dificultad, false, modo >= 0.33, true)
+      const dibujo = jarraMedidora(nivel, elegir(azar, [AZUL, LILA, ARENA]), segun(dificultad, 'todos', 'mitad', 'litro'))
       const r = falta ? 1 - nivel : nivel
       // En cuartos de litro: cuántas rayitas hay hasta el nivel y cuántas faltan para 1 L.
       const [llega, faltan] = [nivel * 4, 4 - nivel * 4]
@@ -2394,18 +2658,30 @@ export const capacidadLitro: TipoPregunta = {
         `medidora:${falta}:${nivel}`,
         `${quien} echó ${bebida} en una jarra medidora de 1 litro.`,
         dibujo,
-        falta ? '¿Cuánto le falta para tener 1 litro?' : `¿Cuánta ${bebida} hay en la jarra?`,
+        // (El nivel 2 queda como siempre, para que las hojas guardadas no cambien.)
+        falta ? '¿Cuánto le falta para tener 1 litro?' : `¿${dificultad !== 2 && /^(refresco|emoliente)/.test(bebida) ? 'Cuánto' : 'Cuánta'} ${bebida} hay en la jarra?`,
         { alternativas: FRACCIONES_LITRO, correcta: r * 4 - 1 },
         [
           'Hasta 1 L hay 4 rayitas, a la misma distancia: cada una sube 1/4 L',
           `El nivel llega a ${plural(llega, 'rayita', 'rayitas')} de 1/4 L: ${FRACCIONES_LITRO[llega - 1]}`,
           ...(falta ? [`Hasta 1 L ${faltan === 1 ? 'falta' : 'faltan'} ${plural(faltan, 'rayita', 'rayitas')} de 1/4 L: ${FRACCIONES_LITRO[faltan - 1]}`] : []),
         ],
-        'Entre 0 y 1/2 L hay dos rayitas iguales: cada una es 1/4 L.',
+        segun(dificultad, 'Cada rayita tiene escrita su medida: 1/4 L, 1/2 L, 3/4 L y 1 L.', 'Entre 0 y 1/2 L hay dos rayitas iguales: cada una es 1/4 L.', 'Hasta 1 L hay 4 rayitas iguales: cada una es 1/4 L.'),
       )
     }
-    // Botellas de 1 L, 1/2 L y 1/4 L: ¿cuántos litros hay en total?
+    // Botellas de 1 L, 1/2 L y 1/4 L: ¿cuántos litros hay en total? Fácil: solo de 1 L y de 1/2 L (de a 2). Difícil:
+    // de las tres medidas a la vez.
+    const anchoBotellas = (c: number[]) => 16 + c.reduce((s, k, i) => s + (k ? k * ([44, 34, 28][i] + 12) + 16 : 0), 0)
     const [k1, k2, k4] = hasta((): [number, number, number] | null => {
+      if (dificultad === 1) {
+        const c: [number, number, number] = [entero(azar, 1, 3), elegir(azar, [2, 4]), 0]
+        return c[0] + c[1] / 2 <= 5 ? c : null
+      }
+      if (dificultad === 3) {
+        const c: [number, number, number] = [entero(azar, 1, 3), entero(azar, 1, 4), entero(azar, 1, 6)]
+        const total = c[0] + c[1] / 2 + c[2] / 4
+        return Number.isInteger(total) && total >= 2 && total <= 6 && c[0] + c[1] + c[2] <= 12 && anchoBotellas(c) <= 620 ? c : null
+      }
       const c = [entero(azar, 0, 3), entero(azar, 0, 4), entero(azar, 0, 6)] as [number, number, number]
       const tipos = c.filter((x) => x > 0).length
       const total = c[0] + c[1] / 2 + c[2] / 4
@@ -2518,13 +2794,19 @@ export const convertirLongitud: TipoPregunta = {
   queHacen: 'Convierten medidas de objetos del aula y de la chacra de metros y centímetros a centímetros, y al revés (1 m = 100 cm).',
   citas: { [P4]: 'y hace conversiones de unidades de longitud' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: los centímetros de 10 en 10 (1 m y 50 cm); la cinta, con medidas de 10 en 10. Difícil: con cero en medio
+  // (2 m y 5 cm = 205 cm, el error es 25 cm); la cinta, de hasta 9 m y con cualquier medida usada.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const modo = azar()
     if (modo < 0.75) {
-      const o = elegir(azar, MEDIBLES)
+      // Difícil: solo lo que puede medir 2 m y unos pocos centímetros (la puerta, la pizarra, la soga).
+      const o = elegir(azar, nivel === 3 ? MEDIBLES.filter((m) => m.max >= 201 && m.min <= 209) : MEDIBLES)
       const N = hasta(() => {
         const x = entero(azar, o.min, o.max)
+        if (nivel === 1) return x % 100 !== 0 && x % 10 === 0 ? x : null
+        if (nivel === 3) return x % 100 >= 1 && x % 100 <= 9 ? x : null
         return x % 100 !== 0 && (x % 100 >= 10 || azar() < 0.3) ? x : null
       })
       const M = Math.floor(N / 100)
@@ -2552,10 +2834,10 @@ export const convertirLongitud: TipoPregunta = {
       )
     }
     // Compró M metros de cinta y usó C centímetros: ¿cuánto le queda?
-    const M = entero(azar, 2, 5)
+    const M = entero(azar, ...segun<[number, number]>(nivel, [1, 3], [2, 5], [3, 9]))
     const C = hasta(() => {
-      const x = entero(azar, 5, 20 * M - 5) * 5
-      return x % 100 ? x : null
+      const x = nivel === 1 ? entero(azar, 1, 10 * M - 1) * 10 : nivel === 3 ? entero(azar, 101, 100 * M - 1) : entero(azar, 5, 20 * M - 5) * 5
+      return x % 100 && (nivel !== 3 || x % 5) ? x : null
     })
     const queda = 100 * M - C
     const L = 480
@@ -2609,47 +2891,81 @@ export const compararLongitudes: TipoPregunta = {
   queHacen: 'Comparan y restan medidas escritas en metros y centímetros o solo en centímetros, convirtiéndolas primero a la misma unidad.',
   citas: { [P4]: 'y hace conversiones de unidades de longitud' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: marcas bien separadas (15 cm o más) y sin ceros en medio; plantas con medidas de 10 en 10. Difícil: 4
+  // estudiantes con marcas muy cercanas, alguna con cero en medio (1 m y 5 cm); la planta baja escrita en "m y cm".
+  generar({ azar, nivel = 2 }) {
     if (azar() < 0.55) {
       // Salto largo: unas marcas en "m y cm" y otras en "cm".
-      const nombres = barajar(azar, ['Daniel', 'Lucía', 'Mateo', 'Valeria', 'Yaku', 'Killa', 'Inti', 'Rosa', 'Kevin', 'Ximena', 'Piero', 'Camila']).slice(0, 3)
+      const cuantos = nivel === 3 ? 4 : 3
+      const nombres = barajar(azar, ['Daniel', 'Lucía', 'Mateo', 'Valeria', 'Yaku', 'Killa', 'Inti', 'Rosa', 'Kevin', 'Ximena', 'Piero', 'Camila']).slice(0, cuantos)
       const [valores, formatos] = hasta((): [number[], boolean[]] | null => {
-        const v = rango(3).map(() => entero(azar, 92, 196))
-        if (new Set(v).size < 3 || Math.max(...v) - Math.min(...v) < 8) return null
-        const f = v.map((x) => x >= 105 && azar() < 0.55)
+        const v = rango(cuantos).map(() => (nivel === 3 ? entero(azar, 95, 135) : entero(azar, 92, 196)))
+        if (new Set(v).size < cuantos || Math.max(...v) - Math.min(...v) < 8) return null
+        if (nivel === 1) {
+          const orden = [...v].sort((p, q) => p - q)
+          if (orden[1] - orden[0] < 15 || orden[2] - orden[1] < 15 || v.some((x) => x >= 100 && x <= 109)) return null
+        }
+        const f = v.map((x) => x >= (nivel === 3 ? 101 : 105) && azar() < 0.55)
         // Al menos una marca en "m y cm" y otra solo en "cm"; y la mayor no siempre en "m y cm".
+        if (nivel === 3 && !v.some((x, i) => f[i] && x <= 109)) return null
         return f.some(Boolean) && f.some((x) => !x) ? [v, f] : null
       })
       const marca = (i: number) => (formatos[i] ? `1 m y ${valores[i] - 100} cm` : `${valores[i]} cm`)
-      const H = 58 + 3 * 42
-      const filas = rango(3)
+      const H = 58 + cuantos * 42
+      const filas = rango(cuantos)
         .map((i) => linea(20, 58 + i * 42, 380, 58 + i * 42, { trazo: GRIS, grosor: 1.4 }) + texto(36, 79 + i * 42, nombres[i], { tam: 16, peso: 700, ancla: 'start' }) + texto(364, 79 + i * 42, marca(i), { tam: 16, peso: 700, ancla: 'end' }))
         .join('')
-      const dibujo = svg(400, H + 14, rect(10, 8, 380, H, { relleno: '#ffffff', grosor: 2.6, redondeo: 8 }) + texto(200, 33, 'Salto largo', { tam: 18, peso: 700 }) + filas, `Tabla de salto largo: ${rango(3).map((i) => `${nombres[i]} ${marca(i)}`).join(', ')}`)
+      const dibujo = svg(400, H + 14, rect(10, 8, 380, H, { relleno: '#ffffff', grosor: 2.6, redondeo: 8 }) + texto(200, 33, 'Salto largo', { tam: 18, peso: 700 }) + filas, `Tabla de salto largo: ${rango(cuantos).map((i) => `${nombres[i]} ${marca(i)}`).join(', ')}`)
       const mas = azar() < 0.65
       const busca = mas ? Math.max(...valores) : Math.min(...valores)
       const i = valores.indexOf(busca)
       return opciones(
         `salto:${mas}:${valores.join('-')}:${formatos.map(Number).join('')}`,
-        'En Educación Física, tres estudiantes hicieron salto largo. Estas son sus marcas.',
+        `En Educación Física, ${cuantos === 4 ? 'cuatro' : 'tres'} estudiantes hicieron salto largo. Estas son sus marcas.`,
         dibujo,
         mas ? '¿Quién saltó más lejos?' : '¿Quién saltó menos?',
-        alternativas(azar, nombres[i], nombres.filter((_, k) => k !== i), 3),
+        alternativas(azar, nombres[i], nombres.filter((_, k) => k !== i), cuantos),
         [
-          `1 m = 100 cm: ${rango(3)
+          `1 m = 100 cm: ${rango(cuantos)
             .filter((k) => formatos[k])
             .map((k) => `${marca(k)} = ${num(valores[k])} cm`)
             .join('; ')}`,
-          `Todo en cm: ${lista(rango(3).map((k) => `${nombres[k]} ${num(valores[k])}`))}`,
+          `Todo en cm: ${lista(rango(cuantos).map((k) => `${nombres[k]} ${num(valores[k])}`))}`,
           `${mas ? 'Saltó más lejos' : 'Saltó menos'} (${num(busca)} cm): ${nombres[i]}`,
         ],
-        `En centímetros: ${rango(3).map((k) => `${nombres[k]} ${valores[k]} cm`).join(', ')}.`,
+        `En centímetros: ${rango(cuantos).map((k) => `${nombres[k]} ${valores[k]} cm`).join(', ')}.`,
       )
     }
-    // ¿Cuántos centímetros más alta es una planta que la otra?
-    const alta = entero(azar, 118, 190)
-    const baja = entero(azar, 55, 98)
+    // ¿Cuántos centímetros más alta es una planta que la otra? Fácil: de 10 en 10. Difícil: la alta en cm y la baja en
+    // "m y cm" (a veces con cero en medio): hay que pasar la baja a cm.
+    const alta = nivel === 1 ? entero(azar, 12, 19) * 10 : entero(azar, ...segun<[number, number]>(nivel, [118, 190], [118, 190], [150, 195]))
+    const baja = nivel === 1 ? entero(azar, 6, 9) * 10 : nivel === 3 ? (azar() < 0.5 ? entero(azar, 101, 109) : entero(azar, 110, 140)) : entero(azar, 55, 98)
     if (alta % 100 === 0) return null
+    if (nivel === 3) {
+      const d = alta - baja
+      const [ta, tb] = azar() < 0.5 ? (['maiz', 'girasol'] as const) : (['girasol', 'maiz'] as const)
+      const nombreDe = { maiz: 'el maíz', girasol: 'el girasol' }
+      const piso = 286
+      const k = 220 / 190
+      const etiqueta = (x: number, alto: number, t: string) => {
+        const tw = anchoTexto(t, 15) + 16
+        return rect(x - tw / 2, piso - alto - 38, tw, 26, { relleno: '#ffffff', grosor: 1.6, redondeo: 6 }) + texto(x, piso - alto - 25, t, { tam: 15, peso: 700 })
+      }
+      const cuerpo = linea(20, piso, 380, piso, { grosor: 2 }) + planta(ta, 120, piso, alta * k) + planta(tb, 280, piso, baja * k) + etiqueta(120, alta * k, `${alta} cm`) + etiqueta(280, baja * k, mYcm(baja))
+      const quien = nombre(azar)
+      const C = baja % 100
+      return opciones(
+        `plantas-cm:${ta}:${alta}:${baja}`,
+        `${quien} midió dos plantas del biohuerto: ${nombreDe[ta]} y ${nombreDe[tb]}.`,
+        svg(400, piso + 8, cuerpo, `${mayus(nombreDe[ta])} mide ${alta} cm y ${nombreDe[tb]} mide ${mYcm(baja)}`),
+        `¿Cuántos centímetros más alto es ${nombreDe[ta]} que ${nombreDe[tb]}?`,
+        // Los errores: leer "1 m y 5 cm" como 15 o como 150, o restar solo los centímetros.
+        conUnidad(altNum(azar, d, [alta - (10 + C), alta - (C < 10 ? 100 + 10 * C : C), alta - C, d + 10, d - 10], 4, 1), 'cm'),
+        [`${mayus(nombreDe[tb])}: ${mYcm(baja)} = 100 + ${num(C)} = ${num(baja)} cm`, `Diferencia: ${num(alta)} − ${num(baja)} = ${num(d)} cm`],
+        `${mYcm(baja)} = ${baja} cm, y ${alta} − ${baja} = ${d}.`,
+      )
+    }
     const d = alta - baja
     const [ta, tb] = azar() < 0.5 ? (['maiz', 'girasol'] as const) : (['girasol', 'maiz'] as const)
     const nombreDe = { maiz: 'el maíz', girasol: 'el girasol' }
@@ -2763,7 +3079,10 @@ export const traslacion: TipoPregunta = {
   queHacen: 'Cuentan cuántos cuadros y hacia dónde se trasladó una figura en la cuadrícula, o la dibujan trasladada.',
   citas: { [P4]: 'el uso de las cuadrículas, para construir formas simétricas, ubicar objetos y trasladar figuras' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: se mueve hacia un solo lado (solo a los costados o solo hacia arriba o abajo). Difícil: siempre hacia los
+  // dos lados, de 3 a 8 cuadros a los costados y de 2 a 4 hacia arriba o abajo.
+  generar({ azar, nivel = 2 }) {
     const COLS = 15
     const FILAS = 9
     const L = 26
@@ -2773,8 +3092,19 @@ export const traslacion: TipoPregunta = {
       const f = transformar(azar, elegir(azar, FIGURAS_TRASLADO))
       const [w, h] = anchoAlto(f)
       const tipo = azar()
-      const dx = tipo < 0.85 ? elegir(azar, [1, -1]) * entero(azar, 2, 8) : 0
-      const dy = tipo < 0.3 ? 0 : elegir(azar, [1, -1]) * entero(azar, tipo >= 0.85 ? 3 : 1, 4)
+      let dx: number
+      let dy: number
+      if (nivel === 1) {
+        const costado = tipo < 0.5
+        dx = costado ? elegir(azar, [1, -1]) * entero(azar, 2, 7) : 0
+        dy = costado ? 0 : elegir(azar, [1, -1]) * entero(azar, 2, 5)
+      } else if (nivel === 3) {
+        dx = elegir(azar, [1, -1]) * entero(azar, 3, 8)
+        dy = elegir(azar, [1, -1]) * entero(azar, 2, 4)
+      } else {
+        dx = tipo < 0.85 ? elegir(azar, [1, -1]) * entero(azar, 2, 8) : 0
+        dy = tipo < 0.3 ? 0 : elegir(azar, [1, -1]) * entero(azar, tipo >= 0.85 ? 3 : 1, 4)
+      }
       const ax = entero(azar, 0, COLS - w)
       const ay = entero(azar, 0, FILAS - h)
       const [bx, by] = [ax + dx, ay + dy]
@@ -2844,7 +3174,10 @@ export const traslacionCual: TipoPregunta = {
   queHacen: 'Distinguen la traslación (mover sin girar ni voltear) de una figura girada o volteada, y ubican dónde queda una figura trasladada.',
   citas: { [P4]: 'así como la traslación de los objetos o figuras' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: las que no son traslación están giradas (se nota más que volteadas); al ubicarla, se movió hacia un solo
+  // lado. Difícil: las dos están volteadas (como en un espejo); al ubicarla, cuatro copias en vez de tres.
+  generar({ azar, nivel = 2 }) {
     const L = 24
     // Margen para que las letras de las esquinas no se corten.
     const x0 = 16
@@ -2870,7 +3203,9 @@ export const traslacionCual: TipoPregunta = {
         )
           .map(([g, como]) => ({ g: transformarA0(g), como }))
           .filter((m) => firmaPuntos(m.g) !== firma)
-        const distintas = barajar(azar, opcionesMalas)
+        const giradas = opcionesMalas.filter((m) => m.como === 'girada')
+        const volteadas = opcionesMalas.filter((m) => m.como !== 'girada')
+        const distintas = nivel === 1 ? barajar(azar, giradas) : nivel === 3 ? [...barajar(azar, volteadas), ...barajar(azar, giradas)] : barajar(azar, opcionesMalas)
         const m1 = distintas[0]
         const m2 = distintas.find((m) => firmaPuntos(m.g) !== firmaPuntos(m1.g))
         if (!m1 || !m2) return null
@@ -2901,34 +3236,45 @@ export const traslacionCual: TipoPregunta = {
         ],
       )
     }
-    // ¿En qué lugar quedó? Tres copias en distintos lugares.
-    const COLS = 16
+    // ¿En qué lugar quedó? Tres copias en distintos lugares (en el difícil, cuatro, en una cuadrícula más ancha).
+    const COLS = nivel === 3 ? 20 : 16
     const FILAS = 9
+    const copias = nivel === 3 ? 4 : 3
     const caso = intentar(300, () => {
       const f = transformar(azar, elegir(azar, FIGURAS_TRASLADO))
       const [w, h] = anchoAlto(f)
+      // Fácil: solo a los costados.
       const dx = elegir(azar, [1, -1]) * entero(azar, 3, 8)
-      const dy = elegir(azar, [1, -1]) * entero(azar, 1, 4)
+      const dy = nivel === 1 ? 0 : elegir(azar, [1, -1]) * entero(azar, nivel === 3 ? 2 : 1, 4)
       if (Math.abs(dx) === Math.abs(dy)) return null
       const ax = entero(azar, 0, COLS - w)
       const ay = entero(azar, 0, FILAS - h)
-      const malas: [number, number][] = barajar(azar, [
-        [signo(dx) * Math.abs(dy), signo(dy) * Math.abs(dx)],
-        [dx, -dy],
-        [-dx, dy],
-        [dx + signo(dx), dy],
-      ])
+      const s = nivel === 1 ? elegir(azar, [1, -1]) : 1
+      const malas: [number, number][] =
+        nivel === 1
+          ? barajar(azar, [
+              [-dx, 0],
+              [dx, s * (h + 1)],
+              [0, s * (h + 1)],
+              [dx, -s * (h + 1)],
+            ])
+          : barajar(azar, [
+              [signo(dx) * Math.abs(dy), signo(dy) * Math.abs(dx)],
+              [dx, -dy],
+              [-dx, dy],
+              nivel === 3 ? [-dx, -dy] : [dx + signo(dx), dy],
+            ])
       const lugares: [number, number][] = []
       // Cada copia en su sitio: sin tocar al modelo ni a las otras copias.
       const libre = (cx: number, cy: number) => cx >= 0 && cy >= 0 && cx + w <= COLS && cy + h <= FILAS && [[0, 0] as [number, number], ...lugares].every(([ex, ey]) => Math.abs(ax + ex - cx) > w || Math.abs(ay + ey - cy) > h)
       if (!libre(ax + dx, ay + dy)) return null
       lugares.push([dx, dy])
-      for (const m of malas) if (lugares.length < 3 && libre(ax + m[0], ay + m[1])) lugares.push(m)
-      return lugares.length === 3 ? { f, w, h, ax, ay, dx, dy, lugares } : null
+      for (const m of malas) if (lugares.length < copias && libre(ax + m[0], ay + m[1])) lugares.push(m)
+      return lugares.length === copias ? { f, w, h, ax, ay, dx, dy, lugares } : null
     })
     if (!caso) return null
     const { f, w, h, ax, ay, dx, dy, lugares } = caso
-    const orden = barajar(azar, [0, 1, 2])
+    const orden = barajar(azar, rango(copias))
     const partes = [rejilla(x0, y0, COLS, FILAS, L), figuraEn(f, ax, ay, x0, y0, L, PINTA)]
     orden.forEach((i, k) => {
       const [ex, ey] = lugares[i]
@@ -2937,9 +3283,9 @@ export const traslacionCual: TipoPregunta = {
     return opciones(
       `donde-traslada:${firmaPuntos(f)}:${ax},${ay}:${lugares.map((l) => l.join(',')).join('|')}:${orden.join('')}`,
       `La figura gris oscuro se trasladó ${movimiento(dx, dy)}.`,
-      svg(COLS * L + 2 * x0, FILAS * L + 2 * y0, partes.join(''), 'Una figura gris oscuro y tres copias A, B y C en distintos lugares de la cuadrícula'),
+      svg(COLS * L + 2 * x0, FILAS * L + 2 * y0, partes.join(''), copias === 4 ? 'Una figura gris oscuro y cuatro copias A, B, C y D en distintos lugares de la cuadrícula' : 'Una figura gris oscuro y tres copias A, B y C en distintos lugares de la cuadrícula'),
       '¿En qué lugar quedó?',
-      cual('Figura', 3, orden.indexOf(0)),
+      cual('Figura', copias, orden.indexOf(0)),
       ['Se elige un vértice de la figura gris oscuro y desde ahí se cuentan los cuadros', `${mayus(movimiento(dx, dy))}: llega a la Figura ${LETRAS[orden.indexOf(0)]}`],
     )
   },
@@ -3022,24 +3368,68 @@ export const croquisLlegar: TipoPregunta = {
   queHacen: 'Siguen indicaciones en el croquis del barrio (cuadras a la derecha, a la izquierda, hacia arriba o hacia abajo) o eligen las que llevan a un lugar.',
   citas: { [P4]: 'Expresa con gráficos o croquis los desplazamientos y posiciones de objetos, personas y lugares cercanos' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: camina hacia un solo lado (un tramo). Difícil: tres tramos (a un costado, hacia arriba o abajo y otra vez a
+  // un costado), y el error es olvidar el último o hacerlo al revés.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const caso = intentar(60, () => {
       const casa: Celda = [entero(azar, 0, CROQ.cols - 1), entero(azar, 0, CROQ.filas - 1)]
-      const dx = elegir(azar, [1, -1]) * entero(azar, 1, 4)
-      const dy = elegir(azar, [1, -1]) * entero(azar, 1, 3)
+      let tramos: [number, number][]
+      if (nivel === 1) {
+        tramos = [azar() < 0.5 ? [elegir(azar, [1, -1]) * entero(azar, 1, 4), 0] : [0, elegir(azar, [1, -1]) * entero(azar, 1, 3)]]
+      } else if (nivel === 3) {
+        tramos = [
+          [elegir(azar, [1, -1]) * entero(azar, 1, 3), 0],
+          [0, elegir(azar, [1, -1]) * entero(azar, 1, 3)],
+          [elegir(azar, [1, -1]) * entero(azar, 1, 2), 0],
+        ]
+      } else {
+        const x = elegir(azar, [1, -1]) * entero(azar, 1, 4)
+        tramos = [
+          [x, 0],
+          [0, elegir(azar, [1, -1]) * entero(azar, 1, 3)],
+        ]
+      }
+      const dx = tramos.reduce((s, t) => s + t[0], 0)
+      const dy = tramos.reduce((s, t) => s + t[1], 0)
       const meta: Celda = [casa[0] + dx, casa[1] + dy]
       if (!dentroCroquis(meta)) return null
+      // Cada esquina por donde pasa queda dentro del croquis.
+      let p: Celda = casa
+      for (const [a, b] of tramos) {
+        p = [p[0] + a, p[1] + b]
+        if (!dentroCroquis(p)) return null
+      }
+      if (nivel === 3 && (dx === 0 || igualC(meta, casa))) return null
       const sx = signo(dx)
       const sy = signo(dy)
-      const errores: Celda[] = [
-        [casa[0] + sx * Math.abs(dy), casa[1] + sy * Math.abs(dx)],
-        [casa[0] - dx, casa[1] + dy],
-        [casa[0] + dx, casa[1] - dy],
-        [casa[0] + dx + sx, casa[1] + dy],
-        [casa[0] + dx, casa[1] + dy + sy],
-        [casa[0] + dx - sx, casa[1] + dy],
-      ]
+      const ultimo = tramos[tramos.length - 1]
+      const errores: Celda[] =
+        nivel === 1
+          ? [
+              [casa[0] - dx, casa[1] - dy],
+              [meta[0] + sx, meta[1] + sy],
+              [casa[0] + dy, casa[1] + dx],
+              [meta[0] - sx, meta[1] - sy],
+              [casa[0] - dy, casa[1] - dx],
+            ]
+          : nivel === 3
+            ? [
+                [meta[0] - ultimo[0], meta[1]],
+                [meta[0] - 2 * ultimo[0], meta[1]],
+                [meta[0], casa[1] - dy],
+                [meta[0] + signo(ultimo[0]), meta[1]],
+                [casa[0] - tramos[0][0] + ultimo[0], meta[1]],
+              ]
+            : [
+                [casa[0] + sx * Math.abs(dy), casa[1] + sy * Math.abs(dx)],
+                [casa[0] - dx, casa[1] + dy],
+                [casa[0] + dx, casa[1] - dy],
+                [casa[0] + dx + sx, casa[1] + dy],
+                [casa[0] + dx, casa[1] + dy + sy],
+                [casa[0] + dx - sx, casa[1] + dy],
+              ]
       const usadas: Celda[] = [casa, meta]
       const malas: Celda[] = []
       for (const e of errores) if (malas.length < 3 && dentroCroquis(e) && !usadas.some((u) => igualC(u, e))) malas.push(e), usadas.push(e)
@@ -3049,7 +3439,7 @@ export const croquisLlegar: TipoPregunta = {
         const c: Celda = [entero(azar, 0, CROQ.cols - 1), entero(azar, 0, CROQ.filas - 1)]
         if (!usadas.some((u) => Math.abs(u[0] - c[0]) + Math.abs(u[1] - c[1]) < 2)) usadas.push(c)
       }
-      return { casa, dx, dy, meta, malas, extra: usadas.slice(2 + malas.length) }
+      return { casa, tramos, dx, dy, meta, malas, extra: usadas.slice(2 + malas.length) }
     })
     if (!caso) return null
     const nombres = barajar(azar, LUGARES)
@@ -3059,18 +3449,42 @@ export const croquisLlegar: TipoPregunta = {
     const todos = [lugarMeta, ...lugaresMalos, ...extras]
     const dibujo = dibujoCroquis(todos, caso.casa, null, `Croquis del barrio con la casa y ${todos.map((l) => l.nombre).join(', ')}`)
     const clave = `croquis:${kc(...caso.casa)}:${caso.dx},${caso.dy}:${todos.map((l) => `${l.nombre}@${kc(...l.en)}`).join('|')}`
-    if (azar() < 0.6) {
+    const camina = caso.tramos.map(([a, b]) => movimiento(a, b, 'cuadra', 'cuadras'))
+    const llega = `Lugar al que llega: ${mayus(lugarMeta.el)}`
+    if (nivel === 1 && azar() < 0.6)
+      return opciones(clave, `Observa el croquis del barrio. ${quien} sale de su casa y camina ${camina[0]}.`, dibujo, '¿A qué lugar llega?', alternativas(azar, mayus(lugarMeta.el), lugaresMalos.map((l) => mayus(l.el)), 4), [`Desde la casa, ${camina[0]}`, llega])
+    if (nivel === 3)
+      return opciones(
+        `${clave}:tres`,
+        `Observa el croquis del barrio. ${quien} sale de su casa, camina ${camina[0]}, luego ${camina[1]} y después ${camina[2]}.`,
+        dibujo,
+        '¿A qué lugar llega?',
+        alternativas(azar, mayus(lugarMeta.el), lugaresMalos.map((l) => mayus(l.el)), 4),
+        [`Desde la casa, ${camina[0]}`, `Luego, ${camina[1]}`, `Después, ${camina[2]}`, llega],
+      )
+    if (nivel === 2 && azar() < 0.6) {
       return opciones(
         clave,
         `Observa el croquis del barrio. ${quien} sale de su casa, camina ${plural(Math.abs(caso.dx), 'cuadra', 'cuadras')} a la ${caso.dx > 0 ? 'derecha' : 'izquierda'} y luego ${plural(Math.abs(caso.dy), 'cuadra', 'cuadras')} hacia ${caso.dy > 0 ? 'abajo' : 'arriba'}.`,
         dibujo,
         '¿A qué lugar llega?',
         alternativas(azar, mayus(lugarMeta.el), lugaresMalos.map((l) => mayus(l.el)), 4),
-        [`Desde la casa, ${movimiento(caso.dx, 0, 'cuadra', 'cuadras')}`, `Desde esa esquina, ${movimiento(0, caso.dy, 'cuadra', 'cuadras')}`, `Lugar al que llega: ${mayus(lugarMeta.el)}`],
+        [`Desde la casa, ${movimiento(caso.dx, 0, 'cuadra', 'cuadras')}`, `Desde esa esquina, ${movimiento(0, caso.dy, 'cuadra', 'cuadras')}`, llega],
       )
     }
     const correcta = mayus(movimiento(caso.dx, caso.dy, 'cuadra', 'cuadras'))
     const { dx, dy } = caso
+    if (nivel === 1) {
+      // Hacia un solo lado: los errores son ir al revés, una cuadra de más o de menos, o doblar hacia el otro lado.
+      const [sx, sy] = [signo(dx), signo(dy)]
+      const malas1 = [movimiento(-dx, -dy, 'cuadra', 'cuadras'), movimiento(dx + sx, dy + sy, 'cuadra', 'cuadras'), movimiento(dy, dx, 'cuadra', 'cuadras'), movimiento(-dy, -dx, 'cuadra', 'cuadras'), movimiento(dx - sx, dy - sy, 'cuadra', 'cuadras')].filter(Boolean).map(mayus)
+      // "al colegio", "a la posta".
+      const aLugar = lugarMeta.el.startsWith('el ') ? `al ${lugarMeta.el.slice(3)}` : `a ${lugarMeta.el}`
+      return opciones(`${clave}:indica`, `Observa el croquis del barrio. ${quien} quiere ir de su casa ${aLugar}.`, dibujo, '¿Con qué indicaciones llega hasta allí?', alternativas(azar, correcta, malas1, 4), [
+        `Se cuentan las cuadras de la casa ${aLugar}, en línea recta`,
+        `Indicaciones: ${correcta}`,
+      ])
+    }
     const malas = [
       Math.abs(dx) !== Math.abs(dy) ? movimiento(signo(dx) * Math.abs(dy), signo(dy) * Math.abs(dx), 'cuadra', 'cuadras') : '',
       movimiento(-dx, dy, 'cuadra', 'cuadras'),
@@ -3102,15 +3516,17 @@ export const croquisRecorrido: TipoPregunta = {
   queHacen: 'Leen en el croquis el camino que hizo una persona: cuántas cuadras caminó, por dónde pasó y cómo se describe.',
   citas: { [P4]: 'Establece relaciones entre los datos de ubicación y recorrido de los objetos, personas y lugares cercanos' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: dos tramos de 1 o 2 cuadras. Difícil: 3 o 4 tramos y 5 cuadras o más en total.
+  generar({ azar, nivel = 2 }) {
     const quien = nombre(azar)
     const caso = intentar(80, () => {
       const casa: Celda = [entero(azar, 0, CROQ.cols - 1), entero(azar, 0, CROQ.filas - 1)]
       const tramos: [number, number][] = []
-      const n = entero(azar, 2, 3)
+      const n = nivel === 1 ? 2 : entero(azar, ...segun<[number, number]>(nivel, [2, 2], [2, 3], [3, 4]))
       let horizontal = azar() < 0.5
       for (let i = 0; i < n; i++) {
-        const k = entero(azar, 1, 3) * elegir(azar, [1, -1])
+        const k = entero(azar, 1, nivel === 1 ? 2 : 3) * elegir(azar, [1, -1])
         tramos.push(horizontal ? [k, 0] : [0, k])
         horizontal = !horizontal
       }
@@ -3124,7 +3540,7 @@ export const croquisRecorrido: TipoPregunta = {
         }
       }
       const total = camino.length - 1
-      if (total < 3) return null
+      if (total < segun(nivel, 2, 3, 5)) return null
       // Un lugar por donde pasa (no la casa ni la llegada) y otros fuera del camino.
       const enMedio = camino.slice(1, -1)
       const pasa = elegir(azar, enMedio)
@@ -3223,10 +3639,14 @@ export const simetriaCompletar: TipoPregunta = {
   queHacen: 'Completan en la cuadrícula la otra mitad de una figura para que sea simétrica respecto del eje, o eligen la mitad que falta.',
   citas: { [P4]: 'para construir formas simétricas' },
   ...BASE,
-  generar({ azar }) {
-    const n = entero(azar, 5, 9)
+  niveles: true,
+  // Fácil: medias figuras de 3 a 5 cuadraditos, el eje siempre parado; la mitad mala está al revés (de arriba abajo).
+  // Difícil: de 8 a 11 cuadraditos, más veces con el eje acostado; elegir entre cuatro mitades, dos con un cuadradito
+  // cambiado.
+  generar({ azar, nivel = 2 }) {
+    const n = entero(azar, ...segun<[number, number]>(nivel, [3, 5], [5, 9], [8, 11]))
     if (azar() < 0.42) {
-      const vertical = azar() < 0.6
+      const vertical = azar() < segun(nivel, 1, 0.6, 0.4)
       const L = 30
       const m = mitad(azar, n, 4, 6)
       const cs = vertical ? m : m.map(([x, y]): Celda => [y, x])
@@ -3248,46 +3668,59 @@ export const simetriaCompletar: TipoPregunta = {
         ],
       }
     }
-    // ¿Cuál es la otra mitad? La reflejada, la copiada sin voltear y una con un cuadradito cambiado.
+    // ¿Cuál es la otra mitad? La reflejada, la copiada sin voltear y una con un cuadradito cambiado (en el fácil, una
+    // al revés de arriba abajo; en el difícil, dos con un cuadradito cambiado).
     const caso = hasta(() => {
       const m = mitad(azar, n, 4, 6)
       const espejo = m.map(([x, y]): Celda => [3 - x, y])
       const mx = Math.min(...m.map((c) => c[0]))
       const copia = m.map(([x, y]): Celda => [x - mx, y])
       if (firmaCeldas(espejo) === firmaCeldas(copia)) return null
-      const cambiada = intentar(60, () => {
-        const quitar = entero(azar, 0, espejo.length - 1)
-        const resto = espejo.filter((_, i) => i !== quitar)
-        const [x, y] = elegir(azar, resto)
-        const [dx, dy] = elegir(azar, VECINOS)
-        const nueva: Celda = [x + dx, y + dy]
-        if (nueva[0] < 0 || nueva[1] < 0 || nueva[0] > 3 || nueva[1] > 5 || conjunto(resto).has(kc(...nueva))) return null
-        const r = [...resto, nueva]
-        if (!conectado(r) || tieneHuecos(r) || !r.some(([c]) => c === 0) || [espejo, copia].some((o) => firmaCeldas(o) === firmaCeldas(r))) return null
-        return r
-      })
-      return cambiada ? { m, piezas: [espejo, copia, cambiada] } : null
+      const cambiar = (otras: Celda[][]) =>
+        intentar(60, () => {
+          const quitar = entero(azar, 0, espejo.length - 1)
+          const resto = espejo.filter((_, i) => i !== quitar)
+          const [x, y] = elegir(azar, resto)
+          const [dx, dy] = elegir(azar, VECINOS)
+          const nueva: Celda = [x + dx, y + dy]
+          if (nueva[0] < 0 || nueva[1] < 0 || nueva[0] > 3 || nueva[1] > 5 || conjunto(resto).has(kc(...nueva))) return null
+          const r = [...resto, nueva]
+          if (!conectado(r) || tieneHuecos(r) || !r.some(([c]) => c === 0) || otras.some((o) => firmaCeldas(o) === firmaCeldas(r))) return null
+          return r
+        })
+      if (nivel === 1) {
+        const alReves = espejo.map(([x, y]): Celda => [x, 5 - y])
+        return [espejo, copia].some((o) => firmaCeldas(o) === firmaCeldas(alReves)) ? null : { m, piezas: [espejo, copia, alReves] }
+      }
+      const cambiada = cambiar([espejo, copia])
+      if (!cambiada) return null
+      if (nivel !== 3) return { m, piezas: [espejo, copia, cambiada] }
+      const otra = cambiar([espejo, copia, cambiada])
+      return otra ? { m, piezas: [espejo, copia, cambiada, otra] } : null
     })
-    const L = 22
+    const cuantas = caso.piezas.length
+    const L = cuantas === 4 ? 20 : 22
     const x0 = 10
     const y0 = 10
-    const orden = barajar(azar, [0, 1, 2])
+    const orden = barajar(azar, rango(cuantas))
     const partes = [rejilla(x0, y0, 8, 6, L), pintarCeldas(caso.m, x0, y0, L), ejePunteado(x0 + 4 * L, y0 - 6, x0 + 4 * L, y0 + 6 * L + 6)]
     orden.forEach((i, k) => {
       const px = x0 + 8 * L + 40 + k * (4 * L + 26)
       partes.push(rejilla(px, y0, 4, 6, L), pintarCeldas(caso.piezas[i], px, y0, L, SUAVE), ejePunteado(px, y0 - 6, px, y0 + 6 * L + 6), texto(px + 2 * L, y0 + 6 * L + 20, LETRAS[k], { tam: 18, peso: 700 }))
     })
-    const W = x0 + 8 * L + 40 + 3 * (4 * L + 26) - 26 + 10
+    const W = x0 + 8 * L + 40 + cuantas * (4 * L + 26) - 26 + 10
+    const porQue = (i: number) => (i === 1 ? 'está copiada igual, no volteada como en un espejo' : nivel === 1 ? 'está al revés, de arriba abajo' : 'tiene un cuadradito cambiado de lugar')
     return opciones(
       `simetria-cual:${caso.m.map((c) => kc(...c)).join(' ')}:${orden.join('')}`,
       'La línea punteada es el eje de simetría. Falta la mitad derecha de la figura.',
-      svg(W, y0 + 6 * L + 34, partes.join(''), 'Media figura junto a un eje de simetría y tres mitades A, B y C para completarla'),
+      svg(W, y0 + 6 * L + 34, partes.join(''), cuantas === 4 ? 'Media figura junto a un eje de simetría y cuatro mitades A, B, C y D para completarla' : 'Media figura junto a un eje de simetría y tres mitades A, B y C para completarla'),
       '¿Cuál mitad completa la figura simétrica?',
-      cual('Mitad', 3, orden.indexOf(0)),
+      cual('Mitad', cuantas, orden.indexOf(0)),
       [
-        ...[1, 2]
+        ...rango(cuantas)
+          .slice(1)
           .sort((p, q) => orden.indexOf(p) - orden.indexOf(q))
-          .map((i) => `Mitad ${LETRAS[orden.indexOf(i)]}: ${i === 1 ? 'está copiada igual, no volteada como en un espejo' : 'tiene un cuadradito cambiado de lugar'}`),
+          .map((i) => `Mitad ${LETRAS[orden.indexOf(i)]}: ${porQue(i)}`),
         `Es el reflejo, cuadradito por cuadradito: Mitad ${LETRAS[orden.indexOf(0)]}`,
       ],
       'La otra mitad es el reflejo, como en un espejo: lo que toca el eje sigue tocándolo.',
@@ -3304,28 +3737,77 @@ export const ejeSimetria: TipoPregunta = {
   queHacen: 'Reconocen si una línea es eje de simetría de una figura en la cuadrícula y qué letras tienen eje de simetría.',
   citas: { [P4]: 'la visualización, así como el uso de las cuadrículas, para construir formas simétricas' },
   ...BASE,
-  generar({ azar }) {
+  niveles: true,
+  // Fácil: figuras chicas y la que no es simétrica se ve torcida a simple vista; las letras, "¿cuál tiene eje?" con
+  // letras que se ven torcidas (F, J, L…). Difícil: figuras más grandes y "¿en cuál NO es eje?", con un solo cuadradito
+  // fuera de lugar; las letras N, S y Z, que se ven parejas pero no tienen eje, entre cuatro.
+  generar({ azar, nivel = 2 }) {
     if (azar() < 0.65) {
       const simetrica = () => {
-        const m = mitad(azar, entero(azar, 3, 6), 3, 6)
+        const m = mitad(azar, entero(azar, ...segun<[number, number]>(nivel, [2, 4], [3, 6], [5, 8])), 3, 6)
         return [...m, ...m.map(([x, y]): Celda => [5 - x, y])]
       }
       const buena = simetrica()
+      /** Una figura simétrica con un cuadradito cambiado de lugar: ya no es simétrica. */
+      const conUnoCambiado = () =>
+        hasta(() => {
+          const s = simetrica()
+          const quitar = entero(azar, 0, s.length - 1)
+          const resto = s.filter((_, i) => i !== quitar)
+          const [x, y] = elegir(azar, resto)
+          const [dx, dy] = elegir(azar, VECINOS)
+          const nueva: Celda = [x + dx, y + dy]
+          if (nueva[0] < 0 || nueva[1] < 0 || nueva[0] > 5 || nueva[1] > 5 || conjunto(resto).has(kc(...nueva))) return null
+          const r = [...resto, nueva]
+          return conectado(r) && !tieneHuecos(r) && !simetricaEn(r, 3) ? r : null
+        })
+      if (nivel === 3) {
+        // Dos figuras con su eje y una con un cuadradito fuera de lugar: ¿en cuál la línea NO es eje?
+        const otra = hasta(() => {
+          const s = simetrica()
+          return firmaCeldas(s) !== firmaCeldas(buena) ? s : null
+        })
+        const figuras = [conUnoCambiado(), buena, otra]
+        const L = 22
+        const W = 6 * L + 28
+        const panel = (cs: Celda[]) => {
+          const vertical = azar() < 0.6
+          const celdas = vertical ? cs : cs.map(([x, y]): Celda => [y, x])
+          const eje = vertical ? ejePunteado(14 + 3 * L, 6, 14 + 3 * L, 14 + 6 * L + 8) : ejePunteado(6, 14 + 3 * L, 14 + 6 * L + 8, 14 + 3 * L)
+          return rejilla(14, 14, 6, 6, L) + pintarCeldas(celdas, 14, 14, L) + eje
+        }
+        const orden = barajar(azar, [0, 1, 2])
+        return opciones(
+          `eje-no:${orden.map((i) => firmaCeldas(figuras[i])).join('|')}`,
+          'Observa las figuras y sus líneas punteadas.',
+          enFila(
+            orden.map((i) => panel(figuras[i])),
+            W,
+            W,
+            'Tres figuras en cuadrículas, cada una con una línea punteada por el medio',
+          ),
+          '¿En cuál la línea punteada NO es un eje de simetría?',
+          cual('Figura', 3, orden.indexOf(0)),
+          [
+            'Se imagina doblar cada figura por su línea punteada',
+            `${lista([1, 2].map((i) => `Figura ${LETRAS[orden.indexOf(i)]}`).sort())}: las dos mitades coinciden`,
+            `Un cuadradito no coincide al doblar: Figura ${LETRAS[orden.indexOf(0)]}`,
+          ],
+          'Si se dobla la figura por el eje, las dos mitades coinciden. Basta un cuadradito que no coincida para que no sea eje.',
+        )
+      }
       const corrida = hasta(() => {
         const s = simetrica()
         return Math.min(...s.map((c) => c[0])) <= 1 ? s : null
       })
-      const ladeada = hasta(() => {
-        const s = simetrica()
-        const quitar = entero(azar, 0, s.length - 1)
-        const resto = s.filter((_, i) => i !== quitar)
-        const [x, y] = elegir(azar, resto)
-        const [dx, dy] = elegir(azar, VECINOS)
-        const nueva: Celda = [x + dx, y + dy]
-        if (nueva[0] < 0 || nueva[1] < 0 || nueva[0] > 5 || nueva[1] > 5 || conjunto(resto).has(kc(...nueva))) return null
-        const r = [...resto, nueva]
-        return conectado(r) && !tieneHuecos(r) && !simetricaEn(r, 3) ? r : null
-      })
+      // Fácil: la que no es simétrica es una figura cualquiera, torcida a simple vista.
+      const ladeada =
+        nivel === 1
+          ? hasta(() => {
+              const p = poliomino(azar, entero(azar, 5, 9), 6, 6)
+              return simetricaEn(p, 3) ? null : p
+            })
+          : conUnoCambiado()
       const casos: [Celda[], number][] = [
         [buena, 3],
         [corrida, elegir(azar, [2, 4])],
@@ -3355,15 +3837,18 @@ export const ejeSimetria: TipoPregunta = {
           'Se imagina doblar cada figura por su línea punteada',
           ...[1, 2]
             .sort((p, q) => orden.indexOf(p) - orden.indexOf(q))
-            .map((i) => `Figura ${LETRAS[orden.indexOf(i)]}: ${i === 1 ? 'la línea no pasa por el medio de la figura' : 'un cuadradito no coincide al doblar'}`),
+            .map((i) => `Figura ${LETRAS[orden.indexOf(i)]}: ${i === 1 ? 'la línea no pasa por el medio de la figura' : nivel === 1 ? 'sus dos partes no son iguales al doblar' : 'un cuadradito no coincide al doblar'}`),
           `Las dos mitades coinciden: Figura ${LETRAS[orden.indexOf(0)]}`,
         ],
         'Si se dobla la figura por el eje, las dos mitades coinciden.',
       )
     }
-    const no = azar() < 0.6
-    const correcta = elegir(azar, no ? LETRAS_SIN_EJE : LETRAS_SIMETRICAS)
-    const alt = alternativas(azar, correcta, barajar(azar, no ? LETRAS_SIMETRICAS : LETRAS_SIN_EJE).slice(0, 2), 3)
+    const no = nivel === 1 ? false : nivel === 3 ? true : azar() < 0.6
+    // Las letras sin eje: fácil, las que se ven torcidas; difícil, N, S y Z (si se giran se ven iguales, pero no tienen eje).
+    const sinEje = segun(nivel, ['F', 'G', 'J', 'L', 'P', 'R'], LETRAS_SIN_EJE, ['N', 'S', 'Z'])
+    const cuantas = nivel === 3 ? 4 : 3
+    const correcta = elegir(azar, no ? sinEje : LETRAS_SIMETRICAS)
+    const alt = alternativas(azar, correcta, barajar(azar, no ? LETRAS_SIMETRICAS : sinEje).slice(0, cuantas - 1), cuantas)
     if (!alt) return null
     const con = alt.alternativas.filter((l) => LETRAS_SIMETRICAS.includes(l))
     const sin = alt.alternativas.filter((l) => LETRAS_SIN_EJE.includes(l))
@@ -3371,7 +3856,7 @@ export const ejeSimetria: TipoPregunta = {
     return opciones(
       `letras:${no}:${alt.alternativas.join('')}`,
       'Observa estas letras mayúsculas.',
-      svg(3 * 124 - 6, 118, cuerpo, `Las letras ${alt.alternativas.join(', ')}`),
+      svg(cuantas * 124 - 6, 118, cuerpo, `Las letras ${alt.alternativas.join(', ')}`),
       no ? '¿Qué letra NO tiene eje de simetría?' : '¿Qué letra tiene un eje de simetría?',
       alt,
       [
@@ -3381,7 +3866,9 @@ export const ejeSimetria: TipoPregunta = {
           .join('; '),
         `${no ? 'No tiene eje de simetría' : 'Tiene eje de simetría'}: ${correcta}`,
       ],
-      'Una figura tiene eje de simetría si al doblarla por esa línea las dos mitades coinciden.',
+      nivel === 3
+        ? 'Una figura tiene eje de simetría si al doblarla por esa línea las dos mitades coinciden. La N, la S y la Z se ven iguales si se giran, pero al doblarlas no coinciden.'
+        : 'Una figura tiene eje de simetría si al doblarla por esa línea las dos mitades coinciden.',
     )
   },
 }

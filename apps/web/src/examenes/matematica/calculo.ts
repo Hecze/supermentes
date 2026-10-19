@@ -5,7 +5,7 @@ import { frac, num, valor } from '../../juegos/matematica/formato'
 import { habilidadPorId } from '../../juegos/matematica/habilidades'
 import type { Reto } from '../../juegos/tipos'
 import { TINTA, el, svg } from '../dibujos'
-import type { Dibujo, TipoPregunta } from '../tipos'
+import type { Azar, Dibujo, TipoPregunta } from '../tipos'
 import { alternativas } from '../util'
 
 // ---------- Pasos de resolución (clave del docente) ----------
@@ -327,24 +327,143 @@ export function dibujoPastel([k, n]: Fraccion): Dibujo {
   return svg(2 * c, 2 * c, partes, `Círculo partido en ${n} partes iguales con ${k} pintadas`)
 }
 
+// ---------- Más fácil y más difícil ----------
+// La práctica de los juegos no se toca. Cada dificultad se queda con los retos que le sirven (sin llevadas, con
+// canje, con ceros, números más chicos…) y vuelve a sortear los demás; si hace falta, usa otro nivel de la misma
+// práctica, solo si en 4.º cita el mismo desempeño, letra por letra. Así la cita del tipo sigue siendo verdad.
+
+const P4 = 'primaria-4'
+
+/** Qué retos sirven en una dificultad y, si no es el de siempre, de qué nivel de la práctica salen. */
+type Ajuste = { sirve: (r: Reto) => boolean; nivel?: string }
+
+/** La cifra de n en la posición k (0: unidades, 1: decenas…), con 0 donde no hay. */
+const cifraEn = (n: number, k: number) => Math.floor(n / 10 ** k) % 10
+
+/** Cuántas veces se lleva al sumar en columna. */
+function llevadas(a: number, b: number) {
+  let lleva = 0
+  let veces = 0
+  for (let k = 0; k < Math.max(String(a).length, String(b).length); k++) {
+    lleva = cifraEn(a, k) + cifraEn(b, k) + lleva >= 10 ? 1 : 0
+    veces += lleva
+  }
+  return veces
+}
+
+/** Cuántas veces se canjea al restar en columna. */
+function canjesAlRestar(a: number, b: number) {
+  let presta = 0
+  let veces = 0
+  for (let k = 0; k < String(a).length; k++) {
+    presta = cifraEn(a, k) - presta < cifraEn(b, k) ? 1 : 0
+    veces += presta
+  }
+  return veces
+}
+
+/** Los dos números de "a op b = ?", si la pregunta es de esa operación. */
+function numeros(r: Reto, signo: string): [number, number] | null {
+  const o = operacion(r.pregunta)
+  return o && o[1] === signo ? [o[0], o[2]] : null
+}
+
+/** Si los términos de un patrón ("3, 6, 9, 12, ?") cumplen algo. */
+const patron = (f: (t: number[]) => boolean) => (r: Reto) => f(r.pregunta.replace(/, \?$/, '').split(', ').map((x) => valor(x) ?? NaN))
+
+/** Si "a ▢ b" son dos números de cuatro cifras que cumplen algo (como texto, para mirar sus cifras). */
+const comparando = (f: (a: string, b: string) => boolean) => (r: Reto) => {
+  const [a, b] = r.pregunta.split('▢').map((t) => String(valor(t)))
+  return a.length === 4 && b.length === 4 && f(a, b)
+}
+
+/** Los números de la pregunta según un patrón (los grupos del patrón, como números), o null si no es de esa forma. */
+function leer(r: Reto, patron: RegExp): number[] | null {
+  const m = patron.exec(r.pregunta)
+  return m ? m.slice(1).map((x) => valor(x) ?? NaN) : null
+}
+
+/** Si un reto de "a op b = ?" cumple algo con sus dos números. */
+const con = (signo: string, f: (a: number, b: number) => boolean) => (r: Reto) => {
+  const x = numeros(r, signo)
+  return !!x && f(...x)
+}
+
+/** Si un reto cumple algo con los números que lee el patrón. */
+const segun = (patron: RegExp, f: (...xs: number[]) => boolean) => (r: Reto) => {
+  const xs = leer(r, patron)
+  return !!xs && f(...xs)
+}
+
+/** Si el número de la respuesta (o de la pregunta) cumple algo. */
+const respuesta = (f: (n: number) => boolean) => (r: Reto) => f(valor(r.respuesta) ?? NaN)
+const pregunta = (f: (n: number) => boolean) => (r: Reto) => f(valor(r.pregunta) ?? NaN)
+
+const MITAD_O_DOBLE = /^(?:Doble|Mitad) de (\d+) = \?$/
+
+/** Si un "Doble de n" o "Mitad de n" cumple algo. */
+const dobleOMitad = (f: (doble: boolean, n: number) => boolean) => (r: Reto) => {
+  const n = leer(r, MITAD_O_DOBLE)?.[0]
+  return n !== undefined && f(r.pregunta.startsWith('Doble'), n)
+}
+const FRACCION_DE = /^\d+\/(\d+) de (\d+) = \?$/
+const EQUIVALENTE = /^(\d+)\/(\d+) = (\?|\d+)\/(\?|\d+)$/
+const FRACCIONES = /^(\d+)\/(\d+) [+−] (\d+)\/(\d+) = \?$/
+const VASOS = /^¿Cuántos vasos de 1\/(\d+) L llenan (\d+) L\?$/
+
+/** Cuántas veces se amplificó en "2/3 = ?/12" o "2/3 = 8/?". */
+function factor(r: Reto) {
+  const m = EQUIVALENTE.exec(r.pregunta)
+  if (!m) return NaN
+  return m[3] === '?' ? Number(m[4]) / Number(m[2]) : Number(m[3]) / Number(m[1])
+}
+
+/**
+ * Un reto de la práctica que sirva en esa dificultad. Se salta un número del azar para sortear otra pregunta: si no,
+ * cuando el reto normal ya sirve, el fácil o el difícil saldría igual al normal.
+ */
+function retoQueSirve(azar: Azar, generar: (azar: Azar) => Reto, sirve: (r: Reto) => boolean): Reto | null {
+  azar()
+  for (let i = 0; i < 400; i++) {
+    const r = generar(azar)
+    if (sirve(r)) return r
+  }
+  return null
+}
+
 /**
  * Un tipo de pregunta a partir de un nivel de práctica. Solo se ofrece en los grados donde ese nivel tiene cita.
- * `enunciado`: lo que se lee antes del ejercicio, cuando la consigna sola queda corta.
+ * `enunciado`: lo que se lee antes del ejercicio, cuando la consigna sola queda corta. `facil` y `dificil`: qué retos
+ * sirven en cada dificultad (sin ellos, el tipo no cambia con la dificultad).
  */
-export function deCalculo(o: { id: string; habilidad: string; nivel: string; nombre: string; queHacen: string; enunciado?: string }): TipoPregunta {
+export function deCalculo(o: { id: string; habilidad: string; nivel: string; nombre: string; queHacen: string; enunciado?: string; facil?: Ajuste; dificil?: Ajuste }): TipoPregunta {
   const h = habilidadPorId(o.habilidad)
-  const nivel = h?.niveles.find((n) => n.nombre === o.nivel)
-  if (!h || !nivel) throw new Error(`No existe la práctica ${o.habilidad} · ${o.nivel}`)
+  const practica = h?.niveles.find((n) => n.nombre === o.nivel)
+  if (!h || !practica) throw new Error(`No existe la práctica ${o.habilidad} · ${o.nivel}`)
+  /** El generador de una dificultad: el del nivel o, si se pide, otro nivel de la práctica con la misma cita de 4.º. */
+  const generadorDe = (a: Ajuste) => {
+    if (!a.nivel) return practica.generar
+    const otro = h.niveles.find((n) => n.nombre === a.nivel)
+    if (!otro?.citas[P4] || otro.citas[P4] !== practica.citas[P4]) throw new Error(`${o.id}: el nivel «${a.nivel}» no cita en 4.º lo mismo que «${o.nivel}»`)
+    return otro.generar
+  }
+  const ajustes = o.facil && o.dificil ? { 1: { ...o.facil, generar: generadorDe(o.facil) }, 3: { ...o.dificil, generar: generadorDe(o.dificil) } } : null
   return {
     id: o.id,
     nombre: o.nombre,
     queHacen: o.queHacen,
-    citas: nivel.citas,
+    citas: practica.citas,
     area: 'matematica',
     cambia: 'numeros',
-    generar({ azar }) {
-      const r = nivel.generar(azar)
-      const alt = alternativas(azar, r.respuesta, r.distractores, 4)
+    ...(ajustes ? { niveles: true } : {}),
+    generar({ azar, nivel = 2 }) {
+      const a = ajustes && nivel !== 2 ? ajustes[nivel] : null
+      const r = a ? retoQueSirve(azar, a.generar, a.sirve) : practica.generar(azar)
+      if (!r) return null
+      // Con otra dificultad, sin alternativas de más de cuatro cifras (en 4.º se trabaja hasta 9999).
+      const tope = Math.max(9999, valor(r.respuesta) ?? 0)
+      const malas = a ? r.distractores.filter((d) => !((valor(d) ?? 0) > tope)) : r.distractores
+      const alt = alternativas(azar, r.respuesta, malas, 4)
       if (!alt) return null
       const dibujo = r.visual?.tipo === 'fraccion' ? dibujoPastel(r.visual.partes) : undefined
       if (r.visual && !dibujo) return null
@@ -363,24 +482,210 @@ export function deCalculo(o: { id: string; habilidad: string; nivel: string; nom
 }
 
 export const TIPOS_CALCULO = [
-  deCalculo({ id: 'calc-valor-posicional', habilidad: 'valor-posicional', nivel: 'Millares', nombre: '¿Qué número es?', queHacen: 'Juntan millares, centenas, decenas y unidades en un solo número.' }),
-  deCalculo({ id: 'calc-comparar', habilidad: 'comparar', nivel: 'Hasta 10 000', nombre: 'Mayor, menor o igual', queHacen: 'Comparan dos números de cuatro cifras y eligen el signo >, < o =.' }),
-  deCalculo({ id: 'calc-redondeo-decena', habilidad: 'redondeo', nivel: 'A la decena', nombre: 'Redondea a la decena', queHacen: 'Redondean un número a la decena más cercana.' }),
-  deCalculo({ id: 'calc-redondeo-centena', habilidad: 'redondeo', nivel: 'A la centena', nombre: 'Redondea a la centena', queHacen: 'Redondean un número a la centena más cercana.' }),
-  deCalculo({ id: 'calc-sumar', habilidad: 'sumar', nivel: 'Hasta 10 000', nombre: 'Suma', queHacen: 'Suman números de hasta cuatro cifras.' }),
-  deCalculo({ id: 'calc-restar', habilidad: 'restar', nivel: 'Hasta 10 000', nombre: 'Resta', queHacen: 'Restan números de hasta cuatro cifras.' }),
-  deCalculo({ id: 'calc-tablas', habilidad: 'tablas', nivel: 'Todas', nombre: 'Multiplica', queHacen: 'Resuelven multiplicaciones de las tablas del 2 al 10.' }),
-  deCalculo({ id: 'calc-dividir', habilidad: 'dividir', nivel: 'Todas', nombre: 'Divide', queHacen: 'Resuelven divisiones exactas entre 2 y 9.' }),
-  deCalculo({ id: 'calc-dobles', habilidad: 'dobles-mitades', nivel: 'Dobles y mitades hasta 100', nombre: 'Dobles y mitades', queHacen: 'Calculan el doble o la mitad de un número.' }),
-  deCalculo({ id: 'calc-fraccion-pintada', habilidad: 'fracciones-reconocer', nivel: 'Hasta octavos', nombre: '¿Qué fracción está pintada?', queHacen: 'Miran un círculo partido en partes iguales y escriben la fracción pintada.' }),
-  deCalculo({ id: 'calc-fraccion-de', habilidad: 'fraccion-de', nivel: 'Mitad, tercio y cuarto', nombre: 'Mitad, tercio y cuarto', queHacen: 'Calculan la mitad, la tercera o la cuarta parte de una cantidad.' }),
-  deCalculo({ id: 'calc-equivalentes', habilidad: 'fracciones-equivalentes', nivel: 'Medios, tercios y cuartos', nombre: 'Fracciones equivalentes', queHacen: 'Encuentran una fracción equivalente amplificando o simplificando.' }),
-  deCalculo({ id: 'calc-sumar-fracciones', habilidad: 'fracciones-operar', nivel: 'Igual denominador', nombre: 'Suma y resta de fracciones', queHacen: 'Suman y restan fracciones con el mismo denominador.' }),
-  deCalculo({ id: 'calc-ecuacion', habilidad: 'ecuaciones', nivel: 'x + a = b', nombre: 'Halla el número que falta', queHacen: 'Encuentran el término desconocido de una igualdad.' }),
-  deCalculo({ id: 'calc-patron-suma', habilidad: 'secuencias', nivel: 'Sumando o restando', nombre: '¿Qué número sigue?', queHacen: 'Descubren la regla de un patrón que suma o resta y siguen la secuencia.' }),
-  deCalculo({ id: 'calc-patron-multiplica', habilidad: 'secuencias', nivel: 'Multiplicando', nombre: 'Patrón que multiplica', queHacen: 'Descubren la regla de un patrón que multiplica y siguen la secuencia.' }),
-  deCalculo({ id: 'calc-longitud', habilidad: 'medidas', nivel: 'Metros y centímetros', nombre: 'Convertir metros y centímetros', queHacen: 'Convierten metros a centímetros y al revés.' }),
-  deCalculo({ id: 'calc-tiempo', habilidad: 'medidas', nivel: 'Horas y minutos', nombre: 'Horas y minutos', queHacen: 'Convierten horas, medias horas y cuartos de hora a minutos.' }),
-  deCalculo({ id: 'calc-masa', habilidad: 'medidas', nivel: 'Kilos y gramos', nombre: 'Kilos y gramos', queHacen: 'Convierten kilogramos a gramos y al revés.' }),
-  deCalculo({ id: 'calc-litro', habilidad: 'medidas', nivel: 'Medio y cuarto de litro', nombre: 'Medio y cuarto de litro', queHacen: 'Calculan cuántos vasos de medio o cuarto de litro llenan un recipiente.' }),
+  deCalculo({
+    id: 'calc-valor-posicional',
+    habilidad: 'valor-posicional',
+    nivel: 'Millares',
+    nombre: '¿Qué número es?',
+    queHacen: 'Juntan millares, centenas, decenas y unidades en un solo número.',
+    // Fácil: están las cuatro posiciones. Difícil: falta la centena o la decena y hay que escribir el 0 en medio.
+    facil: { sirve: respuesta((n) => !String(n).includes('0')) },
+    dificil: { sirve: respuesta((n) => /^\d0|^\d\d0/.test(String(n))) },
+  }),
+  deCalculo({
+    id: 'calc-comparar',
+    habilidad: 'comparar',
+    nivel: 'Hasta 10 000',
+    nombre: 'Mayor, menor o igual',
+    queHacen: 'Comparan dos números de cuatro cifras y eligen el signo >, < o =.',
+    // Fácil: se decide con la primera cifra. Difícil: la misma unidad de millar, hay que mirar más adentro. En las dos,
+    // ambos de cuatro cifras.
+    facil: { sirve: comparando((a, b) => a[0] !== b[0]) },
+    dificil: { sirve: comparando((a, b) => a !== b && a[0] === b[0]) },
+  }),
+  deCalculo({
+    id: 'calc-redondeo-decena',
+    habilidad: 'redondeo',
+    nivel: 'A la decena',
+    nombre: 'Redondea a la decena',
+    queHacen: 'Redondean un número a la decena más cercana.',
+    // Fácil: de dos cifras y sin el 5 del medio. Difícil: de tres cifras, justo en el medio (345) o pasando a la
+    // centena siguiente (397 → 400).
+    facil: { sirve: pregunta((n) => n < 100 && n % 10 !== 5) },
+    dificil: { sirve: pregunta((n) => n >= 100 && (n % 10 === 5 || (cifraEn(n, 1) === 9 && n % 10 > 5))) },
+  }),
+  deCalculo({
+    id: 'calc-redondeo-centena',
+    habilidad: 'redondeo',
+    nivel: 'A la centena',
+    nombre: 'Redondea a la centena',
+    queHacen: 'Redondean un número a la centena más cercana.',
+    // Fácil: de tres cifras y lejos del medio. Difícil: de cuatro, justo en el medio (2450), casi en el medio (2449) o
+    // pasando al millar siguiente (2960 → 3000).
+    facil: { sirve: pregunta((n) => n < 1000 && cifraEn(n, 1) !== 4 && cifraEn(n, 1) !== 5) },
+    dificil: {
+      sirve: pregunta((n) => n >= 1000 && (n % 100 === 50 || (cifraEn(n, 1) === 4 && cifraEn(n, 0) >= 5) || (cifraEn(n, 2) === 9 && cifraEn(n, 1) >= 5))),
+    },
+  }),
+  deCalculo({
+    id: 'calc-sumar',
+    habilidad: 'sumar',
+    nivel: 'Hasta 10 000',
+    nombre: 'Suma',
+    queHacen: 'Suman números de hasta cuatro cifras.',
+    // Fácil: sin llevar. Difícil: llevando en tres columnas.
+    facil: { sirve: con('+', (a, b) => llevadas(a, b) === 0) },
+    dificil: { sirve: con('+', (a, b) => llevadas(a, b) >= 3) },
+  }),
+  deCalculo({
+    id: 'calc-restar',
+    habilidad: 'restar',
+    nivel: 'Hasta 10 000',
+    nombre: 'Resta',
+    queHacen: 'Restan números de hasta cuatro cifras.',
+    // Fácil: sin canjear. Difícil: dos números de cuatro cifras, canjeando en dos columnas o más.
+    facil: { sirve: con('−', (a, b) => b >= 100 && canjesAlRestar(a, b) === 0) },
+    dificil: { sirve: con('−', (a, b) => b >= 1000 && canjesAlRestar(a, b) >= 2) },
+  }),
+  deCalculo({
+    id: 'calc-tablas',
+    habilidad: 'tablas',
+    nivel: 'Todas',
+    nombre: 'Multiplica',
+    queHacen: 'Resuelven multiplicaciones de las tablas del 2 al 10.',
+    // Fácil: las tablas del 2, 3, 4, 5 y 10. Difícil: las del 6 al 9, por 6 a 9.
+    facil: { sirve: con('×', (a) => [2, 3, 4, 5, 10].includes(a)) },
+    dificil: { sirve: con('×', (a, b) => a >= 6 && a <= 9 && b >= 6 && b <= 9) },
+  }),
+  deCalculo({
+    id: 'calc-dividir',
+    habilidad: 'dividir',
+    nivel: 'Todas',
+    nombre: 'Divide',
+    queHacen: 'Resuelven divisiones exactas entre 2 y 9.',
+    // Fácil: entre 2 a 5, con cociente hasta 5. Difícil: entre 6 a 9, con cociente de 6 o más.
+    facil: { sirve: con('÷', (a, d) => d <= 5 && a / d <= 5) },
+    dificil: { sirve: con('÷', (a, d) => d >= 6 && a / d >= 6) },
+  }),
+  deCalculo({
+    id: 'calc-dobles',
+    habilidad: 'dobles-mitades',
+    nivel: 'Dobles y mitades hasta 100',
+    nombre: 'Dobles y mitades',
+    queHacen: 'Calculan el doble o la mitad de un número.',
+    // Fácil: sin llevar (doble de 23, mitad de 48). Difícil: llevando (doble de 37) o con decenas impares (mitad de 38).
+    facil: { sirve: dobleOMitad((doble, n) => (doble ? n % 10 < 5 : !/[13579]/.test(String(n)))) },
+    dificil: { sirve: dobleOMitad((doble, n) => (doble ? n >= 15 && n % 10 >= 5 : n >= 30 && cifraEn(n, 1) % 2 === 1)) },
+  }),
+  deCalculo({
+    id: 'calc-fraccion-pintada',
+    habilidad: 'fracciones-reconocer',
+    nivel: 'Hasta octavos',
+    nombre: '¿Qué fracción está pintada?',
+    queHacen: 'Miran un círculo partido en partes iguales y escriben la fracción pintada.',
+    // Fácil: medios, tercios y cuartos. Difícil: quintos, sextos y octavos, con más de una parte pintada.
+    facil: { sirve: (r) => r.visual?.tipo === 'fraccion' && r.visual.partes[1] <= 4 },
+    dificil: { sirve: (r) => r.visual?.tipo === 'fraccion' && r.visual.partes[1] >= 5 && r.visual.partes[0] >= 2 },
+  }),
+  deCalculo({
+    id: 'calc-fraccion-de',
+    habilidad: 'fraccion-de',
+    nivel: 'Mitad, tercio y cuarto',
+    nombre: 'Mitad, tercio y cuarto',
+    queHacen: 'Calculan la mitad, la tercera o la cuarta parte de una cantidad.',
+    // Fácil: cantidades chicas (cada parte, hasta 5). Difícil: tercios y cuartos de cantidades más grandes (1/4 de 36).
+    facil: { sirve: segun(FRACCION_DE, (b, n) => n / b <= 5) },
+    dificil: { sirve: segun(FRACCION_DE, (b, n) => b >= 3 && n / b >= 6) },
+  }),
+  deCalculo({
+    id: 'calc-equivalentes',
+    habilidad: 'fracciones-equivalentes',
+    nivel: 'Medios, tercios y cuartos',
+    nombre: 'Fracciones equivalentes',
+    queHacen: 'Encuentran una fracción equivalente amplificando o simplificando.',
+    // Fácil: medios, tercios y cuartos por 2. Difícil: quintos, sextos, octavos y décimos, del nivel «Cualquier
+    // fracción», que en 4.º cita el mismo desempeño.
+    facil: { sirve: (r) => factor(r) === 2 },
+    dificil: { nivel: 'Cualquier fracción', sirve: segun(EQUIVALENTE, (_a, b) => [5, 6, 8, 10].includes(b)) },
+  }),
+  deCalculo({
+    id: 'calc-sumar-fracciones',
+    habilidad: 'fracciones-operar',
+    nivel: 'Igual denominador',
+    nombre: 'Suma y resta de fracciones',
+    queHacen: 'Suman y restan fracciones con el mismo denominador.',
+    // Fácil: sumas con denominador hasta 6. Difícil: sumas o restas con denominador de 8 a 12.
+    facil: { sirve: (r) => r.pregunta.includes('+') && (leer(r, FRACCIONES)?.[1] ?? NaN) <= 6 },
+    dificil: { sirve: segun(FRACCIONES, (_x, d) => d >= 8) },
+  }),
+  deCalculo({
+    id: 'calc-ecuacion',
+    habilidad: 'ecuaciones',
+    nivel: 'x + a = b',
+    nombre: 'Halla el número que falta',
+    queHacen: 'Encuentran el término desconocido de una igualdad.',
+    // Fácil: x + a = b con a hasta 10. Difícil: x − a = b con a de 10 o más (hay que sumar para deshacer la resta).
+    facil: { sirve: segun(/^x \+ (\d+) = \d+$/, (a) => a <= 10) },
+    dificil: { sirve: segun(/^x − (\d+) = \d+$/, (a) => a >= 10) },
+  }),
+  deCalculo({
+    id: 'calc-patron-suma',
+    habilidad: 'secuencias',
+    nivel: 'Sumando o restando',
+    nombre: '¿Qué número sigue?',
+    queHacen: 'Descubren la regla de un patrón que suma o resta y siguen la secuencia.',
+    // Fácil: sube de 3, 4 o 5 en 5. Difícil: baja, de 6 en 6 o más.
+    facil: { sirve: patron(([x, y]) => y - x > 0 && y - x <= 5) },
+    dificil: { sirve: patron(([x, y]) => y - x <= -6) },
+  }),
+  deCalculo({
+    id: 'calc-patron-multiplica',
+    habilidad: 'secuencias',
+    nivel: 'Multiplicando',
+    nombre: 'Patrón que multiplica',
+    queHacen: 'Descubren la regla de un patrón que multiplica y siguen la secuencia.',
+    // Fácil: por 2 y desde 1, 2 o 3. Difícil: números más grandes (el último término, de 40 o más).
+    facil: { sirve: patron(([x, y]) => y === 2 * x && x <= 3) },
+    dificil: { sirve: patron((t) => t[3] >= 40) },
+  }),
+  deCalculo({
+    id: 'calc-longitud',
+    habilidad: 'medidas',
+    nivel: 'Metros y centímetros',
+    nombre: 'Convertir metros y centímetros',
+    queHacen: 'Convierten metros a centímetros y al revés.',
+    // Fácil: de metros a centímetros (se multiplica). Difícil: de centímetros a metros (se divide).
+    facil: { sirve: (r) => / m = \? cm$/.test(r.pregunta) },
+    dificil: { sirve: (r) => / cm = \? m$/.test(r.pregunta) },
+  }),
+  deCalculo({
+    id: 'calc-tiempo',
+    habilidad: 'medidas',
+    nivel: 'Horas y minutos',
+    nombre: 'Horas y minutos',
+    queHacen: 'Convierten horas, medias horas y cuartos de hora a minutos.',
+    // Fácil: horas enteras. Difícil: horas y un cuarto, media o tres cuartos de hora, desde 2 h (2 h 45 min).
+    facil: { sirve: (r) => /^\d+ h = \? min$/.test(r.pregunta) },
+    dificil: { sirve: segun(/^(\d+) h (\d+) min = \? min$/, (h, m) => h >= 2 && [15, 30, 45].includes(m)) },
+  }),
+  deCalculo({
+    id: 'calc-masa',
+    habilidad: 'medidas',
+    nivel: 'Kilos y gramos',
+    nombre: 'Kilos y gramos',
+    queHacen: 'Convierten kilogramos a gramos y al revés.',
+    // Fácil: de kilos a gramos (se multiplica). Difícil: de gramos a kilos (se divide).
+    facil: { sirve: (r) => / kg = \? g$/.test(r.pregunta) },
+    dificil: { sirve: (r) => / g = \? kg$/.test(r.pregunta) },
+  }),
+  deCalculo({
+    id: 'calc-litro',
+    habilidad: 'medidas',
+    nivel: 'Medio y cuarto de litro',
+    nombre: 'Medio y cuarto de litro',
+    queHacen: 'Calculan cuántos vasos de medio o cuarto de litro llenan un recipiente.',
+    // Fácil: vasos de medio litro (2 por litro). Difícil: vasos de cuarto de litro (4 por litro), desde 2 L.
+    facil: { sirve: segun(VASOS, (porLitro) => porLitro === 2) },
+    dificil: { sirve: segun(VASOS, (porLitro, litros) => porLitro === 4 && litros >= 2) },
+  }),
 ]

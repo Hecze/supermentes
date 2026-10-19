@@ -1,10 +1,11 @@
 // Tipos de pregunta de números de cuatro cifras (4.º de primaria), con dibujos: el dinero del Perú, el ábaco, el
 // material Base Diez y el tablero de valor posicional. Cada versión trae otros números, y las alternativas
 // incorrectas son los errores que más cometen los alumnos (olvidar las monedas, saltarse el cero, leer al revés).
-import { entero } from '../../juegos/motor/azar'
-import { distractores, num } from '../../juegos/matematica/formato'
-import { CLARO, GRIS, TINTA, casilla, circulo, elipse, grupo, linea, poligono, rect, svg, texto } from '../dibujos'
-import type { Azar, Dibujo, TipoPregunta } from '../tipos'
+import { barajar, elegir, entero } from '../../juegos/motor/azar'
+import { distractores, num, valor } from '../../juegos/matematica/formato'
+import { CLARO, GRIS, casilla, circulo, el, elipse, grupo, linea, poligono, rect, svg, texto } from '../dibujos'
+import { BILLETES, DIAMETRO_MONEDA, MONEDAS, PROPORCION_BILLETE } from '../peru/dinero'
+import type { Azar, Dibujo, Nivel, TipoPregunta } from '../tipos'
 import { alternativas, nombre, soles } from '../util'
 
 const P4 = 'primaria-4'
@@ -30,6 +31,34 @@ function erroresDeLectura(n: number) {
   const sinCeros = Number(c.filter((d) => d !== 0).join('') || 0)
   const alReves = deCifras([...c].reverse())
   return [sinCeros, alReves, n + 100, n - 10, n + 10, n - 100, n + 1000, deCifras([c[0], c[2], c[1], c[3]])]
+}
+
+/** Los mismos errores, pero los más finos primero: sin los ceros, el cero corrido a otro lugar, una cuenta de más o de menos. */
+function erroresFinos(n: number) {
+  const c = cifrasDe(n)
+  const sinCeros = Number(c.filter((d) => d !== 0).join('') || 0)
+  // 4037 → 4307 o 4370: el cero cambia de lugar con la cifra de al lado.
+  const corridos = c.flatMap((d, i) =>
+    d === 0 && i > 0
+      ? [i - 1, i + 1]
+          .filter((j) => j > 0 && j < 4 && c[j] !== 0)
+          .map((j) => {
+            const x = [...c]
+            ;[x[i], x[j]] = [x[j], x[i]]
+            return deCifras(x)
+          })
+      : [],
+  )
+  return [sinCeros, ...corridos, n + 10, n - 10, n + 1, n - 1, n + 100, n - 100]
+}
+
+/** Las alternativas incorrectas al leer un número representado, según la dificultad (siempre de 4 cifras o menos). */
+function lecturasMal(n: number, nivel: Nivel): string[] {
+  if (nivel === 2) return distractores(n, erroresDeLectura(n), { min: 1 }).filter((x) => x.length >= 3)
+  const hasta9999 = (xs: string[]) => xs.filter((x) => (valor(x) ?? 0) <= 9999)
+  // Más fácil: errores lejanos (leerlo al revés, mil o cien de más o de menos), todos de 4 cifras.
+  if (nivel === 1) return hasta9999(distractores(n, [deCifras([...cifrasDe(n)].reverse()), n + 1000, n - 1000, n + 100, n - 100], { min: 1000, paso: 100 }))
+  return hasta9999(distractores(n, erroresFinos(n), { min: 1 }).filter((x) => x.length >= 3))
 }
 
 // ---------- Pasos de resolución (clave del docente) ----------
@@ -64,46 +93,26 @@ function ceroEn(c: number[], texto: (lugares: string) => string): string[] {
 
 // ---------- El dinero del Perú ----------
 
-const BILLETES: Record<number, { fondo: string; borde: string }> = {
-  200: { fondo: '#eadcf2', borde: '#6f4a8c' },
-  100: { fondo: '#d6e2f5', borde: '#36598f' },
-  50: { fondo: '#f6d6d2', borde: '#a34a3f' },
-  20: { fondo: '#f8e1c6', borde: '#9a5b1c' },
-  10: { fondo: '#d8eedd', borde: '#3c7a4e' },
-}
-
-const BW = 150
-const BH = 74
+// Los billetes y monedas de verdad (imágenes oficiales del BCRP, en ../peru): así el alumno reconoce el dinero que
+// usa en la bodega. Se ven más chicos que los reales, como en los libros.
+const BW = 176
+const BH = Math.round(BW / PROPORCION_BILLETE)
 
 function billete(valor: number) {
-  const b = BILLETES[valor]
-  const v = String(valor)
   return [
-    rect(0, 0, BW, BH, { relleno: b.fondo, trazo: TINTA, grosor: 1.6, redondeo: 6 }),
-    rect(5, 5, BW - 10, BH - 10, { trazo: b.borde, grosor: 0.8, redondeo: 4 }),
-    texto(13, 26, 'S/', { tam: 13, peso: 700, ancla: 'start', color: b.borde }),
-    texto(31, 26, v, { tam: 24, peso: 700, ancla: 'start' }),
-    // Medallón con una silueta, para que se lea como billete.
-    circulo(112, 36, 21, { relleno: '#ffffff', trazo: b.borde, grosor: 1.2 }),
-    circulo(112, 30, 7, { relleno: CLARO, trazo: b.borde, grosor: 1 }),
-    `<path d="M98,50 Q112,36 126,50" fill="${CLARO}" stroke="${b.borde}" stroke-width="1"/>`,
-    texto(13, BH - 16, v, { tam: 15, peso: 700, ancla: 'start', color: b.borde }),
+    el('image', { href: BILLETES[valor], x: 0, y: 0, width: BW, height: BH, preserveAspectRatio: 'xMidYMid meet' }),
+    // Un filo fino: en la fotocopia, el billete no se pierde en la hoja.
+    rect(0.5, 0.5, BW - 1, BH - 1, { trazo: GRIS, grosor: 0.8, redondeo: 3 }),
   ].join('')
 }
 
-const MONEDAS: Record<number, { r: number; anillo: string; centro: string }> = {
-  5: { r: 31, anillo: '#e3cf86', centro: '#d9d9d9' },
-  2: { r: 28, anillo: '#d9d9d9', centro: '#e3cf86' },
-  1: { r: 27, anillo: '#dcdcdc', centro: '#dcdcdc' },
-}
+/** El radio de cada moneda en el dibujo, en su tamaño relativo real (la de S/ 1 es la más grande). */
+const R_MONEDA = 36
+const radioMoneda = (valor: number) => Math.round((DIAMETRO_MONEDA[valor] / DIAMETRO_MONEDA[1]) * R_MONEDA)
 
 function moneda(valor: number) {
-  const m = MONEDAS[valor]
-  return [
-    circulo(0, 0, m.r, { relleno: m.anillo, grosor: 1.6 }),
-    circulo(0, 0, m.r * 0.7, { relleno: m.centro, trazo: GRIS, grosor: 1 }),
-    texto(0, 1, `S/ ${valor}`, { tam: 16, peso: 700 }),
-  ].join('')
+  const r = radioMoneda(valor)
+  return el('image', { href: MONEDAS[valor], x: -r, y: -r, width: 2 * r, height: 2 * r, preserveAspectRatio: 'xMidYMid meet' })
 }
 
 /** Billetes de mayor a menor, de tres en tres, y debajo las monedas, como en las fichas del MINEDU. */
@@ -113,10 +122,11 @@ export function dibujoDinero(billetes: number[], monedas: number[]): Dibujo {
   const filas = Math.ceil(billetes.length / POR_FILA)
   const partes: string[] = []
   billetes.forEach((b, i) => partes.push(grupo(billete(b), (i % POR_FILA) * (BW + GAP) + 4, Math.floor(i / POR_FILA) * (BH + 12) + 4)))
-  const yMonedas = filas * (BH + 12) + 4 + 32
-  monedas.forEach((m, i) => partes.push(grupo(moneda(m), 4 + 32 + i * 76, yMonedas)))
-  const ancho = Math.max(Math.min(billetes.length, POR_FILA) * (BW + GAP) - GAP, monedas.length * 76) + 8
-  const alto = yMonedas + (monedas.length ? 36 : -32) + 4
+  const paso = 2 * R_MONEDA + 10
+  const yMonedas = filas * (BH + 12) + 4 + R_MONEDA
+  monedas.forEach((m, i) => partes.push(grupo(moneda(m), 4 + R_MONEDA + i * paso, yMonedas)))
+  const ancho = Math.max(Math.min(billetes.length, POR_FILA) * (BW + GAP) - GAP, monedas.length * paso) + 8
+  const alto = yMonedas + (monedas.length ? R_MONEDA : -R_MONEDA) + 4
   const cuenta = (xs: number[], cosa: string) =>
     [...new Set(xs)].map((v) => `${xs.filter((x) => x === v).length} ${cosa} de S/ ${v}`).join(', ')
   return svg(ancho, alto, partes.join(''), `${cuenta(billetes, 'billetes')}; ${cuenta(monedas, 'monedas')}`)
@@ -124,16 +134,42 @@ export function dibujoDinero(billetes: number[], monedas: number[]): Dibujo {
 
 type Bolsillo = { billetes: number[]; monedas: number[]; total: number; enMonedas: number }
 
+/** Cómo se arma un montón de dinero: cuántos billetes de cada valor, qué monedas y cuántas cosas en total. */
+type Reglas = {
+  /** Cuántos billetes de S/ 200, 100, 50, 20 y 10, cada uno [mínimo, máximo]. */
+  billetes: [number, number][]
+  monedas: (azar: Azar) => number[]
+  maxBilletes: number
+  /** Mínimo de valores distintos de billete. */
+  minTipos: number
+  /** Cuántas monedas, [mínimo, máximo]. */
+  cuantasMonedas: [number, number]
+}
+
+/** De 0 a k monedas de S/ 5, de S/ 2 y de S/ 1. */
+const monedasHasta = (k: number) => (azar: Azar) => [5, 2, 1].flatMap((v) => Array(entero(azar, 0, k)).fill(v))
+
+/** Lo de siempre: varios billetes de 3 o más valores y de 2 a 5 monedas. */
+const NORMAL: Reglas = { billetes: [[2, 7], [0, 3], [0, 2], [0, 2], [0, 2]], monedas: monedasHasta(2), maxBilletes: 9, minTipos: 3, cuantasMonedas: [2, 5] }
+/** Más fácil: pocos billetes, casi todos de S/ 200 y S/ 100 (a veces uno de S/ 50), y solo dos monedas distintas. */
+const POCO: Reglas = { billetes: [[3, 7], [0, 3], [0, 1], [0, 0], [0, 0]], monedas: monedasHasta(1), maxBilletes: 7, minTipos: 2, cuantasMonedas: [2, 2] }
+/** Como POCO, pero las monedas suman S/ 10: lo que falta para el millar es un número redondo (de decenas). */
+const POCO_REDONDO: Reglas = { ...POCO, billetes: [[1, 6], [0, 3], [0, 1], [0, 0], [0, 0]], monedas: (azar) => [...elegir(azar, [[5, 5], [5, 2, 2, 1]])], cuantasMonedas: [2, 4] }
+/** Más difícil: billetes de 4 o 5 valores (siempre de 20 y de 10) y más monedas: más cosas que contar y agrupar. */
+const MUCHO: Reglas = { billetes: [[3, 5], [0, 2], [0, 2], [1, 2], [1, 2]], monedas: monedasHasta(2), maxBilletes: 9, minTipos: 4, cuantasMonedas: [4, 6] }
+
 /** Un montón de dinero de 4 cifras: varios billetes de 3 o más valores y algunas monedas. */
-function bolsillo(azar: Azar, min = 1000, max = 2999): Bolsillo {
+function bolsillo(azar: Azar, min = 1000, max = 2999, reglas = NORMAL): Bolsillo {
   return hasta(() => {
-    const cant: Record<number, number> = { 200: entero(azar, 2, 7), 100: entero(azar, 0, 3), 50: entero(azar, 0, 2), 20: entero(azar, 0, 2), 10: entero(azar, 0, 2) }
-    const billetes = [200, 100, 50, 20, 10].flatMap((v) => Array(cant[v]).fill(v))
-    const monedas = [5, 2, 1].flatMap((v) => Array(entero(azar, 0, 2)).fill(v))
-    const tipos = [200, 100, 50, 20, 10].filter((v) => cant[v] > 0).length
+    const valores = [200, 100, 50, 20, 10]
+    const cant: Record<number, number> = Object.fromEntries(valores.map((v, i) => [v, entero(azar, ...reglas.billetes[i])]))
+    const billetes = valores.flatMap((v) => Array(cant[v]).fill(v))
+    const monedas = reglas.monedas(azar)
+    const tipos = valores.filter((v) => cant[v] > 0).length
     const total = [...billetes, ...monedas].reduce((s, x) => s + x, 0)
     const enMonedas = monedas.reduce((s, x) => s + x, 0)
-    if (billetes.length > 9 || tipos < 3 || monedas.length < 2 || monedas.length > 5 || total < min || total > max) return null
+    const [minMonedas, maxMonedas] = reglas.cuantasMonedas
+    if (billetes.length > reglas.maxBilletes || tipos < reglas.minTipos || monedas.length < minMonedas || monedas.length > maxMonedas || total < min || total > max) return null
     return { billetes, monedas, total, enMonedas }
   })
 }
@@ -162,12 +198,20 @@ export const dineroContar: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
-    const b = bolsillo(azar)
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    const b = bolsillo(azar, 1000, 2999, { 1: POCO, 2: NORMAL, 3: MUCHO }[nivel])
     const quien = nombre(azar)
-    // Olvidar las monedas, contar un billete dos veces, equivocarse en las decenas, contar un billete de menos.
-    const malas = distractores(b.total, [b.total - b.enMonedas, b.total + 200, b.total - 30, b.total + 10, b.total - 200, b.total + 100], { min: 1 })
-    const alt = alternativas(azar, num(b.total), malas, 3)
+    const t = b.total
+    const malas = {
+      // Más fácil: errores lejanos, de un billete de 100 o de 200.
+      1: () => distractores(t, [t - 200, t + 200, t + 100, t - 100, t - b.enMonedas], { min: 1, paso: 100 }),
+      // Olvidar las monedas, contar un billete dos veces, equivocarse en las decenas, contar un billete de menos.
+      2: () => distractores(t, [t - b.enMonedas, t + 200, t - 30, t + 10, t - 200, t + 100], { min: 1 }),
+      // Más difícil: errores finos, de un billete chico o de una moneda; y una alternativa más.
+      3: () => distractores(t, [t - b.enMonedas, t - 10, t + 10, t - 30, t + 20, t - 5, t + 5], { min: 1 }),
+    }[nivel]()
+    const alt = alternativas(azar, num(b.total), malas, nivel === 3 ? 4 : 3)
     if (!alt) return null
     const cuenta = contarDinero(b)
     return {
@@ -191,19 +235,44 @@ export const dineroFalta: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
     const b = hasta(() => {
-      const x = bolsillo(azar, 1100, 2950)
-      return x.total % 1000 === 0 ? null : x
+      // Más fácil: también menos de mil (S/ 760 para tener S/ 1000).
+      const x = nivel === 1 ? bolsillo(azar, 500, 1990, POCO_REDONDO) : bolsillo(azar, 1100, 2950, nivel === 3 ? MUCHO : NORMAL)
+      // Más difícil: con unidades (las monedas no suman un número redondo), hay que completar cada columna.
+      return x.total % 1000 === 0 || (nivel === 3 && x.total % 10 === 0) ? null : x
     })
     const meta = Math.ceil(b.total / 1000) * 1000
     const falta = meta - b.total
     const quien = nombre(azar)
     const cosa = azar() < 0.5 ? 'una bicicleta' : azar() < 0.5 ? 'una laptop para su familia' : 'un viaje con su familia'
-    const malas = distractores(falta, [falta + b.enMonedas, falta + 10, falta - 10, falta + 100, falta - 100, b.total], { min: 1 })
+    const malas = {
+      // Más fácil: errores lejanos, de cien o de doscientos, o confundir lo que falta con lo que juntó.
+      1: () => distractores(falta, [falta + 100, falta - 100, b.total, falta + 200, falta - 200], { min: 1, paso: 100 }),
+      2: () => distractores(falta, [falta + b.enMonedas, falta + 10, falta - 10, falta + 100, falta - 100, b.total], { min: 1 }),
+      // Más difícil: el error típico de completar cada cifra a 10 sin canjear (2000 − 1637 → 473), olvidar las monedas
+      // y errores de una decena o una unidad.
+      3: () => distractores(falta, [falta + 110, falta + b.enMonedas, falta + 10, falta - 10, falta + 1, falta - 1, falta + 100, b.total], { min: 1 }),
+    }[nivel]()
     const alt = alternativas(azar, num(falta), malas, 4)
     if (!alt) return null
     const cuenta = contarDinero(b)
+    const pasos = [...cuenta.pasos, `Juntó: ${cuenta.suma} = ${soles(b.total)}`, `Le falta: ${num(meta)} − ${num(b.total)} = ${soles(falta)}`]
+    if (nivel === 3) {
+      // Más difícil: el precio va en el texto y hay un dato que no se usa.
+      const meses = entero(azar, 3, 8)
+      return {
+        forma: 'opciones',
+        clave: `falta:${b.billetes.join('-')}|${b.monedas.join('-')}`,
+        enunciado: `${quien} ahorra para ${cosa}, que cuesta ${soles(meta)}. En ${meses} meses juntó este dinero.`,
+        dibujo: dibujoDinero(b.billetes, b.monedas),
+        pregunta: '¿Cuánto dinero le falta?',
+        ...alt,
+        alternativas: alt.alternativas.map((a) => `S/ ${a}`),
+        pasos: [`Los ${meses} meses no se usan: se compara lo que juntó con el precio`, ...pasos],
+      }
+    }
     return {
       forma: 'opciones',
       clave: `falta:${b.billetes.join('-')}|${b.monedas.join('-')}`,
@@ -212,7 +281,7 @@ export const dineroFalta: TipoPregunta = {
       pregunta: `¿Cuánto le falta para tener ${soles(meta)}?`,
       ...alt,
       alternativas: alt.alternativas.map((a) => `S/ ${a}`),
-      pasos: [...cuenta.pasos, `Juntó: ${cuenta.suma} = ${soles(b.total)}`, `Le falta: ${num(meta)} − ${num(b.total)} = ${soles(falta)}`],
+      pasos,
     }
   },
 }
@@ -243,6 +312,23 @@ function numeroConCero(azar: Azar, maxMillar = 9) {
   return c
 }
 
+/**
+ * Las cifras de un número de 4 cifras según la dificultad. Más fácil: sin ceros y con cifras chicas (pocas cuentas o
+ * fichas que contar). Normal: como siempre. Más difícil: con uno o dos ceros en C, D o U (4007, 3060), que es donde
+ * más se equivocan.
+ */
+function numeroDeNivel(azar: Azar, nivel: Nivel, maxFacil = 5): number[] {
+  if (nivel === 2) return numeroConCero(azar)
+  if (nivel === 1) {
+    // Se salta un número del azar: si no, con cifras hasta 9 saldría el mismo número de la normal cuando esta no trae cero.
+    azar()
+    return [entero(azar, 1, maxFacil), entero(azar, 1, maxFacil), entero(azar, 1, maxFacil), entero(azar, 1, maxFacil)]
+  }
+  const c = [entero(azar, 1, 9), entero(azar, 1, 9), entero(azar, 1, 9), entero(azar, 1, 9)]
+  for (const i of barajar(azar, [1, 2, 3]).slice(0, azar() < 0.5 ? 1 : 2)) c[i] = 0
+  return c
+}
+
 export const abaco: TipoPregunta = {
   id: 'abaco',
   nombre: 'Lee el ábaco',
@@ -251,8 +337,9 @@ export const abaco: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
-    const c = numeroConCero(azar)
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    const c = numeroDeNivel(azar, nivel)
     const n = deCifras(c)
     if (azar() < 0.3) {
       return {
@@ -265,7 +352,7 @@ export const abaco: TipoPregunta = {
         pasos: [desglose(c), ...ceroEn(c, (l) => `En ${l} no se dibuja ninguna cuenta`), `En el ábaco: ${porPosicion(c)}`],
       }
     }
-    const alt = alternativas(azar, num(n), distractores(n, erroresDeLectura(n), { min: 1 }).filter((x) => x.length >= 3), 4)
+    const alt = alternativas(azar, num(n), lecturasMal(n, nivel), 4)
     if (!alt) return null
     return {
       forma: 'opciones',
@@ -341,30 +428,36 @@ export const baseDiez: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
     if (azar() < 0.3) {
-      const cubos = entero(azar, 2, 4)
-      const que = azar() < 0.5 ? { cosa: 'placas de 100', vale: 10 } : { cosa: 'barras de 10', vale: 100 }
+      if (nivel === 3) return equivalenciaDoble(azar)
+      // Más fácil: de 1 a 3 cubos, siempre en placas (cada cubo, 10 placas).
+      const cubos = nivel === 1 ? entero(azar, 1, 3) : entero(azar, 2, 4)
+      const que = nivel === 1 || azar() < 0.5 ? { cosa: 'placas de 100', vale: 10 } : { cosa: 'barras de 10', vale: 100 }
       const r = cubos * que.vale
       const alt = alternativas(azar, num(r), distractores(r, [cubos, cubos * que.vale * 10, cubos * 1000, cubos + que.vale], { min: 1 }), 4)
       if (!alt) return null
+      const losCubos = cubos === 1 ? '1 cubo' : `${cubos} cubos`
       return {
         forma: 'opciones',
         clave: `equivale:${cubos}:${que.vale}`,
-        enunciado: `Observa: son ${cubos} cubos de 1000 del material Base Diez.`,
+        enunciado: `Observa: ${cubos === 1 ? 'es' : 'son'} ${losCubos} de 1000 del material Base Diez.`,
         dibujo: dibujoBaseDiez([cubos, 0, 0, 0]),
         pregunta: `¿Cuántas ${que.cosa} necesitas para formar la misma cantidad?`,
         ...alt,
         pasos: [
           `${num(1000)} = ${que.vale} × ${num(1000 / que.vale)}: cada cubo equivale a ${que.vale} ${que.cosa}`,
-          `${cubos} cubos: ${cubos} × ${que.vale} = ${num(r)} ${que.cosa}`,
+          `${losCubos}: ${cubos} × ${que.vale} = ${num(r)} ${que.cosa}`,
         ],
       }
     }
-    const c = [entero(azar, 1, 3), entero(azar, 0, 6), entero(azar, 0, 9), entero(azar, 0, 9)]
-    if (c[1] + c[2] + c[3] < 6) return null
+    if (nivel === 3) return baseDiezConCanje(azar)
+    // Más fácil: pocas piezas y de todas (sin lugares vacíos).
+    const c = nivel === 1 ? [entero(azar, 1, 2), entero(azar, 1, 4), entero(azar, 1, 5), entero(azar, 1, 5)] : [entero(azar, 1, 3), entero(azar, 0, 6), entero(azar, 0, 9), entero(azar, 0, 9)]
+    if (nivel === 2 && c[1] + c[2] + c[3] < 6) return null
     const n = deCifras(c)
-    const alt = alternativas(azar, num(n), distractores(n, erroresDeLectura(n), { min: 1 }).filter((x) => x.length >= 3), 4)
+    const alt = alternativas(azar, num(n), lecturasMal(n, nivel), 4)
     if (!alt) return null
     return {
       forma: 'opciones',
@@ -376,6 +469,57 @@ export const baseDiez: TipoPregunta = {
       pasos: [c.map((d, i) => `${d} ${PIEZAS[i][d === 1 ? 0 : 1]} = ${num(d * VALOR_POS[i])}`).join('; '), sumaDeValores(c)],
     }
   },
+}
+
+/** Más difícil: cubos y placas juntos, todo en barras (2 cubos y 3 placas son 230 barras). Un paso más. */
+function equivalenciaDoble(azar: Azar) {
+  const cubos = entero(azar, 2, 4)
+  const placas = entero(azar, 1, 5)
+  const r = cubos * 100 + placas * 10
+  // Errores: contar las placas como barras sueltas, olvidarlas, o cambiar cubos y placas por decenas.
+  const alt = alternativas(azar, num(r), distractores(r, [cubos * 100 + placas, cubos * 100, cubos * 10 + placas, r * 10, r + 10, r - 10, cubos + placas], { min: 1 }), 4)
+  if (!alt) return null
+  const lasPlacas = `${placas} ${placas === 1 ? 'placa' : 'placas'}`
+  return {
+    forma: 'opciones' as const,
+    clave: `equivale:${cubos}:${placas}:barras`,
+    enunciado: `Observa: son ${cubos} cubos de 1000 y ${lasPlacas} de 100 del material Base Diez.`,
+    dibujo: dibujoBaseDiez([cubos, placas, 0, 0]),
+    pregunta: '¿Cuántas barras de 10 necesitas para formar la misma cantidad?',
+    ...alt,
+    pasos: [
+      `Cada cubo equivale a 100 barras: ${cubos} × 100 = ${num(cubos * 100)} barras`,
+      `Cada placa equivale a 10 barras: ${placas} × 10 = ${placas * 10} barras`,
+      `${num(cubos * 100)} + ${placas * 10} = ${num(r)} barras`,
+    ],
+  }
+}
+
+/**
+ * Más difícil: 10 o más barras (o cubitos) que hay que canjear por una placa (o una barra). 1 cubo, 3 placas,
+ * 12 barras y 5 cubitos son 1425, no 1325.
+ */
+function baseDiezConCanje(azar: Azar) {
+  const c = [entero(azar, 1, 3), entero(azar, 1, 6), entero(azar, 1, 8), entero(azar, 1, 9)]
+  const k = azar() < 0.5 ? 2 : 3
+  c[k] = entero(azar, 10, 14)
+  const n = deCifras(c)
+  // El error típico es quedarse con la última cifra de cada montón, sin canjear.
+  const sinCanje = deCifras(c.map((d) => d % 10))
+  const alt = alternativas(azar, num(n), [num(sinCanje), ...lecturasMal(n, 3)], 4)
+  if (!alt) return null
+  const sobran = c[k] - 10
+  const canje =
+    sobran === 0 ? `10 ${PIEZAS[k][1]} forman 1 ${PIEZAS[k - 1][0]}` : `${c[k]} ${PIEZAS[k][1]} = 1 ${PIEZAS[k - 1][0]} y ${sobran} ${PIEZAS[k][sobran === 1 ? 0 : 1]}`
+  return {
+    forma: 'opciones' as const,
+    clave: `base10:${c.join('-')}`,
+    enunciado: 'Observa el material Base Diez: cubos de 1000, placas de 100, barras de 10 y cubitos de 1.',
+    dibujo: dibujoBaseDiez(c),
+    pregunta: '¿Qué número se formó?',
+    ...alt,
+    pasos: [c.map((d, i) => `${d} ${PIEZAS[i][d === 1 ? 0 : 1]} = ${num(d * VALOR_POS[i])}`).join('; '), canje, sumaDeValores(c)],
+  }
 }
 
 // ---------- Tablero de valor posicional ----------
@@ -398,6 +542,29 @@ export function dibujoTablero(contenido: (string | number)[], fichas = false): D
   return svg(4 * CW + 8, 120, partes.join(''), alt)
 }
 
+/**
+ * El número y la posición de la cifra por la que se pregunta, que no se repite en el número. Más fácil: sin ceros y la
+ * cifra en UM o C. Más difícil: con un cero y la cifra en C o D, las del medio, que más se confunden.
+ */
+function cifraPorValorar(azar: Azar, nivel: Nivel): { c: number[]; p: number } {
+  if (nivel === 1) return { c: barajar(azar, [1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4), p: entero(azar, 0, 1) }
+  if (nivel === 3) {
+    const [um, ...resto] = barajar(azar, [1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 4)
+    const c = [um, ...resto.slice(0, 2)]
+    c.splice(entero(azar, 1, 3), 0, 0)
+    return { c, p: elegir(azar, [1, 2].filter((i) => c[i] !== 0)) }
+  }
+  const c = hasta(() => {
+    const x = [entero(azar, 1, 9), entero(azar, 0, 9), entero(azar, 0, 9), entero(azar, 0, 9)]
+    return new Set(x).size === 4 ? x : null
+  })
+  const p = hasta(() => {
+    const i = entero(azar, 0, 2)
+    return c[i] !== 0 ? i : null
+  })
+  return { c, p }
+}
+
 export const tablero: TipoPregunta = {
   id: 'tablero',
   nombre: 'Tablero de valor posicional',
@@ -406,22 +573,19 @@ export const tablero: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
     const modo = azar()
     if (modo < 0.4) {
       // ¿Cuánto vale la cifra…? La cifra elegida no se repite en el número.
-      const c = hasta(() => {
-        const x = [entero(azar, 1, 9), entero(azar, 0, 9), entero(azar, 0, 9), entero(azar, 0, 9)]
-        return new Set(x).size === 4 ? x : null
-      })
-      const p = hasta(() => {
-        const i = entero(azar, 0, 2)
-        return c[i] !== 0 ? i : null
-      })
+      const { c, p } = cifraPorValorar(azar, nivel)
       const d = c[p]
       const v = d * 10 ** (3 - p)
+      const n = deCifras(c)
+      // Más difícil, también los errores de leer desde esa cifra (en 3605, «el 6 vale 605») o hasta ella (3600).
+      const finos = nivel === 3 ? [num(n % 10 ** (4 - p)), num(n - (n % 10 ** (3 - p)))] : []
       // Los errores son confundir la posición: la cifra sola o con un cero de más o de menos.
-      const alt = alternativas(azar, num(v), [0, 1, 2, 3].map((k) => num(d * 10 ** k)), 4)
+      const alt = alternativas(azar, num(v), [...finos, ...[0, 1, 2, 3].map((k) => num(d * 10 ** k))], 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -434,9 +598,9 @@ export const tablero: TipoPregunta = {
       }
     }
     if (modo < 0.7) {
-      const c = numeroConCero(azar)
+      const c = numeroDeNivel(azar, nivel)
       const n = deCifras(c)
-      const alt = alternativas(azar, num(n), distractores(n, erroresDeLectura(n), { min: 1 }).filter((x) => x.length >= 3), 4)
+      const alt = alternativas(azar, num(n), lecturasMal(n, nivel), 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -448,7 +612,7 @@ export const tablero: TipoPregunta = {
         pasos: [`Fichas: ${porPosicion(c)}`, ...ceroEn(c, (l) => `En ${l} no hay fichas: se escribe 0`), sumaDeValores(c)],
       }
     }
-    const c = numeroConCero(azar)
+    const c = numeroDeNivel(azar, nivel, 9)
     const n = deCifras(c)
     const respuesta = POSICIONES.map((p, i) => `${p}: ${c[i]}`).join(' · ')
     return {

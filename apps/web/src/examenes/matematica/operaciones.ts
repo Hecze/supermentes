@@ -4,7 +4,7 @@
 import { barajar, elegir, entero } from '../../juegos/motor/azar'
 import { distractores, num } from '../../juegos/matematica/formato'
 import { CLARO, GRIS, TINTA, casilla, circulo, elipse, grupo, linea, poligono, rect, ruta, svg, texto } from '../dibujos'
-import type { Azar, Dibujo, Grupo, TipoPregunta } from '../tipos'
+import type { Azar, Dibujo, Grupo, Nivel, TipoPregunta } from '../tipos'
 import { alternativas, dosNombres, nombre, soles } from '../util'
 
 const P4 = 'primaria-4'
@@ -28,6 +28,15 @@ function probar<T>(f: () => T | null, veces = 80): T | null {
   return null
 }
 
+// La dificultad (`ctx.nivel`): 1 más fácil, 2 la pregunta de siempre, 3 más difícil. Con 2, cada tipo consume el azar en
+// el mismo orden que antes: con la misma semilla sale la misma pregunta, letra por letra (los exámenes ya impresos).
+
+/** El valor de esa dificultad. */
+const segun = <T>(nivel: Nivel, valores: Record<Nivel, T>): T => valores[nivel]
+
+/** Un entero del rango de esa dificultad, ambos extremos incluidos. */
+const enteroSegun = (azar: Azar, nivel: Nivel, rangos: Record<Nivel, readonly [number, number]>) => entero(azar, rangos[nivel][0], rangos[nivel][1])
+
 const rango = (a: number, b: number) => Array.from({ length: b - a + 1 }, (_, i) => a + i)
 const sumar = (xs: number[]) => xs.reduce((s, x) => s + x, 0)
 const decenaAbajo = (n: number) => Math.floor(n / 10) * 10
@@ -35,6 +44,12 @@ const aLaDecena = (n: number) => Math.round(n / 10) * 10
 const aLaCentena = (n: number) => Math.round(n / 100) * 100
 /** Sin 0 ni 5 en las unidades: así nadie duda hacia qué decena va. */
 const redondeable = (n: number) => n % 10 !== 0 && n % 10 !== 5
+/** Si al redondear a la decena se pasa a la centena siguiente (1996 → 2000, 597 → 600). */
+const pasaLaCentena = (n: number) => Math.floor(n / 10) % 10 === 9 && n % 10 > 5
+/** Fácil de redondear: las unidades lejos del 5 (1, 2, 8 o 9) y sin pasar a otra centena. */
+const facilDeRedondear = (n: number) => [1, 2, 8, 9].includes(n % 10) && !pasaLaCentena(n)
+/** Difícil de redondear: las unidades cerca del 5 (4 o 6), o pasa a la centena siguiente. */
+const dificilDeRedondear = (n: number) => [4, 6].includes(n % 10) || pasaLaCentena(n)
 
 // Anchos de Arial en negrita (en em), para centrar igualdades con casillas y poner un texto a continuación de otro.
 const ANGOSTAS: Record<string, number> = { ' ': 0.28, i: 0.28, í: 0.28, j: 0.28, l: 0.28, I: 0.28, f: 0.33, t: 0.33, r: 0.39, '(': 0.33, ')': 0.33, ':': 0.33, '.': 0.28, ',': 0.28, '/': 0.28, '°': 0.4, º: 0.37 }
@@ -109,24 +124,63 @@ export const rectaNumerica: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
-    const paso = elegir(azar, [100, 100, 100, 10, 10, 1000])
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: la recta empieza en un millar o una centena justa (3000, 3100…), hay menos recuadros, las otras
+    // alternativas y letras quedan lejos, y en las letras también se lee el número del medio. Más difícil: la recta cruza
+    // un millar (2960, 2970… 3060), solo se leen los extremos (hay que hallar cuánto vale cada salto) y hay más recuadros.
+    const paso = elegir(azar, segun(nivel, { 1: [100, 100, 100, 10, 10, 1000], 2: [100, 100, 100, 10, 10, 1000], 3: [10, 10, 10, 100, 100, 1000] }))
     const n = paso === 1000 ? 9 : 10
-    const inicio = paso === 1000 ? 0 : paso === 100 ? entero(azar, 10, 89) * 100 : entero(azar, 100, 989) * 10
+    const inicio =
+      nivel === 1
+        ? paso === 1000
+          ? 0
+          : paso === 100
+            ? entero(azar, 1, 8) * 1000
+            : entero(azar, 10, 98) * 100
+        : nivel === 3
+          ? paso === 1000
+            ? entero(azar, 1, 9) * 100
+            : paso === 100
+              ? entero(azar, 1, 8) * 1000 + entero(azar, 1, 9) * 100
+              : entero(azar, 2, 9) * 1000 - entero(azar, 1, 9) * 10
+          : paso === 1000
+            ? 0
+            : paso === 100
+              ? entero(azar, 10, 89) * 100
+              : entero(azar, 100, 989) * 10
     const v = (i: number) => inicio + i * paso
-    const etiquetas = [0, 5, n]
-    const libres = rango(1, n - 1).filter((i) => i !== 5)
+    const etiquetas = nivel === 3 ? [0, n] : [0, 5, n]
+    const libres = rango(1, n - 1).filter((i) => !etiquetas.includes(i))
     const p = num(paso)
     // Pasos de la clave: cuánto vale cada salto (entre dos números escritos) y contar de salto en salto.
     const cadaSalto = (j: number) =>
       `De ${num(v(0))} a ${num(v(j))} hay ${j} saltos: ${inicio === 0 ? '' : `${num(v(j))} − ${num(v(0))} = ${num(j * paso)} y `}${num(j * paso)} ÷ ${j} = ${p}`
     const contar = (desde: number, marcas: number[]) => `Desde ${num(v(desde))}, ${desde > marcas[0] ? 'hacia atrás ' : ''}de ${p} en ${p}: ${marcas.map((i) => num(v(i))).join(', ')}`
+    /** Contar desde el número escrito más cercano a la marca k, hacia adelante o hacia atrás. */
+    const desdeCerca = (k: number) => {
+      const base = etiquetas.reduce((b, e) => (Math.abs(e - k) < Math.abs(b - k) ? e : b))
+      return base > k ? contar(base, rango(k, base - 1).reverse()) : contar(base, rango(base + 1, k))
+    }
+    const salto = cadaSalto(nivel === 3 ? n : 5)
     const modo = azar()
     if (modo < 0.45) {
       const k = elegir(azar, libres)
-      // Contar las marcas de 1 en 1 o de 10 en 10, o contar una marca de más o de menos.
-      const frecuentes = paso === 10 ? [inicio + k, v(k + 1), v(k - 1), inicio + k * 100] : paso === 100 ? [inicio + k * 10, v(k + 1), v(k - 1), inicio + k] : [k * 100, v(k + 1), v(k - 1), k]
-      const malas = distractores(v(k), frecuentes, { min: 0, paso }).filter((t) => Number(t.replace(/\s/g, '')) <= 9999)
+      // Contar las marcas de 1 en 1 o de 10 en 10, o contar una marca de más o de menos. En el fácil, marcas más lejanas.
+      const frecuentes =
+        nivel === 1
+          ? [v(k + 2), v(k - 2), v(k + 3), v(k - 3)]
+          : paso === 10
+            ? [inicio + k, v(k + 1), v(k - 1), inicio + k * 100]
+            : paso === 100
+              ? [inicio + k * 10, v(k + 1), v(k - 1), inicio + k]
+              : [k * 100, v(k + 1), v(k - 1), k]
+      // En el fácil, solo otras marcas vacías de la misma recta.
+      const enRecta = (x: number) => x >= v(0) && x <= v(n) && (x - inicio) % paso === 0 && !etiquetas.some((e) => v(e) === x)
+      const malas = distractores(v(k), frecuentes, { min: 0, paso: nivel === 1 ? 2 * paso : paso }).filter((t) => {
+        const x = Number(t.replace(/\s/g, ''))
+        return x <= 9999 && (nivel !== 1 || enRecta(x))
+      })
       const alt = alternativas(azar, num(v(k)), malas, 4)
       if (!alt) return null
       const base = k < 5 ? 0 : 5
@@ -137,13 +191,13 @@ export const rectaNumerica: TipoPregunta = {
         dibujo: dibujoRecta({ inicio, paso, n, etiquetas, flecha: k }),
         pregunta: '¿Qué número señala la flecha?',
         nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
-        pasos: [cadaSalto(5), contar(base, rango(base + 1, k)), `La flecha señala el ${num(v(k))}`],
+        pasos: [salto, nivel === 3 ? desdeCerca(k) : contar(base, rango(base + 1, k)), `La flecha señala el ${num(v(k))}`],
         ...alt,
       }
     }
     if (modo < 0.75) {
       const cas = barajar(azar, libres)
-        .slice(0, 3)
+        .slice(0, segun(nivel, { 1: 2, 2: 3, 3: 4 }))
         .sort((a, b) => a - b)
       const respuesta = cas.map((i) => num(v(i))).join(', ')
       return {
@@ -154,13 +208,17 @@ export const rectaNumerica: TipoPregunta = {
         respuesta,
         espacio: 'dibujo',
         nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
-        pasos: [cadaSalto(5), contar(0, rango(1, cas[cas.length - 1])), `En los recuadros: ${respuesta}`],
+        pasos: [salto, contar(0, rango(1, cas[cas.length - 1])), `En los recuadros: ${respuesta}`],
       }
     }
-    // ¿Qué letra señala el número? Las otras letras van en las marcas vecinas, que es donde más se confunden.
+    // ¿Qué letra señala el número? Las otras letras van en las marcas vecinas, que es donde más se confunden (en el fácil,
+    // lejos de la correcta).
     const k = elegir(azar, libres)
-    const vecinas = barajar(azar, [k - 1, k + 1].filter((i) => i >= 1 && i <= n - 1))
-    const otras = barajar(azar, rango(1, n - 1).filter((i) => i !== k && !vecinas.includes(i)))
+    const vecinas = nivel === 1 ? [] : barajar(azar, [k - 1, k + 1].filter((i) => i >= 1 && i <= n - 1))
+    const otras = barajar(
+      azar,
+      rango(1, n - 1).filter((i) => i !== k && !vecinas.includes(i) && (nivel !== 1 || (!etiquetas.includes(i) && Math.abs(i - k) > 1))),
+    )
     const letras = [k, ...[...vecinas, ...otras].slice(0, 3)].sort((a, b) => a - b)
     // Se cuenta desde el extremo más cercano: desde el último número, hacia atrás.
     const desdeFin = k > n - k
@@ -168,10 +226,14 @@ export const rectaNumerica: TipoPregunta = {
       forma: 'opciones',
       clave: `recta-letra:${inicio}:${paso}:${letras.join('-')}:${k}`,
       enunciado: 'Observa la recta numérica.',
-      dibujo: dibujoRecta({ inicio, paso, n, etiquetas: [0, n], letras }),
+      dibujo: dibujoRecta({ inicio, paso, n, etiquetas: nivel === 1 ? etiquetas : [0, n], letras }),
       pregunta: `¿Qué letra señala el número ${num(v(k))}?`,
       nota: `Las marcas van de ${num(paso)} en ${num(paso)}.`,
-      pasos: [cadaSalto(n), desdeFin ? contar(n, rango(k, n - 1).reverse()) : contar(0, rango(1, k)), `El ${num(v(k))} está en la letra ${'ABCD'[letras.indexOf(k)]}`],
+      pasos: [
+        nivel === 1 ? cadaSalto(5) : cadaSalto(n),
+        nivel === 1 ? desdeCerca(k) : desdeFin ? contar(n, rango(k, n - 1).reverse()) : contar(0, rango(1, k)),
+        `El ${num(v(k))} está en la letra ${'ABCD'[letras.indexOf(k)]}`,
+      ],
       alternativas: ['A', 'B', 'C', 'D'],
       correcta: letras.indexOf(k),
     }
@@ -325,6 +387,39 @@ function paraOrdenar(azar: Azar, [lo, hi]: [number, number]): number[] {
   return [(m - 1) * 1000 + entero(azar, 860, 990), m * 1000 + x * 10 + y, m * 1000 + y * 10 + x, m * 1000 + entero(azar, 1, 9) * 100 + entero(azar, 0, 99)]
 }
 
+/** Más fácil: cuatro números que se distinguen ya en el millar o en la centena, a 400 o más de distancia (1250, 1730, 3405…). */
+function paraOrdenarFacil(azar: Azar, [lo, hi]: [number, number]): number[] {
+  const centenas =
+    probar(() => {
+      const c = barajar(azar, rango(lo * 10, hi * 10 + 9))
+        .slice(0, 4)
+        .sort((a, b) => a - b)
+      return c.every((x, i) => i === 0 || x - c[i - 1] >= 4) ? c : null
+    }) ?? [lo * 10, lo * 10 + 4, lo * 10 + 8, lo * 10 + 12]
+  return barajar(
+    azar,
+    centenas.map((c) => c * 100 + entero(azar, 0, 99)),
+  )
+}
+
+/**
+ * Más difícil: tres con las mismas cifras y un cero en medio (4058, 4508, 4850) y uno del millar anterior que «parece»
+ * mayor si se olvida el millar (3985).
+ */
+function paraOrdenarDificil(azar: Azar, [lo, hi]: [number, number]): number[] {
+  const m = entero(azar, lo + 1, hi)
+  const [a, b] = barajar(azar, rango(1, 9))
+  const perm = [
+    [a, b, 0],
+    [a, 0, b],
+    [b, a, 0],
+    [b, 0, a],
+    [0, a, b],
+    [0, b, a],
+  ].map(([x, y, z]) => m * 1000 + x * 100 + y * 10 + z)
+  return barajar(azar, [...barajar(azar, perm).slice(0, 3), (m - 1) * 1000 + entero(azar, 900, 999)])
+}
+
 const cadena = (xs: number[]) => xs.map(num).join(' < ')
 
 const LUGARES = ['UM', 'C', 'D', 'U']
@@ -353,9 +448,12 @@ export const ordenarNumeros: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: números que se distinguen en el millar o la centena, y alternativas sin los errores más finos. Más
+    // difícil: las mismas cifras con un cero y uno del millar anterior, y una alternativa más (cuatro órdenes).
     const ctx = elegir(azar, PARA_ORDENAR)
-    const valores = paraOrdenar(azar, ctx.millares)
+    const valores = segun(nivel, { 1: paraOrdenarFacil, 2: paraOrdenar, 3: paraOrdenarDificil })(azar, ctx.millares)
     if (new Set(valores).size < 4) return null
     const asc = [...valores].sort((a, b) => a - b)
     // Que no aparezcan ya ordenadas.
@@ -371,7 +469,10 @@ export const ordenarNumeros: TipoPregunta = {
     const pasos = [leidas, `${porQue(asc[0], asc[1])}; ${porQue(asc[1], asc[2])}`, porQue(asc[2], asc[3]), `De menor a mayor: ${cadena(asc)}`]
     const modo = azar()
     if (modo < 0.45) {
-      const alt = alternativas(azar, cadena(asc), ordenesMalos(asc).map(cadena), 3)
+      const malos = ordenesMalos(asc)
+      // En el fácil, sin cruzar los dos más parecidos: al revés, mirando las unidades, sin el millar o el mayor primero.
+      const lista = nivel === 1 ? [malos[3], malos[2], malos[0], [asc[3], asc[0], asc[1], asc[2]]] : malos
+      const alt = alternativas(azar, cadena(asc), lista.map(cadena), nivel === 3 ? 4 : 3)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -400,8 +501,9 @@ export const ordenarNumeros: TipoPregunta = {
     // Primero la que más confunde: la que gana si se miran las cifras desde la derecha.
     const malo = ordenesMalos(asc)[2]
     const confusa = mayor ? malo[3] : malo[0]
-    const otras = [confusa, ...(mayor ? [asc[2], asc[1], asc[0]] : [asc[1], asc[2], asc[3]])].filter((v) => v !== objetivo)
-    const alt = alternativas(azar, etiquetaDe(objetivo), otras.map(etiquetaDe), 4)
+    // En el fácil, tres alternativas: las que quedan más lejos de la mayor (o de la menor).
+    const otras = (nivel === 1 ? (mayor ? [asc[0], asc[1]] : [asc[3], asc[2]]) : [confusa, ...(mayor ? [asc[2], asc[1], asc[0]] : [asc[1], asc[2], asc[3]])]).filter((v) => v !== objetivo)
+    const alt = alternativas(azar, etiquetaDe(objetivo), otras.map(etiquetaDe), nivel === 1 ? 3 : 4)
     if (!alt) return null
     return {
       forma: 'opciones',
@@ -473,11 +575,15 @@ export const redondeoRecta: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: las unidades lejos del 5 (1, 2, 8 o 9), tres alternativas y, para escribir, el punto ya está en la recta.
+    // Más difícil: las unidades cerca del 5 (4 o 6) o un redondeo que pasa a la otra centena (1996 → 2000).
     const ctx = elegir(azar, PARA_REDONDEAR)
+    const sirve = segun(nivel, { 1: facilDeRedondear, 2: redondeable, 3: dificilDeRedondear })
     const n = probar(() => {
-      const x = entero(azar, ctx.min, ctx.max)
-      return redondeable(x) ? x : null
+      const x = nivel === 3 && azar() < 0.15 ? Math.floor(entero(azar, ctx.min, ctx.max) / 100) * 100 + 90 + entero(azar, 6, 9) : entero(azar, ctx.min, ctx.max)
+      return x >= ctx.min && x <= ctx.max && sirve(x) ? x : null
     })
     if (n === null) return null
     const D = decenaAbajo(n)
@@ -490,7 +596,7 @@ export const redondeoRecta: TipoPregunta = {
     if (azar() < 0.6) {
       // Quedarse con la decena de abajo, redondear a la centena, irse una decena más allá.
       const malas = distractores(R, [otra, aLaCentena(n), R + (R - otra)], { min: 0, paso: 10 })
-      const alt = alternativas(azar, fmt(R), ctx.dinero ? malas.map((m) => `S/ ${m}`) : malas, 4)
+      const alt = alternativas(azar, fmt(R), ctx.dinero ? malas.map((m) => `S/ ${m}`) : malas, nivel === 1 ? 3 : 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -503,6 +609,17 @@ export const redondeoRecta: TipoPregunta = {
         ...alt,
       }
     }
+    // En el fácil, un paso menos: el número ya está marcado en la recta.
+    if (nivel === 1)
+      return {
+        forma: 'abierta',
+        clave: `redondeo:${n}`,
+        enunciado: `${ctx.enunciado(quien, n)} Observa ese número en la recta numérica y redondea ${ctx.que} a la decena.`,
+        dibujo: dibujoRedondeo(D, { n, etiqueta }, true),
+        respuesta: `${num(n)} va entre ${num(D)} y ${num(D + 10)}, más cerca de ${num(R)}: se redondea a ${num(R)}.`,
+        espacio: 'dibujo',
+        pasos: [`En la recta, ${num(n)} está entre ${num(D)} y ${num(D + 10)}`, distancias, `Está más cerca de ${num(R)}: se redondea a ${num(R)}`],
+      }
     return {
       forma: 'abierta',
       clave: `redondeo:${n}`,
@@ -570,31 +687,42 @@ export const estimarCompra: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
-    const casa = azar() < 0.45
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: más precios de dos cifras, siempre dos productos con las unidades lejos del 5, y alternativas más
+    // lejanas; al buscar el precio, los otros quedan lejos. Más difícil: más precios de tres cifras y siempre tres
+    // productos; al buscar el precio, todos quedan cerca del límite (36 y 44 frente a 34 y 46).
+    const casa = azar() < segun(nivel, { 1: 0.25, 2: 0.45, 3: 0.65 })
     const tienda = casa ? 'una tienda de muebles y electrodomésticos' : 'una tienda de ropa del mercado'
     const elegidos = barajar(azar, casa ? CASA : ROPA).slice(0, 4)
     const quien = nombre(azar)
     if (azar() < 0.65) {
-      const cuantos = !casa && azar() < 0.4 ? 3 : 2
-      const r = probar(() => {
-        const precios = elegidos.map((p) => entero(azar, p.min, p.max))
-        if (!precios.every(redondeable)) return null
-        const compra = barajar(azar, [0, 1, 2, 3])
-          .slice(0, cuantos)
-          .sort((a, b) => a - b)
-        const ps = compra.map((i) => precios[i])
-        const exacto = sumar(ps)
-        const aprox = sumar(ps.map(aLaDecena))
-        // Que redondear antes o después de sumar dé lo mismo, y que la cuenta exacta no sea la aproximada.
-        if (aLaDecena(exacto) !== aprox || exacto === aprox) return null
-        return { precios, compra, ps, exacto, aprox }
-      })
+      const cuantos = nivel === 1 ? 2 : nivel === 3 ? 3 : !casa && azar() < 0.4 ? 3 : 2
+      const r = probar(
+        () => {
+          const precios = elegidos.map((p) => entero(azar, p.min, p.max))
+          if (!precios.every(redondeable)) return null
+          const compra = barajar(azar, [0, 1, 2, 3])
+            .slice(0, cuantos)
+            .sort((a, b) => a - b)
+          const ps = compra.map((i) => precios[i])
+          if (nivel === 1 && !ps.every((x) => [1, 2, 8, 9].includes(x % 10))) return null
+          const exacto = sumar(ps)
+          const aprox = sumar(ps.map(aLaDecena))
+          // Que redondear antes o después de sumar dé lo mismo, y que la cuenta exacta no sea la aproximada.
+          if (aLaDecena(exacto) !== aprox || exacto === aprox) return null
+          return { precios, compra, ps, exacto, aprox }
+        },
+        nivel === 1 ? 200 : 80,
+      )
       if (!r) return null
-      const malas = distractores(r.aprox, [r.exacto, sumar(r.ps.map(decenaAbajo)), sumar(r.ps.map((p) => decenaAbajo(p) + 10)), r.aprox + 10, r.aprox - 10], {
-        min: 1,
-        paso: 10,
-      })
+      const malas =
+        nivel === 1
+          ? distractores(r.aprox, [r.exacto, r.aprox + 20, r.aprox - 20, r.aprox + 40], { min: 1, paso: 20 })
+          : distractores(r.aprox, [r.exacto, sumar(r.ps.map(decenaAbajo)), sumar(r.ps.map((p) => decenaAbajo(p) + 10)), r.aprox + 10, r.aprox - 10], {
+              min: 1,
+              paso: 10,
+            })
       const alt = alternativas(
         azar,
         soles(r.aprox),
@@ -619,10 +747,11 @@ export const estimarCompra: TipoPregunta = {
     }
     // ¿Qué precio se redondea a T? Los otros se redondean a T si se corta siempre hacia abajo, o siempre hacia arriba.
     const T = casa ? entero(azar, 20, 80) * 10 : entero(azar, 3, 8) * 10
-    const correcto = T + elegir(azar, [-4, -3, -2, -1, 1, 2, 3, 4])
-    const cortaAbajo = T + entero(azar, 6, 9)
-    const subeSiempre = T - entero(azar, 6, 9)
-    const lejos = azar() < 0.5 ? T + entero(azar, 11, 14) : T - entero(azar, 11, 14)
+    const correcto = T + elegir(azar, segun(nivel, { 1: [-2, -1, 1, 2], 2: [-4, -3, -2, -1, 1, 2, 3, 4], 3: [-4, -3, 3, 4] }))
+    const cortaAbajo = T + enteroSegun(azar, nivel, { 1: [8, 9], 2: [6, 9], 3: [6, 7] })
+    const subeSiempre = T - enteroSegun(azar, nivel, { 1: [8, 9], 2: [6, 9], 3: [6, 7] })
+    const lejano = segun(nivel, { 1: [21, 24], 2: [11, 14], 3: [11, 14] } as const)
+    const lejos = azar() < 0.5 ? T + entero(azar, lejano[0], lejano[1]) : T - entero(azar, lejano[0], lejano[1])
     const precios = barajar(azar, [correcto, cortaAbajo, subeSiempre, lejos])
     const nombreDe = (p: number) => elegidos[precios.indexOf(p)].nombre
     const alt = alternativas(azar, nombreDe(correcto), [cortaAbajo, subeSiempre, lejos].map(nombreDe), 4)
@@ -694,6 +823,12 @@ export function dibujoBodega(filas: { nombre: string; unidad: string; precio: nu
   return svg(W, fondo + 14, partes.join(''), `Lista de precios de la bodega: ${filas.map((f) => `${f.nombre} (${f.unidad}), ${soles(f.precio)}`).join('; ')}`)
 }
 
+/** 2000 − 1365 "sin canje": en cada lugar, la cifra mayor menos la menor (1, 3, 6, 5 → 1365). */
+function restaSinCanje(a: number, b: number) {
+  const [ca, cb] = [a, b].map((x) => String(x).padStart(4, '0'))
+  return Number([...ca].map((d, i) => Math.abs(Number(d) - Number(cb[i]))).join(''))
+}
+
 /** 7 × 165 "sin llevar": cada cifra por 7 y solo se escriben las unidades (7, 2, 5 → 725). */
 function sinLlevar(n: number, p: number) {
   return Number(
@@ -712,24 +847,80 @@ export const bodega: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
-    const productos = barajar(azar, BODEGA).slice(0, 5)
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: 3 productos en la lista, un paso menos (uno solo de lo segundo, el vuelto de un solo producto), menos
+    // cantidades y el saco a precio redondo. Más difícil: 7 productos (datos de más) y un paso más: tres productos, el
+    // vuelto de dos con varias unidades, lo que alcanza después de otra compra, o lo que queda después del pedido grande.
+    const enLista = segun(nivel, { 1: 3, 2: 5, 3: 7 })
+    const productos = barajar(azar, BODEGA).slice(0, enLista)
     const precios = productos.map((p) => entero(azar, p.min, p.max))
     const saco = elegir(azar, SACOS)
-    const precioSaco = entero(azar, saco.min, saco.max)
+    const precioSaco = nivel === 1 ? entero(azar, Math.ceil(saco.min / 10), Math.floor(saco.max / 10)) * 10 : entero(azar, saco.min, saco.max)
     const dibujo = dibujoBodega([...productos.map((p, i) => ({ nombre: p.nombre, unidad: p.unidad, precio: precios[i] })), { nombre: saco.nombre, unidad: saco.unidad, precio: precioSaco }])
     const base = `bodega:${precios.join('-')}:${saco.nombre}${precioSaco}`
     const quien = nombre(azar)
     const enunciado = 'Observa la lista de precios de la bodega.'
     /** Lo que se lee en la lista: "Arroz (1 kg) S/ 5". */
     const fila = (x: number) => `${productos[x].nombre} (${productos[x].unidad}) ${soles(precios[x])}`
+    const indices = rango(0, enLista - 1)
     const modo = azar()
     if (modo < 0.3) {
       // Cuánto paga por dos productos, varios de cada uno.
-      const [i, j] = barajar(azar, [0, 1, 2, 3, 4])
-      const a = entero(azar, 2, 6)
-      const b = entero(azar, 2, 5)
+      const [i, j, l] = barajar(azar, indices)
+      const a = enteroSegun(azar, nivel, { 1: [2, 4], 2: [2, 6], 3: [2, 6] })
+      const b = nivel === 1 ? 1 : entero(azar, 2, 5)
       const [pa, pb] = [precios[i], precios[j]]
+      if (nivel === 1) {
+        // Varios de un producto y uno del otro.
+        const total = a * pa + pb
+        const malas = distractores(total, [a * pa, pa + pb, total + pa, total + 10], { min: 1, paso: 5 })
+        const alt = alternativas(
+          azar,
+          soles(total),
+          malas.map((m) => `S/ ${m}`),
+          4,
+        )
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `${base}:paga:${i}x${a}:${j}x1`,
+          enunciado,
+          dibujo,
+          pregunta: `${quien} compra ${de(productos[i], a)} y ${de(productos[j], 1)}. ¿Cuánto paga?`,
+          nota: `${a} × ${pa} + ${pb} = ${a * pa} + ${pb} = ${total}`,
+          pasos: [`En la lista: ${fila(i)} y ${fila(j)}`, `${a} × ${num(pa)} = ${num(a * pa)}`, `Paga: ${num(a * pa)} + ${num(pb)} = ${soles(total)}`],
+          ...alt,
+        }
+      }
+      if (nivel === 3) {
+        // Tres productos, varios de cada uno.
+        const c = entero(azar, 2, 4)
+        const pc = precios[l]
+        const total = a * pa + b * pb + c * pc
+        const malas = distractores(total, [a * pa + b * pb + pc, a * pa + b * pb, total + pc, total - pb, (a + b + c) * Math.max(pa, pb, pc)], { min: 1 })
+        const alt = alternativas(
+          azar,
+          soles(total),
+          malas.map((m) => `S/ ${m}`),
+          4,
+        )
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `${base}:paga:${i}x${a}:${j}x${b}:${l}x${c}`,
+          enunciado,
+          dibujo,
+          pregunta: `${quien} compra ${de(productos[i], a)}, ${de(productos[j], b)} y ${de(productos[l], c)}. ¿Cuánto paga?`,
+          nota: `${a} × ${pa} + ${b} × ${pb} + ${c} × ${pc} = ${a * pa} + ${b * pb} + ${c * pc} = ${total}`,
+          pasos: [
+            `En la lista: ${fila(i)}, ${fila(j)} y ${fila(l)}`,
+            `${a} × ${num(pa)} = ${num(a * pa)}; ${b} × ${num(pb)} = ${num(b * pb)}; ${c} × ${num(pc)} = ${num(c * pc)}`,
+            `Paga: ${num(a * pa)} + ${num(b * pb)} + ${num(c * pc)} = ${soles(total)}`,
+          ],
+          ...alt,
+        }
+      }
       const total = a * pa + b * pb
       // Olvidar multiplicar uno de los dos, o multiplicar todo por un solo precio.
       const malas = distractores(total, [a * pa + pb, pa + b * pb, (a + b) * Math.max(pa, pb), total + pa, total - pb], { min: 1 })
@@ -752,14 +943,40 @@ export const bodega: TipoPregunta = {
       }
     }
     if (modo < 0.55) {
-      // El vuelto.
-      const dos = azar() < 0.5
-      const [i, j] = barajar(azar, [0, 1, 2, 3, 4])
-      const a = entero(azar, 2, 6)
-      const costo = a * precios[i] + (dos ? precios[j] : 0)
-      const billete = [20, 50, 100].find((x) => x > costo + 1)
+      // El vuelto. En el fácil, de un solo producto; en el difícil, de dos, con varios de cada uno.
+      const dos = nivel === 1 ? false : nivel === 3 ? true : azar() < 0.5
+      const [i, j] = barajar(azar, indices)
+      const a = enteroSegun(azar, nivel, { 1: [2, 4], 2: [2, 6], 3: [2, 6] })
+      const b = nivel === 3 ? entero(azar, 2, 5) : 1
+      const costo = a * precios[i] + (dos ? b * precios[j] : 0)
+      const billete = segun(nivel, { 1: [10, 20, 50], 2: [20, 50, 100], 3: [20, 50, 100, 200] }).find((x) => x > costo + 1)
       if (!billete) return null
       const vuelto = billete - costo
+      if (nivel === 3) {
+        // Olvidar multiplicar los dos o uno de ellos, dar el costo en vez del vuelto, equivocarse al restar con canje.
+        const malas = distractores(vuelto, [billete - precios[i] - precios[j], billete - a * precios[i] - precios[j], costo, vuelto + 10, vuelto - 10], { min: 1 })
+        const alt = alternativas(
+          azar,
+          soles(vuelto),
+          malas.map((m) => `S/ ${m}`),
+          4,
+        )
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `${base}:vuelto:${i}x${a}:${j}x${b}:${billete}`,
+          enunciado,
+          dibujo,
+          pregunta: `${quien} compra ${de(productos[i], a)} y ${de(productos[j], b)}. Paga con un billete de ${soles(billete)}. ¿Cuánto recibe de vuelto?`,
+          nota: `${a} × ${precios[i]} + ${b} × ${precios[j]} = ${costo}; ${billete} − ${costo} = ${vuelto}`,
+          pasos: [
+            `En la lista: ${fila(i)} y ${fila(j)}`,
+            `Gasta: ${a} × ${num(precios[i])} = ${num(a * precios[i])}; ${b} × ${num(precios[j])} = ${num(b * precios[j])}; ${num(a * precios[i])} + ${num(b * precios[j])} = ${num(costo)}`,
+            `Vuelto: ${num(billete)} − ${num(costo)} = ${soles(vuelto)}`,
+          ],
+          ...alt,
+        }
+      }
       // Restar el precio de uno solo, dar el costo en vez del vuelto, equivocarse al restar con canje.
       const malas = distractores(vuelto, [billete - precios[i] - (dos ? precios[j] : 0), costo, vuelto + 10, vuelto - 10], { min: 1 })
       const alt = alternativas(
@@ -788,17 +1005,47 @@ export const bodega: TipoPregunta = {
     if (modo < 0.75) {
       // Cuántos puede comprar: una división exacta.
       const i = probar(() => {
-        const x = entero(azar, 0, 4)
+        const x = entero(azar, 0, enLista - 1)
         return precios[x] >= 2 ? x : null
       })
       if (i === null) return null
       // Que la cantidad no sea igual al precio: así no se confunde una con otro.
       const k = elegir(
         azar,
-        rango(3, 9).filter((x) => x !== precios[i]),
+        rango(nivel === 1 ? 2 : 3, nivel === 1 ? 5 : 9).filter((x) => x !== precios[i]),
       )
+      if (nivel === 3) {
+        // Un paso más: primero compra otro producto y con lo que le queda compra este.
+        const j = elegir(
+          azar,
+          indices.filter((x) => x !== i),
+        )
+        const a = entero(azar, 2, 4)
+        const gasta = a * precios[j]
+        const queda = k * precios[i]
+        const dinero = gasta + queda
+        // Dividir todo el dinero (sin restar lo primero), contar uno de más o de menos, confundir con la otra cantidad.
+        const malas = distractores(k, [dinero / precios[i], k + 1, k - 1, a, k + a], { min: 1 })
+        const alt = alternativas(azar, num(k), malas, 4)
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `${base}:cuantos:${j}x${a}:${i}:${k}`,
+          enunciado,
+          dibujo,
+          pregunta: `${quien} tiene ${soles(dinero)}. Compra ${de(productos[j], a)} y, con todo lo que le queda, compra ${productos[i].en}, sin que le sobre nada. ${productos[i].cuantos} compra?`,
+          nota: `${dinero} − ${a} × ${precios[j]} = ${queda}; ${queda} ÷ ${precios[i]} = ${k}`,
+          pasos: [
+            `En la lista: ${fila(j)} y ${fila(i)}`,
+            `Gasta: ${a} × ${num(precios[j])} = ${num(gasta)}; le quedan ${num(dinero)} − ${num(gasta)} = ${num(queda)}`,
+            `${num(queda)} ÷ ${num(precios[i])} = ${num(k)}: compra ${de(productos[i], k)}`,
+          ],
+          ...alt,
+        }
+      }
       const dinero = k * precios[i]
-      const malas = distractores(k, [k + 1, k - 1, dinero - precios[i], k + 2], { min: 1 })
+      // En el fácil, errores más lejanos: escribir el dinero o el precio, o dos de más.
+      const malas = nivel === 1 ? distractores(k, [precios[i], k + 2, dinero, k + 3], { min: 1 }) : distractores(k, [k + 1, k - 1, dinero - precios[i], k + 2], { min: 1 })
       const alt = alternativas(azar, num(k), malas, 4)
       if (!alt) return null
       return {
@@ -817,8 +1064,43 @@ export const bodega: TipoPregunta = {
       }
     }
     // Compra al por mayor: tres cifras por una cifra.
-    const n = entero(azar, 3, 9)
+    const n = enteroSegun(azar, nivel, { 1: [2, 4], 2: [3, 9], 3: [5, 9] })
     const total = n * precioSaco
+    // Como en la pizarra: se multiplica por las centenas, las decenas y las unidades del precio, y se suma.
+    const partes = String(precioSaco)
+      .split('')
+      .map((d, i, cs) => Number(d) * 10 ** (cs.length - 1 - i))
+      .filter((x) => x > 0)
+    const leido = `En la lista: 1 ${saco.nombre.toLowerCase()} (${saco.unidad}) cuesta ${soles(precioSaco)}`
+    if (nivel === 3) {
+      // Un paso más: cuánto les queda del dinero que tenían (una resta con ceros: 2000 − 1365).
+      const tenian = [1000, 2000, 3000].find((x) => x > total) ?? 4000
+      const queda = tenian - total
+      const malas = distractores(queda, [total, restaSinCanje(tenian, total), queda + 100, queda - 100, queda + 10, queda - 10], { min: 1, paso: 10 })
+      const alt = alternativas(
+        azar,
+        soles(queda),
+        malas.map((m) => `S/ ${m}`),
+        4,
+      )
+      if (!alt) return null
+      const pagan = partes.length > 1 ? `Pagan: ${partes.map((x) => num(n * x)).join(' + ')} = ${soles(total)}` : `Pagan: ${n} × ${num(precioSaco)} = ${soles(total)}`
+      return {
+        forma: 'opciones',
+        clave: `${base}:queda:${n}:${tenian}`,
+        enunciado,
+        dibujo,
+        pregunta: `${saco.para} tenían ${soles(tenian)} y compran ${de(saco, n)} en esta bodega. ¿Cuánto dinero les queda?`,
+        nota: `${n} × ${precioSaco} = ${total}; ${tenian} − ${total} = ${queda}`,
+        pasos: [
+          leido,
+          ...(partes.length > 1 ? [`${n} × ${num(precioSaco)}: ${partes.map((x) => `${n} × ${num(x)} = ${num(n * x)}`).join('; ')}`] : []),
+          pagan,
+          `Les queda: ${num(tenian)} − ${num(total)} = ${soles(queda)}`,
+        ],
+        ...alt,
+      }
+    }
     const malas = distractores(total, [sinLlevar(n, precioSaco), total + 100, total - 100, total - 10, total + 10], { min: 100, paso: 10 })
     const alt = alternativas(
       azar,
@@ -827,12 +1109,6 @@ export const bodega: TipoPregunta = {
       4,
     )
     if (!alt) return null
-    // Como en la pizarra: se multiplica por las centenas, las decenas y las unidades del precio, y se suma.
-    const partes = String(precioSaco)
-      .split('')
-      .map((d, i, cs) => Number(d) * 10 ** (cs.length - 1 - i))
-      .filter((x) => x > 0)
-    const leido = `En la lista: 1 ${saco.nombre.toLowerCase()} (${saco.unidad}) cuesta ${soles(precioSaco)}`
     return {
       forma: 'opciones',
       clave: `${base}:mayor:${n}`,
@@ -970,19 +1246,53 @@ export const arreglos: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: menos cajas y cajas más chicas, tres alternativas para elegir la operación, menos objetos para agrupar o
+    // repartir. Más difícil: más cajas y además unos sueltos (combinar colecciones), elegir la operación con su resultado
+    // entre errores finos, agrupar con lo que sobra, y repartos más grandes.
     const modo = azar()
     const quien = nombre(azar)
     if (modo < 0.3) {
       // Reiterar: k cajas iguales.
       const huevos = azar() < 0.55
-      const filas = huevos ? 5 : entero(azar, 3, 4)
-      const columnas = huevos ? 6 : entero(azar, 4, 6)
-      const k = entero(azar, 2, 4)
+      const filas = huevos ? 5 : enteroSegun(azar, nivel, { 1: [2, 3], 2: [3, 4], 3: [4, 5] })
+      const columnas = huevos ? 6 : enteroSegun(azar, nivel, { 1: [3, 4], 2: [4, 6], 3: [5, 6] })
+      const k = enteroSegun(azar, nivel, { 1: [2, 3], 2: [2, 4], 3: [3, 4] })
       const una = filas * columnas
+      if (nivel === 3) {
+        // Las cajas llenas y, además, unos sueltos: multiplicar y luego juntar.
+        const sueltos = entero(azar, 5, una - 5)
+        const llenas = k * una
+        const total = llenas + sueltos
+        const cosas = huevos ? 'huevos' : 'alfajores'
+        const malas = distractores(total, [llenas, k * (filas + columnas) + sueltos, una + sueltos, total + columnas, total - 10], { min: 1 })
+        const alt = alternativas(azar, num(total), malas, 4)
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `cajas:${huevos ? 'h' : 'a'}:${k}:${filas}x${columnas}:${sueltos}`,
+          enunciado: huevos
+            ? `En la bodega hay ${k} maples de huevos, todos llenos, y además ${sueltos} huevos sueltos en una bolsa.`
+            : `Para el compartir del aula compraron ${k} cajas de alfajores, todas llenas, y además ${sueltos} alfajores sueltos.`,
+          dibujo: dibujoCajas(k, filas, columnas, huevos ? 'huevo' : 'alfajor'),
+          pregunta: huevos ? '¿Cuántos huevos hay en total?' : '¿Cuántos alfajores hay en total?',
+          nota: `${k} × ${una} + ${sueltos} = ${llenas} + ${sueltos} = ${total}`,
+          pasos: [
+            `Hay ${k} ${huevos ? 'maples; cada uno' : 'cajas; cada una'} con ${filas} filas de ${columnas} ${cosas}, y ${sueltos} sueltos`,
+            `${huevos ? 'Un maple' : 'Una caja'}: ${filas} × ${columnas} = ${una}`,
+            `${huevos ? 'Los maples' : 'Las cajas'}: ${k} × ${una} = ${num(llenas)}`,
+            `En total: ${num(llenas)} + ${sueltos} = ${num(total)} ${cosas}`,
+          ],
+          ...alt,
+        }
+      }
       const total = k * una
       // Sumar filas y columnas, contar una sola caja, contar una caja de más, olvidar una fila.
-      const malas = distractores(total, [k * (filas + columnas), una, una * (k + 1), total - columnas, total + 10], { min: 1 })
+      const malas =
+        nivel === 1
+          ? distractores(total, [una, k * (filas + columnas), una * (k + 1), total + 10, total - 10], { min: 1, paso: 5 })
+          : distractores(total, [k * (filas + columnas), una, una * (k + 1), total - columnas, total + 10], { min: 1 })
       const alt = alternativas(azar, num(total), malas, 4)
       if (!alt) return null
       return {
@@ -1002,14 +1312,33 @@ export const arreglos: TipoPregunta = {
     }
     if (modo < 0.55) {
       // El modelo: qué multiplicación da las carpetas del aula.
-      const filas = entero(azar, 3, 5)
+      const filas = enteroSegun(azar, nivel, { 1: [2, 3], 2: [3, 5], 3: [4, 6] })
       const columnas = probar(() => {
-        const c = entero(azar, 4, 7)
+        const c = enteroSegun(azar, nivel, { 1: [3, 5], 2: [4, 7], 3: [5, 7] })
         return c !== filas ? c : null
       })
       if (columnas === null) return null
-      const malas = [`${filas} + ${columnas}`, `${columnas} × ${columnas}`, `${filas} × ${filas}`, `${filas} × ${columnas + 1}`]
-      const alt = alternativas(azar, `${filas} × ${columnas}`, malas, 4)
+      const P = filas * columnas
+      if (nivel === 3) {
+        // La operación con su resultado: una fila o una columna de más, sumar, o multiplicar mal.
+        const correcta = `${filas} × ${columnas} = ${P}`
+        const malas = [`${filas} × ${columnas + 1} = ${filas * (columnas + 1)}`, `${filas + 1} × ${columnas} = ${(filas + 1) * columnas}`, `${filas} + ${columnas} = ${filas + columnas}`, `${filas} × ${columnas} = ${P + 10}`]
+        const alt = alternativas(azar, correcta, malas, 4)
+        if (!alt) return null
+        return {
+          forma: 'opciones',
+          clave: `aula:${filas}x${columnas}:resultado`,
+          enunciado: `Así están las carpetas en el aula de ${quien}: ${filas} filas, todas con la misma cantidad de carpetas.`,
+          dibujo: dibujoAula(filas, columnas),
+          pregunta: '¿Qué operación, con su resultado, dice cuántas carpetas hay?',
+          nota: `${filas} filas de ${columnas} carpetas: ${filas} × ${columnas} = ${P}`,
+          pasos: [`En el aula hay ${filas} filas de ${columnas} carpetas`, `${Array<number>(filas).fill(columnas).join(' + ')} = ${P}: ${filas} veces ${columnas}`, `La operación es ${correcta}`],
+          ...alt,
+        }
+      }
+      // En el fácil, tres alternativas, sin la de una columna de más.
+      const malas = [`${filas} + ${columnas}`, `${columnas} × ${columnas}`, `${filas} × ${filas}`, ...(nivel === 1 ? [] : [`${filas} × ${columnas + 1}`])]
+      const alt = alternativas(azar, `${filas} × ${columnas}`, malas, nivel === 1 ? 3 : 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -1030,15 +1359,44 @@ export const arreglos: TipoPregunta = {
       // Agrupar: cuántas cajas se llenan.
       const ctx = elegir(azar, PARA_AGRUPAR)
       const r = probar(() => {
-        const g = entero(azar, 3, 8)
-        const k = entero(azar, 3, 8)
-        return g !== k && g * k <= 48 ? { g, k } : null
+        const g = enteroSegun(azar, nivel, { 1: [2, 5], 2: [3, 8], 3: [3, 9] })
+        const k = enteroSegun(azar, nivel, { 1: [2, 5], 2: [3, 8], 3: [3, 8] })
+        return g !== k && g * k <= segun(nivel, { 1: 25, 2: 48, 3: 54 }) ? { g, k } : null
       })
       if (!r) return null
+      if (nivel === 3) {
+        // Sobran algunos: se cuentan solo las llenas.
+        const resto = entero(azar, 1, r.g - 1)
+        const N = r.g * r.k + resto
+        const porFila = ctx.cosa === 'pan' ? 10 : N > 40 ? 16 : 12
+        const s = sueltos(ctx.cosa, N, porFila, 260, 4)
+        // Contar también la que no se llena, o confundir con lo que sobra.
+        const malas = distractores(r.k, [r.k + 1, r.k - 1, resto, r.g, r.k + 2], { min: 1 })
+        const alt = alternativas(azar, num(r.k), malas, 4)
+        if (!alt) return null
+        const una = ctx.en.replace(/s$/, '')
+        return {
+          forma: 'opciones',
+          clave: `agrupar:${ctx.cosa}:${N}:${r.g}`,
+          enunciado: `${quien} tiene ${N} ${ctx.muchos} para guardar. ${ctx.caben(r.g)}`,
+          dibujo: svg(520, s.alto + 8, s.cuerpo, `${N} ${ctx.muchos} sueltos`),
+          pregunta: `¿Cuántas ${ctx.en} llena por completo?`,
+          nota: `${N} ÷ ${r.g} = ${r.k} y sobran ${resto}`,
+          pasos: [
+            `Hay ${N} ${ctx.muchos}; en cada ${una} van ${r.g}`,
+            `Se cuenta de ${r.g} en ${r.g}: ${rango(1, r.k)
+              .map((i) => num(i * r.g))
+              .join(', ')}; sobran ${N} − ${r.k * r.g} = ${resto}`,
+            `${N} ÷ ${r.g} = ${num(r.k)} y sobran ${resto}: llena ${r.k} ${ctx.en}`,
+          ],
+          ...alt,
+        }
+      }
       const N = r.g * r.k
       const porFila = ctx.cosa === 'pan' ? 10 : N > 40 ? 16 : 12
       const s = sueltos(ctx.cosa, N, porFila, 260, 4)
-      const malas = distractores(r.k, [r.k + 1, r.k - 1, N - r.g, r.k + 2], { min: 1 })
+      // En el fácil, errores más lejanos: confundir con lo que entra en cada una, o dos de más.
+      const malas = nivel === 1 ? distractores(r.k, [r.g, N - r.g, r.k + 2, r.k + 3], { min: 1 }) : distractores(r.k, [r.k + 1, r.k - 1, N - r.g, r.k + 2], { min: 1 })
       const alt = alternativas(azar, num(r.k), malas, 4)
       if (!alt) return null
       return {
@@ -1059,8 +1417,8 @@ export const arreglos: TipoPregunta = {
       }
     }
     // Repartir en partes iguales, dibujando.
-    const bolsas = entero(azar, 2, 4)
-    const cada = entero(azar, 3, bolsas === 4 ? 6 : 8)
+    const bolsas = enteroSegun(azar, nivel, { 1: [2, 3], 2: [2, 4], 3: [3, 4] })
+    const cada = nivel === 1 ? entero(azar, 2, 5) : nivel === 3 ? entero(azar, 6, 9) : entero(azar, 3, bolsas === 4 ? 6 : 8)
     const panes = bolsas * cada
     return {
       forma: 'abierta',
@@ -1139,11 +1497,15 @@ export const conmutativa: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: arreglos chicos (hasta 15) y tres alternativas, sin la más parecida. Más difícil: arreglos grandes (de 20
+    // a 54, que ya no conviene contar), alternativas casi iguales (4 × 7 = 7 × 5, 4 × 7 = 7 + 4…) y el recuadro en
+    // cualquiera de los dos lados.
     const r = probar(() => {
-      const x = entero(azar, 2, 6)
-      const y = entero(azar, 3, 8)
-      return x !== y && x * y <= 40 ? (azar() < 0.5 ? [x, y] : [y, x]) : null
+      const x = enteroSegun(azar, nivel, { 1: [2, 3], 2: [2, 6], 3: [4, 6] })
+      const y = enteroSegun(azar, nivel, { 1: [3, 5], 2: [3, 8], 3: [5, 9] })
+      return x !== y && x * y <= segun(nivel, { 1: 15, 2: 40, 3: 54 }) ? (azar() < 0.5 ? [x, y] : [y, x]) : null
     })
     if (!r) return null
     const [a, b] = r
@@ -1158,7 +1520,12 @@ export const conmutativa: TipoPregunta = {
     const cuentas = `${a} × ${b} = ${a * b} y ${b} × ${a} = ${a * b}`
     const modo = azar()
     if (modo < 0.45) {
-      const alt = alternativas(azar, `${a} × ${b} = ${b} × ${a}`, [`${a} × ${b} = ${a} + ${b}`, `${a} × ${a} = ${b} × ${b}`, `${a} × ${b} = ${b} × ${b}`], 4)
+      const malas = segun(nivel, {
+        1: [`${a} × ${b} = ${a} + ${b}`, `${a} × ${a} = ${b} × ${b}`],
+        2: [`${a} × ${b} = ${a} + ${b}`, `${a} × ${a} = ${b} × ${b}`, `${a} × ${b} = ${b} × ${b}`],
+        3: [`${a} × ${b} = ${b} × ${a + 1}`, `${a} × ${b} = ${b} + ${a}`, `${a} × ${b} = ${b} × ${b}`, `${a} × ${a} = ${b} × ${b}`],
+      })
+      const alt = alternativas(azar, `${a} × ${b} = ${b} × ${a}`, malas, nivel === 1 ? 3 : 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -1171,9 +1538,29 @@ export const conmutativa: TipoPregunta = {
         ...alt,
       }
     }
+    if (modo < 0.75 && nivel === 3) {
+      // El recuadro a la derecha (a × b = b × □) o a la izquierda (□ × a = a × b); errores finos: el otro factor, el
+      // producto o un número vecino.
+      const izquierda = azar() < 0.5
+      const falta = izquierda ? b : a
+      const otro = izquierda ? a : b
+      const alt = alternativas(azar, num(falta), [num(otro), num(a * b), num(falta + 1), num(falta - 1)], 4)
+      if (!alt) return null
+      const igual = izquierda ? `${b} × ${a} = ${a} × ${b}` : `${a} × ${b} = ${b} × ${a}`
+      return {
+        forma: 'opciones',
+        clave: `girado-falta:${a}x${b}${izquierda ? ':izq' : ''}`,
+        enunciado: `${enunciado} ${iguales}`,
+        dibujo: dibujoGirado(a, b, etiquetas, cosa, false, izquierda ? [null, `× ${a} = ${a} × ${b}`] : [`${a} × ${b} = ${b} ×`, null]),
+        pregunta: '¿Qué número va en el recuadro?',
+        nota: igual,
+        pasos: [leido, cuentas, `En el recuadro va el ${num(falta)}: ${igual}`],
+        ...alt,
+      }
+    }
     if (modo < 0.75) {
-      // El factor que falta: no es el producto, ni el mismo número que ya está.
-      const alt = alternativas(azar, num(a), [num(b), num(a * b), num(a + b)], 4)
+      // El factor que falta: no es el producto, ni el mismo número que ya está (en el fácil, tres alternativas).
+      const alt = alternativas(azar, num(a), nivel === 1 ? [num(b), num(a * b)] : [num(b), num(a * b), num(a + b)], nivel === 1 ? 3 : 4)
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -1186,6 +1573,17 @@ export const conmutativa: TipoPregunta = {
         ...alt,
       }
     }
+    // En el difícil, sin dibujarlos: la igualdad sale de la propiedad, no de contar (y el arreglo es grande).
+    if (nivel === 3)
+      return {
+        forma: 'abierta',
+        clave: `girado-sin-dibujar:${a}x${b}`,
+        enunciado: `${enunciado} ${iguales} ${bombones ? `La caja de ${n2}` : 'El biohuerto de 4.º B'} tiene ${b} filas de ${a} ${cosas}. Sin dibujarlos, completa la igualdad.`,
+        dibujo: dibujoGirado(a, b, etiquetas, cosa, true, [null, '×', null, '=', null, '×', null]),
+        respuesta: `${a} × ${b} = ${b} × ${a} (${a * b} ${cosas} en cada uno)`,
+        espacio: 'dibujo',
+        pasos: [`${etiquetas[0]}: ${a} filas de ${b}; ${etiquetas[1]}: ${b} filas de ${a}`, `Cambia el orden, no el total: ${cuentas}`, `${a} × ${b} = ${b} × ${a}: ${a * b} ${cosas} en cada uno`],
+      }
     return {
       forma: 'abierta',
       clave: `girado-dibuja:${a}x${b}`,
@@ -1263,11 +1661,21 @@ export const asociativa: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: productos hasta 36, tres alternativas, y juntar solo los que dan 10. Más difícil: bandejas más grandes
+    // (hasta 105 panes), una alternativa más fina, y juntar los que dan 100 con un número de dos cifras (25 × 17 × 4).
     const modo = azar()
     if (modo < 0.7) {
       const r = probar(() => {
-        const x = [entero(azar, 2, 3), entero(azar, 2, 4), entero(azar, 3, 6)]
+        const x = [
+          enteroSegun(azar, nivel, { 1: [2, 3], 2: [2, 3], 3: [3, 5] }),
+          enteroSegun(azar, nivel, { 1: [2, 4], 2: [2, 4], 3: [3, 5] }),
+          enteroSegun(azar, nivel, { 1: [2, 5], 2: [3, 6], 3: [4, 7] }),
+        ]
+        if (nivel === 1 && x[0] * x[1] * x[2] > 36) return null
+        // Que las bandejas entren en la hoja.
+        if (nivel === 3 && x[0] * (x[2] * 22 + 16) + (x[0] - 1) * 24 + 16 > 640) return null
         return new Set(x).size === 3 ? x : null
       })
       if (!r) return null
@@ -1279,7 +1687,13 @@ export const asociativa: TipoPregunta = {
       const derecha = `${k} × (${f} × ${c}) = ${k} × ${f * c} = ${P}`
       if (modo < 0.35) {
         const [n1, n2] = dosNombres(azar)
-        const alt = alternativas(azar, `${n1} y ${n2} obtienen ${P}.`, [`A ${n1} le sale más que a ${n2}.`, `A ${n2} le sale más que a ${n1}.`, `${n1} y ${n2} obtienen ${k + f + c}.`], 4)
+        const malas = [
+          `A ${n1} le sale más que a ${n2}.`,
+          `A ${n2} le sale más que a ${n1}.`,
+          ...(nivel === 1 ? [] : [`${n1} y ${n2} obtienen ${k + f + c}.`]),
+          ...(nivel === 3 ? [`${n1} y ${n2} obtienen ${k * f + c}.`] : []),
+        ]
+        const alt = alternativas(azar, `${n1} y ${n2} obtienen ${P}.`, malas, nivel === 1 ? 3 : 4)
         if (!alt) return null
         return {
           forma: 'opciones',
@@ -1292,7 +1706,12 @@ export const asociativa: TipoPregunta = {
           ...alt,
         }
       }
-      const alt = alternativas(azar, num(f), [num(c), num(k), num(k * f)], 4)
+      const alt = alternativas(
+        azar,
+        num(f),
+        segun(nivel, { 1: [num(c), num(k)], 2: [num(c), num(k), num(k * f)], 3: [num(c), num(k), num(k * f), num(f * c)] }),
+        nivel === 1 ? 3 : 4,
+      )
       if (!alt) return null
       return {
         forma: 'opciones',
@@ -1306,21 +1725,43 @@ export const asociativa: TipoPregunta = {
       }
     }
     // Juntar primero los que dan 10 o 100.
-    const [a, c] = elegir(azar, [
-      [5, 2],
-      [2, 5],
-      [25, 4],
-      [4, 25],
-      [50, 2],
-      [20, 5],
-    ])
+    const [a, c] = elegir(
+      azar,
+      segun(nivel, {
+        1: [
+          [5, 2],
+          [2, 5],
+        ],
+        2: [
+          [5, 2],
+          [2, 5],
+          [25, 4],
+          [4, 25],
+          [50, 2],
+          [20, 5],
+        ],
+        3: [
+          [25, 4],
+          [4, 25],
+          [50, 2],
+          [2, 50],
+          [20, 5],
+          [5, 20],
+        ],
+      }),
+    )
     const b = elegir(
       azar,
-      rango(3, 9).filter((x) => x !== a && x !== c),
+      nivel === 3 ? rango(11, 19) : rango(3, 9).filter((x) => x !== a && x !== c),
     )
     const P = a * b * c
     const quien = nombre(azar)
-    const malas = distractores(P, [a * b + c, (a + c) * b, a + b + c, P + 10, P - 10], { min: 1 })
+    // Sumar en vez de multiplicar, o (en el difícil) un cero de más o de menos.
+    const malas = segun(nivel, {
+      1: () => distractores(P, [a * b + c, (a + c) * b, a + b + c], { min: 1, paso: 10 }),
+      2: () => distractores(P, [a * b + c, (a + c) * b, a + b + c, P + 10, P - 10], { min: 1 }),
+      3: () => distractores(P, [P / 10, a * b + c, (a + c) * b, P + 100, P - 100], { min: 1, paso: 100 }).filter((t) => Number(t.replace(/\s/g, '')) <= 9999),
+    })()
     const alt = alternativas(azar, num(P), malas, 4)
     if (!alt) return null
     return {
@@ -1378,8 +1819,53 @@ export const doblar: TipoPregunta = {
   area: 'matematica',
   competencia: 1,
   cambia: 'numeros',
-  generar({ azar }) {
+  niveles: true,
+  generar({ azar, nivel = 2 }) {
+    // Más fácil: dos máquinas en vez de tres y números más chicos. Más difícil: hacia atrás (sale el número y hay que
+    // hallar el que entró: partir para deshacer el doblar, y al revés), números de hasta cuatro cifras, y las máquinas
+    // juntas sin ver los números del medio.
     const modo = azar()
+    if (modo < 0.35 && nivel === 1) {
+      const n0 = entero(azar, 11, 99)
+      const fin = n0 * 4
+      // Hacer una máquina de menos o de más, sumar 2 en cada máquina.
+      const malas = distractores(fin, [n0 * 2, n0 * 8, n0 + 4], { min: 1, paso: 10 })
+      const alt = alternativas(azar, num(fin), malas, 4)
+      if (!alt) return null
+      return {
+        forma: 'opciones',
+        clave: `doblar2:${n0}`,
+        enunciado: `Cada máquina dobla el número que entra. Entra el ${num(n0)}.`,
+        dibujo: dibujoMaquinas([n0, null, '?'], '× 2'),
+        pregunta: '¿Qué número sale al final?',
+        nota: `${n0} → ${n0 * 2} → ${fin}`,
+        pasos: [`Entra el ${num(n0)} y pasa por 2 máquinas que hacen × 2`, `${num(n0)} × 2 = ${num(n0 * 2)}; ${num(n0 * 2)} × 2 = ${num(fin)}`, `Sale el ${num(fin)}, igual que ${num(n0)} × 4`],
+        ...alt,
+      }
+    }
+    if (modo < 0.35 && nivel === 3) {
+      // Hacia atrás: sale el número y se busca el que entró, partiendo por la mitad tres veces.
+      const n0 = entero(azar, 13, 1249)
+      const fin = n0 * 8
+      // Creer que tres veces × 2 es × 6, deshacer una máquina de menos o de más, restar 2 en cada máquina.
+      const malas = distractores(n0, [fin / 6, fin / 4, fin / 16, fin - 6, fin / 2], { min: 1 })
+      const alt = alternativas(azar, num(n0), malas, 4)
+      if (!alt) return null
+      return {
+        forma: 'opciones',
+        clave: `doblar-atras:${n0}`,
+        enunciado: `Cada máquina dobla el número que entra. Al final sale el ${num(fin)}.`,
+        dibujo: dibujoMaquinas(['?', null, null, fin], '× 2'),
+        pregunta: '¿Qué número entró?',
+        nota: `${n0} → ${n0 * 2} → ${n0 * 4} → ${fin}`,
+        pasos: [
+          `Sale el ${num(fin)} después de 3 máquinas que hacen × 2`,
+          `Hacia atrás se parte por la mitad: ${num(fin)} ÷ 2 = ${num(n0 * 4)}; ${num(n0 * 4)} ÷ 2 = ${num(n0 * 2)}; ${num(n0 * 2)} ÷ 2 = ${num(n0)}`,
+          `Entró el ${num(n0)}: ${num(n0)} × 8 = ${num(fin)}`,
+        ],
+        ...alt,
+      }
+    }
     if (modo < 0.35) {
       const n0 = entero(azar, 12, 250)
       const fin = n0 * 8
@@ -1400,6 +1886,39 @@ export const doblar: TipoPregunta = {
           `Sale el ${num(fin)}, igual que ${num(n0)} × 8`,
         ],
         ...alt,
+      }
+    }
+    if (modo < 0.65 && nivel === 1) {
+      const q = entero(azar, 6, 99)
+      const n0 = q * 4
+      const respuesta = `${num(n0 / 2)}, ${num(q)}`
+      return {
+        forma: 'abierta',
+        clave: `partir2:${n0}`,
+        enunciado: 'Cada máquina parte por la mitad el número que entra. Escribe en los recuadros los números que salen.',
+        dibujo: dibujoMaquinas([n0, null, null], '÷ 2'),
+        respuesta,
+        espacio: 'dibujo',
+        pasos: [`Entra el ${num(n0)} y cada máquina hace ÷ 2`, `${num(n0)} ÷ 2 = ${num(n0 / 2)}; ${num(n0 / 2)} ÷ 2 = ${num(q)}`, `En los recuadros: ${respuesta}`],
+      }
+    }
+    if (modo < 0.65 && nivel === 3) {
+      // Hacia atrás: sale el número y se llenan los recuadros doblando, desde el final.
+      const q = entero(azar, 13, 1249)
+      const n0 = q * 8
+      const respuesta = [n0, n0 / 2, n0 / 4].map(num).join(', ')
+      return {
+        forma: 'abierta',
+        clave: `partir-atras:${n0}`,
+        enunciado: `Cada máquina parte por la mitad el número que entra. Al final salió el ${num(q)}. Escribe en los recuadros los números que faltan.`,
+        dibujo: dibujoMaquinas([null, null, null, q], '÷ 2'),
+        respuesta,
+        espacio: 'dibujo',
+        pasos: [
+          `Salió el ${num(q)} después de 3 máquinas que hacen ÷ 2`,
+          `Hacia atrás se dobla: ${num(q)} × 2 = ${num(n0 / 4)}; ${num(n0 / 4)} × 2 = ${num(n0 / 2)}; ${num(n0 / 2)} × 2 = ${num(n0)}`,
+          `En los recuadros: ${respuesta}`,
+        ],
       }
     }
     if (modo < 0.65) {
@@ -1424,21 +1943,24 @@ export const doblar: TipoPregunta = {
         ],
       }
     }
-    // Qué hacen las máquinas juntas: doblar 3 veces es ×8; partir 2 veces es ÷4.
-    const m = azar() < 0.5 ? 2 : 3
+    // Qué hacen las máquinas juntas: doblar 3 veces es ×8; partir 2 veces es ÷4. En el fácil, siempre dos máquinas; en el
+    // difícil, tres, sin los números del medio.
+    const m = nivel === 1 ? 2 : nivel === 3 ? 3 : azar() < 0.5 ? 2 : 3
     const dobla = azar() < 0.55
     const f = 2 ** m
-    const n0 = dobla ? entero(azar, 11, 60) : entero(azar, 7, 120) * f
+    const n0 = dobla
+      ? enteroSegun(azar, nivel, { 1: [5, 30], 2: [11, 60], 3: [61, 1249] })
+      : enteroSegun(azar, nivel, { 1: [3, 30], 2: [7, 120], 3: [121, 1249] }) * f
     const valores = rango(0, m).map((i) => (dobla ? n0 * 2 ** i : n0 / 2 ** i))
     const op = dobla ? 'Multiplicar por' : 'Dividir entre'
     const malas = [`${op} ${2 * m}`, `${op} ${f / 2}`, `${op} ${f * 2}`, dobla ? `Sumar ${2 * m}` : `Restar ${2 * m}`]
-    const alt = alternativas(azar, `${op} ${f}`, malas, 4)
+    const alt = alternativas(azar, `${op} ${f}`, malas, nivel === 1 ? 3 : 4)
     if (!alt) return null
     return {
       forma: 'opciones',
       clave: `maquinas:${dobla ? 'x' : 'd'}:${m}:${n0}`,
       enunciado: `Observa: cada máquina ${dobla ? 'dobla' : 'parte por la mitad'} el número que entra.`,
-      dibujo: dibujoMaquinas(valores, dobla ? '× 2' : '÷ 2'),
+      dibujo: dibujoMaquinas(nivel === 3 ? valores.map((x, i) => (i === 0 || i === m ? x : null)) : valores, dobla ? '× 2' : '÷ 2'),
       pregunta: `Las ${m === 2 ? 'dos' : 'tres'} máquinas juntas hacen lo mismo que:`,
       nota: `${num(n0)} ${dobla ? '×' : '÷'} ${f} = ${num(valores[m])}`,
       pasos: [
