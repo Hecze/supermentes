@@ -1,5 +1,5 @@
 // Perfil de la docente con cuenta: cómo la llaman, su colegio y su grado. Sale del onboarding y se guarda en el
-// navegador y en su cuenta (/api/perfil, tabla docentes de D1), así no se lo volvemos a preguntar en otra computadora.
+// navegador y en su cuenta (/api/perfil, tabla docentes), así no se lo volvemos a preguntar en otra computadora.
 import { useEffect, useState } from 'react'
 import { tokenDeCuenta, useCuenta } from './cuenta'
 

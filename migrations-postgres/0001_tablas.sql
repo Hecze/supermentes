@@ -1,6 +1,6 @@
--- Las mismas tablas que migrations/ (D1, Cloudflare), en Postgres (Neon, Vercel). Se puede correr varias veces:
+-- Las tablas de la cuenta de la docente en Postgres (Neon). Se puede correr varias veces:
 --   npm run db:postgres
--- Fechas en TEXT (ISO), como en D1, para que las consultas de api/ sirvan igual en las dos bases.
+-- Fechas en TEXT (ISO): las consultas de api/ las comparan como texto.
 
 CREATE TABLE IF NOT EXISTS envios (
   docente TEXT NOT NULL,

@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         .run()
       return json({ codigo })
     } catch (e) {
-      // D1 dice "UNIQUE constraint failed"; Postgres, "duplicate key … unique constraint".
+      // Código repetido: Postgres dice "duplicate key … unique constraint". Se prueba con otro.
       if (!/unique/i.test(String(e))) throw e
     }
   }
