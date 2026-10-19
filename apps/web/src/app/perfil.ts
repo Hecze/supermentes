@@ -144,16 +144,21 @@ function juntos(colegios: Colegio[]): Ensenanza {
 
 /** Lo manda a la base: con cuenta, el perfil completo; sin cuenta, solo dónde enseña. `true` si se guardó. */
 async function subir(p: Perfil | null, colegios: Colegio[]): Promise<boolean> {
-  try {
-    const t = await tokenDeCuenta()
-    const todo = juntos(colegios)
-    const datos = t && p ? { ...p, ...todo, colegios } : { ...todo, colegios, anonimo: idSinCuenta() }
-    const r = await fetch('/api/perfil', {
+  const todo = juntos(colegios)
+  const enviar = (datos: object, token?: string | null) =>
+    fetch('/api/perfil', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(t && p ? { Authorization: `Bearer ${t}` } : {}) },
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(datos),
     })
-    return r.ok
+  try {
+    const t = await tokenDeCuenta()
+    if (t && p) {
+      const r = await enviar({ ...p, ...todo, colegios }, t)
+      // Si el servidor no reconoce la cuenta (401), igual se guarda dónde enseña, como sin cuenta.
+      if (r.status !== 401) return r.ok
+    }
+    return (await enviar({ ...todo, colegios, anonimo: idSinCuenta() })).ok
   } catch {
     return false
   }
