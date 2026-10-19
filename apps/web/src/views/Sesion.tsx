@@ -1,6 +1,6 @@
 // Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
 // Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Download, Printer, SlidersHorizontal } from 'lucide-react'
+import { BadgeCheck, Construction, Download, Printer, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { type OpcionesSesion, type Sesion as TipoSesion } from '../api'
 import { useDatosDocumento, type DatosDocumento } from '../app/documento'
@@ -393,6 +393,16 @@ export function Sesion() {
   return (
     <>
       <EncabezadoHerramienta id="sesion" />
+
+      {/* Hasta que cada parte cumpla la norma del MINEDU con su fuente (CLAUDE.md, «La sesión de aprendizaje: todo o
+          nada»), la vista queda solo para revisarla y se avisa arriba. */}
+      <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
+        <Construction className="mt-0.5 size-5 shrink-0" aria-hidden />
+        <span>
+          <strong>En construcción:</strong> no uses esta sesión en tu clase ni la presentes. Su contenido todavía no
+          cumple todas las normas del MINEDU.
+        </span>
+      </p>
 
       <BarraHoja>
         <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord}>
