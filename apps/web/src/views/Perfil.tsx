@@ -1,4 +1,4 @@
-// Mi perfil: cómo la llaman y dónde enseña. Cada colegio es público o privado y tiene sus grados y cursos (en un
+// Mi perfil: su nombre completo (va en sus documentos) y dónde enseña. Cada colegio es público o privado y tiene sus grados y cursos (en un
 // privado, Matemática se parte en Álgebra, Geometría…). El buscador de temas abre con los de su colegio. Nada se
 // guarda hasta tocar «Guardar» (arriba, siempre a la vista): una sola petición a la base.
 import { Check, ImagePlus, Plus, Trash2 } from 'lucide-react'
@@ -148,13 +148,13 @@ function TarjetaColegio({ colegio, n, cambiar, quitar }: { colegio: Colegio; n: 
 
 export function Perfil() {
   const { avisar } = useStore()
-  const { entro, nombre: nombreCuenta } = useCuenta()
+  const { entro, nombreCompleto } = useCuenta()
   const { perfil } = usePerfil()
   const guardados = useColegios()
   // Con cuenta el nombre es obligatorio; sin cuenta es opcional y solo se guarda en este navegador.
   const conNombre = entro || !!perfil
 
-  const inicial = { nombre: perfil?.nombre ?? (nombreCuenta ? `Profe ${nombreCuenta}` : ''), colegios: guardados }
+  const inicial = { nombre: perfil?.nombre ?? nombreCompleto ?? '', colegios: guardados }
   const [borrador, setBorrador] = useState(inicial)
   const [base, setBase] = useState(JSON.stringify(inicial))
   const [guardando, setGuardando] = useState(false)
@@ -191,13 +191,14 @@ export function Perfil() {
         </Boton>
       </header>
 
-      <Seccion titulo="¿Cómo te llaman tus alumnos?">
+      <Seccion titulo="¿Cuál es tu nombre completo?">
         <input
           value={borrador.nombre}
           onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })}
-          placeholder="Profe Rosa"
-          maxLength={60}
-          aria-label="Tu nombre en clase"
+          placeholder="Rosa María Quispe Huamán"
+          maxLength={100}
+          autoComplete="name"
+          aria-label="Tu nombre completo"
           className={`${campo} max-w-md`}
         />
       </Seccion>

@@ -1,5 +1,5 @@
 // Onboarding (flujo "entrar y primer tema" en pen): solo la primera vez que entra con su cuenta.
-// 1 · cómo la llaman, 2 · qué enseña (grados y cursos), 3 · el tema de mañana. Termina con su primera clase lista.
+// 1 · su nombre completo, 2 · qué enseña (grados y cursos), 3 · el tema de mañana. Termina con su primera clase lista.
 import { ArrowRight, Search } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { useCuenta } from '../app/cuenta'
@@ -58,7 +58,7 @@ export function Onboarding() {
   const cuenta = useCuenta()
   const { abrirNuevoTema } = useStore()
   const [paso, setPaso] = useState(1)
-  const [nombre, setNombre] = useState(cuenta.nombre ? `Profe ${cuenta.nombre}` : '')
+  const [nombre, setNombre] = useState(cuenta.nombreCompleto ?? '')
   const [colegio, setColegio] = useState('')
   const [ensenanza, setEnsenanza] = useState<Ensenanza>(ENSENANZA_INICIAL)
   const [tipo, setTipo] = useState<TipoColegio>('publico')
@@ -77,8 +77,8 @@ export function Onboarding() {
     return (
       <Paso n={1}>
         <p className="text-lg text-ink-soft">¡Bienvenida a Supermentes! 🎉</p>
-        <h1 className={titulo}>¿Cómo te llaman tus alumnos?</h1>
-        <p className="text-lg text-ink-soft">Así te saludamos en Supermentes.</p>
+        <h1 className={titulo}>¿Cuál es tu nombre completo?</h1>
+        <p className="text-lg text-ink-soft">Va en el encabezado de tus exámenes y prácticas.</p>
         <form
           className="flex w-full max-w-xl flex-col items-center gap-5"
           onSubmit={(e) => {
@@ -87,12 +87,13 @@ export function Onboarding() {
           }}
         >
           <label className="flex w-full flex-col gap-2 text-left font-semibold">
-            Tu nombre en clase
+            Nombres y apellidos
             <input
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              placeholder="Profe Rosa"
-              maxLength={60}
+              placeholder="Rosa María Quispe Huamán"
+              maxLength={100}
+              autoComplete="name"
               autoFocus
               className="h-16 rounded-2xl border-2 border-ink bg-surface px-5 text-xl font-normal"
             />

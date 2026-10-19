@@ -1,4 +1,4 @@
-// Perfil de la docente: cómo la llaman y dónde enseña (sus colegios, cada uno público o privado, con sus grados y
+// Perfil de la docente: su nombre completo y dónde enseña (sus colegios, cada uno público o privado, con sus grados y
 // cursos). Sale del onboarding y de "Mi perfil"; se guarda en el navegador y, al tocar «Guardar», en la base
 // (/api/perfil): con cuenta, en docentes; sin cuenta, solo dónde enseña, en docentes_sin_cuenta. El buscador de temas
 // abre con los grados y cursos de su colegio.
@@ -164,7 +164,7 @@ async function subir(p: Perfil | null, colegios: Colegio[]): Promise<boolean> {
   }
 }
 
-/** Guarda cómo la llaman y dónde enseña, en este navegador y en la base. `true` si llegó a la base. */
+/** Guarda su nombre completo y dónde enseña, en este navegador y en la base. `true` si llegó a la base. */
 export function guardarPerfil(p: Perfil, colegios: Colegio[]): Promise<boolean> {
   const cs = validos(colegios)
   const lista = cs.length ? cs : colegiosGuardados()

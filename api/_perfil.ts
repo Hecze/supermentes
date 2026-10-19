@@ -152,7 +152,7 @@ async function guardar(request: Request) {
     return json({ perfil: { grados, cursos, colegios } })
   }
 
-  const nombre = texto(o.nombre, 60)
+  const nombre = texto(o.nombre, 100)
   const colegio = colegios[0]?.nombre || texto(o.colegio, 120) || undefined
   // Clientes de antes mandan solo `grado`.
   const grado = grados[0] ?? texto(o.grado, 20)

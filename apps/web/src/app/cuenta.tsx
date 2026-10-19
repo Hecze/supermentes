@@ -13,7 +13,8 @@ const CLAVE_SIN_CUENTA = 'supermentes-sin-cuenta'
 const callbackUrl = () => `${location.origin}/app/sso-callback`
 const enPasoDeClerk = () => /^\/app\/[\w-]+/.test(location.pathname)
 
-export type Cuenta = { lista: boolean; entro: boolean; nombre?: string; entrar: () => Promise<void>; salir: () => void }
+/** `nombre` es el de pila, para saludar; `nombreCompleto`, con apellidos, para sus documentos. */
+export type Cuenta = { lista: boolean; entro: boolean; nombre?: string; nombreCompleto?: string; entrar: () => Promise<void>; salir: () => void }
 
 const SIN_CUENTA: Cuenta = { lista: false, entro: false, entrar: async () => {}, salir: () => {} }
 
@@ -25,6 +26,7 @@ function useCuentaClerk(): Cuenta {
     lista: isLoaded,
     entro: !!isSignedIn,
     nombre: user?.firstName ?? user?.fullName ?? undefined,
+    nombreCompleto: user?.fullName ?? user?.firstName ?? undefined,
     // Ventana emergente y no redirección: el tema abierto vive en memoria y se perdería al volver de Google.
     async entrar() {
       const callback = callbackUrl()
