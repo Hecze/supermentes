@@ -31,9 +31,38 @@ const REEMPLAZOS: [RegExp, string][] = [
 const limpiar = (s: string) => REEMPLAZOS.reduce((t, [re, por]) => t.replace(re, por), s)
 
 /** Un SVG como imagen PNG, a unos 290 puntos por pulgada. */
+const incrustadas = new Map<string, Promise<string>>()
+
+/** Una imagen del dibujo (un billete, una moneda) como data URL: un SVG pasado a imagen no carga archivos de afuera. */
+function aDataUrl(url: string): Promise<string> {
+  if (!incrustadas.has(url))
+    incrustadas.set(
+      url,
+      fetch(url)
+        .then((r) => r.blob())
+        .then(
+          (b) =>
+            new Promise<string>((listo, falla) => {
+              const lector = new FileReader()
+              lector.onload = () => listo(lector.result as string)
+              lector.onerror = falla
+              lector.readAsDataURL(b)
+            }),
+        ),
+    )
+  return incrustadas.get(url)!
+}
+
+async function conImagenes(svg: string) {
+  const urls = [...new Set([...svg.matchAll(/<image[^>]* href="([^"]+)"/g)].map((m) => m[1]).filter((u) => !u.startsWith('data:')))]
+  let listo = svg
+  for (const u of urls) listo = listo.split(`href="${u}"`).join(`href="${await aDataUrl(u)}"`)
+  return listo
+}
+
 async function aPng(d: Dibujo, escala = 3): Promise<string> {
   const img = new Image()
-  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(d.svg)}`
+  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(await conImagenes(d.svg))}`
   await img.decode()
   const c = document.createElement('canvas')
   c.width = Math.round(d.ancho * escala)
@@ -487,7 +516,20 @@ export async function pdfHoja(d: DatosPdf, { clave: conClave = false } = {}): Pr
       })
       c.y += 3
     })
+    creditos(c, v)
   })
   pie(c)
   return doc.output('blob')
+}
+
+/** Al final de la hoja, de quién son las fotos y las imágenes del dinero (lo piden sus licencias), en letra chica. */
+function creditos(c: Ctx, v: Version) {
+  const lista = [...new Set(v.items.flatMap((it) => (it.dibujo?.credito ? [it.dibujo.credito] : [])))]
+  if (!lista.length) return
+  const { doc } = c
+  const ls = lineas(doc, `Imágenes: ${lista.join(' · ')}.`, 7.5, W)
+  if (c.y + ls.length * alto(7.5) + 2 > LIMITE) nuevaPagina(c)
+  doc.setTextColor(120)
+  escribir(c, ls, 7.5)
+  doc.setTextColor(0)
 }

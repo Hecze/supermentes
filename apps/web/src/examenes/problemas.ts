@@ -3,6 +3,7 @@
 // de Matemática 4 del MINEDU como referencia, y cada problema pasó controles y una resolución a ciegas
 // (scripts/generar-problemas.py). Se descarga solo al abrir un tema de esa área.
 import { normalizar } from '../curriculo/buscar'
+import { cosaEn, fotoDe } from './peru/cosas'
 import type { TemaProblemas, TipoPregunta } from './tipos'
 
 const archivos = import.meta.glob<TemaProblemas[]>('./problemas/*/*.json', { import: 'default' })
@@ -33,6 +34,17 @@ export const problemasDelTema: TipoPregunta = {
     const p = lista[i]
     // Como en el libro, con su recuadro para el procedimiento: es lo que el docente revisa y los padres quieren ver.
     // (Sus alternativas sirvieron para resolverlo a ciegas al generarlo.)
-    return { clave: `problema:${i}`, enunciado: p.enunciado, pasos: p.pasos, nivel: p.nivel, forma: 'abierta', respuesta: p.respuesta, espacio: 'procedimiento' }
+    // Si habla de algo del Perú (el cuy, la combi, la chicha morada…), va su foto al lado del enunciado.
+    const cosa = cosaEn(p.enunciado)
+    return {
+      clave: `problema:${i}`,
+      enunciado: p.enunciado,
+      ...(cosa ? { dibujo: fotoDe(cosa) } : {}),
+      pasos: p.pasos,
+      nivel: p.nivel,
+      forma: 'abierta',
+      respuesta: p.respuesta,
+      espacio: 'procedimiento',
+    }
   },
 }

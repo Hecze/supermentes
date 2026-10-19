@@ -5,7 +5,15 @@
 import type { TemaBanco } from '../banco/banco'
 
 /** Un dibujo en SVG (texto), el mismo en la pantalla y en el PDF. Medidas en px: 1 px ≈ 0,26 mm al imprimir. */
-export type Dibujo = { svg: string; ancho: number; alto: number; /** Qué muestra, para quien no ve el dibujo. */ alt: string }
+export type Dibujo = {
+  svg: string
+  ancho: number
+  alto: number
+  /** Qué muestra, para quien no ve el dibujo. */
+  alt: string
+  /** De quién es la imagen, si trae una foto o una imagen de otro (va al pie de la hoja, como pide su licencia). */
+  credito?: string
+}
 
 type Base = {
   /** Lo que se observa o se hace primero: "Observa el dinero que tiene Daniel." */

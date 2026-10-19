@@ -95,6 +95,9 @@ function ceroEn(c: number[], texto: (lugares: string) => string): string[] {
 
 // Los billetes y monedas de verdad (imágenes oficiales del BCRP, en ../peru): así el alumno reconoce el dinero que
 // usa en la bodega. Se ven más chicos que los reales, como en los libros.
+/** Las imágenes del dinero son del BCRP: se dice al pie de la hoja. */
+export const CREDITO_DINERO = 'Billetes y monedas: imágenes del Banco Central de Reserva del Perú (BCRP)'
+
 const BW = 176
 const BH = Math.round(BW / PROPORCION_BILLETE)
 
@@ -129,7 +132,7 @@ export function dibujoDinero(billetes: number[], monedas: number[]): Dibujo {
   const alto = yMonedas + (monedas.length ? R_MONEDA : -R_MONEDA) + 4
   const cuenta = (xs: number[], cosa: string) =>
     [...new Set(xs)].map((v) => `${xs.filter((x) => x === v).length} ${cosa} de S/ ${v}`).join(', ')
-  return svg(ancho, alto, partes.join(''), `${cuenta(billetes, 'billetes')}; ${cuenta(monedas, 'monedas')}`)
+  return { ...svg(ancho, alto, partes.join(''), `${cuenta(billetes, 'billetes')}; ${cuenta(monedas, 'monedas')}`), credito: CREDITO_DINERO }
 }
 
 type Bolsillo = { billetes: number[]; monedas: number[]; total: number; enMonedas: number }

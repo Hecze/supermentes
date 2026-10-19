@@ -19,6 +19,11 @@ Examen, práctica y balotario son **la misma hoja de preguntas** con otro largo 
 
 - **Tres gestos por pregunta, iguales en las tres:** cambiar (otros números u otra pregunta), **fijar** (ya no
   cambia: ni con «Otra versión» ni en la Fila B; en el balotario, la fijada pasa igualita al examen) y quitar.
+- **Dificultad: Fácil, Normal o Difícil**, para toda la hoja (arriba) o para una sola pregunta (los botones − y + de
+  cada pregunta). Normal es la pregunta de siempre: con la misma versión sale igualita. Fácil y difícil no son solo
+  otros números: menos o más billetes, sin o con canje, distractores más lejanos o del error típico, un paso más
+  (el vuelto), datos de más; siempre dentro del desempeño citado (`Contexto.nivel` y `TipoPregunta.niveles` en
+  `tipos.ts`; en los problemas, el nivel del problema). La pregunta fijada guarda su dificultad.
 - **«+ Tema»** la vuelve una **miscelánea**: muestra los temas del mismo curso y, al buscar, también los de otros
   cursos del grado (es la única vez que aparece otro curso). Cada tema va con su subtítulo (I, II, III…).
 - **El encabezado del colegio** (colegio, grado y sección, docente) se escribe directo sobre la hoja y queda guardado
@@ -53,7 +58,11 @@ con otros números y otra respuesta:
 - `del-banco.ts`: **para todos los cursos**, con el banco del tema (`apps/web/src/banco`): marcar la correcta,
   "¿Tiene razón?" (revisar la respuesta de un compañero), unir con flechas y completar con la palabra.
 
-Los dibujos son SVG en texto (`dibujos.ts`): los mismos en la pantalla y, pasados a imagen, en el PDF.
+Los dibujos son SVG en texto (`dibujos.ts`): los mismos en la pantalla y, pasados a imagen, en el PDF. Lo que es del
+Perú va con **imagen real** (`peru/`, ver su README): los billetes y monedas del BCRP en las preguntas de dinero, y
+fotos con licencia libre del cuy, la combi, la papa, el choclo, la chicha morada… en los problemas que hablan de eso.
+Lo genérico (un carro, un huevo, una gallina) se queda en dibujo. El PDF incrusta las imágenes y pone sus créditos al
+pie de la hoja.
 
 ## El currículo
 
@@ -67,9 +76,10 @@ currículo. Un tipo sin cita en un grado no se ofrece en ese grado.
 `npm run verificar:curriculo` (también en `npm run typecheck`, ver `verificar.ts`) falla si una cita no aparece tal
 cual o es de otra competencia, si un tema del grado no tiene hojas, si un tema de Matemática tiene menos de 2 tipos
 con dibujos, si una pregunta con números no trae sus pasos (o el último no dice la respuesta), si un problema está
-incompleto, o si en 300 preguntas por tipo y 25 hojas por tema (examen, práctica, balotario, misceláneas y el examen
-que sale del balotario) alguna sale rota: sin texto, con "NaN", alternativas repetidas, la correcta fuera de rango,
-casi siempre en la misma letra o un dibujo más ancho que la hoja.
+incompleto, si un tipo con dificultad no sale bien en fácil o difícil (o sale casi igual que en normal), o si en 300
+preguntas por tipo y 25 hojas por tema (examen, práctica, balotario, misceláneas y el examen que sale del balotario)
+alguna sale rota: sin texto, con "NaN", alternativas repetidas, la correcta fuera de rango, casi siempre en la misma
+letra o un dibujo más ancho que la hoja.
 
 Para mirar los tipos a ojo: `node scripts/muestras-examen.mjs salida.html [filtro] [versiones]`.
 

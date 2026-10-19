@@ -17,17 +17,20 @@ import {
   armarVersiones,
   cambiarCantidad,
   cambiarItem,
+  cambiarNivelHoja,
+  cambiarNivelItem,
   contar,
   examenDesdeBalotario,
   fijarItem,
   hojaNueva,
+  nivelPedido,
   otraVersion,
   porTema,
   quitarTema,
   type Fuentes,
 } from '../examenes/armar'
 import { citaDelTipo } from '../examenes/catalogo'
-import type { Clase, ConfigHoja, Dibujo, Fuente, Item, Teoria, TipoPregunta, Version } from '../examenes/tipos'
+import type { Clase, ConfigHoja, Dibujo, Fuente, Item, Nivel, Teoria, TipoPregunta, Version } from '../examenes/tipos'
 import { cargarArea, fuenteDe, useAreas, useColegio, useTemasDelGrado, type Area, type Colegio } from '../examenes/usar'
 import { letra } from '../examenes/util'
 import { Bloque, BotonInfo, Cita, useSustento } from './SustentoJuego'
@@ -41,6 +44,23 @@ const CLASES: { id: Clase; nombre: string }[] = [
 ]
 
 const TITULOS: Record<Clase, string> = { examen: 'Examen', practica: 'Práctica', balotario: 'Balotario' }
+
+const NIVELES: { n: Nivel; nombre: string }[] = [
+  { n: 1, nombre: 'Fácil' },
+  { n: 2, nombre: 'Normal' },
+  { n: 3, nombre: 'Difícil' },
+]
+
+/** La dificultad en tres puntitos: ●○○ fácil, ●●○ normal, ●●● difícil. */
+function Puntos({ n }: { n: Nivel }) {
+  return (
+    <span className="flex gap-0.5" aria-hidden>
+      {[1, 2, 3].map((k) => (
+        <span key={k} className={cx('size-1.5 rounded-full', k <= n ? 'bg-current' : 'bg-line')} />
+      ))}
+    </span>
+  )
+}
 
 const ROMANOS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
 
@@ -66,6 +86,7 @@ function VerDibujo({ d, escala = 1 }: { d: Dibujo; escala?: number }) {
     <div
       role="img"
       aria-label={d.alt}
+      title={d.credito}
       className="max-w-full [&>svg]:h-auto [&>svg]:w-full"
       style={{ width: d.ancho * escala }}
       // El SVG lo arma la app (examenes/dibujos.ts) y escapa todo el texto.
@@ -311,7 +332,7 @@ function Recuerda({ teoria }: { teoria: Teoria }) {
   )
 }
 
-/** Una pregunta de la hoja con sus tres gestos: cambiar, fijar y quitar (y la «i» del currículo). */
+/** Una pregunta de la hoja con sus gestos: más fácil o más difícil, cambiar, fijar y quitar (y la «i» del currículo). */
 function Pregunta({
   it,
   n,
@@ -320,6 +341,8 @@ function Pregunta({
   tipo,
   ficha,
   f,
+  nivel,
+  cambiarNivel,
   cambiar,
   fijar,
   quitar,
@@ -331,6 +354,9 @@ function Pregunta({
   tipo: TipoPregunta
   ficha: Ficha
   f: Fuente
+  /** La dificultad pedida, o null si este tipo de pregunta no cambia con ella. */
+  nivel: Nivel | null
+  cambiarNivel: (d: 1 | -1) => void
   cambiar: () => void
   fijar: () => void
   quitar: () => void
@@ -339,7 +365,7 @@ function Pregunta({
   // Como en el libro: el enunciado a la izquierda y el recuadro para el procedimiento a la derecha.
   const conRecuadro = !compacta && it.forma === 'abierta' && it.espacio === 'procedimiento'
   const cabeza = (
-    <div className={cx('flex items-start gap-3', !conRecuadro && 'sm:pr-40')}>
+    <div className={cx('flex items-start gap-3', !conRecuadro && (nivel ? 'sm:pr-60' : 'sm:pr-40'))}>
       <span className="shrink-0 text-lg font-bold tabular-nums">{n}.</span>
       <p className={cx('text-lg leading-snug', !compacta && 'font-semibold')}>{it.enunciado}</p>
     </div>
@@ -371,8 +397,21 @@ function Pregunta({
       )}
       <Responder it={it} respuestas={respuestas} compacta={compacta} />
       {respuestas && <Pasos pasos={it.pasos} nota={it.nota} />}
-      {/* Solo en la pantalla: cambiar, fijar, quitar y ver qué evalúa. */}
+      {/* Solo en la pantalla: más fácil o más difícil, cambiar, fijar, quitar y ver qué evalúa. */}
       <div className="flex items-center gap-1 print:hidden sm:absolute sm:right-0 sm:top-5 sm:group-first:top-0">
+        {nivel && (
+          <span className="mr-1 inline-flex items-center rounded-lg border border-line text-ink-soft opacity-70 transition group-hover:opacity-100" title={`Dificultad: ${NIVELES[nivel - 1].nombre.toLowerCase()}`}>
+            <button type="button" onClick={() => cambiarNivel(-1)} disabled={nivel === 1} className="grid size-8 place-items-center rounded-l-lg hover:bg-surface-2 hover:text-ink disabled:opacity-30" aria-label={`Más fácil la pregunta ${n}`} title="Más fácil">
+              <Minus className="size-3.5" aria-hidden />
+            </button>
+            <span role="img" aria-label={`Dificultad: ${NIVELES[nivel - 1].nombre.toLowerCase()}`} className="px-0.5">
+              <Puntos n={nivel} />
+            </span>
+            <button type="button" onClick={() => cambiarNivel(1)} disabled={nivel === 3} className="grid size-8 place-items-center rounded-r-lg hover:bg-surface-2 hover:text-ink disabled:opacity-30" aria-label={`Más difícil la pregunta ${n}`} title="Más difícil">
+              <Plus className="size-3.5" aria-hidden />
+            </button>
+          </span>
+        )}
         <button
           type="button"
           onClick={cambiar}
@@ -427,7 +466,7 @@ function VistaHoja({
   colegio: Colegio
   cambiarColegio: (c: Partial<Colegio>) => void
   respuestas: boolean
-  acciones: { cambiar: (i: number) => void; fijar: (i: number) => void; quitar: (i: number) => void }
+  acciones: { cambiar: (i: number) => void; fijar: (i: number) => void; quitar: (i: number) => void; nivel: (i: number, d: 1 | -1) => void }
 }) {
   const clase = config.clase
   const grupos = porTema(v, config.temas)
@@ -492,6 +531,8 @@ function VistaHoja({
                       tipo={tipo}
                       ficha={ficha}
                       f={f}
+                      nivel={tipo.niveles ? nivelPedido(config, config.items[it.indice]) : null}
+                      cambiarNivel={(d) => acciones.nivel(it.indice, d)}
                       cambiar={() => acciones.cambiar(it.indice)}
                       fijar={() => acciones.fijar(it.indice)}
                       quitar={() => acciones.quitar(it.indice)}
@@ -725,11 +766,13 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
       fuentes={fuentes}
       ficha={ficha}
       cambiar={(t, tipo, d) => poner(cambiarCantidad(config, t, tipo, d))}
-      reiniciar={() => poner(hojaNueva(clase, config.temas.flatMap((t) => fuentes.get(t) ?? []), config.filas))}
+      reiniciar={() => poner(hojaNueva(clase, config.temas.flatMap((t) => fuentes.get(t) ?? []), config.filas, undefined, config.nivel))}
     />
   )
 
   const activo = (si: boolean) => (si ? { background: tinte(COLOR, 12), borderColor: COLOR } : undefined)
+  // La dificultad de la hoja se ofrece si alguna de sus preguntas cambia con ella.
+  const conNiveles = config.items.some((it) => fuentes.get(it.tema)?.tipos.find((t) => t.id === it.tipo)?.niveles)
 
   return (
     <>
@@ -758,6 +801,25 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
             <Plus className="size-4" aria-hidden /> Tema
           </button>
         </div>
+        {conNiveles && (
+          <div className="flex items-center gap-2 xl:ml-auto">
+            <span className="text-ink-soft">Dificultad</span>
+            <div role="radiogroup" aria-label="Dificultad de toda la hoja" className="flex gap-1 rounded-2xl bg-surface-2 p-1">
+              {NIVELES.map((x) => (
+                <button
+                  key={x.n}
+                  role="radio"
+                  type="button"
+                  aria-checked={x.n === (config.nivel ?? 2)}
+                  onClick={() => poner(cambiarNivelHoja(config, x.n))}
+                  className={cx('h-10 rounded-xl px-4 transition', x.n === (config.nivel ?? 2) ? 'bg-surface font-semibold shadow-sm' : 'text-ink-soft hover:text-ink')}
+                >
+                  {x.nombre}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <BarraHoja>
@@ -848,6 +910,7 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
                 cambiar: (i) => poner(cambiarItem(config, i, fuentes)),
                 fijar: (i) => poner(fijarItem(config, i)),
                 quitar: (i) => poner({ ...config, items: config.items.filter((_, k) => k !== i) }),
+                nivel: (i, d) => poner(cambiarNivelItem(config, i, d)),
               }}
             />
           ) : (
