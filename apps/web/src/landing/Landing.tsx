@@ -351,7 +351,7 @@ export function Landing() {
         <Contenedor className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-2">
             <Logo />
-            <p className="text-sm text-ink-soft">Hecho en Lima para Hack the Andes 2026.</p>
+            <p className="text-sm text-ink-soft">Hecho en Lima.</p>
           </div>
           <nav className="flex gap-5 text-ink-soft" aria-label="Pie de página">
             <a href="#herramientas" className="hover:text-ink">
