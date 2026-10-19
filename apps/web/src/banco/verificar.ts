@@ -44,7 +44,6 @@ export function fichaDe(gradoId: string, grado: string, areaId: string, area: st
     vocabulario: [],
     ejemplo: '',
     errorFrecuente: '',
-    coincidenciasBiblioteca: 0,
   }
 }
 

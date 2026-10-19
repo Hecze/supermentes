@@ -2,7 +2,6 @@
 import type {
   Ficha,
   Juego,
-  Material,
   OpcionesSesion,
   Sesion,
 } from './types'
@@ -50,7 +49,6 @@ export const FICHA_EJEMPLO: Ficha = {
   ],
   ejemplo: 'Si un queque se corta en 8 tajadas iguales y te comes 3, te comiste 3/8 del queque.',
   errorFrecuente: 'Confunden el numerador con el denominador: creen que el número más grande siempre va arriba.',
-  coincidenciasBiblioteca: 2,
 }
 
 export const FICHA_AGUA: Ficha = {
@@ -86,7 +84,6 @@ export const FICHA_AGUA: Ficha = {
   ],
   ejemplo: 'Cuando hierves agua para el té, el vapor que sale de la olla es agua evaporándose.',
   errorFrecuente: 'Creen que las nubes son humo o algodón, y no agua.',
-  coincidenciasBiblioteca: 2,
 }
 
 export const FICHA_SUSTANTIVOS: Ficha = {
@@ -121,7 +118,6 @@ export const FICHA_SUSTANTIVOS: Ficha = {
   ],
   ejemplo: '"Mi perra Luna vive en Huancayo": perra es común; Luna y Huancayo son propios.',
   errorFrecuente: 'Escriben con minúscula los nombres de ciudades y ríos.',
-  coincidenciasBiblioteca: 4,
 }
 
 /** Temas que la docente ya preparó, del más reciente al más antiguo. */
@@ -220,20 +216,6 @@ export function juegoDesdeVocabulario(ficha: Ficha): Juego {
     palabras: v.map((x) => ({ palabra: x.palabra, pista: x.definicion })),
   }
 }
-
-// ---------- Biblioteca ----------
-
-export const BIBLIOTECA_EJEMPLO: Material[] = [
-  { id: 'm1', titulo: 'El rap del sistema digestivo', tipo: 'cancion', grado: '4.º primaria', area: 'Ciencia y Tecnología', autor: 'Carmen Huamán', lugar: 'Arequipa', usos: 214 },
-  { id: 'm2', titulo: 'Memoria de fracciones con pizzas', tipo: 'juego', grado: '4.º primaria', area: 'Matemática', autor: 'Jorge Mamani', lugar: 'Puno', usos: 156 },
-  { id: 'm3', titulo: 'Misión: fracciones en la cocina', tipo: 'examen', grado: '4.º primaria', area: 'Matemática', autor: 'Diana Flores', lugar: 'Piura', usos: 120 },
-  { id: 'm4', titulo: 'Trivia: animales de la Amazonía', tipo: 'juego', grado: '2.º primaria', area: 'Ciencia y Tecnología', autor: 'Miguel Vargas', lugar: 'Iquitos', usos: 133 },
-  { id: 'm5', titulo: 'Misión: el ciclo del agua', tipo: 'examen', grado: '5.º primaria', area: 'Ciencia y Tecnología', autor: 'Lucía Torres', lugar: 'Trujillo', usos: 98 },
-  { id: 'm6', titulo: 'Crucigrama de sustantivos y adjetivos', tipo: 'crucigrama', grado: '3.º primaria', area: 'Comunicación', autor: 'Ana Rojas', lugar: 'Cusco', usos: 77 },
-  { id: 'm7', titulo: 'Examen de tablas de multiplicar en lectura fácil', tipo: 'examen', grado: '3.º primaria', area: 'Matemática', autor: 'Elena Castro', lugar: 'Lima', usos: 61 },
-  { id: 'm8', titulo: 'Adivina la palabra: la Independencia', tipo: 'juego', grado: '6.º primaria', area: 'Personal Social', autor: 'Pedro Salas', lugar: 'Ica', usos: 88 },
-  { id: 'm9', titulo: 'El huayno de las regiones del Perú', tipo: 'cancion', grado: '4.º primaria', area: 'Personal Social', autor: 'Rosa Quispe', lugar: 'Lima', usos: 45, esMio: true },
-]
 
 // ---------- Sesión de aprendizaje ----------
 

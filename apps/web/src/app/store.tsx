@@ -4,11 +4,10 @@ import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { Clase, ConfigHoja } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
-export const VISTAS = ['ficha', 'sesion', 'cancion', 'examen', 'juego', 'crucigrama', 'biblioteca', 'resultados', 'perfil'] as const
+export const VISTAS = ['ficha', 'curriculo', 'sesion', 'ejercicios', 'cancion', 'recursos', 'juego', 'crucigrama', 'resultados', 'perfil'] as const
 export type Vista = (typeof VISTAS)[number]
 
 type Tono = 'info' | 'ok' | 'error'
-export type PestanaBiblioteca = 'curriculo' | 'materiales'
 export type Aviso = { id: number; texto: string; tono: Tono }
 type Tema = 'light' | 'dark'
 
@@ -55,9 +54,7 @@ type Store = {
   previoTema: PrevioTema | null
   abrirNuevoTema: (previo?: PrevioTema) => void
   cerrarNuevoTema: () => void
-  /** Pestaña de la Biblioteca y documento del currículo que está abierto. */
-  pestanaBiblioteca: PestanaBiblioteca
-  setPestanaBiblioteca: (p: PestanaBiblioteca) => void
+  /** Documento del currículo que está abierto (sección Currículo nacional). */
   curriculoAbierto: { gradoId: string; areaId: string } | null
   verCurriculo: (gradoId: string, areaId: string) => void
   resultados: Resultados
@@ -70,9 +67,13 @@ type Store = {
 
 const Ctx = createContext<Store | null>(null)
 
+/** Rutas de antes que siguen abriendo lo mismo (links guardados o compartidos). */
+const RUTAS_ANTIGUAS: Record<string, Vista> = { examen: 'ejercicios', biblioteca: 'curriculo' }
+
 function vistaDelHash(): Vista {
   try {
     const h = window.location.hash.replace('#', '')
+    if (RUTAS_ANTIGUAS[h]) return RUTAS_ANTIGUAS[h]
     // Sin vista (o la del antiguo inicio), se abre el tema.
     return (VISTAS as readonly string[]).includes(h) ? (h as Vista) : 'ficha'
   } catch {
@@ -139,7 +140,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [porTema, setPorTema] = useState<Record<string, Resultados>>(RESULTADOS_INICIALES)
   const [nuevoTemaAbierto, setNuevoTemaAbierto] = useState(false)
   const [previoTema, setPrevioTema] = useState<PrevioTema | null>(null)
-  const [pestanaBiblioteca, setPestanaBiblioteca] = useState<PestanaBiblioteca>('curriculo')
   const [curriculoAbierto, setCurriculoAbierto] = useState<{ gradoId: string; areaId: string } | null>(null)
   const [avisos, setAvisos] = useState<Aviso[]>([])
   const [tema, setTema] = useState<Tema>(() => {
@@ -226,8 +226,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const verCurriculo = useCallback(
     (gradoId: string, areaId: string) => {
       setCurriculoAbierto({ gradoId, areaId })
-      setPestanaBiblioteca('curriculo')
-      ir('biblioteca')
+      ir('curriculo')
     },
     [ir],
   )
@@ -251,8 +250,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           setNuevoTemaAbierto(true)
         },
         cerrarNuevoTema: () => setNuevoTemaAbierto(false),
-        pestanaBiblioteca,
-        setPestanaBiblioteca,
         curriculoAbierto,
         verCurriculo,
         resultados: (idActual && porTema[idActual]) || {},

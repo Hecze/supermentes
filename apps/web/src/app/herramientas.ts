@@ -12,7 +12,9 @@ export type Herramienta = {
   color: string
 }
 
-export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['sesion', 'cancion', 'examen', 'juego', 'crucigrama']
+// Así se ofrecen en la ficha del tema. El menú (components/Shell.tsx) solo lleva sesión, ejercicios y canciones;
+// juego y crucigrama se abren desde la ficha.
+export const ORDEN_HERRAMIENTAS: HerramientaId[] = ['sesion', 'ejercicios', 'cancion', 'juego', 'crucigrama']
 
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   sesion: {
@@ -25,16 +27,16 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   },
   cancion: {
     id: 'cancion',
-    pedido: 'Una canción',
-    nombre: 'Canción',
+    pedido: 'Canciones',
+    nombre: 'Canciones',
     descripcion: 'Para que memoricen el tema cantando.',
     icono: Music,
     color: 'var(--cancion)',
   },
-  examen: {
-    id: 'examen',
-    pedido: 'Un examen',
-    nombre: 'Examen',
+  ejercicios: {
+    id: 'ejercicios',
+    pedido: 'Ejercicios',
+    nombre: 'Ejercicios',
     descripcion: 'Examen, práctica y balotario listos para imprimir, con su clave.',
     icono: FileText,
     color: 'var(--examen)',

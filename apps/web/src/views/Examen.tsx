@@ -1,4 +1,4 @@
-// La herramienta Examen: las hojas del tema abierto (examen, práctica y balotario), generadas desde cero con lo que
+// La herramienta Ejercicios (antes «Examen», ruta #ejercicios): las hojas del tema abierto (examen, práctica y balotario), generadas desde cero con lo que
 // trae el currículo (ver Hojas.tsx). Hoy las tiene 4.º de primaria; los demás grados llegan con su banco.
 import { useMemo } from 'react'
 import { useStore } from '../app/store'
@@ -18,7 +18,7 @@ function ExamenDelTema({ ficha }: { ficha: NonNullable<ReturnType<typeof useStor
 
   return (
     <>
-      <EncabezadoHerramienta id="examen" />
+      <EncabezadoHerramienta id="ejercicios" />
       {area && hay !== null &&
         (hay ? (
           <Hojas key={ficha.id} ficha={ficha} area={area} />

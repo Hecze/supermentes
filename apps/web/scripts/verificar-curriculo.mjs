@@ -40,6 +40,15 @@ try {
   } else {
     console.log(`✓ Exámenes listos (${examenes.grados.join(', ')}): ${examenes.tipos} tipos de pregunta, ${examenes.citas} citas tal cual; los ${examenes.temas} temas tienen examen, práctica y balotario y ninguna versión sale rota; cada pregunta con números trae sus pasos para la clave; ${examenes.problemas} problemas con sus pasos.`)
   }
+  const { verificarRecursos } = await vite.ssrLoadModule('/src/recursos/verificar.ts')
+  const recursos = verificarRecursos()
+  if (recursos.errores.length) {
+    console.error(`✗ Más recursos: ${recursos.errores.length} problemas:\n- ${recursos.errores.join('\n- ')}`)
+    process.exitCode = 1
+  } else {
+    const detalle = Object.entries(recursos.porTipo).filter(([, n]) => n).map(([t, n]) => `${n} ${t}`).join(', ')
+    console.log(`✓ Más recursos: ${recursos.total} enlaces a material oficial${detalle ? ` (${detalle})` : ''}, cada uno con su fuente y fecha de revisión.`)
+  }
 } finally {
   await vite.close()
 }

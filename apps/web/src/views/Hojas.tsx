@@ -826,7 +826,7 @@ export function Hojas({ ficha, area }: { ficha: Ficha; area: Area }) {
       </div>
 
       <BarraHoja>
-        <Boton variante="herramienta" herramienta="examen" onClick={() => bajar(false)} cargando={armando === 'hoja'} disabled={!total}>
+        <Boton variante="herramienta" herramienta="ejercicios" onClick={() => bajar(false)} cargando={armando === 'hoja'} disabled={!total}>
           {armando !== 'hoja' && <Download className="size-5" aria-hidden />} Descargar PDF
         </Boton>
         <Boton variante="contorno" onClick={() => bajar(true)} cargando={armando === 'clave'} disabled={!total}>

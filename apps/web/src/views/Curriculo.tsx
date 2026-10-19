@@ -1,8 +1,9 @@
-import { ExternalLink, LoaderCircle, Plus, Printer, Sparkles } from 'lucide-react'
+import { BookMarked, ExternalLink, LoaderCircle, Plus, Printer, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useStore } from '../app/store'
 import { GRADOS_CURRICULO, NIVELES, areasDe, gradoPorId, nivelDe } from '../curriculo/catalogo'
 import { useCurriculo } from '../curriculo/cargar'
+import { EncabezadoSeccion } from '../components/Shell'
 import { Boton, Hoja, cx, imprimir } from '../components/ui'
 
 /** Documento del Currículo Nacional para un grado y curso, con la lista de cursos del grado al costado. */
@@ -116,7 +117,7 @@ export function VisorCurriculo() {
                 <Sparkles className="mt-0.5 size-5 shrink-0" aria-hidden />
                 <p>
                   Cuando creas un tema de <strong>{cur.area.nombre}</strong> para <strong>{grado?.corto}</strong>, Supermentes parte de estas
-                  competencias y desempeños para preparar canciones, juegos, exámenes y crucigramas.
+                  competencias y desempeños para preparar la sesión, los ejercicios y los juegos, y para elegir las canciones.
                 </p>
               </div>
 
@@ -214,5 +215,17 @@ export function VisorCurriculo() {
         </Hoja>
       </div>
     </div>
+  )
+}
+
+/** La sección «Currículo nacional» del menú: el documento oficial del grado y curso, abierto en los del tema. */
+export function CurriculoNacional() {
+  return (
+    <>
+      <EncabezadoSeccion icono={BookMarked} titulo="Currículo nacional">
+        Competencias, capacidades y desempeños de cada grado y curso, copiados tal cual de los programas del MINEDU.
+      </EncabezadoSeccion>
+      <VisorCurriculo />
+    </>
   )
 }

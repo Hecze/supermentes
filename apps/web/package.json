@@ -8,6 +8,7 @@
     "build": "node ../../presentacion/armar.mjs && vite build",
     "typecheck": "tsc --noEmit && node scripts/verificar-curriculo.mjs",
     "verificar:curriculo": "node scripts/verificar-curriculo.mjs",
+    "verificar:enlaces": "node scripts/verificar-enlaces.mjs",
     "build:preview": "vite build --mode artifact && node scripts/make-artifact.mjs"
   },
   "dependencies": {
