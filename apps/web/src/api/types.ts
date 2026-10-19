@@ -115,7 +115,6 @@ export type Recurso = {
 export interface Api {
   prepararFicha(entrada: EntradaTema): Promise<Ficha>
   generarJuego(ficha: Ficha): Promise<Juego>
-  generarSesion(ficha: Ficha, opciones: OpcionesSesion): Promise<Sesion>
   /** Videos y fichas de internet para el tema. */
   buscarRecursos(ficha: Ficha): Promise<Recurso[]>
 }
