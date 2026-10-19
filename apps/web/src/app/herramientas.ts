@@ -75,8 +75,4 @@ export const AREAS = ['Matemática', 'Comunicación', 'Ciencia y Tecnología', '
 
 export const DURACIONES = ['30 min', '45 min', '90 min']
 
-export const RITMOS = ['Cumbia', 'Huayno', 'Festejo', 'Rap', 'Balada']
-
-export const MELODIAS = ['Los pollitos dicen', 'Arroz con leche', 'Pin Pon']
-
 export const INTERESES = ['Fútbol', 'Animales', 'Cocina']

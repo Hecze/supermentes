@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { MODO_EJEMPLO, type AudioCancion, type Cancion, type Ficha, type Juego, type Sesion } from '../api'
+import { MODO_EJEMPLO, type Cancion, type Ficha, type Juego, type Sesion } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { Clase, ConfigHoja } from '../examenes/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
@@ -19,7 +19,6 @@ export type Resultados = {
   crucigrama?: { filas: FilaCrucigrama[] }
   sesion?: Sesion
   cancion?: Cancion
-  audio?: AudioCancion
   /** Las hojas listas del tema (examenes/): examen, práctica y balotario, para volver a la misma versión. */
   hojas?: Partial<Record<Clase, ConfigHoja>>
   /** La hoja que el docente vio por última vez en este tema. */

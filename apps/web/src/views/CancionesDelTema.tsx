@@ -1,12 +1,11 @@
-// Las dos canciones del banco para el tema (banco/banco.ts): con ritmos del Perú, la letra lista y su "i" con la
-// parte exacta del desempeño oficial que trabajan. Como en una app de música: ▶ la hace sonar ahí mismo
-// (api/audio.ts) y tocar la tarjeta abre la letra.
-import { BadgeCheck, LoaderCircle, Pause, Play } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { api, type AudioCancion, type Ficha } from '../api'
+// Las dos letras del banco para el tema (banco/banco.ts): con ritmos del Perú y su "i" con la parte exacta del
+// desempeño oficial que trabajan. Tocar la tarjeta abre la letra para cantar e imprimir. La música no se crea en la
+// app: cuando esté el canal de YouTube, cada letra tendrá su video (obsidian/CANCIONES.md).
+import { BadgeCheck, Music } from 'lucide-react'
+import type { Ficha } from '../api'
 import { useStore } from '../app/store'
-import { useGeneracion } from '../app/useGeneracion'
-import { cancionDelBanco, type CancionBanco, type TemaBanco } from '../banco/banco'
+import { cancionDelBanco, type TemaBanco } from '../banco/banco'
+import { tinte } from '../components/ui'
 import { ubicarCita } from '../curriculo/citas'
 import { useCurriculo } from '../curriculo/cargar'
 import { nivelDe } from '../curriculo/catalogo'
@@ -61,90 +60,28 @@ function coroDe(letra: string[]) {
   return letra.slice(i + 1).filter((l) => !l.startsWith('[')).slice(0, 2)
 }
 
-/** Las barras que suben y bajan mientras suena, como en cualquier app de música. */
-function Sonando() {
-  return (
-    <span className="flex h-3.5 items-end gap-[2px]" aria-hidden>
-      {[0, 0.25, 0.1, 0.35].map((d, i) => (
-        <span key={i} className="h-full w-[3px] origin-bottom rounded-full" style={{ background: COLOR, animation: `onda 0.8s ease-in-out ${d}s infinite` }} />
-      ))}
-    </span>
-  )
-}
-
-// El audio ya creado de cada canción: volver a tocarla no lo pide (ni lo cobra) otra vez.
-const audios = new Map<string, AudioCancion>()
-const clave = (c: CancionBanco) => `${c.titulo}|${c.ritmo}`
-
 export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Ficha }) {
-  const { guardar, avisar } = useStore()
-  const { generar } = useGeneracion()
-  const [sonando, setSonando] = useState<number | null>(null)
-  const [cargando, setCargando] = useState<number | null>(null)
-  const reproductor = useRef<HTMLAudioElement | null>(null)
-  const reloj = useRef<number>(0)
-
-  function parar() {
-    reproductor.current?.pause()
-    reproductor.current = null
-    window.clearTimeout(reloj.current)
-    setSonando(null)
-  }
-  useEffect(() => parar, [])
-
-  async function alternar(i: number) {
-    if (sonando === i) return parar()
-    parar()
-    const c = tema.canciones[i]
-    let a = audios.get(clave(c))
-    if (!a) {
-      setCargando(i)
-      a = (await generar('Audio', () => api.generarAudio(cancionDelBanco(c)))) ?? undefined
-      setCargando(null)
-      if (!a) return
-      audios.set(clave(c), a)
-    }
-    if (a.url) {
-      const r = new Audio(a.url)
-      r.onended = () => setSonando(null)
-      r.onerror = () => {
-        setSonando(null)
-        avisar('No se pudo reproducir el audio. Vuelve a intentarlo.', 'error')
-      }
-      reproductor.current = r
-      // Tras esperar la música, el iPhone a veces no deja sonar sin otro toque: se avisa en vez de quedar callado.
-      r.play().catch(() => {
-        setSonando(null)
-        avisar('La canción está lista: toca ▶ otra vez para escucharla.')
-      })
-    } else {
-      // Datos de ejemplo: no hay sonido, solo se ve que "suena" un rato.
-      reloj.current = window.setTimeout(() => setSonando(null), 8000)
-    }
-    setSonando(i)
-  }
-
+  const { guardar } = useStore()
   function abrir(i: number) {
-    parar()
-    const c = tema.canciones[i]
-    guardar('cancion', cancionDelBanco(c))
-    guardar('audio', audios.get(clave(c)))
+    guardar('cancion', cancionDelBanco(tema.canciones[i]))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
     <section className="flex flex-col gap-3">
       <div>
-        <h2 className="font-display text-2xl font-bold">Canciones de tu tema</h2>
-        <p className="text-ink-soft">Listas para cantar en clase, con ritmos del Perú.</p>
+        <h2 className="font-display text-2xl font-bold">Letras para cantar</h2>
+        <p className="text-ink-soft">De tu tema, con ritmos del Perú. Ábrela para imprimirla o mandarla por WhatsApp.</p>
       </div>
       <ul className="grid gap-4 sm:grid-cols-2">
         {tema.canciones.map((c, i) => (
           <li key={c.titulo} className="relative rounded-2xl border border-line bg-surface transition hover:bg-surface-2">
             <button type="button" onClick={() => abrir(i)} className="flex w-full flex-col gap-1 rounded-2xl py-4 pl-[4.75rem] pr-12 text-left" aria-label={`Ver la letra de «${c.titulo}»`}>
+              <span className="absolute left-4 top-4 grid size-12 place-items-center rounded-full" style={{ background: tinte(COLOR, 14), color: COLOR }} aria-hidden>
+                <Music className="size-5" />
+              </span>
               <span className="font-display text-xl font-bold leading-tight">{c.titulo}</span>
-              <span className="flex items-center gap-2 text-sm font-semibold capitalize" style={{ color: COLOR }}>
-                {sonando === i && <Sonando />}
+              <span className="text-sm font-semibold capitalize" style={{ color: COLOR }}>
                 {c.ritmo}
               </span>
               <span className="mt-1 flex flex-col font-display italic text-ink-soft">
@@ -152,16 +89,6 @@ export function CancionesDelTema({ tema, ficha }: { tema: TemaBanco; ficha: Fich
                   <span key={l}>{l}</span>
                 ))}
               </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => void alternar(i)}
-              disabled={cargando !== null}
-              className="absolute left-4 top-4 grid size-12 place-items-center rounded-full text-on-tool shadow-md transition hover:scale-105 disabled:opacity-80"
-              style={{ background: COLOR }}
-              aria-label={sonando === i ? `Pausar «${c.titulo}»` : `Escuchar «${c.titulo}»`}
-            >
-              {cargando === i ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : sonando === i ? <Pause className="size-5" aria-hidden /> : <Play className="ml-0.5 size-5" aria-hidden />}
             </button>
             <BotonInfo etiqueta={`Por qué «${c.titulo}» cumple el Currículo Nacional`} className="absolute right-2.5 top-2.5 z-10">
               <SustentoBanco tema={tema} ficha={ficha} />
