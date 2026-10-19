@@ -2,6 +2,7 @@
 // del grado donde se ofrece, y que en los grados con banco cada tema tenga al menos 2 juegos.
 // También que cada tema de esos grados tenga examen listo y que sus versiones al azar no salgan rotas.
 // Ver src/juegos/matematica/verificar.ts, src/banco/verificar.ts y src/examenes/verificar.ts. Falla (código 1) si algo no cuadra.
+import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'vite'
 
@@ -42,6 +43,7 @@ try {
   }
   const { verificarRecursos } = await vite.ssrLoadModule('/src/recursos/verificar.ts')
   const recursos = verificarRecursos()
+  for (const p of recursos.portadas) if (!existsSync(new URL(`../public${p}`, import.meta.url))) recursos.errores.push(`Falta la portada ${p} en public/.`)
   if (recursos.errores.length) {
     console.error(`✗ Más recursos: ${recursos.errores.length} problemas:\n- ${recursos.errores.join('\n- ')}`)
     process.exitCode = 1

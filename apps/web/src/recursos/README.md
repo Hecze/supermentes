@@ -15,8 +15,11 @@ Cada entrada (tipo en `catalogo.ts`):
 | `grados`, `areas` | Ids del currículo (`primaria-4`, `matematica`); vacío = sirve para todos |
 | `descripcion` | Qué es y para qué le sirve al docente, en una oración |
 | `verificado` | Fecha en que se comprobó que el enlace abre |
+| `portada` | Miniatura de la primera página del PDF en `public/portadas/` (la arma `scripts/portadas.py`) |
 
 `npm run typecheck` revisa la forma (campos, enlaces https, ids que existen). `npm run verificar:enlaces` comprueba, con internet, que cada enlace siga abriendo.
+
+**Portadas:** `python3 scripts/portadas.py` hace las que faltan (necesita internet, `pdftoppm` y Pillow). Baja solo el inicio y el final de cada PDF, no el libro entero; si la carátula viene completa (contratapa, lomo y tapa) se queda con la tapa. En la app se ven como en una tienda de libros: la tapa grande y el título debajo; las normas, que empiezan con texto, van en lista.
 
 ## Fuentes (revisadas el 19-oct-2026)
 

@@ -21,6 +21,8 @@ export type RecursoOficial = {
   pdf?: string
   /** Si el recurso son varios archivos: la prueba con su registro y su manual, o las fichas de un tema de menos a más. */
   partes?: { nombre: string; detalle?: string; url: string }[]
+  /** Miniatura de la primera página del PDF (public/portadas/, la hace scripts/portadas.py). */
+  portada?: string
   /** El tema, como lo nombra la fuente (no es texto del currículo): sirve para encontrarlo desde el tema del docente. */
   tema?: string
   /** primaria-1 … primaria-6; vacío = sirve para todos los grados. */

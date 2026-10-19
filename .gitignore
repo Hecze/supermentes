@@ -6,3 +6,4 @@ dist-preview
 .DS_Store
 obsidian/.obsidian/workspace*.json
 .vercel
+__pycache__

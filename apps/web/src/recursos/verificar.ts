@@ -22,7 +22,10 @@ export function verificarRecursos() {
     for (const g of r.grados ?? []) if (!grados.has(g)) errores.push(`${quien}: grado desconocido «${g}».`)
     for (const a of r.areas ?? []) if (!areas.has(a)) errores.push(`${quien}: curso desconocido «${a}».`)
     if (!/^\d{4}-\d{2}-\d{2}$/.test(r.verificado ?? '')) errores.push(`${quien}: falta la fecha en que se comprobó el enlace.`)
+    if (r.portada && !/^\/portadas\/[\w-]+\.webp$/.test(r.portada)) errores.push(`${quien}: portada no válida ${r.portada}`)
   }
   const porTipo = Object.fromEntries(ORDEN_TIPOS.map((t) => [TIPOS[t].plural.toLowerCase(), (recursos as RecursoOficial[]).filter((r) => r.tipo === t).length]))
-  return { total: recursos.length, porTipo, errores }
+  // Que cada portada exista lo comprueba scripts/verificar-curriculo.mjs (aquí no hay acceso a archivos).
+  const portadas = (recursos as RecursoOficial[]).flatMap((r) => (r.portada ? [r.portada] : []))
+  return { total: recursos.length, porTipo, portadas, errores }
 }
