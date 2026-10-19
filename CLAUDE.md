@@ -30,6 +30,7 @@ le hace daño al docente.
 - **Si no se puede cumplir todo** (falta información, una limitación técnica, lo que sea), la sesión no se ofrece y
   **no llega a producción**. Mientras tanto, la vista lleva arriba el aviso «En construcción» y no debe usarse
   (`apps/web/src/views/Sesion.tsx`).
+- **La revisión parte por parte, con sus fuentes oficiales:** `obsidian/SESION.md`. Léela antes de tocar la sesión.
 
 ## Antes de trabajar
 
