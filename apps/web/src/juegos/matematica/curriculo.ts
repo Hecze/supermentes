@@ -14,8 +14,6 @@ export function de(citas: Citas, ...grados: string[]): Citas {
 
 export const CITAS = {
   conteo: {
-    'inicial-4': 'Utiliza el conteo hasta 5, en situaciones cotidianas en las que requiere contar',
-    'inicial-5': 'Utiliza el conteo hasta 10, en situaciones cotidianas en las que requiere contar',
     'primaria-1': 'del número como cardinal al determinar una cantidad de hasta 50 objetos',
   },
   comparar: {
@@ -43,7 +41,6 @@ export const CITAS = {
     'primaria-6': 'patrones aditivos o multiplicativos',
   },
   sumarRestar: {
-    'inicial-5': 'Utiliza el conteo en situaciones cotidianas en las que requiere juntar, agregar o quitar hasta cinco objetos',
     'primaria-1': 'expresiones numéricas (modelo) de adición o sustracción con números naturales hasta 20',
     'primaria-2': 'expresiones numéricas (modelo) de adición o sustracción con números naturales de hasta dos cifras',
     'primaria-3': 'de adición, sustracción, multiplicación y división con números naturales de hasta tres cifras',

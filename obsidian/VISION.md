@@ -10,7 +10,7 @@ actualizado: 2026-10-19
 **Crea canciones, juegos y exámenes para tu clase en minutos**, a partir del Currículo Nacional del Perú.
 
 ## Para quién
-- Docentes de **primaria y secundaria** del Perú, de colegios públicos y privados, sin preferencia por un nivel ni por un grado (desde el 19-oct). Inicial no, por ahora.
+- Docentes de **primaria y secundaria** del Perú, de colegios públicos y privados, sin preferencia por un nivel ni por un grado (desde el 19-oct). Inicial no: se quitó de la app y del currículo el 20-oct.
 - Con poca experiencia digital: si algo necesita explicación, está mal diseñado.
 - Preparan la clase en **laptop** (un profesor entrevistado dijo que ahí la usaría mucho más). El celular solo tiene que funcionar.
 - En muchas aulas solo el docente tiene celular e internet.

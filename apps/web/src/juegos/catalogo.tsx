@@ -310,7 +310,7 @@ export function juegosCompatibles(c: Contenido, gradoId?: string) {
 
 /** Más lento para los más chicos. */
 export function ritmoDe(gradoId: string): Ritmo {
-  if (/^inicial|^primaria-[12]$/.test(gradoId)) return 1
+  if (/^primaria-[12]$/.test(gradoId)) return 1
   if (/^primaria-[34]$/.test(gradoId)) return 2
   return 3
 }

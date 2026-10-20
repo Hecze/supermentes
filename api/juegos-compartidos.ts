@@ -65,7 +65,7 @@ export function validar(datos: unknown) {
   const ritmo = entero(o.ritmo, 1, 3)
   if (ritmo === null) return 'Falta el ritmo.'
   const tema = texto(o.tema, 120)
-  const grado = /^(inicial|primaria|secundaria)-\d$/.test(texto(o.grado, 20)) ? texto(o.grado, 20) : undefined
+  const grado = /^(primaria|secundaria)-\d$/.test(texto(o.grado, 20)) ? texto(o.grado, 20) : undefined
   const f = objeto(o.fuente)
 
   if (f.tipo === 'calculo') {

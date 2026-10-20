@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         .filter((n) => n.length >= 2),
     ),
   ].slice(0, 60)
-  if (!/^(inicial|primaria|secundaria)-\d$/.test(grado) || !seccion || !nombres.length) return json({ error: 'Falta la sección o la lista de alumnos.' }, 400)
+  if (!/^(primaria|secundaria)-\d$/.test(grado) || !seccion || !nombres.length) return json({ error: 'Falta la sección o la lista de alumnos.' }, 400)
 
   const salon = randomBytes(9).toString('base64url')
   const insertar = db().prepare('INSERT INTO alumnos (salon, nombre, orden) VALUES (?, ?, ?)')

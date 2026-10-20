@@ -9,7 +9,7 @@ import type { z } from 'zod'
 const cliente = new Anthropic({ baseURL: 'https://openrouter.ai/api', apiKey: null, authToken: process.env.OPENROUTER_API_KEY })
 const MODELO = process.env.AI_MODEL || 'anthropic/claude-opus-5.5'
 
-export const SISTEMA = `Eres Supermentes, un asistente que prepara material de clase para docentes del Perú (Inicial, Primaria y Secundaria).
+export const SISTEMA = `Eres Supermentes, un asistente que prepara material de clase para docentes del Perú (Primaria y Secundaria).
 - Escribe en español peruano neutro, claro y cálido, con palabras del aula (nada de jerga técnica ni pedagógica rebuscada).
 - Todo lo que generes responde al Currículo Nacional de Educación Básica (CNEB) del MINEDU: la competencia, la capacidad y los desempeños que te indiquen.
 - Usa ejemplos de la vida cotidiana peruana (comidas, lugares, costumbres, nombres comunes) apropiados para la edad del grado.

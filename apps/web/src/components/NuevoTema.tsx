@@ -4,12 +4,12 @@ import { useAbrirTema } from '../app/abrirTema'
 import { colegioActivo, colegiosGuardados, elegirColegioActivo, ensenanzaGuardada, ensenanzaValida } from '../app/perfil'
 import { useStore, type Vista } from '../app/store'
 import { buscarEnGrado, buscarEnTodos, esDelCurso, normalizar, sugerenciasPara, type Resultado } from '../curriculo/buscar'
-import { GRADOS_DOCENTE, areaPorId, nombreCursos, nombreGrados } from '../curriculo/catalogo'
+import { GRADOS_CURRICULO, areaPorId, nombreCursos, nombreGrados } from '../curriculo/catalogo'
 import { useGrados } from '../curriculo/cargar'
 import { FiltroCursos, FiltroGrados } from './GradosCursos'
 import { cx } from './ui'
 
-const NOMBRES = Object.fromEntries(GRADOS_DOCENTE.map((g) => [g.id, g.corto]))
+const NOMBRES = Object.fromEntries(GRADOS_CURRICULO.map((g) => [g.id, g.corto]))
 const MAXIMO = 8
 
 /** Con varios grados, los resultados se turnan (el mejor de cada grado primero) para que ninguno quede tapado. */

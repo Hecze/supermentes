@@ -5,17 +5,17 @@ import { useColegios } from '../app/perfil'
 import { useStore } from '../app/store'
 import { coincide, temasPorCurso, type Resultado, type TemasDelCurso } from '../curriculo/buscar'
 import { useGrados } from '../curriculo/cargar'
-import { GRADOS_DOCENTE } from '../curriculo/catalogo'
+import { GRADOS_CURRICULO } from '../curriculo/catalogo'
 import { cx } from './ui'
 
-const NOMBRES = Object.fromEntries(GRADOS_DOCENTE.map((g) => [g.id, g.corto]))
+const NOMBRES = Object.fromEntries(GRADOS_CURRICULO.map((g) => [g.id, g.corto]))
 
 type TemasDelGrado = { gradoId: string; grado: string; cursos: TemasDelCurso[] }
 
 /** Todos los temas de lo que enseña (los grados y cursos de cada colegio de "Mi perfil"): por grado y, dentro, por curso. */
 function useTemasDelPerfil(): TemasDelGrado[] | null {
   const colegios = useColegios()
-  const ids = GRADOS_DOCENTE.filter((g) => colegios.some((c) => c.grados.includes(g.id))).map((g) => g.id)
+  const ids = GRADOS_CURRICULO.filter((g) => colegios.some((c) => c.grados.includes(g.id))).map((g) => g.id)
   const grados = useGrados(ids)
   return useMemo(() => {
     if (!grados) return null

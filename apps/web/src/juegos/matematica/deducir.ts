@@ -41,9 +41,7 @@ export function habilidadesDelTema(ficha: Ficha): Practica[] {
 
 /** Lo típico del grado cuando el tema no dice qué calcular (por ejemplo, geometría): un repaso de operaciones. */
 export function practicaDelGrado(gradoId: string): Practica | null {
-  const candidatas = /^inicial/.test(gradoId)
-    ? ['contar', 'sumar']
-    : /^primaria-[12]$/.test(gradoId)
+  const candidatas = /^primaria-[12]$/.test(gradoId)
       ? ['sumar']
       : /^primaria-[34]$/.test(gradoId)
         ? ['tablas']

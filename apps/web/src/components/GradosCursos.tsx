@@ -3,7 +3,7 @@
 // En un colegio privado aparecen además sus cursos propios (Álgebra, Geometría…), cada uno dentro de su área.
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { GRADOS_DOCENTE, NIVELES_DOCENTE, cursosDe, cursosPrivadosDe, nombreCursos, nombreGrados, type TipoColegio } from '../curriculo/catalogo'
+import { GRADOS_CURRICULO, NIVELES, cursosDe, cursosPrivadosDe, nombreCursos, nombreGrados, type TipoColegio } from '../curriculo/catalogo'
 import { cx } from './ui'
 
 function Opcion({ activo, onClick, children, ancho }: { activo: boolean; onClick: () => void; children: ReactNode; ancho?: boolean }) {
@@ -26,11 +26,11 @@ function Opcion({ activo, onClick, children, ancho }: { activo: boolean; onClick
 
 /** Grados por nivel; "Toda primaria" marca (o desmarca) los seis de una vez. */
 export function ElegirGrados({ valor, onChange }: { valor: string[]; onChange: (grados: string[]) => void }) {
-  const orden = (ids: string[]) => GRADOS_DOCENTE.filter((g) => ids.includes(g.id)).map((g) => g.id)
+  const orden = (ids: string[]) => GRADOS_CURRICULO.filter((g) => ids.includes(g.id)).map((g) => g.id)
   return (
     <div className="flex flex-col gap-4">
-      {NIVELES_DOCENTE.map((n) => {
-        const del = GRADOS_DOCENTE.filter((g) => g.nivel === n.id)
+      {NIVELES.map((n) => {
+        const del = GRADOS_CURRICULO.filter((g) => g.nivel === n.id)
         const todos = del.every((g) => valor.includes(g.id))
         return (
           <div key={n.id} className="flex flex-col gap-2" role="group" aria-label={n.nombre}>

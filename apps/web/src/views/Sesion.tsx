@@ -286,7 +286,7 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
       </section>
 
       <p className="text-xs text-ink-soft">
-        Referencias: Currículo Nacional de la Educación Básica y Programa Curricular de {/secundaria/i.test(s.grado) ? 'Educación Secundaria' : /inicial/i.test(s.grado) ? 'Educación Inicial' : 'Educación Primaria'} (MINEDU).
+        Referencias: Currículo Nacional de la Educación Básica y Programa Curricular de {/secundaria/i.test(s.grado) ? 'Educación Secundaria' : 'Educación Primaria'} (MINEDU).
       </p>
 
       <section className="flex flex-col gap-3 border-t-2 border-dashed border-line pt-5 print:break-before-page print:border-0 print:pt-0" data-salto>

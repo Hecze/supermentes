@@ -31,7 +31,7 @@ flowchart LR
 | Pieza | Qué hace | Hoy | Costo | Falta |
 | --- | --- | --- | --- | --- |
 | Landing `/` | Lista de espera con contador, referidos y fuente | **Real** en producción | Gratis | Promoción (reto de tracción) |
-| Currículo | CNEB de Inicial, Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
+| Currículo | CNEB de Primaria y Secundaria como base | **Real** (`packages/curriculo`) | Gratis | — |
 | Ficha del tema | Resume el tema con sus desempeños | Ejemplo | Gratis | `POST /api/ficha` con Claude: completa ideas clave y vocabulario en segundo plano (el tema y su currículo ya están) |
 | Sesión de aprendizaje | La sesión que el docente entrega al director, en el formato del MINEDU: datos, competencia y capacidades oficiales, criterios con su desempeño citado ("i"), enfoque transversal, materiales, momentos con tiempos (45 o 90 min), ficha de aplicación y escala de valoración para 30. Se arma al instante con el tema y sus desempeños; se ajusta, se corrige con un clic, se imprime o se descarga en Word | **En construcción, no usar** (plantilla instantánea, sin IA; las citas del currículo se verifican, pero el desarrollo, el enfoque y la ficha no salen de una norma del MINEDU) | Gratis | Revisar cada parte contra las fuentes oficiales del MINEDU; sale solo si cumple todas (todo o nada, ver `CLAUDE.md`) |
 | Canción | No se crean canciones en la app (19-oct, `CANCIONES.md`): salen de nuestro canal de YouTube, una por tema para todos. Solo las que están en YouTube, en una sola lista: las de nuestro canal y las de otros (206 de primaria, `apps/web/src/canciones`); el nombre del canal dice de quién es | **Real**: catálogo | Gratis | Crear el canal y la página oculta «Canal»; producir las canciones |

@@ -12,7 +12,6 @@ const CLAVE_REGISTRO = 'supermentes-lista'
 const CLAVE_ORIGEN = 'supermentes-origen'
 
 export const ROLES = [
-  'Docente de inicial',
   'Docente de primaria',
   'Docente de secundaria',
   'Director/a o coordinador/a',

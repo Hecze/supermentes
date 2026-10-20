@@ -49,7 +49,7 @@ export type Muestra = {
   palabras: string[]
 }
 
-/** Velocidad del juego según la edad: 1 lento (inicial y 1.º–2.º), 3 rápido (5.º primaria en adelante). */
+/** Velocidad del juego según la edad: 1 lento (1.º–2.º de primaria), 3 rápido (5.º primaria en adelante). */
 export type Ritmo = 1 | 2 | 3
 
 export type Resultado = {

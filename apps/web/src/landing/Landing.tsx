@@ -177,7 +177,7 @@ export function Landing() {
           <div className="flex min-w-0 flex-col gap-6">
             <p className="inline-flex items-center gap-2 self-start rounded-full border border-line bg-surface px-3 py-1 text-sm">
               <span className="size-2 rounded-full bg-cancion" aria-hidden />
-              Para docentes de inicial, primaria y secundaria del Perú
+              Para docentes de primaria y secundaria del Perú
             </p>
             <h1 className="font-display text-[2.5rem] font-bold leading-[1.04] tracking-tight sm:text-[3.4rem] lg:text-[3.55rem]">
               Crea canciones, juegos y exámenes para tu clase <span className="marker">en minutos</span>.

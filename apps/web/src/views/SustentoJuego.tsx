@@ -41,14 +41,13 @@ export type Sustento = {
   otrosGrados?: string
 }
 
-/** "3.º y 4.º de primaria", "Inicial 5 años y 1.º de primaria". */
+/** "3.º y 4.º de primaria", "6.º de primaria y 1.º de secundaria". */
 export function textoGrados(grados: string[]) {
   const partes: string[] = []
-  for (const nivel of ['inicial', 'primaria', 'secundaria']) {
+  for (const nivel of ['primaria', 'secundaria']) {
     const ns = grados.filter((g) => g.startsWith(nivel)).map((g) => g.split('-')[1])
     if (!ns.length) continue
-    if (nivel === 'inicial') partes.push(`Inicial ${ns.join(' y ')} años`)
-    else partes.push(`${ns.map((n) => `${n}.º`).join(' y ')} de ${nivel}`)
+    partes.push(`${ns.map((n) => `${n}.º`).join(' y ')} de ${nivel}`)
   }
   return partes.join(' y ')
 }

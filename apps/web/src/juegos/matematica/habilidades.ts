@@ -23,7 +23,6 @@ export type Habilidad = {
   niveles: Nivel[]
 }
 
-const I = (...n: number[]) => n.map((x) => `inicial-${x}`)
 const P = (...n: number[]) => n.map((x) => `primaria-${x}`)
 const S = (...n: number[]) => n.map((x) => `secundaria-${x}`)
 
@@ -572,8 +571,7 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Números',
     claves: /\b(contar|conteo|cuantos hay|cuantificar)\b/,
     niveles: [
-      nivel('Hasta 5', de(C.conteo, ...I(4)), contar(1, 5)),
-      nivel('Hasta 10', de(C.conteo, ...I(5), ...P(1)), contar(3, 10)),
+      nivel('Hasta 10', de(C.conteo, ...P(1)), contar(3, 10)),
       nivel('Hasta 20', de(C.conteo, ...P(1)), contar(8, 20)),
     ],
   },
@@ -629,7 +627,6 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(suma\w*|adicion\w*|agregar|juntar)\b/,
     niveles: [
-      nivel('Hasta 5', de(C.sumarRestar, ...I(5)), sumar(1, 4, 5)),
       nivel('Hasta 10', de(C.sumarRestar, ...P(1)), sumar(1, 9, 10)),
       nivel('Hasta 20', de(C.sumarRestar, ...P(1, 2)), sumar(3, 15, 20)),
       nivel('Hasta 100', de(C.sumarRestar, ...P(2, 3)), sumar(11, 85, 99)),
@@ -643,7 +640,6 @@ export const HABILIDADES: Habilidad[] = [
     grupo: 'Operaciones',
     claves: /\b(resta\w*|sustraccion\w*|quitar)\b/,
     niveles: [
-      nivel('Hasta 5', de(C.sumarRestar, ...I(5)), restar(2, 5)),
       nivel('Hasta 10', de(C.sumarRestar, ...P(1)), restar(3, 10)),
       nivel('Hasta 20', de(C.sumarRestar, ...P(1, 2)), restar(11, 20)),
       nivel('Hasta 100', de(C.sumarRestar, ...P(2, 3)), restar(30, 99)),
@@ -814,9 +810,9 @@ export const GRUPOS_HABILIDAD: GrupoHabilidad[] = ['Números', 'Operaciones', 'F
 
 export const habilidadPorId = (id: string) => HABILIDADES.find((h) => h.id === id)
 
-const ORDEN_GRADOS = [...I(3, 4, 5), ...P(1, 2, 3, 4, 5, 6), ...S(1, 2, 3, 4, 5)]
+const ORDEN_GRADOS = [...P(1, 2, 3, 4, 5, 6), ...S(1, 2, 3, 4, 5)]
 
-/** Posición del grado de inicial a secundaria (−1 si no se conoce). */
+/** Posición del grado, de 1.º de primaria a 5.º de secundaria (−1 si no se conoce). */
 export const indiceGrado = (gradoId: string) => ORDEN_GRADOS.indexOf(gradoId)
 
 /** El nivel que se suele trabajar en ese grado: el más avanzado de los que lo incluyen, o el más cercano. */

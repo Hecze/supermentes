@@ -3,7 +3,7 @@
 // (/api/perfil): con cuenta, en docentes; sin cuenta, solo dónde enseña, en docentes_sin_cuenta. El buscador de temas
 // abre con los grados y cursos de su colegio.
 import { useEffect, useState } from 'react'
-import { CURSOS_PRIVADOS, GRADOS_DOCENTE, cursosDe, nivelDe, type TipoColegio } from '../curriculo/catalogo'
+import { CURSOS_PRIVADOS, GRADOS_CURRICULO, cursosDe, nivelDe, type TipoColegio } from '../curriculo/catalogo'
 import { tokenDeCuenta, useCuenta } from './cuenta'
 
 /**
@@ -36,9 +36,9 @@ function cursosValidos(grados: string[], tipo: TipoColegio) {
   ]
 }
 
-/** Solo grados y cursos que existen (sin inicial), en el orden del catálogo. */
+/** Solo grados y cursos que existen, en el orden del catálogo. */
 export function ensenanzaValida(e: Partial<Ensenanza> | null | undefined, tipo: TipoColegio = 'privado'): Ensenanza | null {
-  const grados = GRADOS_DOCENTE.filter((g) => e?.grados?.includes(g.id)).map((g) => g.id)
+  const grados = GRADOS_CURRICULO.filter((g) => e?.grados?.includes(g.id)).map((g) => g.id)
   if (!grados.length) return null
   return { grados, cursos: cursosValidos(grados, tipo).filter((id) => e?.cursos?.includes(id)) }
 }
@@ -138,7 +138,7 @@ function idSinCuenta(): string {
 
 /** Todos sus grados y cursos juntos, para la base (la verdad está en `colegios`). */
 function juntos(colegios: Colegio[]): Ensenanza {
-  const grados = GRADOS_DOCENTE.filter((g) => colegios.some((c) => c.grados.includes(g.id))).map((g) => g.id)
+  const grados = GRADOS_CURRICULO.filter((g) => colegios.some((c) => c.grados.includes(g.id))).map((g) => g.id)
   return { grados, cursos: [...new Set(colegios.flatMap((c) => c.cursos))] }
 }
 

@@ -113,7 +113,8 @@ const MAX_TEMAS = 20
 function temasGuardados(): { temas: Ficha[]; fichaId: string | null } {
   try {
     const g = JSON.parse(localStorage.getItem(CLAVE_TEMAS) ?? 'null') as { temas?: Ficha[]; fichaId?: string | null } | null
-    const temas = Array.isArray(g?.temas) ? g.temas.filter((t) => t?.id && t.titulo) : []
+    // Un tema de inicial (de antes) ya no se abre: no trabajamos ese nivel.
+    const temas = Array.isArray(g?.temas) ? g.temas.filter((t) => t?.id && t.titulo && !t.gradoId?.startsWith('inicial')) : []
     return { temas, fichaId: temas.some((t) => t.id === g?.fichaId) ? (g?.fichaId ?? null) : (temas[0]?.id ?? null) }
   } catch {
     return { temas: [], fichaId: null }

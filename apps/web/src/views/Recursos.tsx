@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useStore } from '../app/store'
 import { EncabezadoSeccion } from '../components/Shell'
 import { Chip, cx } from '../components/ui'
-import { GRADOS_DOCENTE, areasDe } from '../curriculo/catalogo'
+import { GRADOS_CURRICULO, areasDe } from '../curriculo/catalogo'
 import { ORDEN_TIPOS, TIPOS, afinidad, filtrar, useRecursos, type RecursoOficial, type TipoRecurso } from '../recursos/catalogo'
 import { RecursosDelTema } from './RecursosDelTema'
 
@@ -107,7 +107,7 @@ function Catalogo() {
           <span className="text-sm text-ink-soft">Grado</span>
           <select id="recursos-grado" value={gradoId} onChange={(e) => setGradoId(e.target.value)} className={campo}>
             <option value="">Todos los grados</option>
-            {GRADOS_DOCENTE.map((g) => (
+            {GRADOS_CURRICULO.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.corto}
               </option>
