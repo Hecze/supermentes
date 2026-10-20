@@ -51,8 +51,9 @@ try {
   const largo = (t) => [...(t ?? '')].length
   const texto = (v, min, max) => typeof v === 'string' && v === v.trim() && !/[\n\r\t]|\*\*/.test(v) && largo(v) >= min && largo(v) <= max
   const distintos = (xs) => new Set(xs.map(normalizar)).size === xs.length
-  // En las opciones cuenta la tilde y el signo: en ortografía, «¿Dónde…?» y «Dónde…?» son opciones distintas.
-  const opcionesDistintas = (xs) => new Set(xs.map((x) => x.trim().toLowerCase())).size === xs.length
+  // En las opciones cuentan la tilde, el signo y la mayúscula: en ortografía, «¿Dónde…?» y «Dónde…?» (o «lima» y
+  // «Lima») son opciones distintas.
+  const opcionesDistintas = (xs) => new Set(xs.map((x) => x.trim())).size === xs.length
 
   for (const [k, t] of lista.entries()) {
     const quien = `«${t?.tema ?? `n.º ${k + 1}`}»`
