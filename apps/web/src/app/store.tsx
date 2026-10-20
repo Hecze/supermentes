@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-import { MODO_EJEMPLO, type Ficha, type Juego, type Sesion } from '../api'
+import { MODO_EJEMPLO, type Ficha, type Juego } from '../api'
 import { FICHA_EJEMPLO, JUEGO_EJEMPLO, TEMAS_INICIALES } from '../api/ejemplos'
 import type { Clase, ConfigHoja } from '../examenes/tipos'
+import type { Sesion } from '../sesion/tipos'
 import { completarConIA, type EstadoCompletar } from './temaInstantaneo'
 
 export const VISTAS = ['ficha', 'curriculo', 'sesion', 'ejercicios', 'cancion', 'recursos', 'juego', 'crucigrama', 'resultados', 'perfil'] as const
