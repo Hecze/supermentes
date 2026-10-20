@@ -96,7 +96,7 @@ En desarrollo (`npm run dev`), Vite corre las funciones de `api/`. Si el `.env.l
 | Botones rápidos | Hit the Button (Topmarks) | Celular y proyector |
 | Tira y afloja | Tug of War (Arcademic) | Proyector, 2 equipos (táctil o teclas A S D F / H J K L) |
 | Memoria | Matching pairs (Wordwall) | Celular y proyector |
-| Carrera de llamas | Math Racing, sin reloj | Celular y proyector |
+| Carrera de llamas | Math Racing: la rival corre sola | Celular y proyector |
 | Adivina la palabra | Ahorcado, sin horca | Celular y proyector |
 | Pupiletras | Sopa de letras (también se imprime) | Celular y proyector |
 | Atrapa al cuy | Whack-a-mole (Wordwall) | Celular y proyector |

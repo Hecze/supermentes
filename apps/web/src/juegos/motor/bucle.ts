@@ -1,10 +1,15 @@
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 
+/** Lo más que se recupera de una ausencia: alcanza para que venza cualquier pregunta. */
+const MAX_AUSENCIA = 300
+
 /**
- * Llama a `paso(dt, real)` en cada cuadro mientras `activo` sea true. `dt` va en segundos y se limita a 0,1
- * para que nada salte al volver de otra pestaña. `real` es el tiempo de verdad desde el cuadro anterior: el
- * navegador no dibuja con la pestaña oculta, así que un reloj que cuente con `real` descuenta al volver lo que
- * el alumno estuvo fuera (por ejemplo, buscando la respuesta en ChatGPT).
+ * Llama a `paso(dt, real)` en cada cuadro mientras `activo` sea true, con el tiempo de verdad. El navegador no dibuja
+ * con la pestaña oculta, así que al volver se recupera lo que el alumno estuvo fuera (por ejemplo, buscando la
+ * respuesta en ChatGPT): el juego no se pausa, los globos se escaparon y el reloj corrió. Un salto grande se da en
+ * pasos de 0,1 s para que nada atraviese a otro de golpe; por eso lo que `paso` decide una sola vez (perder una
+ * vida, dar la pregunta por vencida) se marca en una ref y no en el estado, que no cambia entre pasos del mismo cuadro.
+ * `dt` y `real` son iguales; `real` queda por los relojes que lo usaban.
  */
 export function useBucle(paso: (dt: number, real: number) => void, activo = true) {
   const ultimo = useRef(paso)
@@ -14,9 +19,13 @@ export function useBucle(paso: (dt: number, real: number) => void, activo = true
     let id = 0
     let antes = performance.now()
     const cuadro = (ahora: number) => {
-      const real = Math.max(0, (ahora - antes) / 1000)
+      let resta = Math.min(MAX_AUSENCIA, Math.max(0, (ahora - antes) / 1000))
       antes = ahora
-      ultimo.current(Math.min(0.1, real), real)
+      while (resta > 1e-6) {
+        const dt = Math.min(0.1, resta)
+        ultimo.current(dt, dt)
+        resta -= dt
+      }
       id = requestAnimationFrame(cuadro)
     }
     id = requestAnimationFrame(cuadro)

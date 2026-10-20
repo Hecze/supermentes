@@ -187,6 +187,40 @@ function Final({
   )
 }
 
+/**
+ * Si el alumno sale del juego (a otra app o pestaña) y vuelve, se le dice que el juego no se detuvo: el reloj siguió
+ * corriendo (motor/bucle). Así entiende por qué perdió la pregunta y no lo vuelve a intentar.
+ */
+function AvisoSalida({ activo }: { activo: boolean }) {
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    if (!activo) return
+    let desde = 0
+    let id = 0
+    const f = () => {
+      if (document.visibilityState === 'hidden') desde = performance.now()
+      else if (desde && performance.now() - desde > 1500) {
+        setVisible(true)
+        window.clearTimeout(id)
+        id = window.setTimeout(() => setVisible(false), 3500)
+      }
+    }
+    document.addEventListener('visibilitychange', f)
+    return () => {
+      document.removeEventListener('visibilitychange', f)
+      window.clearTimeout(id)
+    }
+  }, [activo])
+  if (!visible || !activo) return null
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-[6%] z-50 flex justify-center px-[4cqmin]" role="status">
+      <span className="entrar rounded-full bg-[#2b2d5c]/90 px-[3cqmin] py-[1.2cqmin] text-center font-semibold text-white shadow-xl" style={{ fontSize: 'clamp(15px, 3.6cqmin, 28px)' }}>
+        ⏱️ El juego no se detiene: siguió mientras no estabas.
+      </span>
+    </div>
+  )
+}
+
 function Cargando() {
   return (
     <div className="absolute inset-0 grid place-items-center bg-[#bfe8ff]">
@@ -266,6 +300,8 @@ export function Partida({
           <Juego key={semilla} contenido={contenido} ritmo={ritmo} semilla={semilla} terminar={terminar} />
         </Suspense>
       )}
+      {/* Los juegos de la clase (Ruleta, Tira y afloja) los guía el docente: ahí no corre ningún reloj. */}
+      <AvisoSalida activo={fase === 'jugando' && def.donde.includes('celular')} />
       {fase === 'final' && resultado && (
         <Final resultado={resultado} record={record.valor} nuevoRecord={record.nuevo} otraVez={jugar} alSalir={alSalir} />
       )}

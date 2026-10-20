@@ -1,10 +1,12 @@
-// Globos: suben globos con respuestas y hay que reventar el correcto antes de que se escape.
+// Globos: suben globos con respuestas y hay que reventar el correcto antes de que se escape. Si se escapa, se pierde
+// una vida: el tiempo de cada pregunta es lo que tarda en subir (motor/Reloj), y no se pausa al salir del juego.
 // Inspirado en los "balloon pop" de matemática. Sirve para cualquier reto con respuestas cortas.
 import { useEffect, useId, useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { fuenteDeRetos, largo, opcionesDe } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTemporizadores } from '../motor/bucle'
 import { Enunciado, Flotante, PALETA, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
+import { segundosPorPregunta } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -91,7 +93,9 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
   const siguienteReto = useMemo(() => fuenteDeRetos(contenido, azar), [contenido, azar])
   const meta = ritmo === 1 ? 8 : 10
   const opcionesPorReto = ritmo === 1 ? 3 : 4
-  const velocidadBase = [0, 1 / 9, 1 / 7, 1 / 5.6][ritmo]
+  // Lo que sube un globo desde abajo hasta la pregunta (unas tres cuartas partes de la pantalla), en la mitad del
+  // tiempo de una pregunta: a esa velocidad se alcanza a leer, pero no a ir a buscar la respuesta.
+  const velocidadBase = 0.75 / (segundosPorPregunta(ritmo, contenido) * 0.5)
 
   const escena = useRef<HTMLDivElement>(null)
   const { ancho, alto } = useTamano(escena)
@@ -208,19 +212,43 @@ export default function Globos({ contenido, ritmo, semilla, terminar }: PropsJue
     }
   }
 
+  /** El globo con la respuesta llegó a la pregunta sin que lo revienten: se pierde una vida y sigue otra pregunta. */
+  function seEscapo(g: Globo) {
+    bloqueado.current = true
+    for (const otro of globos.current) if (otro.estado === 'vuela') otro.estado = 'escapa'
+    sonar.error()
+    efecto({ x: g.x * ancho, y: Math.max(g.y * alto, 120), color: '#ff4d4d', texto: '¡Se escapó!' })
+    const quedan = vidas - 1
+    setVidas(quedan)
+    refrescar()
+    if (quedan <= 0) {
+      setTerminado(true)
+      despues(
+        () =>
+          terminar({
+            estrellas: aciertos >= meta / 2 ? 1 : 0,
+            titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
+            detalle: `Reventaste ${aciertos} de ${meta}. La respuesta era ${reto?.respuesta}. ¡Otra vez!`,
+            puntaje: aciertos * 100,
+          }),
+        1000,
+      )
+    } else despues(() => lanzar(siguienteReto(), aciertos), 1100)
+  }
+
   useBucle((dt) => {
     tiempo.current += dt
     if (!ancho || !alto) return
     let salieron = false
-    // Debajo de la pregunta no se puede tocar un globo: llega hasta ahí, se desvanece y vuelve a salir por abajo.
+    // Debajo de la pregunta no se puede tocar un globo: al llegar ahí se escapa.
     const techo = cabecera.current ? (cabecera.current.offsetTop + cabecera.current.offsetHeight) / alto + 0.06 : 0
     for (const g of globos.current) {
       if (g.estado === 'vuela') {
         g.y -= g.vel * dt
-        // Al escaparse por arriba vuelve a salir por abajo: la respuesta siempre está en juego.
         if (g.y < techo) {
-          g.y = 1.2 + azar() * 0.1
-          g.x = Math.min(0.9, Math.max(0.1, g.x + (azar() - 0.5) * 0.1))
+          // Si el que se escapa es el de la respuesta, se pierde la pregunta; los demás solo se van.
+          if (g.correcto && !bloqueado.current) seEscapo(g)
+          g.estado = 'escapa'
         }
       } else if (g.estado === 'escapa') {
         g.y -= g.vel * 3.2 * dt

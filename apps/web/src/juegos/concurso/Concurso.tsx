@@ -7,6 +7,7 @@ import { crearAzar } from '../motor/azar'
 import { useBucle, useTeclas, useTemporizadores } from '../motor/bucle'
 import { Enunciado, TextoMat } from '../motor/piezas'
 import { num } from '../matematica/formato'
+import { segundosPorPregunta } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Respuesta, Reto } from '../tipos'
 
@@ -32,8 +33,9 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
   const azar = useMemo(() => crearAzar(semilla), [semilla])
   const siguienteReto = useMemo(() => fuenteDeRetos(contenido, azar), [contenido, azar])
   const total = tarea || ritmo !== 1 ? 10 : 8
-  // Más tiempo para los chicos y para las preguntas del tema, que hay que leer. La tarea trae el suyo (por grado).
-  const segundos = tarea?.segundos ?? (contenido.generar ? [0, 25, 20, 15][ritmo] : 30)
+  // El reloj de todos los juegos (motor/Reloj): más tiempo para los chicos y para las preguntas del tema. La tarea
+  // trae el suyo (por grado).
+  const segundos = tarea?.segundos ?? segundosPorPregunta(ritmo, contenido)
   const lectura = contenido.generar ? 1.6 : 3
   const despues = useTemporizadores()
 
@@ -44,7 +46,14 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
 
   const [n, setN] = useState(1)
   const [pregunta, setPregunta] = useState<{ reto: Reto; opciones: string[] }>(nueva)
-  const [fase, setFase] = useState<Fase>('lee')
+  const [fase, setFaseEstado] = useState<Fase>('lee')
+  // La fase también en una ref: al volver de otra app el bucle recupera el tiempo de afuera en varios pasos del mismo
+  // cuadro (motor/bucle) y el estado no cambia entre uno y otro; así la pregunta vence una sola vez.
+  const faseRef = useRef<Fase>('lee')
+  const setFase = (f: Fase) => {
+    faseRef.current = f
+    setFaseEstado(f)
+  }
   const [elegida, setElegida] = useState<number | null>(null)
   const [puntos, setPuntos] = useState(0)
   const [ganados, setGanados] = useState(0)
@@ -58,11 +67,12 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
 
   // El reloj cuenta el tiempo real: si sale del juego, al volver ya corrió y, si venció, la pregunta cuenta como fallada.
   useBucle((_dt, real) => {
+    if (faseRef.current === 'resultado') return
     reloj.current += real
-    if (fase === 'lee') {
+    if (faseRef.current === 'lee') {
       if (barra.current) barra.current.style.transform = `scaleX(${Math.max(0, 1 - reloj.current / lectura)})`
       if (reloj.current >= lectura) {
-        reloj.current = 0
+        reloj.current -= lectura
         setFase('responde')
       }
       return
@@ -76,7 +86,7 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
   }, fase !== 'resultado')
 
   function responder(i: number | null) {
-    if (fase !== 'responde') return
+    if (faseRef.current !== 'responde') return
     const bien = i !== null && pregunta.opciones[i] === pregunta.reto.respuesta
     setElegida(i)
     setFase('resultado')
@@ -111,7 +121,7 @@ export default function Concurso({ contenido, ritmo, semilla, tarea, terminar }:
   }
 
   function seguir() {
-    if (fase !== 'resultado') return
+    if (faseRef.current !== 'resultado') return
     if (n >= total) {
       const r = aciertos / total
       terminar({
