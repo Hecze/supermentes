@@ -10,6 +10,7 @@ import { BarraHoja, Boton, Chip, Editable, Hoja, Pregunta, Ventana, cx, descarga
 import { useCurriculo, type AreaCurriculo } from '../curriculo/cargar'
 import type { Nivel } from '../curriculo/catalogo'
 import { ubicarCita } from '../curriculo/citas'
+import { useContextoSesion } from '../sesion/contexto'
 import { ENFOQUES } from '../sesion/enfoques'
 import { NIVELES_ESCALA, REFLEXIONES, opcionesIniciales, sesionPlantilla } from '../sesion/plantilla'
 import { FORMATO_SESION, type Momento, type OpcionesSesion, type Sesion as TipoSesion } from '../sesion/tipos'
@@ -331,24 +332,27 @@ export function Sesion() {
   const gradoId = ficha?.gradoId ?? 'primaria-1'
   const cur = useCurriculo(gradoId.split('-')[0] as Nivel, gradoId, ficha?.areaId ?? 'matematica')
   const area = cur.estado === 'listo' ? cur.area : null
+  const contexto = useContextoSesion(ficha)
 
-  // La sesión se arma sola con el tema y sus desempeños: no hay que esperar a la IA.
+  // La sesión se arma sola con el tema, sus desempeños y lo que ya hay del tema: no usa la IA.
   useEffect(() => {
-    if (!ficha || sesion || cur.estado === 'cargando') return
-    guardar('sesion', sesionPlantilla(ficha, opciones, area))
-  }, [ficha, sesion, cur.estado, area, opciones, guardar])
+    if (!ficha || sesion || cur.estado === 'cargando' || !contexto) return
+    guardar('sesion', sesionPlantilla(ficha, opciones, area, contexto))
+  }, [ficha, sesion, cur.estado, area, contexto, opciones, guardar])
 
   if (!ficha) return <SinTema />
 
-  const actual = sesion ?? sesionPlantilla(ficha, opciones, area)
+  // Mientras se descarga lo del tema (un instante) no se muestra una sesión a medias.
+  const actual = sesion ?? (contexto ? sesionPlantilla(ficha, opciones, area, contexto) : null)
+  if (!actual) return <EncabezadoHerramienta id="sesion" />
 
   function aplicar() {
-    guardar('sesion', sesionPlantilla(ficha!, opciones, area))
+    if (contexto) guardar('sesion', sesionPlantilla(ficha!, opciones, area, contexto))
     setVersion((v) => v + 1)
     setOtra(false)
   }
 
-  async function bajarWord() {
+  const bajarWord = async () => {
     if (!hoja.current) return
     // Un .docx de verdad (lo abren Word, LibreOffice y Google Docs), con el logo del colegio adentro.
     const { hojaADocx } = await import('../lib/docx')

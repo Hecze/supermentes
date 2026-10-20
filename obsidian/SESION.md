@@ -63,6 +63,13 @@ económicos; en Educación Física, motricidad y vida saludable; y toda la secun
 Matemática usa la misma forma en sus cuatro competencias porque las sesiones de ejemplo son de dos de ellas (forma y
 datos) y siguen el mismo enfoque del área.
 
+## Sin IA: lo que cambia según el tema
+
+La sesión no llama a la IA (para no gastar): se arma con el currículo y con lo que ya existe del tema
+(`apps/web/src/sesion/contexto.ts`). Donde hay banco (hoy 4.º de primaria), los saberes previos llevan una pregunta del
+tema; en Matemática, el banco de problemas pone la situación problemática del inicio (un problema de nivel medio), la
+idea que se formaliza y otro problema para trasladar lo aprendido. Sin banco, esos pasos quedan generales.
+
 ## Lo que se quitó (no tenía fuente)
 
 Datos informativos (institución, docente, fecha), «Motivación» y «Conflicto cognitivo» como pasos fijos, cantidades

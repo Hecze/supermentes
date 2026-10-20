@@ -2,6 +2,7 @@
 // publica el MINEDU (unidades 2017). Cada forma lleva las sesiones oficiales que sigue. Si el área o la competencia no
 // tiene ninguna (Inglés, Educación Religiosa, secundaria…), se usa la forma común y la vista avisa «formato impreciso».
 // Qué sesión respalda cada forma: obsidian/SESION.md.
+import type { TemaProblemas } from '../examenes/tipos'
 import type { Bloque } from './tipos'
 
 const SESIONES = 'https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/'
@@ -21,42 +22,54 @@ export type Forma = {
   ejemplos: string[]
 }
 
-type Datos = { tema: string; ejemplo: string }
+type Datos = { tema: string; problemas: TemaProblemas | null }
 
 /** "Fracciones de una cantidad" → "fracciones de una cantidad", para que el tema quepa dentro de una oración. */
 const enOracion = (t: string) => (/^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t)
 
 const FORMAS = {
-  matematica: ({ tema, ejemplo }: Datos): Forma => ({
-    titulo: `Resolvemos problemas de ${enOracion(tema)}`,
-    proposito: `Hoy resolveremos problemas de ${enOracion(tema)}`,
-    evidencia: `Resuelve problemas de ${enOracion(tema)} y explica cómo los resolvió.`,
-    situacion: [
-      ejemplo ? `Plantea la siguiente situación: ${ejemplo}` : 'Plantea una situación problemática de la vida diaria relacionada con el tema.',
-      'Asegúrate de que los estudiantes hayan comprendido y de que se familiaricen con el problema. Para ello, pregúntales: ¿de qué trata el problema?, ¿qué datos tenemos?, ¿qué se pide?',
-    ],
-    desarrollo: [
-      {
-        titulo: 'En grupos pequeños',
-        pasos: [
-          'Promueve la búsqueda y ejecución de estrategias. Para ello, pregúntales: ¿cómo resolveremos el problema?, ¿qué materiales nos pueden ayudar?',
-          'Monitorea el trabajo que realiza cada equipo y, a partir de preguntas y repreguntas, ayúdalos a verificar sus procedimientos.',
-          'Realiza un adecuado tratamiento del error, considerándolo como una oportunidad de aprendizaje.',
-        ],
-      },
-      {
-        titulo: 'En grupo clase',
-        pasos: [
-          'Asegura la socialización de sus representaciones. Para ello, invita a un representante de cada equipo a explicar cómo resolvieron el problema.',
-          'Asegura la formalización y reflexión de los saberes matemáticos y de los procedimientos con la participación de los estudiantes.',
-          'Solicítales que trasladen lo aprendido a otra situación: plantea otros problemas para que los resuelvan.',
-        ],
-      },
-    ],
-    antes: ['Prepara la situación problemática que plantearás y el material concreto que podrán usar para resolverla.'],
-    recursos: ['Material concreto del aula'],
-    ejemplos: de('cuarto-grado/cuarto-grado-u1-s7.pdf', 'cuarto-grado/cuarto-grado-u1-s8.pdf', 'quinto-grado/quinto-grado-u1-s11.pdf', 'quinto-grado/quinto-grado-u1-s12.pdf'),
-  }),
+  matematica: ({ tema, problemas }: Datos): Forma => {
+    // Del banco de problemas del tema (sin IA): uno de nivel medio para empezar, uno más pensado para después y la idea
+    // que se formaliza. Sin banco, los pasos quedan generales.
+    const lista = problemas?.problemas ?? []
+    const situacion = lista.find((p) => p.nivel === 2) ?? lista[0]
+    const otro = lista.find((p) => p.nivel === 3 && p !== situacion) ?? lista.find((p) => p !== situacion)
+    const idea = problemas?.teoria?.idea
+    return {
+      titulo: `Resolvemos problemas de ${enOracion(tema)}`,
+      proposito: `Hoy resolveremos problemas de ${enOracion(tema)}`,
+      evidencia: `Resuelve problemas de ${enOracion(tema)} y explica cómo los resolvió.`,
+      situacion: [
+        situacion ? `Plantea la siguiente situación: «${situacion.enunciado}»` : 'Plantea una situación problemática de la vida diaria relacionada con el tema.',
+        'Asegúrate de que los estudiantes hayan comprendido y de que se familiaricen con el problema. Para ello, pregúntales: ¿de qué trata el problema?, ¿qué datos tenemos?, ¿qué se pide?',
+      ],
+      desarrollo: [
+        {
+          titulo: 'En grupos pequeños',
+          pasos: [
+            'Promueve la búsqueda y ejecución de estrategias. Para ello, pregúntales: ¿cómo resolveremos el problema?, ¿qué materiales nos pueden ayudar?',
+            'Monitorea el trabajo que realiza cada equipo y, a partir de preguntas y repreguntas, ayúdalos a verificar sus procedimientos.',
+            'Realiza un adecuado tratamiento del error, considerándolo como una oportunidad de aprendizaje.',
+          ],
+        },
+        {
+          titulo: 'En grupo clase',
+          pasos: [
+            'Asegura la socialización de sus representaciones. Para ello, invita a un representante de cada equipo a explicar cómo resolvieron el problema.',
+            idea
+              ? `Asegura la formalización y reflexión de los saberes matemáticos y de los procedimientos con la participación de los estudiantes: ${idea}`
+              : 'Asegura la formalización y reflexión de los saberes matemáticos y de los procedimientos con la participación de los estudiantes.',
+            otro
+              ? `Solicítales que trasladen lo aprendido a otra situación. Plantea otros problemas para que los resuelvan, por ejemplo: «${otro.enunciado}»`
+              : 'Solicítales que trasladen lo aprendido a otra situación: plantea otros problemas para que los resuelvan.',
+          ],
+        },
+      ],
+      antes: ['Prepara la situación problemática que plantearás y el material concreto que podrán usar para resolverla.'],
+      recursos: ['Material concreto del aula'],
+      ejemplos: de('cuarto-grado/cuarto-grado-u1-s7.pdf', 'cuarto-grado/cuarto-grado-u1-s8.pdf', 'quinto-grado/quinto-grado-u1-s11.pdf', 'quinto-grado/quinto-grado-u1-s12.pdf'),
+    }
+  },
 
   lee: ({ tema }: Datos): Forma => ({
     titulo: `Leemos un texto sobre ${enOracion(tema)}`,
@@ -324,9 +337,9 @@ const POR_COMPETENCIA: { area: string; competencia?: string; forma: keyof typeof
   { area: 'educacion-fisica', competencia: 'Interactúa', forma: 'juego' },
 ]
 
-export function formaDe(tema: { gradoId: string; areaId: string; competencia: string; titulo: string; ejemplo: string }): Forma {
+export function formaDe(tema: { gradoId: string; areaId: string; competencia: string; titulo: string }, problemas: TemaProblemas | null): Forma {
   const x = tema.gradoId.startsWith('primaria-')
     ? POR_COMPETENCIA.find((p) => p.area === tema.areaId && (!p.competencia || tema.competencia.startsWith(p.competencia)))
     : undefined
-  return FORMAS[x?.forma ?? 'comun']({ tema: tema.titulo, ejemplo: tema.ejemplo })
+  return FORMAS[x?.forma ?? 'comun']({ tema: tema.titulo, problemas })
 }

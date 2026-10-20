@@ -1,7 +1,9 @@
-// La sesión de aprendizaje se arma al instante con el tema y sus desempeños, sin IA, con las partes y el orden de las
-// sesiones de primaria que publica el MINEDU (ver obsidian/SESION.md). El docente la ajusta y corrige con un clic.
+// La sesión de aprendizaje se arma al instante, sin IA, con el tema, sus desempeños y lo que ya hay del tema (banco y
+// problemas), con las partes y el orden de las sesiones que publica el MINEDU (ver obsidian/SESION.md). El docente la
+// ajusta y corrige con un clic.
 import type { Ficha } from '../api'
 import type { AreaCurriculo, Competencia } from '../curriculo/cargar'
+import type { ContextoSesion } from './contexto'
 import { ENFOQUES, ENFOQUE_INICIAL } from './enfoques'
 import { formaDe } from './procesos'
 import { FORMATO_SESION, type OpcionesSesion, type Sesion } from './tipos'
@@ -34,10 +36,12 @@ function competenciaDe(ficha: Ficha, area: AreaCurriculo | null): Competencia | 
   )
 }
 
-export function sesionPlantilla(ficha: Ficha, opciones: OpcionesSesion, area: AreaCurriculo | null): Sesion {
+export function sesionPlantilla(ficha: Ficha, opciones: OpcionesSesion, area: AreaCurriculo | null, contexto: ContextoSesion): Sesion {
   const competencia = competenciaDe(ficha, area)
   const nombreCompetencia = competencia?.nombre ?? ficha.curriculo.competencia
-  const forma = formaDe({ ...ficha, competencia: nombreCompetencia, ejemplo: ficha.ejemplo.trim() })
+  const forma = formaDe({ ...ficha, competencia: nombreCompetencia }, contexto.problemas)
+  // Una pregunta del banco del tema para recoger los saberes previos.
+  const pregunta = contexto.banco?.preguntas[0]?.pregunta
   const [inicio, desarrollo, cierre] = MINUTOS[opciones.duracion]
 
   return {
@@ -68,7 +72,9 @@ export function sesionPlantilla(ficha: Ficha, opciones: OpcionesSesion, area: Ar
           titulo: 'En grupo clase',
           pasos: [
             'Saluda a los estudiantes y recuerda junto con ellos lo trabajado en la sesión anterior.',
-            'Recoge sus saberes previos sobre el tema: pregúntales qué saben y dónde lo han visto, y anota sus ideas en la pizarra.',
+            pregunta
+              ? `Recoge sus saberes previos sobre el tema. Pregúntales, por ejemplo: «${pregunta}», y anota sus ideas en la pizarra.`
+              : 'Recoge sus saberes previos sobre el tema: pregúntales qué saben y dónde lo han visto, y anota sus ideas en la pizarra.',
             ...forma.situacion,
             `Comunica el propósito de la sesión: «${forma.proposito}».`,
             'Explícales en qué te fijarás para saber si lo lograron: los desempeños de la escala de valoración (Anexo 1).',

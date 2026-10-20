@@ -1,7 +1,7 @@
 // La sesión de aprendizaje, con las partes de las sesiones que publica el MINEDU (ver obsidian/SESION.md).
 
 /** Sube cuando cambian las partes: una sesión guardada con otro formato se vuelve a armar. */
-export const FORMATO_SESION = 2
+export const FORMATO_SESION = 3
 
 export type OpcionesSesion = {
   /** Minutos de la clase. */
