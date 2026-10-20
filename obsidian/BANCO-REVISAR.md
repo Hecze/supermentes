@@ -158,3 +158,76 @@ actualizado: 2026-10-20
 - Datos aproximados con «unos» (34 millones, Lima–Cusco ~570 km); tipos de cambio supuestos.
 - Lineal f(x)=mx y afín mx+b, aunque el ejemplo del desempeño 2.1 llama lineal a y = 30x + 700.
 - El desempeño 1.6 dice «radiación» por «radicación» (errata oficial): no se usó para Radicación.
+
+## 3.º grado de secundaria
+
+### Arte y Cultura
+
+- Siku: ira/arca, chuli/malta/toyo (que lo mire alguien de Puno).
+- Temas sensibles: Yuyanapaq (CVR), Yuyachkani, violencia de género; Yawar Fiesta «suele representar».
+- Datos: cuy en «La última cena» (Marcos Zapata), zamacueca → marinera en 1879, Martín Chambi, Tilsa Tsuchiya (Supe), Susana Baca.
+
+### Castellano como segunda lengua
+
+- El desempeño 2.1 (ironía, humor, ambigüedades) sustenta 5 temas; «El debate» cita 1.7 y no 1.16.
+- Datos: intis 1985–1991, Arguedas nació en Andahuaylas, Senamhi como fuente del clima.
+- Estereotipos de ejemplo para reconocerlos; opciones que solo cambian por la tilde a propósito.
+
+### Ciencia y Tecnología
+
+- Nivel por confirmar: tercera ley de Mendel (9:3:3:1), codominancia (AB), E = mc², ΔH en kJ; g = 10 m/s².
+- Datos: IPEN y radioisótopos, amunas de Huarochirí, Q'eswachaka con ichu, sillar (roca ígnea), Misti/Ubinas/Sabancaya, fenolftaleína «rojo grosella».
+- «Gráficas y tendencias» cita solo «Identifica regularidades o tendencias.»; «Electroimán casero» cita la competencia 3.
+
+### Ciencias Sociales
+
+- Temas casi repetidos en la lista oficial (Monarquías absolutas / Absolutismo europeo…): enfoques distintos, confirmar la división.
+- Datos que cambian: UE con 27 países, meta de inflación del BCRP 2 %, billete de S/ 200.
+- Clasificaciones: invasión francesa de 1808 como causa coyuntural; captura de Arriaga como detonante; independencia «concedida» o «conseguida».
+- Datos finos: Hualgayoc, virrey Croix, motín de Balconcillo, «El Sol del Perú», paiche en Pacaya Samiria.
+
+### Competencias transversales
+
+- Nombres de pantalla de Scratch, Word y Tinkercad (pueden variar según versión); APA 7.
+- Dunlosky 2013 (releer), 8–10 h de sueño (AASM), polea ideal; nota 11 aprobatoria en CONTAR.SI.
+
+### Comunicación
+
+- Datos de obras a confirmar con la edición del aula: «Paco Yunque», «Los ríos profundos» (narra Ernesto), «El mundo es ancho y ajeno» (Amenábar), película «La ciudad y los perros» (1985); Arguedas como indigenismo (otros: neoindigenismo).
+- Temas sensibles: racismo y sexismo en la publicidad, burla del dejo regional; jerga peruana como registro informal.
+
+### Desarrollo Personal, Ciudadanía y Cívica
+
+- Datos que cambian: 48 lenguas, Línea 100, SíseVe, Beca 18, CEM, CONEI (Ley 28044, art. 69).
+- Municipio escolar (teniente alcalde, voto secreto) deducido, no comprobado en la norma vigente; señales de tránsito de memoria.
+- Términos avanzados: paraverbal, autoeficacia, aculturación, hábeas corpus/data; temas sensibles desde el autocuidado (grooming, sextorsión).
+- Casos reales («limeños creídos», burla al acento puneño, maltrato animal en fiestas).
+
+### Educación Física
+
+- Reglamentos: relevos (sin medida de la zona, cambió en 2018), FIBA (5 faltas), recepción en W.
+- Datos: Ley 30021, art. 323 del Código Penal, Angélica Espinoza (Tokio 2020), paleta frontón, 8–10 h de sueño.
+- Temas delicados desde la prevención: menstruación, drogas, vapeadores, vigorexia, xenofobia.
+
+### Educación Religiosa
+
+- Datos recientes: León XIV (2025, Chiclayo), Carlo Acutis canonizado en 2025, mártires de Chimbote (1991), Gustavo Gutiérrez.
+- Versículos según la Biblia del salón (Prov 16,3; 1 Pe 3,16; Is 6,8; Sal 119).
+- Respuestas discutibles: encíclicas en latín, persecución romana, cuy de la Última Cena como inculturación.
+
+### Educación para el Trabajo
+
+- Herramientas que el desempeño no nombra (Ishikawa, SCAMPER, Lean Canvas, PMV, PHVA): confirmar que se trabajan.
+- Entrevista grupal «de 6 a 10 personas»; DIGESA y registro sanitario; reclamo vs. queja en el libro de reclamaciones.
+
+### Inglés como lengua extranjera
+
+- Citas cortas que incluyen el texto vecino («comparar estilos de vida; hacer planes»).
+- Opciones marcadas incorrectas por la regla del libro aunque en el habla informal se oyen («Yes, I did.» a «Have you finished…?»).
+- Fechas y fiestas (independencia 1821, Ayacucho 1824, Túpac Amaru II 1780, voto de la mujer 1956, Yungay 1970, Bingham 1911).
+
+### Matemática
+
+- ITF 0,005 % (desde 2011, confirmar vigencia).
+- Contenido que el desempeño no nombra: casos de factorización, relaciones métricas (h² = m · n), ángulos notables, °C a °F, muestreo sistemático y estratificado.
+- Cuadráticas solo ax² + c; varianza dividiendo entre n; «eneágono».
