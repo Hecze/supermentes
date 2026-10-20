@@ -1,10 +1,12 @@
-// Michi: tres en raya contra la computadora. Para marcar una casilla hay que responder bien; si fallas, pierdes
-// el turno. Todos lo conocen, así que no hay que explicar nada. Con los más chicos la computadora se distrae más.
+// Michi: tres en raya contra la computadora. Para marcar una casilla hay que responder bien y a tiempo (motor/Reloj);
+// si fallas o se acaba el tiempo, pierdes el turno. Todos lo conocen, así que no hay que explicar nada. Con los más
+// chicos la computadora se distrae más.
 import { useMemo, useRef, useState, type CSSProperties } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useTeclas, useTemporizadores } from '../motor/bucle'
 import { Enunciado, TextoMat, colorBoton, letraOpciones } from '../motor/piezas'
+import { BarraReloj, segundosPorPregunta, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -64,6 +66,8 @@ export default function Michi({ contenido, ritmo, semilla, terminar }: PropsJueg
   // Se cuenta en una ref: el resultado final se arma en un temporizador y necesita el valor al día.
   const aciertos = useRef(0)
   const [fin, setFin] = useState<{ texto: string; linea?: number[] } | null>(null)
+  // Si se acaba el tiempo de la pregunta, cuenta como fallada: juega la compu.
+  const reloj = useReloj({ segundos: segundosPorPregunta(ritmo, contenido), activo: !!pregunta && !respuesta, vuelta: pregunta, alVencer: () => responder(null) })
 
   function cerrarRonda(t: Marca[], m: typeof marcador) {
     const g = ganador(t)
@@ -119,10 +123,11 @@ export default function Michi({ contenido, ritmo, semilla, terminar }: PropsJueg
     setPregunta({ casilla: i, reto, opciones: opcionesDe(reto, nOpciones, azar) })
   }
 
-  function responder(o: string) {
+  /** `null`: se acabó el tiempo. */
+  function responder(o: string | null) {
     if (!pregunta || respuesta) return
     const bien = o === pregunta.reto.respuesta
-    setRespuesta({ elegida: o, bien })
+    setRespuesta({ elegida: o ?? '', bien })
     if (bien) {
       sonar.acierto()
       aciertos.current++
@@ -195,10 +200,11 @@ export default function Michi({ contenido, ritmo, semilla, terminar }: PropsJueg
       {pregunta && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-[2.4cqmin] bg-[#2a1c6b]/90 p-[4cqmin] backdrop-blur-sm">
           <div className="tarjeta-juego entrar w-full max-w-[min(90cqw,720px)] px-[4cqmin] py-[2.4cqmin]">
-            <p className="mb-[1cqmin] text-center font-semibold text-[#8a8fb8]" style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}>
-              Responde bien y la casilla es tuya
+            <p className={`mb-[1cqmin] text-center font-semibold ${respuesta && !respuesta.elegida ? 'text-[#d6303b]' : 'text-[#8a8fb8]'}`} style={{ fontSize: 'clamp(15px, 3.2cqmin, 24px)' }}>
+              {respuesta && !respuesta.elegida ? '¡Se acabó el tiempo! Juega la compu' : 'Responde bien y a tiempo, y la casilla es tuya'}
             </p>
             <Enunciado reto={pregunta.reto} tam="clamp(22px, 6cqmin, 52px)" />
+            <BarraReloj reloj={reloj} className="mt-[1.6cqmin]" />
           </div>
           <div className={`grid w-full max-w-[min(90cqw,720px)] gap-[2cqmin] ${pregunta.opciones.length === 3 ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {pregunta.opciones.map((o, i) => {

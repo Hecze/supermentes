@@ -15,6 +15,30 @@ Reglas para todo lo que juega el alumno:
 4. **Liviano:** cada juego se descarga solo al abrirlo (2–4 KB comprimidos), sin imágenes ni audio que bajar: dibujos SVG y sonidos sintetizados.
 5. **Sin salidas:** ni publicidad ni links fuera del juego; al terminar, "Otra vez" u "Otro juego" (solo de celular).
 6. **Navegador viejo:** si no soporta lo que usamos (container queries, 2022+), la página del alumno lo dice en lugar de verse rota.
+7. **Con tiempo y sin pausa:** nuestro valor para el docente es que el alumno no puede dejar la pregunta en pausa para ir a preguntarle a ChatGPT. Todo juego que va a la casa tiene un tiempo que tenga sentido en su historia (ver "El tiempo") y ese tiempo corre aunque el alumno salga de la app.
+
+## El tiempo: ningún juego se pausa
+
+- **El reloj es el de verdad.** `useBucle` (`motor/bucle.ts`) avanza con el tiempo real, también el que pasó con la app o la pestaña oculta: al volver, los globos ya se escaparon, la rival siguió corriendo y la pregunta venció. Lo que pasó afuera se recupera en pasos de 0,1 s, así que lo que se decide una sola vez (perder una vida, dar por vencida una pregunta) se marca en una ref. Al volver, la partida le avisa: «El juego no se detiene: siguió mientras no estabas».
+- **Un mismo reloj por pregunta para todos** (`motor/Reloj.tsx`): `segundosPorPregunta` da 30, 25 y 20 s para preguntas del tema y 25, 20 y 15 s para cálculo (1.º–2.º, 3.º–4.º y 5.º en adelante; la tarea del Concurso trae los suyos por grado). Alcanzan para leer y pensar, no para ir a buscar la respuesta. `useReloj` y `BarraReloj` son el reloj y su barra.
+- **El tiempo sale de la historia del juego**, no de una barra pegada encima:
+
+| Juego | Su tiempo |
+| --- | --- |
+| Concurso | Reloj por pregunta y más puntos por rapidez |
+| Botones rápidos | Un minuto para acertar todas las que se pueda |
+| Globos | Lo que tarda en subir el globo: si el de la respuesta se escapa, una vida menos |
+| Atrapa al cuy | Barra por pregunta: si se acaba, «¡Se escaparon!» y una vida menos |
+| Carrera de llamas | La rival corre sola; cada error la adelanta |
+| Vuela, cóndor · Corre, cuy · Invasión | Lo que tarda la puerta, la fila de cajas o el dron en llegar; la pregunta aparece cuando empieza a correr |
+| Duelo de robots | El golpe de la máquina se carga mientras piensas |
+| Michi | Reloj por pregunta: si se acaba, juega la compu |
+| ¿Verdad o mentira? | Reloj por carta: si se acaba, cuenta como error |
+| Une con flechas | Reloj por ronda: si se acaba, las parejas que faltaban se ven en gris |
+| Memoria | Tiempo del tablero, según cuántas parejas hay |
+| Adivina la palabra | Si pasan unos segundos sin elegir una letra, se revienta un globo |
+| Pupiletras | Tiempo de la sopa, según cuántas palabras esconde |
+| Tira y afloja · Ruleta | Son de la clase, en el proyector: los equipos compiten entre sí y la ruleta la guía el docente |
 
 ## Diseño
 
@@ -105,7 +129,7 @@ En desarrollo (`npm run dev`), Vite corre las funciones de `api/`. Si el `.env.l
 | Duelo de robots | Juegos de pelea, sin sangre (contra la máquina o de a dos) | Celular y proyector (5.º–6.º) |
 | Invasión | Arcades de naves (Space Invaders), sin violencia | Celular y proyector (5.º–6.º) |
 | ¿Verdad o mentira? | Verdadero o falso (Wordwall) y las cartas que se deslizan; las mentiras son los errores típicos | Celular y proyector |
-| Une con flechas | Relaciona columnas (cuadernos) y Match up (Wordwall), sin reloj | Celular y proyector |
+| Une con flechas | Relaciona columnas (cuadernos) y Match up (Wordwall), con reloj por ronda | Celular y proyector |
 | Vuela, cóndor | Flappy Bird, amable: el piso y el techo no matan, solo cuenta por qué hueco pasa | Celular (desde 2.º) |
 | Corre, cuy | Subway Surfers: tres carriles, se toca el carril o se desliza | Celular |
 | Michi | Tres en raya contra la compu: para marcar una casilla hay que responder bien | Celular y proyector |

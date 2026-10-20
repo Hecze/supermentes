@@ -1,10 +1,13 @@
 // Adivina la palabra: el ahorcado sin horca. Una llamita flota con globos y cada letra que no está revienta uno.
+// Los globos tampoco aguantan para siempre: si pasan unos segundos sin elegir una letra (motor/Reloj), se revienta
+// uno. Así no da tiempo de ir a buscar la palabra y volver.
 import { useMemo, useState, type CSSProperties } from 'react'
 import { normalizar } from '../../lib/crucigrama'
 import { barajar, crearAzar } from '../motor/azar'
 import { useTeclas, useTemporizadores } from '../motor/bucle'
 import { Llama, LLAMAS } from '../motor/Llama'
 import { PALETA } from '../motor/piezas'
+import { BarraReloj, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego } from '../tipos'
 
@@ -20,12 +23,25 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
   const [usadas, setUsadas] = useState<Set<string>>(new Set())
   const [adivinadas, setAdivinadas] = useState(0)
   const [reventando, setReventando] = useState<number | null>(null)
+  // Globos que se reventaron porque se acabó el tiempo de elegir una letra (cuentan como errores).
+  const [soplos, setSoplos] = useState(0)
 
   const actual = palabras[n]
   const letras = normalizar(actual.palabra)
-  const errores = [...usadas].filter((l) => !letras.includes(l)).length
+  const errores = [...usadas].filter((l) => !letras.includes(l)).length + soplos
   const gano = letras.split('').every((l) => usadas.has(l))
   const perdio = errores >= GLOBOS
+  // Segundos para elegir cada letra; vuelve a empezar con cada letra y con cada globo que se revienta.
+  // Si el alumno sale del juego, al volver se revientan los globos de todo el rato que estuvo fuera.
+  const reloj = useReloj({ segundos: [0, 12, 10, 8][ritmo], activo: !gano && !perdio, vuelta: `${n}-${usadas.size}`, alVencer: desinflar, repetir: true })
+
+  function desinflar() {
+    if (gano || perdio) return
+    sonar.pop()
+    setReventando(errores)
+    despues(() => setReventando(null), 250)
+    setSoplos((x) => Math.min(GLOBOS, x + 1))
+  }
   const ultima = n === palabras.length - 1
 
   function probar(l: string) {
@@ -60,6 +76,7 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
     }
     setN(n + 1)
     setUsadas(new Set())
+    setSoplos(0)
   }
 
   useTeclas((t) => {
@@ -111,6 +128,7 @@ export default function AdivinaPalabra({ contenido, ritmo, semilla, terminar }: 
             <p className="font-semibold leading-snug" style={{ fontSize: 'clamp(20px, 4.8cqmin, 36px)' }}>
               {actual.pista}
             </p>
+            {!gano && !perdio && <BarraReloj reloj={reloj} className="mt-[1.4cqmin]" />}
           </div>
           <div className="flex flex-wrap justify-center gap-[1cqmin]" aria-live="polite">
             {letras.split('').map((l, i) => {
