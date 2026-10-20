@@ -21,7 +21,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     id: 'sesion',
     pedido: 'Mi sesión de aprendizaje',
     nombre: 'Sesión de aprendizaje',
-    descripcion: 'En construcción: todavía no la uses.',
+    descripcion: 'Con las partes de las sesiones que publica el MINEDU.',
     icono: ClipboardList,
     color: 'var(--sesion)',
   },
@@ -76,5 +76,3 @@ export const GRADOS = [
 export const AREAS = ['Matemática', 'Comunicación', 'Ciencia y Tecnología', 'Personal Social', 'Arte y Cultura', 'Inglés']
 
 export const DURACIONES = ['30 min', '45 min', '90 min']
-
-export const INTERESES = ['Fútbol', 'Animales', 'Cocina']

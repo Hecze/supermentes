@@ -1,28 +1,28 @@
-// Sesión de aprendizaje: el documento que el docente presenta al director, en el formato del MINEDU.
-// Se corrige con un clic, se imprime y se descarga en Word (un .doc hecho con el HTML de la hoja, con lo corregido).
-import { BadgeCheck, Construction, Download, Printer, SlidersHorizontal } from 'lucide-react'
+// Sesión de aprendizaje: el documento que el docente presenta, con las partes y el orden de las sesiones de primaria
+// que publica el MINEDU (sesion/plantilla.ts; qué sesión respalda cada parte, en obsidian/SESION.md). Se corrige con un
+// clic, se imprime y se descarga en Word.
+import { BadgeCheck, Download, ExternalLink, Printer, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { type OpcionesSesion, type Sesion as TipoSesion } from '../api'
 import { useDatosDocumento, type DatosDocumento } from '../app/documento'
-import { INTERESES } from '../app/herramientas'
 import { useStore } from '../app/store'
 import { EncabezadoHerramienta, SinTema } from '../components/Shell'
-import { BarraHoja, Boton, Chip, Desplegable, Editable, Hoja, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
-import { sesionPlantilla } from '../sesion/plantilla'
+import { BarraHoja, Boton, Chip, Editable, Hoja, Pregunta, Ventana, cx, descargar, imprimir, tinte } from '../components/ui'
 import { useCurriculo, type AreaCurriculo } from '../curriculo/cargar'
 import type { Nivel } from '../curriculo/catalogo'
 import { ubicarCita } from '../curriculo/citas'
+import { ENFOQUES } from '../sesion/enfoques'
+import { NIVELES_ESCALA, REFLEXIONES, opcionesIniciales, sesionPlantilla } from '../sesion/plantilla'
+import { FORMATO_SESION, type Momento, type OpcionesSesion, type Sesion as TipoSesion } from '../sesion/tipos'
 import { BotonInfo, Cita } from './SustentoJuego'
 
 const COLOR = 'var(--sesion)'
 const ALUMNOS = 30
-const NIVELES_LOGRO = ['Siempre', 'A veces', 'No lo hace']
 
 // ---------- Opciones ----------
 
 function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambiar: (o: OpcionesSesion) => void }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <Pregunta titulo="¿Cuánto dura tu clase?">
         <div className="flex flex-wrap gap-2">
           {([45, 90] as const).map((d) => (
@@ -32,26 +32,16 @@ function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambi
           ))}
         </div>
       </Pregunta>
-      <Desplegable titulo="Más opciones">
-        <div className="flex flex-col gap-2">
-          <p className="font-medium">¿Qué le gusta a tu salón?</p>
-          <p className="-mt-1 text-sm text-ink-soft">Lo usamos para que la motivación les llame la atención. Puedes dejarlo vacío.</p>
-          <div className="flex flex-wrap items-center gap-2">
-            {INTERESES.map((i) => (
-              <Chip key={i} activo={opciones.interes === i} color={COLOR} onClick={() => cambiar({ ...opciones, interes: opciones.interes === i ? undefined : i })}>
-                {i}
-              </Chip>
-            ))}
-            <input
-              value={INTERESES.includes(opciones.interes ?? '') ? '' : (opciones.interes ?? '')}
-              onChange={(e) => cambiar({ ...opciones, interes: e.target.value || undefined })}
-              placeholder="Otro: dinosaurios, música…"
-              maxLength={60}
-              className="h-9 min-w-0 flex-1 rounded-full border-2 border-line bg-surface px-3.5 text-sm outline-none focus:border-ink sm:max-w-64"
-            />
-          </div>
+      <Pregunta titulo="Enfoque transversal">
+        <p className="-mt-2 text-sm text-ink-soft">Elige el de tu unidad. La actitud que se observa sale tal cual del Currículo Nacional.</p>
+        <div className="flex flex-wrap gap-2">
+          {ENFOQUES.map((e, i) => (
+            <Chip key={e.nombre} activo={opciones.enfoque === i} color={COLOR} onClick={() => cambiar({ ...opciones, enfoque: i })}>
+              {e.nombre.replace(/^Enfoque /, '')}
+            </Chip>
+          ))}
         </div>
-      </Desplegable>
+      </Pregunta>
     </div>
   )
 }
@@ -82,30 +72,39 @@ function Lista({ items }: { items: string[] }) {
   )
 }
 
-function Parte({ titulo, items }: { titulo: string; items: string[] }) {
+/** Inicio, desarrollo o cierre, con su tiempo aproximado y sus pasos por agrupamiento. */
+function Momentos({ nombre, m }: { nombre: string; m: Momento }) {
   return (
-    <div className="flex flex-col gap-1">
-      <h4 className="font-bold uppercase underline underline-offset-2">{titulo}</h4>
-      <Lista items={items} />
+    <div className="flex flex-col gap-2 border-t border-line pt-3 first:border-t-0 first:pt-0">
+      <h4 className="flex flex-wrap items-baseline justify-between gap-x-4 font-bold">
+        {nombre}
+        <span className="font-normal">Tiempo aproximado: {m.minutos} min</span>
+      </h4>
+      {m.bloques.map((b, i) => (
+        <div key={i} className="flex flex-col gap-1">
+          <p className="font-semibold italic">{b.titulo}</p>
+          <Lista items={b.pasos} />
+        </div>
+      ))}
     </div>
   )
 }
 
-/** El "i" de cada criterio: el desempeño oficial con la parte que trabaja, resaltada. */
-function InfoCriterio({ area, cita }: { area: AreaCurriculo | null; cita?: string }) {
+/** El "i" de cada desempeño: el texto oficial y de qué competencia es. */
+function InfoDesempeno({ area, desempeno }: { area: AreaCurriculo | null; desempeno: string }) {
   const { verCurriculo, ficha } = useStore()
-  const u = area && cita ? ubicarCita(area, cita) : null
+  const u = area ? ubicarCita(area, desempeno) : null
   if (!u || !ficha) return null
   return (
     <BotonInfo etiqueta="Desempeño" chip className="relative mt-1 print:hidden">
       <div className="flex flex-col gap-2 text-sm leading-snug">
         <p className="text-base font-semibold">Por qué cumple el Currículo Nacional</p>
         <p>
-          Este criterio trabaja la competencia <strong>«{u.competencia}»</strong>, con este desempeño oficial de {ficha.grado}:
+          Es un desempeño oficial de {ficha.grado} de la competencia <strong>«{u.competencia}»</strong>:
         </p>
-        <Cita u={u} cita={cita} />
+        <Cita u={u} cita={desempeno} />
         <p className="flex items-start gap-1.5 font-medium text-ok">
-          <BadgeCheck className="mt-px size-4 shrink-0" aria-hidden /> Lo resaltado está copiado tal cual del currículo.
+          <BadgeCheck className="mt-px size-4 shrink-0" aria-hidden /> Está copiado tal cual del currículo.
         </p>
         <button type="button" onClick={() => verCurriculo(ficha.gradoId, ficha.areaId)} className="self-start text-xs text-ink-soft underline underline-offset-2 hover:text-ink">
           Ver en el currículo
@@ -116,12 +115,11 @@ function InfoCriterio({ area, cita }: { area: AreaCurriculo | null; cita?: strin
 }
 
 function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | null; doc: DatosDocumento }) {
-  const m = s.minutos
   return (
     <div className="flex flex-col gap-5 text-[15px] leading-relaxed">
-      {/* El logo en la columna izquierda (ocupa todas las filas) y el colegio y el título a su derecha. Es una tabla
-          sin bordes para que el .docx (lib/docx.ts) la arme igual. */}
-      <header>
+      {/* El logo en la columna izquierda y el colegio a su derecha. Es una tabla sin bordes para que el .docx
+          (lib/docx.ts) la arme igual. */}
+      <header className="flex flex-col gap-3">
         <table data-sin-bordes className="w-full border-collapse">
           <tbody>
             <tr>
@@ -131,109 +129,79 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
                 </td>
               )}
               <td className="text-center align-middle">
-                <div className="flex flex-col items-center gap-1">
-                  {doc.institucion && <p className="font-semibold">{doc.institucion}</p>}
-                  <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
-                  <Editable como="h2" className="font-display text-2xl font-bold sm:text-3xl">
-                    {s.titulo}
-                  </Editable>
-                  <p className="text-ink-soft">
-                    {s.grado} · {s.area} · {s.opciones.duracion} minutos
-                  </p>
-                </div>
+                {doc.institucion && <p className="font-semibold">{doc.institucion}</p>}
+                <p className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Sesión de aprendizaje</p>
               </td>
               {doc.logo && <td className="w-24" aria-hidden />}
             </tr>
           </tbody>
         </table>
+        <table data-sin-bordes className="w-full border-collapse">
+          <tbody>
+            <tr>
+              <td className="align-top">Grado: {s.grado}</td>
+              <td className="text-right align-top">
+                <Editable como="span">Unidad didáctica ___ - sesión ___</Editable>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <h2 className="text-center font-display text-2xl font-bold sm:text-3xl">
+          Título: <Editable como="span">{s.titulo}</Editable>
+        </h2>
       </header>
 
       <section className="flex flex-col gap-2">
-        <Titulo>I. Datos informativos</Titulo>
-        <table className="w-full border-collapse">
-          <tbody>
-            {[
-              ['Institución educativa', doc.institucion],
-              ['Docente', doc.docente],
-              ['Fecha', ''],
-              ['Grado', s.grado],
-              ['Área', s.area],
-              ['Duración', `${s.opciones.duracion} minutos`],
-            ].map(([k, v]) => (
-              <tr key={k}>
-                <th className={th} style={{ width: '30%' }}>
-                  {k}
-                </th>
-                <td className={td}>
-                  <Editable como="span" className="block min-h-6">
-                    {v}
-                  </Editable>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <Titulo>II. Propósitos de aprendizaje</Titulo>
+        <Titulo>1. Propósitos y evidencias de aprendizaje</Titulo>
         {/* Sin scroll horizontal: recortaría la ventanita del desempeño. En el celular las palabras se cortan con
             guion para que la tabla quepa y la página no se deslice de lado. */}
-        <div>
-          <table className="w-full border-collapse text-sm max-sm:hyphens-auto max-sm:[&_*]:[overflow-wrap:anywhere]">
-            <thead>
-              <tr>
-                <th className={th}>Competencia</th>
-                <th className={th}>Capacidades</th>
-                <th className={th}>Criterios de evaluación</th>
-                <th className={th}>Evidencia de aprendizaje</th>
-                <th className={th}>Instrumento de evaluación</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className={cx(td, 'w-[16%]')}>{s.competencia}</td>
-                <td className={cx(td, 'w-[24%]')}>
-                  <ul className="flex list-disc flex-col gap-1 pl-4">
-                    {s.capacidades.map((c) => (
-                      <li key={c}>{c}</li>
-                    ))}
-                  </ul>
-                </td>
-                <td className={cx(td, 'w-[30%]')}>
-                  <ul className="flex list-disc flex-col gap-2 pl-4">
-                    {s.criterios.map((c, i) => (
-                      <li key={i}>
-                        <Editable como="span">{c.texto}</Editable>
-                        <div>
-                          <InfoCriterio area={area} cita={c.cita} />
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td className={td}>
-                  <Editable como="span">{s.evidencia}</Editable>
-                </td>
-                <td className={td}>
-                  <Editable como="span">{s.instrumento}</Editable>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full border-collapse text-sm max-sm:hyphens-auto max-sm:[&_*]:[overflow-wrap:anywhere]">
           <thead>
             <tr>
-              <th className={th}>Enfoque transversal</th>
-              <th className={th}>Valor</th>
-              <th className={th}>Actitudes observables</th>
+              <th className={th}>Competencias/capacidades</th>
+              <th className={th}>Desempeños</th>
+              <th className={th}>¿Qué nos dará evidencias de aprendizaje?</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className={cx(td, 'w-[30%]')}>{s.enfoque.nombre}</td>
-              <td className={cx(td, 'w-[20%]')}>{s.enfoque.valor}</td>
+              <td className={cx(td, 'w-[28%]')}>
+                <p className="font-semibold">{s.competencia}</p>
+                <ul className="mt-1 flex list-disc flex-col gap-1 pl-4">
+                  {s.capacidades.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ul>
+              </td>
+              <td className={cx(td, 'w-[44%]')}>
+                <ul className="flex list-disc flex-col gap-2 pl-4">
+                  {s.desempenos.map((d) => (
+                    <li key={d}>
+                      {d}
+                      <div>
+                        <InfoDesempeno area={area} desempeno={d} />
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </td>
+              <td className={td}>
+                <Editable>{s.evidencia}</Editable>
+                <p className="mt-2 font-semibold">{s.instrumento}</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th className={th}>Enfoques transversales</th>
+              <th className={th}>Actitudes o acciones observables</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className={cx(td, 'w-[28%]')}>{s.enfoque.nombre}</td>
               <td className={td}>
                 <Editable como="span">{s.enfoque.actitudes}</Editable>
               </td>
@@ -243,21 +211,21 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
       </section>
 
       <section className="flex flex-col gap-2">
-        <Titulo>III. Materiales y recursos</Titulo>
+        <Titulo>2. Preparación de la sesión</Titulo>
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
-              <th className={th}>¿Qué hacer antes de la sesión?</th>
-              <th className={th}>¿Qué recursos o materiales se usarán?</th>
+              <th className={th}>¿Qué necesitamos hacer antes de la sesión?</th>
+              <th className={th}>¿Qué recursos o materiales se utilizarán en esta sesión?</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className={cx(td, 'w-1/2')}>
-                <Lista items={s.materiales.antes} />
+                <Lista items={s.preparacion.antes} />
               </td>
               <td className={td}>
-                <Lista items={s.materiales.recursos} />
+                <Lista items={s.preparacion.recursos} />
               </td>
             </tr>
           </tbody>
@@ -265,75 +233,36 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
       </section>
 
       <section className="flex flex-col gap-3">
-        <Titulo>IV. Momentos de la sesión</Titulo>
-        <h3 className="font-bold">INICIO ({m.inicio} min)</h3>
-        <Parte titulo="Motivación" items={s.inicio.motivacion} />
-        <Parte titulo="Saberes previos" items={s.inicio.saberesPrevios} />
-        <Parte titulo="Conflicto cognitivo" items={s.inicio.conflicto} />
-        <Parte titulo="Propósito de la sesión" items={[s.proposito]} />
-        <Parte titulo="Criterios de evaluación" items={s.criterios.map((c) => c.texto)} />
-        <Parte titulo="Normas de convivencia" items={s.inicio.normas} />
-
-        <h3 className="border-t border-line pt-3 font-bold">DESARROLLO ({m.desarrollo} min)</h3>
-        {s.desarrollo.map((d, i) => (
-          <Parte key={i} titulo={d.titulo} items={d.pasos} />
-        ))}
-
-        <h3 className="border-t border-line pt-3 font-bold">CIERRE ({m.cierre} min)</h3>
-        <Parte titulo="Sistematización" items={s.cierre.sistematizacion} />
-        <Parte titulo="Metacognición" items={s.cierre.metacognicion} />
-        <Parte titulo="Tarea" items={s.cierre.tarea} />
+        <Titulo>3. Momentos de la sesión</Titulo>
+        <Momentos nombre="Inicio" m={s.inicio} />
+        <Momentos nombre="Desarrollo" m={s.desarrollo} />
+        <Momentos nombre="Cierre" m={s.cierre} />
       </section>
 
-      <p className="text-xs text-ink-soft">
-        Referencias: Currículo Nacional de la Educación Básica y Programa Curricular de {/secundaria/i.test(s.grado) ? 'Educación Secundaria' : 'Educación Primaria'} (MINEDU).
-      </p>
-
-      <section className="flex flex-col gap-3 border-t-2 border-dashed border-line pt-5 print:break-before-page print:border-0 print:pt-0" data-salto>
-        <Titulo>Ficha de aplicación</Titulo>
-        <Editable como="h3" className="text-center text-lg font-bold">
-          {s.ficha.titulo}
-        </Editable>
-        <p className="[overflow-wrap:anywhere]">Nombre: ________________________________________ Fecha: ______________</p>
-        <ol className="flex list-decimal flex-col gap-4 pl-5">
-          {s.ficha.actividades.map((a, i) => (
-            <li key={i}>
-              <Editable como="span">{a.consigna}</Editable>
-              {Array.from({ length: a.lineas }, (_, j) => (
-                <p key={j} className="mt-3 border-b border-ink-soft/60" aria-hidden>
-                  &nbsp;
-                </p>
-              ))}
-            </li>
-          ))}
-        </ol>
+      <section className="flex flex-col gap-2">
+        <Titulo>4. Reflexiones sobre el aprendizaje</Titulo>
+        <Lista items={REFLEXIONES} />
       </section>
 
       <section className="flex flex-col gap-2 border-t-2 border-dashed border-line pt-5 print:break-before-page print:border-0 print:pt-0" data-salto>
-        <Titulo>Escala de valoración</Titulo>
-        <p className="text-sm">
-          <strong>Competencia:</strong> {s.competencia}
-        </p>
+        <Titulo>Anexo 1</Titulo>
+        <p className="font-semibold">Escala de valoración para la competencia «{s.competencia}»</p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-xs">
             <thead>
               <tr>
-                <th className={cx(th, 'w-8 text-center')} rowSpan={2}>
-                  N.º
-                </th>
-                <th className={cx(th, 'w-48')} rowSpan={2}>
-                  Nombres y apellidos
-                </th>
-                {s.criterios.map((c, i) => (
-                  <th key={i} className={cx(th, 'font-normal')} colSpan={NIVELES_LOGRO.length}>
-                    {c.texto}
+                <th className={cx(th, 'w-48')}>Desempeños del grado</th>
+                {s.desempenos.map((d) => (
+                  <th key={d} className={cx(th, 'font-normal')} colSpan={NIVELES_ESCALA.length}>
+                    {d}
                   </th>
                 ))}
               </tr>
               <tr>
-                {s.criterios.flatMap((_, i) =>
-                  NIVELES_LOGRO.map((n) => (
-                    <th key={`${i}-${n}`} className={cx(th, 'w-12 text-center text-[11px]')}>
+                <th className={th}>Nombres y apellidos</th>
+                {s.desempenos.flatMap((d) =>
+                  NIVELES_ESCALA.map((n) => (
+                    <th key={`${d}-${n}`} className={cx(th, 'w-14 text-center text-[11px]')}>
                       {n}
                     </th>
                   )),
@@ -343,21 +272,17 @@ function HojaSesion({ s, area, doc }: { s: TipoSesion; area: AreaCurriculo | nul
             <tbody>
               {Array.from({ length: ALUMNOS }, (_, i) => (
                 <tr key={i}>
-                  <td className={cx(td, 'py-1 text-center')}>{i + 1}</td>
-                  <td className={cx(td, 'py-1')} />
-                  {s.criterios.flatMap((_, j) => NIVELES_LOGRO.map((n) => <td key={`${j}-${n}`} className={cx(td, 'py-1')} />))}
+                  <td className={cx(td, 'py-1')}>{i + 1}.</td>
+                  {s.desempenos.flatMap((d) => NIVELES_ESCALA.map((n) => <td key={`${d}-${n}`} className={cx(td, 'py-1')} />))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
-
     </div>
   )
 }
-
-// ---------- Word ----------
 
 /** Nombre del .docx de la hoja tal como se ve (con lo que el docente corrigió; ver lib/docx.ts). */
 const archivo = (titulo: string) =>
@@ -369,13 +294,37 @@ const archivo = (titulo: string) =>
     .replace(/^-|-$/g, '')
     .slice(0, 50)}.docx`
 
+/** Sobre la hoja: qué sesiones del MINEDU sigue o, si no hay una para esta área y competencia, que el formato es impreciso. */
+function Fuente({ ejemplos }: { ejemplos: string[] }) {
+  if (!ejemplos.length) {
+    return (
+      <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
+        <TriangleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
+        <span>
+          <strong>Formato impreciso:</strong> para este curso y competencia no encontramos una sesión de ejemplo del MINEDU,
+          así que el desarrollo es general. Revísalo antes de presentarla.
+        </span>
+      </p>
+    )
+  }
+  return (
+    <p className="-mt-3 text-sm text-ink-soft print:hidden">
+      Ya está armada con tu tema, con las partes de las sesiones que publica el MINEDU. Corrige cualquier texto con un clic.{' '}
+      <a href={ejemplos[0]} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-ink underline underline-offset-4">
+        Ver una sesión del MINEDU <ExternalLink className="size-3.5" aria-hidden />
+      </a>
+    </p>
+  )
+}
+
 // ---------- La vista ----------
 
 export function Sesion() {
   const { ficha, resultados, guardar, avisar } = useStore()
   const doc = useDatosDocumento(ficha)
-  const sesion = resultados.sesion
-  const [opciones, setOpciones] = useState<OpcionesSesion>(sesion?.opciones ?? { duracion: ficha?.duracion?.startsWith('90') ? 90 : 45 })
+  // Una sesión guardada con las partes de antes se vuelve a armar.
+  const sesion = resultados.sesion?.formato === FORMATO_SESION ? resultados.sesion : undefined
+  const [opciones, setOpciones] = useState<OpcionesSesion>(() => sesion?.opciones ?? opcionesIniciales(ficha))
   const [otra, setOtra] = useState(false)
   const [version, setVersion] = useState(0)
   const hoja = useRef<HTMLDivElement>(null)
@@ -410,16 +359,6 @@ export function Sesion() {
     <>
       <EncabezadoHerramienta id="sesion" />
 
-      {/* Hasta que cada parte cumpla la norma del MINEDU con su fuente (CLAUDE.md, «La sesión de aprendizaje: todo o
-          nada»), la vista queda solo para revisarla y se avisa arriba. */}
-      <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
-        <Construction className="mt-0.5 size-5 shrink-0" aria-hidden />
-        <span>
-          <strong>En construcción:</strong> no uses esta sesión en tu clase ni la presentes. Su contenido todavía no
-          cumple todas las normas del MINEDU.
-        </span>
-      </p>
-
       <BarraHoja>
         <Boton variante="herramienta" herramienta="sesion" onClick={bajarWord}>
           <Download className="size-5" aria-hidden /> Descargar en Word
@@ -431,12 +370,10 @@ export function Sesion() {
           <SlidersHorizontal className="size-5" aria-hidden /> Ajustar
         </Boton>
       </BarraHoja>
-      <p className="-mt-3 text-sm text-ink-soft print:hidden">
-        Ya está armada con tu tema. Corrige cualquier texto con un clic; si cambias la duración, se rearma al instante.
-      </p>
+      <Fuente ejemplos={actual.ejemplos} />
 
       <Hoja>
-        <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.interes ?? ''}-${version}`}>
+        <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.enfoque}-${version}`}>
           <HojaSesion s={actual} area={area} doc={doc} />
         </div>
       </Hoja>

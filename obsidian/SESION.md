@@ -1,75 +1,79 @@
 ---
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 
-# La sesión de aprendizaje contra la norma del MINEDU
+# La sesión de aprendizaje y la norma del MINEDU
 
-> Regla: todo o nada (ver `CLAUDE.md`). Cada parte de la sesión necesita su fuente oficial del MINEDU; si una parte no
-> la tiene, la sesión no se ofrece. Esta nota es la revisión parte por parte de la sesión de hoy
-> (`apps/web/src/views/Sesion.tsx` y `apps/web/src/sesion/plantilla.ts`), hecha el 19-oct con documentos oficiales.
-
-## Fuentes revisadas
-
-- **CNEB:** Currículo Nacional de la Educación Básica, https://www.minedu.gob.pe/curriculo/pdf/curriculo-nacional-de-la-educacion-basica.pdf
-- **PCEP:** Programa Curricular de Educación Primaria, https://www.minedu.gob.pe/curriculo/pdf/programa-curricular-educacion-primaria.pdf
-- **RVM 094-2020-MINEDU** (norma de evaluación), https://cdn.www.gob.pe/uploads/document/file/662983/RVM_N__094-2020-MINEDU.pdf. La RVM 048-2024-MINEDU la modifica en promoción y registro, no en lo que se cita aquí.
-- **Cartilla de planificación curricular** (Dirección de Educación Primaria, 2017; dice «Documento de trabajo en proceso de validación»), https://www.minedu.gob.pe/curriculo/pdf/cartilla-planificacion-curricular.pdf
-- **Sesiones de 4.º del MINEDU (2017)**, https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/cuarto-grado/ (son ejemplos: «para que éstas sean usadas como están o sean adaptadas»).
-- **Rúbricas de observación de aula 2025** (instructivo), https://evaluaciondocente.perueduca.pe/media/11748537639Instructivo-para-la-aplicaci%C3%B3n.pdf
-- **RM 501-2025-MINEDU** (año escolar 2026), https://www.gob.pe/institucion/minedu/normas-legales/7380466-501-2025-minedu: no regula la sesión. Se leyó por OCR; falta compararla con el PDF oficial.
+> Para qué es: el docente hace la sesión porque el Estado se la exige y solo quiere cumplir (no le pagan esas horas;
+> muchos la sacan de ChatGPT con un formato que no cuadra). Le damos una que pueda presentar tal cual; quien quiera la
+> baja en Word y la edita. Regla en `CLAUDE.md`. El código: `apps/web/src/sesion/` y `apps/web/src/views/Sesion.tsx`.
 
 ## Lo que dice la norma
 
-- **No hay un formato obligatorio.** PCEP: «Sin importar los esquemas o estructuras que la planificación tenga, es
-  importante concebir una lógica al planificar»; la planificación «No debe ser rígida»; las orientaciones «no se deben
-  plantear de forma lineal o como listados estáticos».
-- **Elementos básicos** (Cartilla 2017): título («a partir de la actividad principal o el producto»); propósitos
-  (competencias, desempeños y enfoques transversales «tomados de la unidad didáctica»); preparación («¿Qué necesitamos
-  hacer antes de la sesión? y ¿qué recursos o materiales se utilizarán…? ¿Cuánto tiempo se requerirá?»); momentos
-  («Inicio - desarrollo - cierre»). Además: compartir con los estudiantes los criterios, momentos para retroalimentar y
-  atención diferenciada.
-- **Criterios de evaluación** (RVM 094-2020, 5.1.1.1): «se elaboran a partir de los estándares y sus desempeños que
-  deben incluir a todas las capacidades de la competencia y se deben ajustar a la situación o problema a enfrentar».
-  Evidencias: «Producciones y/o actuaciones realizadas por los estudiantes». La retroalimentación «no se restringe a
-  momentos específicos».
-- **El evaluador observa la clase, no el documento** (rúbricas 2025). Penaliza, entre otras cosas, que el docente
-  «únicamente plantea actividades asociativas o memorísticas… practiquen ejercicios (como problemas–tipo o aplicación
-  de algoritmos)… o repitan información ya brindada».
-- **Procesos didácticos por área:** el CNEB y el PCEP vigentes no los nombran. Las sesiones oficiales de 4.º sí los
-  aplican en Matemática (familiarización, búsqueda y ejecución de estrategias, socialización, formalización y
-  reflexión) y en Comunicación-lectura (antes, durante y después de la lectura); Ciencia y Tecnología, en parte. Las
-  listas completas por área solo aparecen en materiales de UGEL, no del MINEDU. Para Arte y Cultura, Educación Física,
-  Inglés y Educación Religiosa no hay nada oficial.
+- **No hay un formato obligatorio.** Programa Curricular de Primaria: «Sin importar los esquemas o estructuras que la
+  planificación tenga, es importante concebir una lógica al planificar»; la planificación «No debe ser rígida». Por
+  eso **seguimos a las sesiones que publica el MINEDU**: sus partes, su orden y cómo nombran cada paso.
+- **Elementos básicos** (cartilla de planificación 2017): título, propósitos (competencias, desempeños y enfoques
+  transversales), preparación («¿Qué necesitamos hacer antes de la sesión? y ¿qué recursos o materiales se
+  utilizarán…?») y momentos («Inicio - desarrollo - cierre»).
+- **Criterios de evaluación** (RVM 094-2020, 5.1.1.1): «se elaboran a partir de los estándares y sus desempeños […] y
+  se deben ajustar a la situación o problema a enfrentar». Las sesiones de ejemplo ponen los desempeños y los evalúan
+  con el instrumento del anexo; así lo hacemos.
+- **El evaluador observa la clase, no el documento** (rúbricas de observación 2025) y penaliza que el docente solo
+  explique y haga practicar ejercicios tipo.
 
-## Parte por parte
+## Cómo se arma hoy y de dónde sale cada parte
 
-| Parte de la sesión de hoy | ¿Fuente oficial? |
+Las sesiones de ejemplo son las de primaria del MINEDU (unidades 2017),
+https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/ (por ejemplo `cuarto-grado/cuarto-grado-u1-s7.pdf`).
+
+| Parte | Fuente |
 |---|---|
-| Datos informativos (institución, docente, fecha) | No. Las sesiones oficiales ponen grado, unidad, sesión y título. |
-| Título «Aprendemos «tema»» | El título sí se pide, pero a partir de la actividad o el producto; el nuestro es genérico. |
-| Competencia y capacidades | Sí (Cartilla 2017, sesiones oficiales). |
-| Criterios = desempeños copiados tal cual | **No cumple** la RVM 094: los criterios se elaboran desde los desempeños, cubren todas las capacidades y se ajustan a la situación. |
-| Evidencia | Sí (RVM 094), pero la nuestra es genérica («Ficha de aplicación resuelta…»). |
-| Instrumento «Escala de valoración» | Sí (PCEP: «listas de cotejo, escalas de valoración, rúbricas»). |
-| Niveles «Siempre / A veces / No lo hace» | No. En los ejemplos oficiales: «Nunca / A veces / Siempre» o «Lo hace / Parcialmente / No lo hace». |
-| Escala para 30 alumnos en cada sesión | No. La escala oficial es «para ser usada durante toda la unidad». |
-| Enfoque fijo «Orientación al bien común» / «Responsabilidad» | No: se toma de la unidad y lleva «actitudes o acciones observables» de esa situación. |
-| Materiales: ¿qué hacer antes? / ¿qué recursos? | Sí (Cartilla 2017, mismas preguntas). |
-| Inicio: saberes previos, propósito y criterios | Sí (Cartilla 2017, CNEB). |
-| Motivación | En parte: el CNEB pide «Generar interés»; la rúbrica no da por buena una dinámica que solo capta la atención. |
-| Conflicto cognitivo como paso fijo del inicio | No: es una orientación del CNEB, no un paso fijo. |
-| Normas de convivencia en el inicio | Solo como ejemplo, no se exige. |
-| Desarrollo «Explicamos / Practicamos juntos / Trabajamos solos» | **No.** Lo inventamos; las sesiones oficiales siguen los procesos del área. Explicar y practicar ejercicios cae en el nivel I de la rúbrica. |
-| Cantidades fijas («resuelven un ejercicio») | No. |
-| Cierre: sistematización y metacognición | Sí (Cartilla 2017). |
-| Tarea | Solo opcional («Se sugiere»). |
-| Minutos fijos (10/25/10 o 15/60/15) | No: lo oficial es «Tiempo aproximado», «en función de las necesidades de aprendizaje». |
-| Referencias | No. |
-| Ficha de aplicación | No se exige; aparece como anexo en algunos ejemplos. |
+| «Grado: 4.º de primaria» y «Unidad didáctica ___ - sesión ___» | Encabezado de las sesiones de ejemplo. |
+| «Título:» | Sesiones de ejemplo; cartilla 2017 (a partir de la actividad principal). |
+| 1. Propósitos y evidencias de aprendizaje: «Competencias/capacidades \| Desempeños \| ¿Qué nos dará evidencias de aprendizaje?» | Sesiones de ejemplo. Competencia, capacidades y desempeños, tal cual `packages/curriculo`. |
+| Instrumento «Escala de valoración (Anexo 1)» | Programa Curricular («escalas de valoración»); sesiones de Arte y Cultura de 4.º. |
+| «Enfoques transversales \| Actitudes o acciones observables» | Sesiones de ejemplo. Las 7 actitudes se copiaron tal cual del CNEB, pp. 22-29 (`sesion/enfoques.ts`); el docente elige el de su unidad; por defecto, orientación al bien común (el que más usan las de 4.º). |
+| 2. Preparación de la sesión, con sus dos preguntas | Sesiones de ejemplo y cartilla 2017. |
+| 3. Momentos: inicio, desarrollo y cierre con «Tiempo aproximado» | Sesiones de ejemplo: 10/25/10 en 45 min (Arte, sesión 2) y 10/70/10 en 90 min (la mayoría). |
+| Agrupamientos «En grupo clase», «En grupos pequeños»… | Sesiones de ejemplo. |
+| Inicio: saludo, saberes previos, propósito, en qué se fijará el docente, normas de convivencia | Sesiones de ejemplo (s7: «Recuerda, junto con los estudiantes, las normas de convivencia…»); cartilla 2017 y RVM 094 (comunicar los criterios). |
+| Desarrollo | Según el área y la competencia, abajo. |
+| Cierre: propósito, recuento, reflexión, aspectos positivos | Sesiones de ejemplo (quinto s9, Arte s1, cuarto s2); cartilla 2017. |
+| 4. Reflexiones sobre el aprendizaje (tres preguntas) | Tal cual las sesiones de ejemplo. |
+| Anexo 1: «Escala de valoración para la competencia…», «Desempeños del grado», «Nombres y apellidos», «Nunca / A veces / Siempre» | Tercer grado, unidad 1, sesión 14. |
 
-## Conclusión
+**Desarrollo por área y competencia** (`sesion/procesos.ts`; cada forma guarda los enlaces de las sesiones que sigue):
 
-La sesión de hoy **no cumple** y no debe usarse: inventa el desarrollo, copia los desempeños como criterios y fija
-enfoque, minutos, niveles de la escala y pasos que la norma no fija. Además, una sesión que cumpla no se puede armar
-solo con el tema: los propósitos, el enfoque y los criterios salen de la **unidad didáctica y su situación
-significativa**, que hoy no le pedimos al docente, y para cuatro áreas no hay procesos didácticos oficiales.
+| Forma | Sesiones del MINEDU que sigue |
+|---|---|
+| Matemática (todas las competencias): familiarización con el problema, búsqueda y ejecución de estrategias, socialización de representaciones, formalización y reflexión, otros problemas | cuarto s7 y s8; quinto s11 y s12 |
+| Comunicación, «Lee»: antes, durante y después de la lectura | cuarto s4 y s16; quinto s3 |
+| Comunicación, «Escribe»: planificación, escritura y revisión | quinto s8 y s9 |
+| Comunicación, «Se comunica oralmente»: antes, durante y después | cuarto s3 (asamblea); quinto s2 |
+| Ciencia y Tecnología, «Indaga»: problema, hipótesis, plan de acción, datos, socialización | cuarto s13 y s14; quinto s19 |
+| Personal Social, «Construye su identidad» y «Convive y participa» | cuarto s1, s2 y s5; quinto s1 y s4 |
+| Arte y Cultura, «Aprecia» y «Crea proyectos» | Arte de 4.º, sesiones 1 y 2 |
+| Educación Física, «Interactúa a través de sus habilidades sociomotrices» | Educación Física de 4.º, sesiones 1 y 2 |
+
+**Con aviso «formato impreciso»** (no encontramos una sesión de ejemplo del MINEDU; el desarrollo es general):
+Inglés, Educación Religiosa, Castellano como segunda lengua; en Ciencia y Tecnología, «Explica el mundo físico» y
+«Diseña y construye soluciones tecnológicas»; en Personal Social, las de historia, espacio y ambiente y recursos
+económicos; en Educación Física, motricidad y vida saludable; y toda la secundaria (falta revisar sus sesiones).
+Matemática usa la misma forma en sus cuatro competencias porque las sesiones de ejemplo son de dos de ellas (forma y
+datos) y siguen el mismo enfoque del área.
+
+## Lo que se quitó (no tenía fuente)
+
+Datos informativos (institución, docente, fecha), «Motivación» y «Conflicto cognitivo» como pasos fijos, cantidades
+(«resuelven un ejercicio»), tarea, referencias, ficha de aplicación, el «qué le gusta a tu salón» y los criterios
+copiados en una columna aparte. La revisión del 19-oct, parte por parte, está en el historial de esta nota.
+
+## Fuentes revisadas
+
+- CNEB: https://www.minedu.gob.pe/curriculo/pdf/curriculo-nacional-de-la-educacion-basica.pdf
+- Programa Curricular de Educación Primaria: https://www.minedu.gob.pe/curriculo/pdf/programa-curricular-educacion-primaria.pdf
+- RVM 094-2020-MINEDU: https://cdn.www.gob.pe/uploads/document/file/662983/RVM_N__094-2020-MINEDU.pdf (la RVM 048-2024 la modifica en promoción y registro, no en lo citado).
+- Cartilla de planificación curricular (2017, «documento de trabajo en proceso de validación»): https://www.minedu.gob.pe/curriculo/pdf/cartilla-planificacion-curricular.pdf
+- Sesiones de primaria del MINEDU: https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/
+- Rúbricas de observación de aula 2025: https://evaluaciondocente.perueduca.pe/media/11748537639Instructivo-para-la-aplicaci%C3%B3n.pdf
