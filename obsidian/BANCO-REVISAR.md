@@ -231,3 +231,76 @@ actualizado: 2026-10-20
 - ITF 0,005 % (desde 2011, confirmar vigencia).
 - Contenido que el desempeño no nombra: casos de factorización, relaciones métricas (h² = m · n), ángulos notables, °C a °F, muestreo sistemático y estratificado.
 - Cuadráticas solo ax² + c; varianza dividiendo entre n; «eneágono».
+
+## 4.º grado de secundaria
+
+### Arte y Cultura
+
+- Errata del texto oficial copiada en la cita de «Muestra artística» («de su proyectos»); cita de «Pintura de paisajes» empieza en minúscula.
+- Términos: timelapse, storyboard, ready-made, land art, leitmotiv, «cédula» de museo.
+- Matices: capoeira «según la tradición», luto chino de blanco, «El plebeyo» como crítica a la desigualdad (interpretación).
+
+### Castellano como segunda lengua
+
+- Citas compartidas: el 2.1 (ambigüedades, humor e ironía) en cinco temas; el 2.7 en tres.
+- «Su casa de mi tío» como forma no usada en texto formal (no «incorrecta»): tratar con respeto por el castellano andino.
+- Temas sensibles como casos para criticar (burla de la mujer andina, chiste sobre el habla andina); términos altos (catáfora, dequeísmo).
+
+### Ciencia y Tecnología
+
+- Datos que cambian: moratoria a transgénicos (Ley 29811, hasta 2035), DNI y donación de órganos, derrame de Ventanilla 2022, mercurio en Madre de Dios.
+- Simplificaciones escolares: 20 aminoácidos, Down con 47 cromosomas («suele»), biodigestor con «microbios».
+- Términos exigentes (alopátrica, deriva génica, Turner, Klinefelter, ARNt/ARNm) cubiertos por los desempeños; temas sensibles (Hiroshima, consulta previa).
+
+### Ciencias Sociales
+
+- Datos que cambian: libro de reclamaciones 15 días hábiles (desde 2022), ONP 13 % / AFP 10 % (reforma 2024), boleta desde S/ 5, Chancay 2024, India el más poblado (2023).
+- Historia: Tangüis 1911, Polo-Bustamante 1909, Lorton 1917, Rumi Maqui 1915; periodización de Basadre presentada como suya.
+- Datos de nicho que el docente puede cambiar: números de ley, Ña Catita, Bartolomé Herrera.
+
+### Competencias transversales
+
+- Funciones de hoja de cálculo en español (SI.ERROR, BUSCARV, CONTAR.SI.CONJUNTO); nombres de pantalla de Classroom y Scratch.
+- Técnicas fuera del MINEDU (Parkinson, 2 minutos, WOOP, Feynman, Cornell, PHVA); ALICIA (Concytec), IGP.
+- Respuestas que dependen de la rúbrica («En proceso» con 2 de 3 fuentes).
+
+### Comunicación
+
+- Citas compartidas: la frase de 2.6 sobre movimientos literarios en cinco temas; varias citas empiezan en minúscula (fragmentos).
+- Nombres según el libro: falacias en latín, kinésica/proxémica, copretérito, estructura encuadrada.
+- Clasificaciones discutibles: Ricardo Palma como romántico, boom 1960–1970, «ayudara» (sin «ayude» como opción).
+
+### Desarrollo Personal, Ciudadanía y Cívica
+
+- Datos que cambian: alcohol 0,5 g/l, 100 puntos de licencia, cuota de 5 % de discapacidad, Línea 1818, DIVINDAT, servicio militar voluntario.
+- Temas delicados que pide el desempeño 1.6: orientación sexual e identidad de género; sextorsión y fotos falsas hechas con IA.
+- Nivel exigente: Kohlberg, bioética, autoridad según Weber, garantías constitucionales.
+
+### Educación Física
+
+- Aproximaciones: gasto calórico con MET, IMC adolescente por tablas de la OMS; vóley sentado («glúteos» simplifica la regla).
+- Fechas y normas: lavado de manos 15 de octubre (40–60 s, OMS), actividad física 6 de abril, AMA, FIFA y racismo.
+- Temas delicados: menstruación y huesos de la deportista, «quemar» lo que se comió.
+
+### Educación Religiosa
+
+- Fiestas regionales (Santurantikuy, t'anta wawa, Bajada de Reyes, Cruces de mayo, Negritos de Huánuco, juane en San Juan).
+- Datos: Doctrina christiana de 1584, Hanacpachap (1631), Sor Ana de los Ángeles (1985), mártires de Pariacoto (1991, tema sensible).
+- Recientes: Acutis y Frassati canonizados en 2025; versículos según la traducción.
+
+### Educación para el Trabajo
+
+- Herramientas que el desempeño no nombra: ruta crítica, 5S, kaizen, FODA, SMART, NPS, Likert, estilos de Thomas-Kilmann, BPM de DIGESA.
+- Convenciones: hito como rombo en Gantt, «cliente encantado» (Kotler), «sondeo»; clasificación ética/social/ambiental/económica discutible en algún caso.
+
+### Inglés como lengua extranjera
+
+- Citas que son pedazos de la lista de ejemplos del desempeño; «Problems and solutions» cita relaciones lógicas.
+- Pedro Paulet solo como «designed rocket engines»; gramática de texto escolar («If I were you», «didn't use to»).
+- Datos: algodón Pima, Chulucanas, paja toquilla de Catacaos, alpacas.
+
+### Matemática
+
+- Impuesto a la renta: escala 8/14/17/20/30 %, 7 UIT, 20 % de cuarta categoría (confirmar vigencia en 2026); UIT como dato supuesto.
+- Triángulo notable 37°–53° (aproximaciones escolares); desviación estándar entre n; cuartiles con 7 y 11 datos.
+- Quizá más allá de 4.º: racionalizar, Sturges, atípicos con 1,5 × RIC, coeficiente de variación, P(A|B), TEA.
