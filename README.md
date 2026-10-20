@@ -79,7 +79,7 @@ Monorepo con Turborepo: la app vive en `apps/web/` (las rutas de abajo son relat
 | `src/api/real.ts` | Llamadas a `/api/*` |
 | `src/lib/crucigrama.ts` | Algoritmo de la grilla del crucigrama |
 | `src/juegos/` | Juegos: contenido, generadores de cálculo, catálogo con compatibilidad y motor común |
-| `src/banco/` | Banco de contenido por tema (hoy todo 4.º de primaria): palabras, preguntas y parejas, con cita del currículo |
+| `src/banco/` | Banco de contenido por tema (un grado completo por carpeta): palabras, preguntas y parejas, con cita del currículo |
 | `src/app/` | Estado global, catálogo de herramientas, cuenta |
 | `src/components/` | Estructura de la app y componentes de interfaz |
 | `src/views/` | Una pantalla por sección |

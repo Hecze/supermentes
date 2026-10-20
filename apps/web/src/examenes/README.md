@@ -1,6 +1,6 @@
 # Hojas listas para imprimir: examen, práctica y balotario
 
-Cada tema de un grado con banco (hoy, **4.º de primaria**: 384 temas) trae sus hojas armadas apenas se abre la
+Cada tema de un grado con banco (las carpetas de `apps/web/src/banco`) trae sus hojas armadas apenas se abre la
 herramienta "Examen": gratis, sin esperar a la IA, en A4 y en blanco y negro para la fotocopiadora. Parten del tema
 abierto en la barra lateral, que ya dice el grado y el curso: no se vuelve a preguntar. Cómo deben verse y por qué,
 según los docentes: `obsidian/MATERIALES.md`.

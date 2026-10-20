@@ -51,9 +51,9 @@ try {
   const largo = (t) => [...(t ?? '')].length
   const texto = (v, min, max) => typeof v === 'string' && v === v.trim() && !/[\n\r\t]|\*\*/.test(v) && largo(v) >= min && largo(v) <= max
   const distintos = (xs) => new Set(xs.map(normalizar)).size === xs.length
-  // En las opciones cuentan la tilde, el signo y la mayúscula: en ortografía, «¿Dónde…?» y «Dónde…?» (o «lima» y
-  // «Lima») son opciones distintas.
-  const opcionesDistintas = (xs) => new Set(xs.map((x) => x.trim())).size === xs.length
+  // Como en el verificador de exámenes: cuentan la tilde y el signo («¿Dónde…?» y «Dónde…?» son distintas), no la
+  // mayúscula («lima» y «Lima» saldrían repetidas en la hoja).
+  const opcionesDistintas = (xs) => new Set(xs.map((x) => x.trim().toLowerCase())).size === xs.length
 
   for (const [k, t] of lista.entries()) {
     const quien = `«${t?.tema ?? `n.º ${k + 1}`}»`

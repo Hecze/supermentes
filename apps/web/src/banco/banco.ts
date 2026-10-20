@@ -6,7 +6,7 @@ import { normalizar } from '../curriculo/buscar'
 // Así cada tema tiene juegos apenas se crea, sin esperar ni gastar en la IA. Las canciones no van aquí: solo se
 // muestran las que están en YouTube (obsidian/CANCIONES.md).
 //
-// Hoy cubre todos los temas de 4.º de primaria (`primaria-4/<área>.json`). Cada tema guarda `cita`: un fragmento
+// Cada carpeta es un grado completo (`<gradoId>/<área>.json`, ver README.md). Cada tema guarda `cita`: un fragmento
 // copiado letra por letra de un desempeño oficial de su área y grado. `npm run verificar:curriculo` comprueba cada
 // cita y que todos los temas del grado tengan al menos 2 juegos (banco/verificar.ts).
 

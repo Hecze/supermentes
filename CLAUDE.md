@@ -12,7 +12,7 @@ Un director o un docente puede preguntar en cualquier momento "¿por qué esto c
 - **Los campos `temas` del JSON no son texto oficial:** sirven para buscar, nunca para sustentar.
 - **El tema guarda sus desempeños** (`Ficha.curriculo.desempenos`, texto oficial). Lo que se cree después parte de ellos; no se vuelven a adivinar.
 - **La IA cita.** Cada endpoint de `api/` recibe los desempeños del tema y debe devolver, por cada pregunta, estrofa o ítem, el desempeño que trabaja con su cita textual. El backend descarta las citas que no aparezcan tal cual en `packages/curriculo`.
-- **El banco también cita.** `apps/web/src/banco` trae, por tema (hoy todo 4.º de primaria), palabras, preguntas y parejas con la cita del desempeño. En un grado con banco, todo tema debe tener al menos 2 juegos: `npm run typecheck` falla si no.
+- **El banco también cita.** `apps/web/src/banco` trae, por tema (un grado completo por carpeta), palabras, preguntas y parejas con la cita del desempeño. En un grado con banco, todo tema debe tener al menos 2 juegos: `npm run typecheck` falla si no.
 - **Canciones: solo las que están en YouTube** (`obsidian/CANCIONES.md`). La app no crea canciones ni muestra letras sin video; cada canción cita su desempeño igual que todo lo demás.
 - **Se muestra con el icono "i"** (`apps/web/src/views/SustentoJuego.tsx`), en dos partes: "El tema abarca" (la competencia y el desempeño oficial) y "El juego abarca" (qué hacen los alumnos y la parte exacta del desempeño, resaltada). Las demás herramientas deben mostrar lo mismo.
 
