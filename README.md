@@ -17,7 +17,7 @@ Herramientas de IA para docentes del Perú. El docente busca su tema en el Curr�
 
 `packages/curriculo/data/*.json` tiene el currículo oficial del MINEDU por nivel, grado y área (competencias, capacidades, estándares y desempeños). En la app:
 
-- **Currículo nacional** (primero en el menú): el docente elige grado y curso y lee el documento; desde los temas del grado puede crear un tema con un clic.
+- **Currículo nacional** (primero en el menú): el docente elige grado y curso en una fila arriba de la hoja y lee el documento oficial. Es solo para leer: los temas se crean con el buscador, no desde aquí.
 - **Busca tu tema:** no hay temas libres, ni fotos ni archivos: el Currículo Nacional alcanza. Es un solo buscador, como el de YouTube: mientras el docente escribe aparecen temas del currículo de su grado (y de otros grados si no está), con lo escrito en negrita. Con un clic el tema queda creado al instante, con su competencia y desempeños (`apps/web/src/components/NuevoTema.tsx`, `apps/web/src/curriculo/buscar.ts`). La IA completa después ideas clave, vocabulario y ejemplo, sin hacer esperar al docente (`apps/web/src/app/temaInstantaneo.ts`); si no responde, la ficha muestra "Reintentar".
 - **Ficha del tema y herramientas:** muestran en qué currículo se basa todo lo que se genera. El backend debe usar `gradoId` y `areaId` de la ficha para incluir esas competencias y desempeños en cada generación.
 
