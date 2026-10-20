@@ -1,9 +1,10 @@
 // Cómo se desarrolla la sesión según el área y la competencia del tema, como lo hacen las sesiones de primaria que
-// publica el MINEDU (unidades 2017). Cada forma lleva las sesiones oficiales que sigue. Si el área o la competencia no
-// tiene ninguna (Inglés, Educación Religiosa, secundaria…), se usa la forma común y la vista avisa «formato impreciso».
-// Qué sesión respalda cada forma: obsidian/SESION.md.
+// publica el MINEDU (unidades 2017). Cada forma lleva las sesiones oficiales que sigue. Secundaria usa la forma de su
+// área (mismas competencias y mismo enfoque), pero el MINEDU no tiene en línea sesiones de secundaria: la vista lo
+// avisa. Si el área o la competencia no tiene ninguna (Inglés, Educación Religiosa…), se usa la forma común y la vista
+// avisa «formato impreciso». Qué sesión respalda cada forma: obsidian/SESION.md.
 import type { TemaProblemas } from '../examenes/tipos'
-import type { Bloque } from './tipos'
+import type { Bloque, Precision } from './tipos'
 
 const SESIONES = 'https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/'
 const de = (...archivos: string[]) => archivos.map((a) => SESIONES + a)
@@ -122,7 +123,7 @@ const FORMAS = {
         pasos: [
           'Invita a los estudiantes a escribir su texto según lo planificado.',
           'Guía el trabajo de los estudiantes y brinda orientaciones para que revisen lo planificado.',
-          'Observa la escritura de cada niño y niña, y oriéntalos según lo que necesiten.',
+          'Observa la escritura de cada estudiante y oriéntalo según lo que necesite.',
         ],
       },
       {
@@ -148,7 +149,7 @@ const FORMAS = {
         titulo: 'Antes del diálogo',
         pasos: [
           'Invítalos a ubicar sus sillas formando un semicírculo, a fin de que todos puedan verse.',
-          'Pide a un niño o a una niña que ayude a determinar cuál es el propósito del diálogo.',
+          'Pide a un estudiante que ayude a determinar cuál es el propósito del diálogo.',
           'Recuerda a los estudiantes cómo participar: expresarse de manera calmada, dar razones de sus ideas, escuchar con atención y respetar el uso de la palabra.',
         ],
       },
@@ -323,7 +324,7 @@ const FORMAS = {
   }),
 }
 
-/** Qué forma usa cada área de primaria y, si depende de la competencia, cada competencia (comienzo de su nombre). */
+/** Qué forma usa cada área y, si depende de la competencia, cada competencia (comienzo de su nombre). */
 const POR_COMPETENCIA: { area: string; competencia?: string; forma: keyof typeof FORMAS }[] = [
   { area: 'matematica', forma: 'matematica' },
   { area: 'comunicacion', competencia: 'Se comunica oralmente', forma: 'oral' },
@@ -332,14 +333,16 @@ const POR_COMPETENCIA: { area: string; competencia?: string; forma: keyof typeof
   { area: 'ciencia-y-tecnologia', competencia: 'Indaga', forma: 'indaga' },
   { area: 'personal-social', competencia: 'Construye su identidad', forma: 'personal' },
   { area: 'personal-social', competencia: 'Convive y participa', forma: 'personal' },
+  { area: 'desarrollo-personal-ciudadania-y-civica', competencia: 'Construye su identidad', forma: 'personal' },
+  { area: 'desarrollo-personal-ciudadania-y-civica', competencia: 'Convive y participa', forma: 'personal' },
   { area: 'arte-y-cultura', competencia: 'Aprecia', forma: 'aprecia' },
   { area: 'arte-y-cultura', competencia: 'Crea proyectos', forma: 'crea' },
   { area: 'educacion-fisica', competencia: 'Interactúa', forma: 'juego' },
 ]
 
-export function formaDe(tema: { gradoId: string; areaId: string; competencia: string; titulo: string }, problemas: TemaProblemas | null): Forma {
-  const x = tema.gradoId.startsWith('primaria-')
-    ? POR_COMPETENCIA.find((p) => p.area === tema.areaId && (!p.competencia || tema.competencia.startsWith(p.competencia)))
-    : undefined
-  return FORMAS[x?.forma ?? 'comun']({ tema: tema.titulo, problemas })
+/** La forma del tema y qué tan respaldada está: por una sesión del MINEDU del mismo nivel, de primaria o por ninguna. */
+export function formaDe(tema: { gradoId: string; areaId: string; competencia: string; titulo: string }, problemas: TemaProblemas | null): { forma: Forma; precision: Precision } {
+  const x = POR_COMPETENCIA.find((p) => p.area === tema.areaId && (!p.competencia || tema.competencia.startsWith(p.competencia)))
+  const forma = FORMAS[x?.forma ?? 'comun']({ tema: tema.titulo, problemas })
+  return { forma, precision: !x ? 'general' : tema.gradoId.startsWith('primaria-') ? 'ejemplo' : 'otro-nivel' }
 }

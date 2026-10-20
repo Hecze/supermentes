@@ -1,7 +1,7 @@
 // La sesión de aprendizaje, con las partes de las sesiones que publica el MINEDU (ver obsidian/SESION.md).
 
 /** Sube cuando cambian las partes: una sesión guardada con otro formato se vuelve a armar. */
-export const FORMATO_SESION = 3
+export const FORMATO_SESION = 4
 
 export type OpcionesSesion = {
   /** Minutos de la clase. */
@@ -14,6 +14,12 @@ export type OpcionesSesion = {
 export type Bloque = { titulo: string; pasos: string[] }
 
 export type Momento = { minutos: number; bloques: Bloque[] }
+
+/**
+ * Qué respalda el desarrollo: una sesión del MINEDU del mismo nivel («ejemplo»), las de primaria del mismo curso
+ * porque no hay de secundaria en línea («otro-nivel»), o ninguna («general»).
+ */
+export type Precision = 'ejemplo' | 'otro-nivel' | 'general'
 
 export type Sesion = {
   formato: typeof FORMATO_SESION
@@ -35,4 +41,5 @@ export type Sesion = {
   cierre: Momento
   /** Las sesiones del MINEDU que sigue el desarrollo; vacío si no hay una para el área y la competencia del tema. */
   ejemplos: string[]
+  precision: Precision
 }

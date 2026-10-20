@@ -39,7 +39,7 @@ function competenciaDe(ficha: Ficha, area: AreaCurriculo | null): Competencia | 
 export function sesionPlantilla(ficha: Ficha, opciones: OpcionesSesion, area: AreaCurriculo | null, contexto: ContextoSesion): Sesion {
   const competencia = competenciaDe(ficha, area)
   const nombreCompetencia = competencia?.nombre ?? ficha.curriculo.competencia
-  const forma = formaDe({ ...ficha, competencia: nombreCompetencia }, contexto.problemas)
+  const { forma, precision } = formaDe({ ...ficha, competencia: nombreCompetencia }, contexto.problemas)
   // Una pregunta del banco del tema para recoger los saberes previos.
   const pregunta = contexto.banco?.preguntas[0]?.pregunta
   const [inicio, desarrollo, cierre] = MINUTOS[opciones.duracion]
@@ -98,5 +98,6 @@ export function sesionPlantilla(ficha: Ficha, opciones: OpcionesSesion, area: Ar
       ],
     },
     ejemplos: forma.ejemplos,
+    precision,
   }
 }

@@ -13,7 +13,7 @@ import { ubicarCita } from '../curriculo/citas'
 import { useContextoSesion } from '../sesion/contexto'
 import { ENFOQUES } from '../sesion/enfoques'
 import { NIVELES_ESCALA, REFLEXIONES, opcionesIniciales, sesionPlantilla } from '../sesion/plantilla'
-import { FORMATO_SESION, type Momento, type OpcionesSesion, type Sesion as TipoSesion } from '../sesion/tipos'
+import { FORMATO_SESION, type Momento, type OpcionesSesion, type Precision, type Sesion as TipoSesion } from '../sesion/tipos'
 import { BotonInfo, Cita } from './SustentoJuego'
 
 const COLOR = 'var(--sesion)'
@@ -295,25 +295,32 @@ const archivo = (titulo: string) =>
     .replace(/^-|-$/g, '')
     .slice(0, 50)}.docx`
 
-/** Sobre la hoja: qué sesiones del MINEDU sigue o, si no hay una para esta área y competencia, que el formato es impreciso. */
-function Fuente({ ejemplos }: { ejemplos: string[] }) {
-  if (!ejemplos.length) {
+const AVISOS: Record<Exclude<Precision, 'ejemplo'>, string> = {
+  'otro-nivel':
+    'el MINEDU no tiene en línea sesiones de ejemplo de secundaria, así que el desarrollo sigue a las de primaria del mismo curso. Revísalo antes de presentarla.',
+  general: 'para este curso y competencia no encontramos una sesión de ejemplo del MINEDU, así que el desarrollo es general. Revísalo antes de presentarla.',
+}
+
+/** Sobre la hoja: qué sesión del MINEDU sigue y, si no hay una de su nivel o de su curso, el aviso «formato impreciso». */
+function Fuente({ s }: { s: TipoSesion }) {
+  const ver = s.ejemplos[0] && (
+    <a href={s.ejemplos[0]} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-ink underline underline-offset-4">
+      Ver una sesión del MINEDU <ExternalLink className="size-3.5" aria-hidden />
+    </a>
+  )
+  if (s.precision !== 'ejemplo') {
     return (
       <p role="status" className="flex items-start gap-2 rounded-2xl bg-warn/12 px-4 py-3 text-warn print:hidden">
         <TriangleAlert className="mt-0.5 size-5 shrink-0" aria-hidden />
         <span>
-          <strong>Formato impreciso:</strong> para este curso y competencia no encontramos una sesión de ejemplo del MINEDU,
-          así que el desarrollo es general. Revísalo antes de presentarla.
+          <strong>Formato impreciso:</strong> {AVISOS[s.precision]} {ver}
         </span>
       </p>
     )
   }
   return (
     <p className="-mt-3 text-sm text-ink-soft print:hidden">
-      Ya está armada con tu tema, con las partes de las sesiones que publica el MINEDU. Corrige cualquier texto con un clic.{' '}
-      <a href={ejemplos[0]} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-ink underline underline-offset-4">
-        Ver una sesión del MINEDU <ExternalLink className="size-3.5" aria-hidden />
-      </a>
+      Ya está armada con tu tema, con las partes de las sesiones que publica el MINEDU. Corrige cualquier texto con un clic. {ver}
     </p>
   )
 }
@@ -374,7 +381,7 @@ export function Sesion() {
           <SlidersHorizontal className="size-5" aria-hidden /> Ajustar
         </Boton>
       </BarraHoja>
-      <Fuente ejemplos={actual.ejemplos} />
+      <Fuente s={actual} />
 
       <Hoja>
         <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.enfoque}-${version}`}>

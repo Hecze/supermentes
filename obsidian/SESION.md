@@ -56,10 +56,19 @@ https://www.minedu.gob.pe/curriculo/pdf/unidades-primaria/ (por ejemplo `cuarto-
 | Arte y Cultura, «Aprecia» y «Crea proyectos» | Arte de 4.º, sesiones 1 y 2 |
 | Educación Física, «Interactúa a través de sus habilidades sociomotrices» | Educación Física de 4.º, sesiones 1 y 2 |
 
-**Con aviso «formato impreciso»** (no encontramos una sesión de ejemplo del MINEDU; el desarrollo es general):
-Inglés, Educación Religiosa, Castellano como segunda lengua; en Ciencia y Tecnología, «Explica el mundo físico» y
-«Diseña y construye soluciones tecnológicas»; en Personal Social, las de historia, espacio y ambiente y recursos
-económicos; en Educación Física, motricidad y vida saludable; y toda la secundaria (falta revisar sus sesiones).
+**Con aviso «formato impreciso»:**
+- *Desarrollo general* (no hay una sesión de ejemplo del MINEDU para el área y la competencia): Inglés, Educación
+  Religiosa, Castellano como segunda lengua, Educación para el Trabajo; en Ciencia y Tecnología, «Explica el mundo
+  físico» y «Diseña y construye soluciones tecnológicas»; en Personal Social y Ciencias Sociales, historia, espacio y
+  ambiente y recursos económicos; en Educación Física, motricidad y vida saludable.
+- *Secundaria con la forma de su área*: sus áreas tienen las mismas competencias y el mismo enfoque que primaria, así
+  que usan la forma de su área (Desarrollo Personal, Ciudadanía y Cívica, la de Personal Social), con un aviso que dice
+  que sigue a las sesiones de primaria. El MINEDU no tiene en línea sesiones de secundaria del CNEB (revisado el
+  20-oct): `curriculo/pdf/unidades-secundaria/` da 404, jec.perueduca.pe ya no existe y repositorio.minedu.gob.pe pide
+  una verificación anti-robots. Para quitar el aviso hace falta leer las sesiones JEC archivadas en web.archive.org
+  (permitir ese dominio en la red del entorno) o bajar a mano, desde un navegador, los registros 20.500.12799/5495 a
+  5497 (Comunicación) y 5501 y 5502 (Matemática) del repositorio, y revisar si ya usan desempeños (CNEB) o indicadores.
+
 Matemática usa la misma forma en sus cuatro competencias porque las sesiones de ejemplo son de dos de ellas (forma y
 datos) y siguen el mismo enfoque del área.
 
