@@ -120,8 +120,10 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
   const aciertos = useRef<Record<Lado, number>>({ volt: 0, nova: 0 })
   const cargado = useRef(0)
   const barraCpu = useRef<HTMLDivElement>(null)
+  // La vida y el fin se llevan también en refs: al volver de otra app, el bucle recupera el tiempo de afuera en varios
+  // pasos del mismo cuadro (motor/bucle) y el estado todavía no cambió entre uno y otro.
   const vidaRef = useRef(vida)
-  vidaRef.current = vida
+  const fin = useRef(false)
   const arena = useRef<HTMLDivElement>(null)
 
   // La pantalla tiembla con cada golpe: se reinicia la animación sin volver a crear la arena.
@@ -152,6 +154,7 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
     const victima = otro(atacante)
     const dano = especial ? DANO_ESPECIAL : DANO
     const restante = vidaRef.current[victima] - dano
+    vidaRef.current = { ...vidaRef.current, [victima]: Math.max(0, restante) }
     setVida((v) => ({ ...v, [victima]: Math.max(0, v[victima] - dano) }))
     posar(atacante, 'golpe')
     despues(() => {
@@ -162,6 +165,7 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
       sonar.golpe()
     }, 140)
     if (restante <= 0) {
+      fin.current = true
       setFase('fin')
       setGanador(atacante)
       despues(() => {
@@ -225,6 +229,7 @@ export default function Duelo({ contenido, ritmo, semilla, terminar }: PropsJueg
   // Contra la máquina: su golpe se carga mientras piensas.
   // Tiempo real: la carga del robot sigue si el jugador sale del juego.
   useBucle((_dt, real) => {
+    if (fin.current) return
     cargado.current = Math.min(1, cargado.current + real / carga)
     if (barraCpu.current) barraCpu.current.style.transform = `scaleX(${cargado.current})`
     if (cargado.current >= 1) {

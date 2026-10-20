@@ -76,6 +76,10 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
   const [terminado, setTerminado] = useState(false)
   const [flotantes, setFlotantes] = useState<{ id: number; y: string; texto: string; color?: string }[]>([])
   const [golpe, setGolpe] = useState(0)
+  // En refs, porque al volver de otra app el bucle recupera el tiempo de afuera en varios pasos del mismo cuadro
+  // (motor/bucle) y el estado no cambia entre uno y otro: una puerta nueva espera a dibujarse antes de avanzar.
+  const esperaPuerta = useRef(false)
+  const fin = useRef(false)
 
   /** Zona de vuelo: entre la pregunta y el pasto. */
   const zona = (): Zona => {
@@ -102,6 +106,7 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
     }
     fisica.current.x = ancho + 40
     fisica.current.evaluada = false
+    esperaPuerta.current = true
     setPuerta(p)
   }
 
@@ -115,9 +120,10 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
   }, [ancho, alto])
 
   useLayoutEffect(() => {
+    esperaPuerta.current = false
     setZ(zona())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [puerta?.id, ancho, alto])
+  }, [puerta?.id, empezo, ancho, alto])
 
   function aletear() {
     if (terminado) return
@@ -165,6 +171,7 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
     }
     const acertadas = aciertos + (dentro === p.correcta ? 1 : 0)
     if (quedan <= 0 || n >= meta) {
+      fin.current = true
       setTerminado(true)
       despues(
         () =>
@@ -203,14 +210,14 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
       f.y = Math.max(z.arriba + tam * 0.45, Math.min(z.abajo - tam * 0.25, f.y + f.vy * dt))
       if (f.y >= z.abajo - tam * 0.25) f.vy = 0
       // La puerta avanza hacia el cóndor.
-      if (puerta && !terminado) {
+      if (puerta && !fin.current && !esperaPuerta.current) {
         const cx = ancho * X_CONDOR
         f.x -= ((ancho + 40 - cx) / cruce) * dt
         if (!f.evaluada && f.x <= cx) {
           f.evaluada = true
           evaluar(puerta, f.y)
         }
-        if (f.x < -ancho * 0.25 && pasadas < meta && vidas > 0) nuevaPuerta()
+        if (f.x < -ancho * 0.25) nuevaPuerta()
       }
     }
     const giro = f.empezo ? Math.max(-25, Math.min(35, f.vy / (alto * 0.02))) : 0
@@ -271,7 +278,8 @@ export default function VuelaCondor({ contenido, ritmo, semilla, terminar }: Pro
             ✓ {aciertos}
           </span>
         </div>
-        {puerta && (
+        {/* La pregunta aparece recién con el primer toque: antes el reloj (la puerta) no corre. */}
+        {puerta && empezo && (
           <div ref={tarjeta} key={puerta.id} className="tarjeta-juego entrar px-[3.5cqmin] py-[1.2cqmin]" style={{ maxWidth: 'min(88cqw, 720px)' }}>
             <Enunciado reto={puerta.reto} tam="clamp(20px, 5cqmin, 44px)" />
           </div>

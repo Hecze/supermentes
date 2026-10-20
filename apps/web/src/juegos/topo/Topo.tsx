@@ -1,4 +1,5 @@
-// Topo: los cuyes se asoman con carteles y hay que tocar al que tiene la respuesta correcta.
+// Topo: los cuyes se asoman con carteles y hay que tocar al que tiene la respuesta correcta. Cada pregunta tiene su
+// barra de tiempo (motor/Reloj): si se acaba sin atraparlo, se escapan y se pierde una vida.
 // Inspirado en el "whack-a-mole" de Wordwall.
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
@@ -6,6 +7,7 @@ import { crearAzar } from '../motor/azar'
 import { useBucle, useTamano, useTemporizadores } from '../motor/bucle'
 import { Cuy } from '../motor/Cuy'
 import { Enunciado, Flotante, TextoMat, Vidas, elogio, letraOpciones } from '../motor/piezas'
+import { BarraReloj, segundosPorPregunta, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -41,7 +43,10 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
   const [aciertos, setAciertos] = useState(0)
   const [vidas, setVidas] = useState(VIDAS)
   const [terminado, setTerminado] = useState(false)
-  const [flotantes, setFlotantes] = useState<{ id: number; x: string; y: string; texto: string }[]>([])
+  const [flotantes, setFlotantes] = useState<{ id: number; x: string; y: string; texto: string; color?: string }[]>([])
+  const [escaparon, setEscaparon] = useState(false)
+  // Los cuyes se asoman rápido y la respuesta sale seguido: alcanza con algo más de la mitad del tiempo de una pregunta.
+  const reloj = useReloj({ segundos: Math.round(segundosPorPregunta(ritmo, contenido) * 0.6), activo: !terminado, vuelta: reto.n, alVencer: seEscaparon })
 
   // En modo estricto el efecto corre dos veces: los huecos empiezan vacíos igual.
   useEffect(() => {
@@ -125,34 +130,52 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
         )
         return
       }
-      despues(() => {
-        const r = siguienteReto()
-        setReto((x) => ({ reto: r, opciones: opcionesDe(r, 6, azar), n: x.n + 1 }))
-        sinCorrecto.current = 0
-        pausa.current = false
-        proximo.current = tiempo.current + 0.3
-      }, 650)
+      despues(siguiente, 650)
       return
     }
     sonar.error()
     a.estado = 'mal'
     refrescar()
     despues(() => esconder(i), 500)
+    perder()
+  }
+
+  function siguiente() {
+    const r = siguienteReto()
+    setReto((x) => ({ reto: r, opciones: opcionesDe(r, 6, azar), n: x.n + 1 }))
+    setEscaparon(false)
+    sinCorrecto.current = 0
+    pausa.current = false
+    proximo.current = tiempo.current + 0.3
+  }
+
+  /** Una vida menos; si era la última, termina. Devuelve true si terminó. */
+  function perder() {
     const quedan = vidas - 1
     setVidas(quedan)
-    if (quedan <= 0) {
-      setTerminado(true)
-      despues(
-        () =>
-          terminar({
-            estrellas: aciertos >= meta / 2 ? 1 : 0,
-            titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
-            detalle: `Atrapaste ${aciertos} de ${meta}. La respuesta era ${reto.reto.respuesta}.`,
-            puntaje: aciertos * 100,
-          }),
-        1000,
-      )
-    }
+    if (quedan > 0) return false
+    setTerminado(true)
+    despues(
+      () =>
+        terminar({
+          estrellas: aciertos >= meta / 2 ? 1 : 0,
+          titulo: aciertos > 0 ? '¡Buen intento!' : '¡Casi!',
+          detalle: `Atrapaste ${aciertos} de ${meta}. La respuesta era ${reto.reto.respuesta}.`,
+          puntaje: aciertos * 100,
+        }),
+      1000,
+    )
+    return true
+  }
+
+  /** Se acabó el tiempo de la pregunta sin atrapar al cuy de la respuesta. */
+  function seEscaparon() {
+    if (pausa.current || terminado) return
+    sonar.error()
+    pausa.current = true
+    asomados.current.forEach((_, j) => esconder(j))
+    setEscaparon(true)
+    if (!perder()) despues(siguiente, 1800)
   }
 
   return (
@@ -171,8 +194,15 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
             🐹 {aciertos} / {meta}
           </span>
         </div>
-        <div key={reto.n} className="tarjeta-juego entrar px-[3.5cqmin] py-[1.4cqmin]" style={{ maxWidth: 'min(86cqw, 720px)' }}>
+        <div key={reto.n} className="tarjeta-juego entrar flex flex-col gap-[1cqmin] px-[3.5cqmin] py-[1.4cqmin]" style={{ maxWidth: 'min(86cqw, 720px)' }}>
           <Enunciado reto={reto.reto} tam="clamp(24px, 5.4cqmin, 48px)" />
+          {escaparon ? (
+            <p className="text-center font-bold text-[#d6303b]" style={{ fontSize: 'clamp(16px, 3.8cqmin, 30px)' }}>
+              ¡Se escaparon! Era <TextoMat texto={reto.reto.respuesta} />
+            </p>
+          ) : (
+            <BarraReloj reloj={reloj} />
+          )}
         </div>
       </div>
 
@@ -222,7 +252,7 @@ export default function Topo({ contenido, ritmo, semilla, terminar }: PropsJuego
       </div>
 
       {flotantes.map((f) => (
-        <Flotante key={f.id} x={f.x} y={f.y} texto={f.texto} />
+        <Flotante key={f.id} x={f.x} y={f.y} texto={f.texto} color={f.color} />
       ))}
     </div>
   )

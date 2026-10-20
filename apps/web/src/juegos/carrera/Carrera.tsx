@@ -1,22 +1,27 @@
-// Carrera de llamas: si aciertas, tu llama avanza; si fallas, avanza la rival. Sin reloj, para leer con calma:
-// sirve también para preguntas largas del tema.
-import { useMemo, useState } from 'react'
+// Carrera de llamas: una carrera de verdad. La rival corre sola y no se detiene (ni si sales del juego: motor/bucle);
+// tu llama avanza un paso con cada respuesta correcta y, si fallas, la rival se adelanta un paso. Su ritmo sale del
+// tiempo de una pregunta (motor/Reloj): quien piensa y responde le gana; quien se va a buscar la respuesta, no.
+// Mientras se ve si acertaste, la rival espera: solo corre el tiempo de pensar.
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { fuenteDeRetos, opcionesDe } from '../contenido'
 import { crearAzar } from '../motor/azar'
-import { useTeclas, useTemporizadores } from '../motor/bucle'
+import { useBucle, useTeclas, useTemporizadores } from '../motor/bucle'
+import { CuentaRegresiva } from '../motor/CuentaRegresiva'
 import { Llama, LLAMAS } from '../motor/Llama'
 import { Enunciado, TextoMat, colorBoton, elogio } from '../motor/piezas'
+import { segundosPorPregunta } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego } from '../tipos'
 
 const INICIO = 3
 const META = 82
 
-function Corredora({ pasos, meta, colores, carril, corriendo }: { pasos: number; meta: number; colores: typeof LLAMAS.crema; carril: 0 | 1; corriendo: boolean }) {
-  const x = INICIO + (pasos / meta) * (META - INICIO)
+function Corredora({ pasos, meta, colores, carril, corriendo, sola }: { pasos: number; meta: number; colores: typeof LLAMAS.crema; carril: 0 | 1; corriendo: boolean; sola?: boolean }) {
+  const x = INICIO + (Math.min(pasos, meta) / meta) * (META - INICIO)
   return (
     <div
-      className="absolute transition-[left] duration-700 ease-out"
+      // La rival avanza un poquito cada medio segundo: con una transición lineal de lo mismo se ve correr parejo.
+      className={`absolute transition-[left] ${sola ? 'duration-500 ease-linear' : 'duration-700 ease-out'}`}
       style={{ left: `${x}%`, bottom: carril === 0 ? '3%' : '25%', zIndex: carril === 0 ? 3 : 2 }}
     >
       {carril === 0 && (
@@ -31,7 +36,7 @@ function Marcador({ colores, texto, pasos, meta }: { colores: typeof LLAMAS.crem
   return (
     <span className="flex items-center gap-[0.6cqmin] rounded-full bg-white/90 py-[0.2cqmin] pl-[0.6cqmin] pr-[1.6cqmin] font-semibold tabular-nums shadow" style={{ fontSize: 'clamp(13px, 3cqmin, 24px)' }}>
       <Llama colores={colores} tam="1.9em" />
-      {texto} {pasos}/{meta}
+      {texto} {Math.min(meta, Math.floor(pasos))}/{meta}
     </span>
   )
 }
@@ -40,52 +45,95 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
   const azar = useMemo(() => crearAzar(semilla), [semilla])
   const siguienteReto = useMemo(() => fuenteDeRetos(contenido, azar), [contenido, azar])
   const meta = ritmo === 1 ? 6 : 8
+  // Segundos que tarda la rival en dar un paso: algo más de la mitad del tiempo de una pregunta.
+  const pasoRival = segundosPorPregunta(ritmo, contenido) * 0.6
   const despues = useTemporizadores()
 
   const [ronda, setRonda] = useState(() => {
     const reto = siguienteReto()
     return { reto, opciones: opcionesDe(reto, 4, azar), n: 0 }
   })
+  const [fase, setFase] = useState<'cuenta' | 'carrera' | 'fin'>('cuenta')
   const [elegida, setElegida] = useState<string | null>(null)
   const [mios, setMios] = useState(0)
   const [rival, setRival] = useState(0)
+  const [errores, setErrores] = useState(0)
   const [corre, setCorre] = useState<'yo' | 'rival' | null>(null)
   const [mensaje, setMensaje] = useState<string | null>(null)
+  // La rival se lleva en refs: el bucle recupera en varios pasos el tiempo que el alumno estuvo fuera (motor/bucle).
+  const rivalRef = useRef(0)
+  const quieta = useRef(false)
+  const fin = useRef(false)
+  const ultimoDibujo = useRef(0)
+
+  const empezar = useCallback(() => setFase('carrera'), [])
+
+  function cerrar(yo: number, ella: number, nErrores: number) {
+    fin.current = true
+    setFase('fin')
+    despues(() => {
+      const gane = yo >= meta
+      terminar({
+        estrellas: gane ? (nErrores <= 1 ? 3 : nErrores <= 3 ? 2 : 1) : 0,
+        titulo: gane ? '¡Tu llama ganó la carrera!' : '¡Ganó la rival!',
+        puntaje: Math.max(0, yo * 100 - nErrores * 50 + (gane ? Math.round((meta - ella) * 50) : 0)),
+        detalle: gane
+          ? nErrores === 0
+            ? 'Llegaste a la meta sin ningún error.'
+            : `Llegaste a la meta con ${nErrores} ${nErrores === 1 ? 'error' : 'errores'}.`
+          : `Llegaste a ${yo} de ${meta}. La rival no se detiene: ¡pide la revancha!`,
+      })
+    }, 1300)
+  }
+
+  // La rival corre sola, también si el alumno sale del juego.
+  useBucle((dt) => {
+    if (fin.current || quieta.current) return
+    rivalRef.current += dt / pasoRival
+    if (rivalRef.current >= meta) {
+      rivalRef.current = meta
+      setRival(meta)
+      cerrar(mios, meta, errores)
+      return
+    }
+    ultimoDibujo.current += dt
+    if (ultimoDibujo.current >= 0.5) {
+      ultimoDibujo.current = 0
+      setRival(rivalRef.current)
+    }
+  }, fase === 'carrera')
 
   function siguiente() {
     const reto = siguienteReto()
     setRonda((r) => ({ reto, opciones: opcionesDe(reto, 4, azar), n: r.n + 1 }))
     setElegida(null)
     setMensaje(null)
+    quieta.current = false
   }
 
   function elegir(o: string) {
-    if (elegida) return
+    if (elegida || fase !== 'carrera' || fin.current) return
     setElegida(o)
+    // Mientras se ve si acertó, la rival espera.
+    quieta.current = true
     const bien = o === ronda.reto.respuesta
+    const yo = bien ? mios + 1 : mios
+    const nErrores = bien ? errores : errores + 1
     if (bien) {
       sonar.acierto()
-      setMios(mios + 1)
+      setMios(yo)
       setMensaje(elogio(azar))
     } else {
       sonar.error()
-      setRival(rival + 1)
-      setMensaje('¡Avanza la rival!')
+      rivalRef.current = Math.min(meta, rivalRef.current + 1)
+      setRival(rivalRef.current)
+      setErrores(nErrores)
+      setMensaje('¡La rival se adelanta!')
     }
     setCorre(bien ? 'yo' : 'rival')
     despues(() => setCorre(null), 750)
-    const yo = bien ? mios + 1 : mios
-    const ella = bien ? rival : rival + 1
-    if (yo >= meta || ella >= meta) {
-      despues(() => {
-        const gane = yo >= meta
-        terminar({
-          estrellas: gane ? (ella <= 1 ? 3 : ella <= 3 ? 2 : 1) : 0,
-          titulo: gane ? '¡Tu llama ganó la carrera!' : '¡Ganó la rival!',
-          puntaje: Math.max(0, yo * 100 - ella * 50),
-          detalle: gane ? (ella === 0 ? 'Llegaste a la meta sin ningún error.' : `Llegaste a la meta con ${ella} ${ella === 1 ? 'error' : 'errores'}.`) : `Acertaste ${yo} de ${yo + ella}. ¡Pide la revancha!`,
-        })
-      }, 1300)
+    if (yo >= meta || rivalRef.current >= meta) {
+      cerrar(yo, rivalRef.current, nErrores)
       return
     }
     // Si fallaste, hay más tiempo para leer la respuesta correcta.
@@ -120,13 +168,14 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
         <div className="absolute bottom-[30%] h-[44%] w-[0.5cqmin] bg-[#6b4a3a]" style={{ left: `${META + 11}%` }} aria-hidden>
           <span className="absolute left-full top-0 h-[34%] w-[5cqmin] bg-[#ff5d73]" style={{ clipPath: 'polygon(0 0, 100% 50%, 0 100%)' }} />
         </div>
-        <Corredora pasos={rival} meta={meta} colores={LLAMAS.cafe} carril={1} corriendo={corre === 'rival'} />
+        <Corredora pasos={rival} meta={meta} colores={LLAMAS.cafe} carril={1} corriendo={fase === 'carrera' || corre === 'rival'} sola />
         <Corredora pasos={mios} meta={meta} colores={LLAMAS.crema} carril={0} corriendo={corre === 'yo'} />
         <div className="absolute left-[3cqmin] top-[2.2cqmin] flex flex-wrap gap-[1.2cqmin]">
           <Marcador colores={LLAMAS.crema} texto="Tú" pasos={mios} meta={meta} />
           <Marcador colores={LLAMAS.cafe} texto="Rival" pasos={rival} meta={meta} />
         </div>
       </div>
+      {fase === 'cuenta' && <CuentaRegresiva alTerminar={empezar} />}
 
       {/* Pregunta */}
       <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-[2.4cqmin] p-[3cqmin]">
@@ -142,7 +191,7 @@ export default function Carrera({ contenido, ritmo, semilla, terminar }: PropsJu
                 key={`${ronda.n}-${o}`}
                 type="button"
                 onClick={() => elegir(o)}
-                disabled={elegida !== null}
+                disabled={elegida !== null || fase !== 'carrera'}
                 className={`b3d sombra-texto min-h-[clamp(54px,10cqh,110px)] px-[2cqmin] py-[1.4cqmin] ${largas ? 'text-left' : ''} ${correcta ? 'bien' : ''} ${mal ? 'mal' : ''} ${elegida && !correcta && !mal ? 'apagado' : ''}`}
                 style={{ ...colorBoton(i), fontSize: largas ? 'clamp(20px, 3.6cqmin, 32px)' : 'clamp(24px, 4.6cqmin, 42px)' }}
               >
