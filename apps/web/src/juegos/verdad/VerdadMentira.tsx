@@ -1,5 +1,6 @@
 // ¿Verdad o mentira?: aparece una carta con una respuesta y hay que decidir si es correcta, deslizándola o con
 // los botones. Las "mentiras" son los errores típicos (1/5 + 2/5 = 3/10), así que el juego enseña a detectarlos.
+// Cada carta tiene su reloj (motor/Reloj): si se acaba, cuenta como error y se ve la explicación.
 // Inspirado en el "Verdadero o falso" de Wordwall y en las cartas que se deslizan de las apps.
 import { Check, X } from 'lucide-react'
 import { useMemo, useRef, useState, type CSSProperties, type PointerEvent as EventoPuntero } from 'react'
@@ -7,6 +8,7 @@ import { fuenteDeRetos, sinIgual } from '../contenido'
 import { crearAzar } from '../motor/azar'
 import { useTeclas, useTemporizadores } from '../motor/bucle'
 import { Flotante, TextoMat, VisualDe, elogio } from '../motor/piezas'
+import { BarraReloj, segundosPorPregunta, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego, Reto } from '../tipos'
 
@@ -67,7 +69,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
 
   const [carta, setCarta] = useState<Carta>(() => nuevaCarta(1))
   const [salida, setSalida] = useState<'izq' | 'der' | null>(null)
-  const [aviso, setAviso] = useState<{ bien: boolean; texto: string } | null>(null)
+  const [aviso, setAviso] = useState<{ bien: boolean; texto: string; titulo?: string } | null>(null)
   const [aciertos, setAciertos] = useState(0)
   const [racha, setRacha] = useState(0)
   const [mejorRacha, setMejorRacha] = useState(0)
@@ -75,6 +77,13 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
   const nodo = useRef<HTMLDivElement>(null)
   const arrastre = useRef<{ x0: number; dx: number } | null>(null)
   const ocupado = useRef(false)
+  // Decidir verdad o mentira es más rápido que elegir entre cuatro: un poco menos que una pregunta.
+  const reloj = useReloj({
+    segundos: Math.round(segundosPorPregunta(ritmo, contenido) * 0.7),
+    activo: !aviso && !salida,
+    vuelta: carta.n,
+    alVencer: () => responder(null),
+  })
 
   function mover(dx: number) {
     const el = nodo.current
@@ -109,7 +118,8 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
     ocupado.current = false
   }
 
-  function responder(diceVerdad: boolean) {
+  /** `null`: se acabó el tiempo. */
+  function responder(diceVerdad: boolean | null) {
     if (ocupado.current || aviso) return
     ocupado.current = true
     const bien = diceVerdad === carta.verdad
@@ -132,6 +142,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
       sonar.error()
       setAviso({
         bien: false,
+        titulo: diceVerdad === null ? '¡Se acabó el tiempo!' : undefined,
         texto: carta.verdad ? `Era verdad: ${carta.candidato} está bien.` : `Era mentira. La respuesta es ${carta.reto.respuesta}.`,
       })
     }
@@ -217,6 +228,9 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
                 ¿Es correcto?
               </p>
               <Afirmacion c={carta} />
+              <div className="absolute inset-x-[4cqmin] bottom-[2.4cqmin]">
+                <BarraReloj reloj={reloj} />
+              </div>
               {/* Sellos que aparecen al arrastrar */}
               <span
                 className="pointer-events-none absolute left-[5cqmin] top-[5cqmin] -rotate-12 rounded-[1.2cqmin] border-[0.6cqmin] border-[#1f9d55] px-[2cqmin] font-bold text-[#1f9d55]"
@@ -270,7 +284,7 @@ export default function VerdadMentira({ contenido, ritmo, semilla, terminar }: P
           className="entrar absolute inset-x-[5cqmin] bottom-[calc(5cqmin+clamp(56px,13cqh,120px))] z-20 mx-auto flex max-w-[min(90cqw,620px)] flex-col items-center gap-[1cqmin] rounded-[2.4cqmin] bg-[#e5484d] px-[4cqmin] py-[3cqmin] text-center text-white shadow-2xl"
         >
           <span className="font-bold" style={{ fontSize: 'clamp(22px, 6cqmin, 52px)' }}>
-            ¡Ups!
+            {aviso.titulo ?? '¡Ups!'}
           </span>
           <span className="font-semibold leading-tight" style={{ fontSize: 'clamp(17px, 4.4cqmin, 36px)' }}>
             <TextoMat texto={aviso.texto} />

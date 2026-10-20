@@ -1,11 +1,13 @@
 // Pupiletras: encontrar las palabras del tema en la sopa de letras. Se arrastra de la primera a la última letra,
-// o se toca una y luego la otra (más fácil en la pizarra digital y en celulares chicos).
+// o se toca una y luego la otra (más fácil en la pizarra digital y en celulares chicos). La sopa tiene su tiempo
+// (motor/Reloj), según cuántas palabras esconde; si se acaba, cuentan las que encontró.
 import { Check } from 'lucide-react'
 import { useMemo, useRef, useState, type PointerEvent } from 'react'
 import { normalizar } from '../../lib/crucigrama'
 import { barajar, crearAzar } from '../motor/azar'
 import { useBucle, useTemporizadores } from '../motor/bucle'
 import { PALETA } from '../motor/piezas'
+import { BarraReloj, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { PropsJuego } from '../tipos'
 import { ajustar, armarSopa, direcciones, linea, type Celda } from './sopa'
@@ -47,7 +49,30 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
   const [ultima, setUltima] = useState<{ palabra: string; pista: string } | null>(null)
   const [falla, setFalla] = useState(0)
   const total = sopa.ubicadas.length
-  const terminado = halladas.length === total
+  const [acabado, setAcabado] = useState(false)
+  const terminado = halladas.length === total || acabado
+  const limite = total * [0, 35, 30, 25][ritmo]
+  const reloj = useReloj({ segundos: limite, activo: !terminado, vuelta: sopa, alVencer: seAcabo })
+
+  function seAcabo() {
+    if (terminado) return
+    setAcabado(true)
+    setInicio(null)
+    setFin(null)
+    setPendiente(null)
+    sonar.error()
+    const n = halladas.length
+    despues(
+      () =>
+        terminar({
+          estrellas: n >= total * 0.6 ? 1 : 0,
+          titulo: '¡Se acabó el tiempo!',
+          detalle: `Encontraste ${n} de ${total} palabras.`,
+          puntaje: n * 100,
+        }),
+      900,
+    )
+  }
 
   useBucle((_dt, real) => (tiempo.current += real), !terminado)
 
@@ -83,7 +108,7 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
     if (p) setUltima({ palabra: p.palabra, pista: p.pista })
     if (nuevas.length === total) {
       const s = tiempo.current
-      const estrellas = s <= total * 25 ? 3 : s <= total * 45 ? 2 : 1
+      const estrellas = s <= limite * 0.6 ? 3 : s <= limite * 0.85 ? 2 : 1
       const min = Math.floor(s / 60)
       const seg = Math.round(s % 60)
       despues(
@@ -144,6 +169,9 @@ export default function Pupiletras({ contenido, ritmo, semilla, terminar }: Prop
       <div className="absolute left-[3cqmin] top-[2.2cqmin] flex gap-[1.5cqmin]" style={{ fontSize: 'clamp(15px, 3.4cqmin, 28px)' }}>
         <span className="rounded-full bg-white/90 px-[1.8cqmin] py-[0.5cqmin] font-semibold tabular-nums shadow-md">
           🔎 {halladas.length} / {total}
+        </span>
+        <span className="flex w-[clamp(90px,22cqmin,200px)] items-center rounded-full bg-white/90 px-[1.4cqmin] shadow-md">
+          <BarraReloj reloj={reloj} />
         </span>
       </div>
 

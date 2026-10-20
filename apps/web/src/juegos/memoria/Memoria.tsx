@@ -1,10 +1,12 @@
-// Memoria: voltear cartas de a dos hasta encontrar todas las parejas (3/4 y su dibujo, 7 × 8 y 56).
+// Memoria: voltear cartas de a dos hasta encontrar todas las parejas (3/4 y su dibujo, 7 × 8 y 56) antes de que se
+// acabe el tiempo del tablero (motor/Reloj), que depende de cuántas parejas hay.
 import { Check } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { paresDePartida } from '../contenido'
 import { barajar, crearAzar } from '../motor/azar'
 import { useTamano, useTemporizadores } from '../motor/bucle'
 import { PALETA, TextoMat, VisualDe } from '../motor/piezas'
+import { BarraReloj, segundosPorPregunta, useReloj } from '../motor/Reloj'
 import { sonar } from '../motor/sonido'
 import type { Lado, PropsJuego } from '../tipos'
 
@@ -56,6 +58,27 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
   const [encontradas, setEncontradas] = useState<Set<number>>(new Set())
   const [intentos, setIntentos] = useState(0)
   const [falla, setFalla] = useState(false)
+  const [terminado, setTerminado] = useState(false)
+  // Encontrar una pareja toma menos que responder una pregunta: un poco menos de la mitad por pareja.
+  const reloj = useReloj({ segundos: Math.round(cuantas * segundosPorPregunta(ritmo, contenido) * 0.45), activo: !terminado, vuelta: cartas, alVencer: seAcabo })
+
+  function seAcabo() {
+    if (terminado) return
+    setTerminado(true)
+    setAbiertas([])
+    sonar.error()
+    const n = encontradas.size
+    despues(
+      () =>
+        terminar({
+          estrellas: n >= cuantas / 2 ? 1 : 0,
+          titulo: '¡Se acabó el tiempo!',
+          detalle: `Encontraste ${n} de ${cuantas} parejas.`,
+          puntaje: n * 60,
+        }),
+      900,
+    )
+  }
 
   const hueco = Math.max(6, Math.min(ancho, alto) * 0.02)
   const { cols, lado } = mejorGrilla(cartas.length, ancho, alto, hueco)
@@ -63,7 +86,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
   const letra = `max(18px, calc(30cqi * ${tamTexto(masLargo(cartas.map((c) => c.lado.texto)))}))`
 
   function tocar(c: Carta) {
-    if (abiertas.length === 2 || abiertas.includes(c.id) || encontradas.has(c.par)) return
+    if (terminado || abiertas.length === 2 || abiertas.includes(c.id) || encontradas.has(c.par)) return
     const nuevas = [...abiertas, c.id]
     setAbiertas(nuevas)
     if (nuevas.length < 2) {
@@ -79,6 +102,7 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
       setEncontradas(ya)
       setAbiertas([])
       if (ya.size === cuantas) {
+        setTerminado(true)
         const estrellas = total <= cuantas + 2 ? 3 : total <= cuantas * 1.8 ? 2 : 1
         despues(
           () =>
@@ -86,8 +110,8 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
               estrellas,
               titulo: '¡Encontraron todas!',
               detalle: `${cuantas} parejas en ${total} intentos.${estrellas < 3 ? ` Con ${cuantas + 2} o menos son tres estrellas.` : ''}`,
-              // 1000 sin errores; cada intento de más resta 50.
-              puntaje: Math.max(0, 1000 - (total - cuantas) * 50),
+              // 1000 sin errores; cada intento de más resta 50 y cada segundo que sobró suma 5.
+              puntaje: Math.max(0, 1000 - (total - cuantas) * 50) + reloj.quedan * 5,
             }),
           900,
         )
@@ -114,6 +138,9 @@ export default function Memoria({ contenido, ritmo, semilla, terminar }: PropsJu
           ⭐ {encontradas.size} / {cuantas}
         </span>
         <span className="rounded-full bg-white/90 px-[1.8cqmin] py-[0.5cqmin] font-semibold tabular-nums shadow-md">Intentos: {intentos}</span>
+      </div>
+      <div className="relative z-10 px-[3cqmin] pt-[1.4cqmin]">
+        <BarraReloj reloj={reloj} />
       </div>
       <div ref={tablero} className="relative z-10 m-[3cqmin] mt-[2cqmin] flex-1">
         <div

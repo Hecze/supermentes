@@ -17,8 +17,22 @@ export function segundosPorPregunta(ritmo: Ritmo, contenido: Pick<Contenido, 'ge
 /**
  * Cuenta `segundos` mientras `activo` sea true y llama a `alVencer` una sola vez. Vuelve a empezar cuando cambia
  * `vuelta` (otra pregunta, otra ronda). Suena un tic en los últimos segundos. La barra se mueve sin redibujar React.
+ * Con `repetir`, al vencer vuelve a contar solo; si el alumno estuvo fuera, al volver vence una vez por cada vuelta
+ * que pasó, en el mismo cuadro (quien lo use suma con actualizaciones funcionales: el estado no cambia entre una y otra).
  */
-export function useReloj({ segundos, activo, vuelta, alVencer }: { segundos: number; activo: boolean; vuelta: unknown; alVencer: () => void }) {
+export function useReloj({
+  segundos,
+  activo,
+  vuelta,
+  alVencer,
+  repetir = false,
+}: {
+  segundos: number
+  activo: boolean
+  vuelta: unknown
+  alVencer: () => void
+  repetir?: boolean
+}) {
   const pasado = useRef(0)
   const vencido = useRef(false)
   const barra = useRef<HTMLDivElement>(null)
@@ -44,7 +58,8 @@ export function useReloj({ segundos, activo, vuelta, alVencer }: { segundos: num
       if (s <= 3 && s > 0) sonar.tic()
     }
     if (resta <= 0) {
-      vencido.current = true
+      if (repetir) pasado.current -= segundos
+      else vencido.current = true
       vencer.current()
     }
   }, activo)
