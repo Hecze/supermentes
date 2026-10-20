@@ -21,4 +21,9 @@ Canciones no: la app solo muestra las que están en YouTube (`obsidian/CANCIONES
 
 ## Cómo se hizo y cómo sumar un grado
 
-Lo escribieron agentes de IA por lotes de hasta 16 temas de una misma área, cada uno con los desempeños oficiales del grado en la mano y un validador (formato, largos, cita letra por letra, distractores distintos, ritmos y coro). Para otro grado: armar los lotes con los temas de `packages/curriculo` (función `temasDe`), generarlos igual y dejar los archivos en `<gradoId>/<área>.json`; el verificador lo exige completo apenas aparece la carpeta.
+Lo escribieron agentes de IA por lotes de una misma área, cada uno con los desempeños oficiales del grado en la mano y un validador. Para otro grado, por área:
+
+1. `node scripts/banco-lote.mjs <gradoId> <área>`: los desempeños oficiales numerados por competencia y la lista exacta de temas (con la competencia que les toca).
+2. Escribir los temas con ese material y el estilo de 4.º, por partes.
+3. `node scripts/validar-banco.mjs <gradoId> <área> <archivo o carpeta> [--parcial]`: formato y largos como los de 4.º, la cita letra por letra en su competencia, todos los temas una vez, la pista sin la palabra, opciones distintas y cuántos juegos arma cada tema con la lógica de la app (en 4.º, 13 a 17).
+4. Dejar `<gradoId>/<área>.json` de **todas** las áreas del grado a la vez: el verificador exige el grado completo apenas aparece la carpeta.
