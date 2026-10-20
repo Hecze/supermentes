@@ -88,3 +88,73 @@ actualizado: 2026-10-20
 - Fuera a propósito (no está en los desempeños de 1.º): π y círculo, inecuaciones generales, frecuencia acumulada, Pitágoras.
 - Dentro aunque algunos libros no lo ven en 1.º: C + V = A + 2, ángulo exterior, desigualdad triangular, y = mx + b.
 - Notación: coma decimal, (2; 3), {1; 2; 3}, superíndices. Distractores con el valor correcto pero la forma equivocada (10² como factorización prima de 100).
+
+## 2.º grado de secundaria
+
+### Arte y Cultura
+
+- Tablas de Sarhua «al techar su casa» (tradición, no texto oficial); wititi con polleras; textiles asháninkas (arawak, cushma, achiote, huito).
+- Zigzag del manto «puede representar» el río (interpretación); escala AD/A/B/C.
+
+### Castellano como segunda lengua
+
+- Jerga peruana como registro informal; mitos en su versión común (Manco Cápac, Chullachaqui, Inkarri).
+- Formato de solicitud de uso común (Solicito:, DNI, «Por lo expuesto…»), no comparado con documento del MINEDU.
+
+### Ciencia y Tecnología
+
+- Chaquitaclla como palanca; llama desde el guanaco; maíz desde el teosinte; «más de 3000 variedades de papa»; resistencia a antibióticos como selección natural.
+- Wayra (Marcona), Rubí (Moquegua), Pastoruri; waru waru, andenes, puquios, tinaja; «qocha»/«cocha».
+- Quizá de más para el grado: eV en salto cuántico, °C a kelvin y calorías.
+
+### Ciencias Sociales
+
+- Cronología inca aproximada (1438–1532, Huayna Cápac hacia 1503); El Niño en el sur andino = sequía (lo típico).
+- Ejemplo del limón en 2023 de memoria; IGV 18 % (tasa general con IPM); deforestación como principal fuente de emisiones.
+- Afirmaciones usuales: minería y conflictos, agricultura y deforestación, IGV el que más recauda. Sin número de cámaras del Congreso (cambió).
+- La cita de «Plan de gestión del riesgo escolar» copia el texto oficial con su errata («propone alternativas mejorar»).
+
+### Competencias transversales
+
+- Marcas reales (GeoGebra, Duolingo, Scratch, Tinkercad, menús de Excel y Google); INEI, Senamhi, «.gob.pe».
+- Estilos de aprendizaje como preferencias; Pomodoro 25 + 5; óvalo en diagramas de flujo.
+
+### Comunicación
+
+- Datos: Chabuca Granda (1920, Cotabambas), Guaman Poma, Garcilaso, Vallejo (Santiago de Chuco, Trilce), Heraud.
+- Términos que cambian según el libro: tipos de argumento, publicidad vs. propaganda, coma vocativa, personaje redondo/plano.
+- Obras del plan lector (Paco Yunque, El caballero Carmelo, Los ríos profundos).
+
+### Desarrollo Personal, Ciudadanía y Cívica
+
+- Vigencia: Línea 100, CEM, SíseVe, 48 lenguas, voto obligatorio hasta los 70, niño hasta 12.
+- Temas sensibles: ITS, embarazo adolescente, feminicidio, hostigamiento de un profesor (lenguaje de aula, sin detalles).
+- Ciclo de la violencia con fase de «reconciliación»; dilema de Heinz con otros nombres.
+
+### Educación Física
+
+- Kimberly García (2022), Sofía Mulanovich (2004), ceviche UNESCO 2023, DEVIDA.
+- Cifras de fuentes generales: 20 s de lavado, pulso 60–100, FC máx. 220 − edad; bandeja «dos tiempos».
+
+### Educación Religiosa
+
+- Pregunta sensible «una amiga quiere hacerse daño» → avisar a un adulto; «desde la concepción»; Día del Niño por Nacer.
+- León XIV (2025, fue obispo de Chiclayo); Censo 2017; Mt 18,22 «setenta veces siete».
+
+### Educación para el Trabajo
+
+- Lienzo de propuesta de valor: «frustraciones y alegrías» (otros: dolores y ganancias); malla receptora; árbol de problemas (efectos en ramas).
+- Señales NTP 399.010-1 de memoria; sigla EPP; chaccu, veda de la anchoveta; vocabulario de confección.
+
+### Inglés como lengua extranjera
+
+- Citas que traen el ítem vecino del texto oficial (going to + adverb clauses; condicional cero y primero).
+- Datos: Vargas Llosa (Arequipa 1936, Nobel 2010, murió en 2025), Chabuca Granda, Inti Raymi 24 de junio.
+- Conectores but/however/first-then-finally por el desempeño 3.2; presente continuo para planes; ítems «Escucha:» para leer en voz alta.
+
+### Matemática
+
+- IGV 18 % con IPM; impuesto a la renta (7 UIT, 8 % en recibos por honorarios, quinta categoría).
+- Datos aproximados con «unos» (34 millones, Lima–Cusco ~570 km); tipos de cambio supuestos.
+- Lineal f(x)=mx y afín mx+b, aunque el ejemplo del desempeño 2.1 llama lineal a y = 30x + 700.
+- El desempeño 1.6 dice «radiación» por «radicación» (errata oficial): no se usó para Radicación.
