@@ -102,3 +102,11 @@ No hay créditos: quien tiene cuenta usa la plataforma sin límite (decidido el 
 1. Backend `/api` con Claude: ficha (completa ideas clave y vocabulario de un tema del currículo) y juego.
 2. Canciones del canal de YouTube de Supermentes en la app (`obsidian/CANCIONES.md`).
 3. Persistencia: guardar lo que el docente corrige en la hoja.
+
+## Recordar opciones de las sesiones (opcional)
+
+En «Sesión de aprendizaje → Ajustar», una docente con cuenta puede pedir que las sesiones de temas nuevos empiecen con su duración y enfoque transversal preferidos. «Cambiar» los reemplaza y «Olvidar» los borra. Las sesiones ya editadas se conservan.
+
+Configura `ATOMICMEMORY_API_URL=https://api.atomicstrata.ai` y `ATOMICMEMORY_API_KEY` en el servidor, además de la configuración de Clerk existente. Sin ambas variables, la opción queda apagada. La clave nunca lleva prefijo `VITE_` ni se entrega al navegador. Cada sujeto de memoria sale del usuario de Clerk verificado; no se envía `session_id`.
+
+Las solicitudes al proveedor tienen un límite de 2,5 segundos. Si guardar falla, la sesión actual sí se ajusta y la app avisa que no recordó la elección. `npm test` comprueba la ruta real con un fixture HTTP local y el cambio entre cuentas en el cliente; no utiliza Atomic Memory en vivo. El contrato está en la [referencia HTTP de Atomic Memory](https://docs.atomicstrata.ai/api-reference/http/atomicmemory-http-api).

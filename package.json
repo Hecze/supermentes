@@ -12,6 +12,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",
     "verificar:curriculo": "npm run verificar:curriculo -w @supermentes/web",
+    "test": "node --test --import ./tests/cargar-ts.mjs tests/*.test.ts apps/web/src/sesion/*.test.ts",
     "db:postgres": "node scripts/postgres.mjs"
   },
   "devDependencies": {

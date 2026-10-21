@@ -13,7 +13,7 @@
   },
   "rewrites": [
     {
-      "source": "/api/:ruta(entrar-demo|intentos|mis-envios|perfil|salones|tareas)",
+      "source": "/api/:ruta(entrar-demo|intentos|mis-envios|perfil|preferencias-sesion|salones|tareas)",
       "destination": "/api/cuentas?ruta=:ruta"
     },
     {

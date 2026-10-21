@@ -1,7 +1,7 @@
 // Sesión de aprendizaje: el documento que el docente presenta, con las partes y el orden de las sesiones de primaria
 // que publica el MINEDU (sesion/plantilla.ts; qué sesión respalda cada parte, en obsidian/SESION.md). Se corrige con un
 // clic, se imprime y se descarga en Word.
-import { BadgeCheck, Download, ExternalLink, Printer, SlidersHorizontal, TriangleAlert } from 'lucide-react'
+import { BadgeCheck, BookmarkCheck, Download, ExternalLink, Printer, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useDatosDocumento, type DatosDocumento } from '../app/documento'
 import { useStore } from '../app/store'
@@ -13,6 +13,7 @@ import { ubicarCita } from '../curriculo/citas'
 import { useContextoSesion } from '../sesion/contexto'
 import { ENFOQUES } from '../sesion/enfoques'
 import { NIVELES_ESCALA, REFLEXIONES, opcionesIniciales, sesionPlantilla } from '../sesion/plantilla'
+import { useRecordadas, type Recordadas } from '../sesion/recordar'
 import { FORMATO_SESION, type Momento, type OpcionesSesion, type Precision, type Sesion as TipoSesion } from '../sesion/tipos'
 import { BotonInfo, Cita } from './SustentoJuego'
 
@@ -44,6 +45,35 @@ function ElegirOpciones({ opciones, cambiar }: { opciones: OpcionesSesion; cambi
         </div>
       </Pregunta>
     </div>
+  )
+}
+
+/** «90 min y Enfoque ambiental», para decirle a la docente qué se recuerda. */
+const resumen = (o: OpcionesSesion) => `${o.duracion} min y ${ENFOQUES[o.enfoque].nombre}`
+
+/** Sobre la hoja: lo que pidió recordar para sus próximas sesiones, con cómo cambiarlo u olvidarlo. */
+function Recordado({ recordadas, ajustar, olvidar }: { recordadas: Recordadas; ajustar: () => void; olvidar: () => void }) {
+  if (recordadas.estado === 'error') {
+    return (
+      <p role="status" className="-mt-3 text-sm text-ink-soft print:hidden">
+        {recordadas.mensaje}
+      </p>
+    )
+  }
+  if (recordadas.estado !== 'listo' || !recordadas.opciones) return null
+  return (
+    <p className="-mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-soft print:hidden">
+      <span className="inline-flex items-center gap-1.5">
+        <BookmarkCheck className="size-4 shrink-0" style={{ color: COLOR }} aria-hidden />
+        Tus sesiones empiezan con lo que pediste recordar: <strong className="text-ink">{resumen(recordadas.opciones)}</strong>.
+      </span>
+      <button type="button" onClick={ajustar} className="font-medium text-ink underline underline-offset-4">
+        Cambiar
+      </button>
+      <button type="button" onClick={olvidar} className="font-medium text-ink underline underline-offset-4">
+        Olvidar
+      </button>
+    </p>
   )
 }
 
@@ -340,23 +370,46 @@ export function Sesion() {
   const cur = useCurriculo(gradoId.split('-')[0] as Nivel, gradoId, ficha?.areaId ?? 'matematica')
   const area = cur.estado === 'listo' ? cur.area : null
   const contexto = useContextoSesion(ficha)
+  // Lo que la docente pidió recordar (duración y enfoque): con eso empieza una sesión nueva.
+  const { recordadas, recordar: recordarOpciones, olvidar: olvidarOpciones } = useRecordadas()
+  const deMemoria = recordadas.estado === 'listo' ? recordadas.opciones : null
+  const esperandoMemoria = !sesion && recordadas.estado === 'cargando'
+  const [recordar, setRecordar] = useState(false)
 
   // La sesión se arma sola con el tema, sus desempeños y lo que ya hay del tema: no usa la IA.
   useEffect(() => {
-    if (!ficha || sesion || cur.estado === 'cargando' || !contexto) return
-    guardar('sesion', sesionPlantilla(ficha, opciones, area, contexto))
-  }, [ficha, sesion, cur.estado, area, contexto, opciones, guardar])
+    if (!ficha || sesion || cur.estado === 'cargando' || !contexto || esperandoMemoria) return
+    if (deMemoria) setOpciones(deMemoria)
+    guardar('sesion', sesionPlantilla(ficha, deMemoria ?? opciones, area, contexto))
+  }, [ficha, sesion, cur.estado, area, contexto, opciones, guardar, esperandoMemoria, deMemoria])
 
   if (!ficha) return <SinTema />
 
-  // Mientras se descarga lo del tema (un instante) no se muestra una sesión a medias.
-  const actual = sesion ?? (contexto ? sesionPlantilla(ficha, opciones, area, contexto) : null)
+  // Mientras se descarga lo del tema o lo recordado (un instante) no se muestra una sesión a medias.
+  const actual = sesion ?? (contexto && !esperandoMemoria ? sesionPlantilla(ficha, deMemoria ?? opciones, area, contexto) : null)
   if (!actual) return <EncabezadoHerramienta id="sesion" />
 
-  function aplicar() {
+  function ajustar() {
+    setRecordar(deMemoria !== null)
+    setOtra(true)
+  }
+
+  async function olvidar() {
+    const r = await olvidarOpciones()
+    avisar(r.ok ? 'Listo: ya no lo recordamos. Tus próximas sesiones empiezan con lo de siempre.' : r.mensaje, r.ok ? 'ok' : 'error')
+  }
+
+  async function aplicar() {
     if (contexto) guardar('sesion', sesionPlantilla(ficha!, opciones, area, contexto))
     setVersion((v) => v + 1)
     setOtra(false)
+    // Solo si lo pidió: guardar lo nuevo, o olvidar lo que había si desmarcó «Recordar».
+    if (recordar) {
+      const r = await recordarOpciones(opciones)
+      avisar(r.ok ? `Listo: tus próximas sesiones empezarán con ${resumen(opciones)}.` : r.mensaje, r.ok ? 'ok' : 'error')
+    } else if (deMemoria) {
+      await olvidar()
+    }
   }
 
   const bajarWord = async () => {
@@ -377,11 +430,12 @@ export function Sesion() {
         <Boton variante="contorno" onClick={() => imprimir(avisar)} aria-label="Imprimir">
           <Printer className="size-5" aria-hidden /> <span className="hidden sm:inline">Imprimir</span>
         </Boton>
-        <Boton variante="contorno" onClick={() => setOtra(true)}>
+        <Boton variante="contorno" onClick={ajustar}>
           <SlidersHorizontal className="size-5" aria-hidden /> Ajustar
         </Boton>
       </BarraHoja>
       <Fuente s={actual} />
+      <Recordado recordadas={recordadas} ajustar={ajustar} olvidar={olvidar} />
 
       <Hoja>
         <div ref={hoja} key={`${actual.opciones.duracion}-${actual.opciones.enfoque}-${version}`}>
@@ -391,6 +445,15 @@ export function Sesion() {
 
       <Ventana abierta={otra} cerrar={() => setOtra(false)} titulo="Ajusta tu sesión">
         <ElegirOpciones opciones={opciones} cambiar={setOpciones} />
+        {(recordadas.estado === 'listo' || recordadas.estado === 'error') && (
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-4">
+            <input type="checkbox" checked={recordar} onChange={(e) => setRecordar(e.target.checked)} className="mt-1 size-5 shrink-0" style={{ accentColor: COLOR }} />
+            <span>
+              <span className="font-semibold">Recordar para mis próximas sesiones</span>
+              <span className="block text-sm text-ink-soft">Tus sesiones nuevas empezarán con esta duración y este enfoque. Lo puedes cambiar u olvidar cuando quieras.</span>
+            </span>
+          </label>
+        )}
         <div className="flex flex-col items-start gap-2">
           <Boton tam="lg" variante="herramienta" herramienta="sesion" onClick={aplicar}>
             Aplicar cambios
