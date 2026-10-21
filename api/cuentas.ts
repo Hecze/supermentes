@@ -1,10 +1,11 @@
-// Las funciones de la cuenta de la docente (entrar con la demo, perfil, salones, tareas, intentos y envíos) en una sola
-// función de Vercel: el plan Hobby permite 12 por despliegue. vercel.json reescribe /api/salones, /api/tareas… a
-// /api/cuentas?ruta=…, así que para la app las rutas no cambian.
+// Las funciones de la cuenta de la docente (entrar con la demo, perfil, lo que pidió recordar de sus sesiones, salones,
+// tareas, intentos y envíos) en una sola función de Vercel: el plan Hobby permite 12 por despliegue. vercel.json
+// reescribe /api/salones, /api/tareas… a /api/cuentas?ruta=…, así que para la app las rutas no cambian.
 import * as entrarDemo from './_entrar-demo.js'
 import * as intentos from './_intentos.js'
 import * as misEnvios from './_mis-envios.js'
 import * as perfil from './_perfil.js'
+import * as preferencias from './_preferencias-sesion.js'
 import * as salones from './_salones.js'
 import * as tareas from './_tareas.js'
 
@@ -15,6 +16,8 @@ const RUTAS: Record<string, Partial<Record<string, Handler>>> = {
   intentos,
   'mis-envios': misEnvios,
   perfil,
+  // Ese archivo también exporta lo que usan sus pruebas: aquí van solo sus rutas.
+  'preferencias-sesion': { GET: preferencias.GET, POST: preferencias.POST, DELETE: preferencias.DELETE },
   salones,
   tareas,
 }
@@ -29,3 +32,4 @@ function despachar(request: Request) {
 
 export const GET = despachar
 export const POST = despachar
+export const DELETE = despachar
